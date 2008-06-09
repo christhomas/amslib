@@ -1,0 +1,17 @@
+@CHARSET "UTF-8";
+
+.floatFix{ 
+	height: 1%;
+}
+
+*+html .floatFix{
+	display: inline-block;
+}
+
+.hbox{
+	display: inline;
+}
+
+.hbox-right{
+	display: inline;
+}
