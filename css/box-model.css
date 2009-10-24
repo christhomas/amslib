@@ -3,19 +3,19 @@
 /*****************************************************************************/
 /* CSS enclose float hack to make floats enclose within the container div */
 /*****************************************************************************/
-.floatFix:after{
-	content: ".";
+.floatfix:after{
+	content: " ";
 	display: block;
 	height: 0;
 	clear: both;
 	visibility: hidden;
 }
 /* Which float to clear, left or right, both is automatic */
-.floatFix-left:after{ clear: left; }
-.floatFix-right:after{ clear: right; }
-.floatFix{ display: inline-table; } /* Mark Hadley's fix for IE Mac */
+.floatfix-left:after{ clear: left; }
+.floatfix-right:after{ clear: right; }
+.floatfix{ display: inline-table; } /* Mark Hadley's fix for IE Mac */
 /* Back Mac Hack, Hides this css from Mac IE (this back slash-->) \*/
-.floatFix{ display: block; }
+.floatfix{ display: block; }
 /* End of Back Mac Hack */
 /* End of CSS enclose float hack */
 
