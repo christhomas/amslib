@@ -59,6 +59,7 @@ class AntimatterDatabase
 	var $__lastInsertId = 0;
 
 	var $__lastQuery = array();
+	var $__queryCacheLength = 10;
 
 	var $__dbFile = "mysql-details.php";
 
@@ -96,7 +97,7 @@ class AntimatterDatabase
 	function __setLastQuery($query)
 	{
 		$this->__lastQuery[] = $query;
-		if(count($this->__lastQuery) > 100) array_shift($this->__lastQuery);
+		if(count($this->__lastQuery) > $this->__queryCacheLength) array_shift($this->__lastQuery);
 	}
 
 	function __defaultFetchResult($result)
@@ -114,9 +115,10 @@ class AntimatterDatabase
 		return $this->__lastResult;
 	}
 
-	function getLastQuery()
+	function getLastQuery($count=NULL)
 	{
-		return $this->__lastQuery;
+		if($count === NULL) return array_reverse($this->__lastQuery);
+		else if(is_numeric($count)) return array_slice(array_reverse($this->__lastQuery),0,$count);
 	}
 
 	/**
@@ -280,7 +282,7 @@ class AntimatterDatabase
 
 	function error()
 	{
-
+		return mysql_error();
 	}
 
 	function setDebug($state)
@@ -296,6 +298,14 @@ class AntimatterDatabase
 	function __disconnect()
 	{
 		$this->__connection = false;
+	}
+	
+	function setQueryCacheLength($length)
+	{
+		if(!length || !is_numeric($length)) return false;
+		
+		$this->__queryCacheLength = $length;
+		return true;
 	}
 
 	/**
