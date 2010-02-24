@@ -309,7 +309,7 @@ class Amslib_Validator
 	 */
 	function __dni($name,$dni,$required,$options)
 	{
-		amslib::include_file("amslib/lib/dni.php");
+		Amslib::requireFile("amslib/lib/dni.php");
 
 		$result = DNI::validate($dni);
 
@@ -745,7 +745,7 @@ class Amslib_Validator
 			$options	=	$validator[2];
 
 			if($validator[0] == "file"){
-				$value = amslib::filesParam($name);
+				$value = Amslib::filesParam($name);
 			}else{
 				$value = (isset($this->__source[$name])) ? $this->__source[$name] : NULL;
 			}
