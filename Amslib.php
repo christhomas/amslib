@@ -1,0 +1,308 @@
+<?php
+/*******************************************************************************
+ * Copyright (c) {15/03/2008} {Christopher Thomas} 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * 
+ * File: Amslib.php
+ * Title: Amslib core utility object
+ * Version: 2.6
+ * Project: Amslib (antimatter studios library)
+ * 
+ * Contributors/Author:
+ *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *******************************************************************************/
+
+//	Amslib helper class
+class Amslib
+{
+	static $showErrorTrigger = false;
+	
+	function showErrors()
+	{
+		//	Enable all error reporting
+		ini_set("display_errors", "On");
+		error_reporting(E_ALL);
+		self::$showErrorTrigger = true;
+	}
+	
+	/**
+	 *	function:	addIncludePath
+	 *
+	 *	Add an include path to the PHP include path
+	 *
+	 *	parameters:
+	 *		$path	-	The path to add to the PHP include path
+	 */
+	function addIncludePath($path)
+	{
+		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
+		
+		$valid = true;
+		foreach($includePath as $p){
+			if(strcmp($path,$p) == 0) $valid = false;
+		}
+		
+		if($valid) array_unshift($includePath,$path);
+		ini_set("include_path",implode(PATH_SEPARATOR,$includePath));
+	}
+
+	function getIncludeContents($filename)
+	{
+		ob_start();
+		include($filename);
+		$contents = ob_get_contents();
+		ob_end_clean();
+		return $contents;
+	}
+	
+	function var_dump($dump,$preformat=false)
+	{
+		ob_start();
+		var_dump($dump);
+		$dump = ob_get_contents();
+		ob_end_clean();
+	
+		return ($preformat) ? "<pre>$dump</pre>" : $dump;
+	}
+	
+	function findPath($file)
+	{
+		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
+		
+		foreach($includePath as $p){
+			$test = (strpos($file,"/") !== 0) ? "$p/$file" : "{$p}{$file}";
+			if(file_exists($test)) return $p;
+		}
+		
+		if(self::$showErrorTrigger) print("INCLUDE PATH($file) = <pre>".print_r($includePath,true)."</pre>");
+		
+		return false;
+	}
+	
+	//	DEPRECATED: use includeFile instead
+	function include_file($file,$showError=false){ return self::includeFile($file,$showError); }
+	
+	function includeFile($file,$showError=false)
+	{
+		$p = self::findPath($file);
+		
+		if($p !== false) return include("$p/$file");
+		
+		return false;
+	}
+	
+	function requireFile($file,$data=array())
+	{
+		$path = "";
+		
+		if(!file_exists($file)){
+			$path = self::findPath($file);
+
+			if($path !== false && strlen($path)) $path = "$path/";
+		}
+		
+		$file = "{$path}$file";
+		
+		if(file_exists($file)){
+			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
+			require($file);
+			
+			return true;
+		}
+		
+		return false;
+	}
+		
+	function autoloader()
+	{
+		function amslib_autoload($class_name)
+		{
+			if($class_name == "amslib") return;
+			
+			$path = dirname(__FILE__);
+		
+			//	Special case for the FirePHP library
+			if($class_name == "FirePHP"){
+				$path		=	"$path/util/FirePHPCore";
+				$class_name	=	"$class_name.class";
+			}
+			
+			//	Redirect to include the correct path for the translator system
+			if(strpos($class_name,"Amslib_Translator") !== false){
+				$path		=	"$path/translator/";
+			}
+			
+			$file = "$path/$class_name.php";
+			
+			if(file_exists($file)) Amslib::requireFile($file);
+		}
+		
+		//	register a special autoloader that will include correctly all of the amslib classes
+		spl_autoload_register("amslib_autoload");
+	}
+	
+	function findKey($key,$source)
+	{
+		foreach($source as $k=>$ignore){
+			if(strpos($k,$key) !== false) return $k;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * 	function:	getParam
+	 * 	
+	 * 	Obtain a parameter from the GET global array
+	 * 
+	 * 	parameters:
+	 * 		$value		-	The value requested
+	 * 		$default	-	The value to return if the value does not exist
+	 * 		$erase		-	Whether or not to erase the value after it's been read
+	 * 
+	 * 	returns:
+	 * 		-	The value from the GET global array, if not exists, the value of the parameter return
+	 */
+	function getParam($value,$default=NULL,$erase=false)
+	{
+		return self::arrayParam($_GET,$value,$default,$erase);
+	}
+	
+	/**
+	 *	function:	insertGetParameter
+	 *
+	 *	Insert a parameter into the global GET array
+	 *
+	 *	parameters:
+	 *		$parameter	-	The parameter to insert
+	 *		$value		-	The value of the parameter being inserted
+	 *
+	 *	notes:
+	 *		-	Sometimes this is helpful, because it can let you build certain types of code flow which arent possible otherwise
+	 */
+	function insertGetParam($parameter,$value)
+	{
+		$_GET[$parameter] = $value;
+	}
+	
+	/**
+	 * 	function:	postParam
+	 * 	
+	 * 	Obtain a parameter from the POST global array
+	 * 
+	 * 	parameters:
+	 * 		$value		-	The value requested
+	 * 		$default	-	The value to return if the value does not exist
+	 * 		$erase		-	Whether or not to erase the value after it's been read
+	 * 
+	 * 	returns:
+	 * 		-	The value from the POST global array, if not exists, the value of the parameter return
+	 */
+	function postParam($value,$default=NULL,$erase=false)
+	{
+		return self::arrayParam($_POST,$value,$default,$erase);
+	}
+	
+	/**
+	 *	function:	insertPostParameter
+	 *
+	 *	Insert a parameter into the global POST array
+	 *
+	 *	parameters:
+	 *		$parameter	-	The parameter to insert
+	 *		$value		-	The value of the parameter being inserted
+	 *
+	 *	notes:
+	 *		-	Sometimes this is helpful, because it can let you build certain types of code flow which arent possible otherwise
+	 */
+	function insertPostParam($parameter,$value)
+	{
+		$_POST[$parameter] = $value;
+	}
+	
+	/**
+	 * 	function:	sessionParam
+	 * 	
+	 * 	Obtain a parameter from the SESSION global array
+	 * 
+	 * 	parameters:
+	 * 		$value		-	The value requested
+	 * 		$default	-	The value to return if the value does not exist
+	 * 		$erase		-	Whether or not to erase the value after it's been read
+	 * 
+	 * 	returns:
+	 * 		-	The value from the SESSION global array, if not exists, the value of the parameter return
+	 */
+	function sessionParam($value,$default=NULL,$erase=false)
+	{
+		return self::arrayParam($_SESSION,$value,$default,$erase);
+	}
+	
+	function insertSessionParam($parameter,$value)
+	{
+		$_SESSION[$parameter] = $value;
+	}
+	
+	/**
+	 * 	function:	filesParam
+	 * 	
+	 * 	Obtain a parameter from the FILES global array
+	 * 
+	 * 	parameters:
+	 * 		$value		-	The value requested
+	 * 		$default	-	The value to return if the value does not exist
+	 * 		$erase		-	Whether or not to erase the value after it's been read
+	 * 
+	 * 	returns:
+	 * 		-	The value from the FILES global array, if not exists, the value of the parameter return
+	 */
+	function filesParam($value,$default=NULL,$erase=false)
+	{
+		return self::arrayParam($_FILES,$value,$default,$erase);
+	}
+	
+	function arrayParam(&$source,$value,$default=NULL,$erase=false)
+	{
+		if(isset($source[$value])){
+			$default = $source[$value];
+			if($erase) unset($source[$value]);
+		}
+		
+		return $default;
+	}
+	
+	/**
+	 * 	function:	requestParam
+	 * 	
+	 * 	Obtain a parameter from the GET or POST global array
+	 * 
+	 * 	parameters:
+	 * 		value	-	The value requested
+	 * 		return	-	The value to return if the value does not exist
+	 * 		erase	-	Whether or not to erase the value after it's been read
+	 * 		order	-	A two element array specifying what order to obtain the parameter in { get, post } is the default order
+	 * 
+	 * 	returns:
+	 * 		-	The value from the GET or POST global array, if not exists, the value of the parameter return
+	 */
+	function requestParam($value,$default=NULL,$erase=false,$order=array("getParam","postParam"))
+	{
+		$ret = self::$order[0]($value,$default,$erase);
+		if($ret === $default) $ret = self::$order[1]($value,$default,$erase);
+		
+		return $ret;
+	}
+}
+

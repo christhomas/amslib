@@ -1,3 +1,21 @@
+/************************************************
+ * file:	fade.js
+ * class:	Fade
+ * 
+ * Class to control, over time the opacity of elements on 
+ * the screen to give a smooth fading effect in or out of 
+ * the page
+ * 
+ * version:	2.1
+ * owner:	chris.thomas@antimatter-studios.com
+ * company:	Antimatter Studios
+ * website:	antimatter-studios.com
+ * 
+ * todo:
+ * 	-	add a daisychain method to set the callback (instead of passing through show/hide)
+ * 	-	add a daisychain method to set the maxOpacity of this object
+ * 	-	add a daisychain method to set the minOpacity of this object
+ */
 if(Prototype && Class)
 {
 	var Fade = Class.create({
@@ -69,7 +87,7 @@ if(Prototype && Class)
 						if(opacity > max){
 							clearInterval(showInterval);
 							node.setOpacity(max,true);
-							if(typeof(callback) == "function") callback();
+							if(typeof(callback) == "function") callback(node);
 						}else{
 							node.setOpacity(opacity);
 						}
@@ -105,7 +123,7 @@ if(Prototype && Class)
 							//	FIXME: Assumption, what if the opacity=0 display mode is NOT none?
 							if(min == 0) node.style.display = "none";
 							//	custom callback on completion
-							if(typeof(callback) == "function") callback();
+							if(typeof(callback) == "function") callback(node);
 						}else{
 							node.setOpacity(opacity);
 						}

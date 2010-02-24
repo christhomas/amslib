@@ -17,7 +17,7 @@
  *
  * File: Amslib_Validator.php
  * Title: Antimatter Form Validator
- * Version: 2.4
+ * Version: 2.5
  * Project: amslib
  *
  * Contributors:
@@ -39,10 +39,19 @@
  * 	-	Add a url validator method perhaps?
  * 	-	move the required parameter into the options structure
  * 	-	Allow a date to validate between two unix timestamps defining the start and end period (useful for birthdates, restriction of dates based on product availability etc)
- * 	-	Update the data structures to use associative arrays instead of numerically indexed arrays, which are opaque.
+ * 	-	Update the data structures to use associative arrays instead of numerically indexed arrays, which are not easy to use
+ * 	-	standarise on returning error information with associative arrays instead of numerics, same reason as above
  */
 class Amslib_Validator
 {
+	/**
+	 * array:	$__types
+	 * 
+	 * Contains all the registered types that are allowed to validate, in order to add a new validator
+	 * you must register it's type in the constructor
+	 */
+	var $__types;
+	
 	/**
 	 * array:	$__error
 	 *
@@ -109,13 +118,20 @@ class Amslib_Validator
 		$this->__hasExecuted		=	false;
 
 		$this->__setRequiredRules(false);
+		$this->register("text",				array("Amslib_Validator","__text"));
+		$this->register("alpha",			array("Amslib_Validator","__alpha"));
+		$this->register("alpha_relaxed",	array("Amslib_Validator","__alpha_relaxed"));
+		$this->register("password",			array("Amslib_Validator","__password"));
+		$this->register("dni",				array("Amslib_Validator","__dni"));
+		$this->register("boolean",			array("Amslib_Validator","__boolean"));
+		$this->register("number",			array("Amslib_Validator","__number"));
+		$this->register("email",			array("Amslib_Validator","__email"));
+		$this->register("domain",			array("Amslib_Validator","__domain"));
+		$this->register("phone",			array("Amslib_Validator","__phone"));
+		$this->register("date",				array("Amslib_Validator","__date"));
+		$this->register("file",				array("Amslib_Validator","__file"));
 	}
-
-	function __setValid($name,$value)
-	{
-		$this->__validData[$name] = $value;
-	}
-
+	
 	/**
 	 * method:	__text
 	 *
@@ -154,8 +170,11 @@ class Amslib_Validator
 		if(isset($options["limit-input"])){
 			if(!in_array($value,$options["limit-input"])) return "VALIDATOR_TEXT_CANNOT_MATCH_AGAINST_LIMIT";
 		}
+		if(isset($options["invalid"])){
+			if(in_array($value,$options["invalid"])) return "VALIDATOR_TEXT_INVALID_INPUT";
+		}
 
-		if(!isset($options["delegated"])) $this->__setValid($name,$value);
+		if(!isset($options["delegated"])) $this->setValid($name,$value);
 
 		return true;
 	}
@@ -191,7 +210,7 @@ class Amslib_Validator
 
 		if(!ctype_alpha($value)) return "VALIDATOR_TEXT_NOT_ALPHABETICAL";
 
-		if(!isset($options["delegated"])) $this->__setValid($name,$value);
+		if(!isset($options["delegated"])) $this->setValid($name,$value);
 
 		return true;
 	}
@@ -224,7 +243,7 @@ class Amslib_Validator
 
 		if($regexp != 0) return "VALIDATOR_TEXT_NOT_ALPHABETICAL";
 
-		if(!isset($options["delegated"])) $this->__setValid($name,$value);
+		if(!isset($options["delegated"])) $this->setValid($name,$value);
 
 		return true;
 	}
@@ -314,7 +333,7 @@ class Amslib_Validator
 		$result = DNI::validate($dni);
 
 		if($result > 0){
-			if(!isset($options["delegated"])) $this->__setValid($name,$dni);
+			if(!isset($options["delegated"])) $this->setValid($name,$dni);
 			return true;
 		}
 
@@ -367,7 +386,7 @@ class Amslib_Validator
 			$bool = (bool)$value;
 		}
 
-		if(!isset($options["delegated"])) $this->__setValid($name,$bool);
+		if(!isset($options["delegated"])) $this->setValid($name,$bool);
 
 		if(!$required) return true;
 
@@ -417,7 +436,7 @@ class Amslib_Validator
 			if(!in_array($value,$options["limit-input"])) return "VALIDATOR_NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
 		}
 
-		if(!isset($options["delegated"])) $this->__setValid($name,$value);
+		if(!isset($options["delegated"])) $this->setValid($name,$value);
 
 		return true;
 	}
@@ -454,7 +473,7 @@ class Amslib_Validator
 
 		$pattern = "^[a-z0-9,!#\$%&'\*\+/=\?\^_`\{\|}~-]+(\.[a-z0-9,!#\$%&'\*\+/=\?\^_`\{\|}~-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*\.([a-z]{2,})$";
 		if(eregi($pattern,$value)){
-			if(!isset($options["delegated"])) $this->__setValid($name,$value);
+			if(!isset($options["delegated"])) $this->setValid($name,$value);
 			return true;
 		}
 
@@ -492,7 +511,7 @@ class Amslib_Validator
 		$record = dns_get_record($value);
 
 		if($record){
-			if(!isset($options["delegated"])) $this->__setValid($name,$value);
+			if(!isset($options["delegated"])) $this->setValid($name,$value);
 			return true;
 		}
 
@@ -546,7 +565,7 @@ class Amslib_Validator
 		$temp = trim($temp);
 
 		if(!strlen($temp)){
-			if(!isset($options["delegated"])) $this->__setValid($name,$value);
+			if(!isset($options["delegated"])) $this->setValid($name,$value);
 			return true;
 		}
 		return "VALIDATOR_PHONE_INVALID";
@@ -573,7 +592,7 @@ class Amslib_Validator
 		$success = strtotime($value);
 
 		if($required && $success || !$required){
-			if(!isset($options["delegated"])) $this->__setValid($name,$value);
+			if(!isset($options["delegated"])) $this->setValid($name,$value);
 			return true;
 		}
 
@@ -617,9 +636,11 @@ class Amslib_Validator
 	 */
 	function __file($name,$value,$required,$options)
 	{
+		$value = Amslib::filesParam($name);
+		
 		if($value !== NULL){
 			if(is_file($value["tmp_name"])){
-				$this->__setValid($name,$value);
+				$this->setValid($name,$value);
 				return true;
 			}else{
 				if($required == false) return true;
@@ -637,17 +658,22 @@ class Amslib_Validator
 
 		if($required == false){
 			//	I am 100% sure this is a bug, what?? setting valid data to an error message????
-			if(!isset($options["delegated"])) $this->__setValid($name,"VALIDATOR_FILE_REQUEST_FILE_NOT_FOUND");
+			if(!isset($options["delegated"])) $this->setValid($name,"VALIDATOR_FILE_REQUEST_FILE_NOT_FOUND");
 			return true;
 		}
 
 		return "VALIDATOR_FILE_NOT_FOUND";
 	}
+	
+	function setValid($name,$value)
+	{
+		$this->__validData[$name] = $value;
+	}	
 
 	/**
-	 * method:	setType
+	 * method:	add
 	 *
-	 * Set a type of validation to happen on a particular field
+	 * add a validation to happen on a particular field
 	 *
 	 * parameters:
 	 * 	name		-	The name of the field to validate
@@ -665,28 +691,45 @@ class Amslib_Validator
 	 * 		the parameter actually has no valid meaning, so I Am thinking to move into a more array based idea whereas instead of having
 	 * 		a static list of parameters to this method we have an array and determine the contents internally
 	 */
-	function setType($name,$type,$required=false,$options=array())
+	function add($name,$type,$required=false,$options=array())
 	{
-		$this->__items[$name]		=	array($type,$required,$options);
+		$options["vobject"]			=	$this;
+		$this->__items[$name]		=	array("type"=>$type,"required"=>$required,"options"=>$options);
 		$this->__validData[$name]	=	"";
 
 		if($required === true) $this->__setRequiredRules(true);
 	}
 
 	/**
-	 * method:	removeType
+	 * method: remove
 	 *
 	 * Remove a type from validation, perhaps it's part of a post-filter on the type settings for the validator
 	 *
 	 * parameters:
 	 * 	name	-	The name of the type to remove from validation
 	 */
-	function removeType($name)
+	function remove($name)
 	{
 		unset($this->__items[$name],$this->__validData[$name]);
 
 		$this->__checkRequiredRules();
 	}
+	
+	/**
+	 * method: register
+	 * 
+	 * Register a validation type, this allows the importation of external validator methods to act like
+	 * native ones
+	 * 
+	 * parameters:
+	 * 	$name		-	The name of the validation method to implment (you can override built in types here)
+	 * 	$callback	-	The name of the callback, can be array of two items if callback is from a class (see: call_user_func)
+	 */
+	
+	function register($name,$callback)
+	{
+		$this->__types[$name] = $callback;
+	}	
 
 	/**
 	 * For description: read the member variables related to this method, they explain all
@@ -700,7 +743,7 @@ class Amslib_Validator
 	{
 		$areRequiredRules = false;
 		foreach($this->__items as $item){
-			if($item[1] == true) $areRequiredRules = true;
+			if($item["required"] == true) $areRequiredRules = true;
 		}
 
 		$this->__areRequiredRules = $areRequiredRules;
@@ -740,19 +783,18 @@ class Amslib_Validator
 		foreach($this->__items as $name=>$validator){
 			$this->__hasExecuted = true;
 
-			$callback	=	"__{$validator[0]}";
-			$required	=	$validator[1];
-			$options	=	$validator[2];
-
-			if($validator[0] == "file"){
-				$value = Amslib::filesParam($name);
-			}else{
-				$value = (isset($this->__source[$name])) ? $this->__source[$name] : NULL;
-			}
-
+			$value = (isset($this->__source[$name])) ? $this->__source[$name] : NULL;
+			
 			if(is_string($value)) $value = trim($value);
-
-			$success = $this->$callback($name,$value,$required,$options);
+			
+			$success = call_user_func(
+							$this->__types[$validator["type"]],
+							$name,
+							$value,
+							$validator["required"],
+							$validator["options"]
+						);
+						
 			if($success !== true){
 				$this->__error[] = array($name,$value,$success);
 			}
@@ -865,7 +907,7 @@ class Amslib_Validator
 	 * whether rules have been associated with the validator or  not
 	 *
 	 * returns:
-	 * 	The number of items setup when calling FormValidator::setType to setup the validation
+	 * 	The number of items that are being validated
 	 */
 	function itemCount()
 	{
