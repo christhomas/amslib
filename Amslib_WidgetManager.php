@@ -62,11 +62,23 @@ class Amslib_WidgetManager
 		}
 	}
 	
+	public function set($name,$data)
+	{
+		if(session_id() == "") @session_start();	
+		Amslib::insertSessionParam("widgets/$name",$data);
+	}
+	
+	public function get($name)
+	{
+		if(session_id() == "") @session_start();
+		return Amslib::sessionParam("widgets/$name");
+	}
+	
 	protected function getPath($name,$file)
 	{
 		$filename = $file->nodeValue;
 		$path = "{$this->paths[$name]}/$name/$filename";
-		if(!file_exists($path)) $path = amslib::findPath($filename)."/$filename"; 
+		if(!file_exists($path)) $path = Amslib::findPath($filename)."/$filename"; 
 		return $path;
 	}
 	
@@ -107,7 +119,7 @@ class Amslib_WidgetManager
 		if(isset($this->layouts[$name])){
 			if($l = $this->layouts[$name]->item(0))
 			{
-				amslib::requireFile("{$this->paths[$name]}/$name/$l->nodeValue",$parameters);
+				Amslib::requireFile("{$this->paths[$name]}/$name/$l->nodeValue",$parameters);
 			}
 		}
 	} 

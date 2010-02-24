@@ -116,7 +116,7 @@ if(Prototype && Class)
 			execute(selector,callback,minOpacity);
 			
 			return this;
-		},
+		}
 	});
 }else{
 	alert("Prototype not available, cannot use Fade class");

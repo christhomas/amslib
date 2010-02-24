@@ -17,7 +17,7 @@
  * 
  * File: amslib.php
  * Title: Amslib core utility object
- * Version: 1.0
+ * Version: 1.1
  * Project: amslib
  * 
  * Contributors/Author:
@@ -27,7 +27,7 @@
 //	PROBABLY REMOVE THIS
 $page = basename($_SERVER["PHP_SELF"]);
 
-class amslib
+class Amslib
 {
 	function showErrors()
 	{
@@ -239,8 +239,8 @@ class amslib
 	 */
 	function requestParam($value,$return=NULL,$erase=false,$order=array("getParam","postParam"))
 	{
-		$ret = amslib::$order[0]($value,$return,$erase);	
-		if($ret === NULL) $ret = amslib::$order[1]($value,$return,$erase);
+		$ret = self::$order[0]($value,$return,$erase);	
+		if($ret === NULL) $ret = selfs::$order[1]($value,$return,$erase);
 		
 		return $ret;
 	}
