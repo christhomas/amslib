@@ -43,7 +43,6 @@ class Amslib_Router
 	{
 		Amslib_Router_URL::setRouter($this);
 		
-		
 		$this->setupCache();
 		$this->setupRouter();
 	}

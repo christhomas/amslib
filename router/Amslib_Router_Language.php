@@ -26,10 +26,10 @@
 
 class Amslib_Router_Language
 {
-	protected static $enabled				=	false;
-	protected static $defaultLanguage		=	"en";
-	protected static $supportedLanguages	=	array("en","es","fr","de","it","pt");
+	protected static $enabled = false;
 	protected static $enabledLanguage;
+	protected static $supportedLanguages;
+	protected static $defaultLanguage;
 	
 			//	If there was a language passed, make sure it's one of those supported
 	protected static function sanitise($language)
@@ -40,15 +40,11 @@ class Amslib_Router_Language
 
 		return self::$defaultLanguage;
 	}
-		
-	public static function enable()
-	{
-		self::$enabled = true;
-	}
 	
-	public static function disable()
+	public static function setup($supported,$default)
 	{
-		self::$enabled = false;
+		self::$supportedLanguages	=	$supported;
+		self::$defaultLanguage		=	$default;
 	}
 
 	public static function initialise($language=NULL,$sessionKey="language")
@@ -65,6 +61,16 @@ class Amslib_Router_Language
 		//	Remember, if there is a session language set, you cannot override it through this method
 		//	To override this session language, you must provide a routerPath with a language parameter embedded
 		self::$enabledLanguage = &$_SESSION[$sessionKey];
+	}
+		
+	public static function enable()
+	{
+		self::$enabled = true;
+	}
+	
+	public static function disable()
+	{
+		self::$enabled = false;
 	}
 	
 	/**
@@ -103,16 +109,15 @@ class Amslib_Router_Language
 	 * 
 	 * FIXME: Seems to be hard coded into dealing with only spanish and english languages
 	 */
-	public static function change()
+	public static function change($language)
 	{
 		if(self::$enabled){
 			//	Switch language
-			$lang = (self::$enabledLanguage == "es") ? "/en" : "/es";
-			self::set($lang);
+			self::set($language);
 		}
 		
 		// return the current page, but with the language swapped
-		$Router = Router::getInstance();
+		$Router = Amslib_Router::getInstance();
 		return $Router->getCurrentRoute();
 	}
 	
@@ -131,5 +136,10 @@ class Amslib_Router_Language
 		}
 		
 		return $lang;
+	}
+	
+	public static function getCode()
+	{
+		return array_search(self::$enabledLanguage,self::$supportedLanguages);	
 	}
 }

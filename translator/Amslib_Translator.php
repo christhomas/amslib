@@ -17,7 +17,7 @@
  *
  * file: Amslib_Translator.php
  * title: Human Language Translator
- * version: 2.2
+ * version: 2.5
  * description: A translator object which uses a language catalog like gettext but doesnt
  *		really suck by actually doing things cleverly, you can learn, forget, translate
  *		mix catalogues from different parts of projects together, it's much more powerful
@@ -39,114 +39,83 @@
  */
 class Amslib_Translator
 {
-	static $interfaceType = false;
+	protected $keyStore;
 
-	var $__accessLayer;
-
-	function Amslib_Translator($database=NULL,$immediateClose=false)
+	public function __construct()
 	{
-		// TODO: Throw an exception instead, it's better
-		if(self::$interfaceType == false) die("Amslib_Translator requires an interface type to continue");
-
-		switch(self::$interfaceType){
-			case "database":{
-				$this->__accessLayer = new Amslib_Translator_DatabaseInterface($database,$immediateClose);
-			}break;
-
-			case "file":{
-				$this->__accessLayer = new Amslib_Translator_FileInterface($database,$immediateClose);
-			}break;
-			
-			case "memory":{
-				$this->__accessLayer = new Amslib_Translator_MemoryInterface($database,$immediateClose);
-			}break;
-			
-			case "xml":{
-				$this->__accessLayer = new Amslib_Translator_XMLInterface($database,$immediateClose);
-			}break;
-		};
+		$this->open(array());
 	}
 
-	function open($database,$readAll=false)
+	public function open($database)
 	{
-		return $this->__accessLayer->open($database,$readAll);
+		$this->keyStore = $database;	
+	}
+	
+	public function close()
+	{
+		$this->keyStore = array();
 	}
 
-	function close()
+	//	NOTE: These methods have no purpose in the basic runtime memory translator
+	public function sync(){}
+	public function async(){}
+	
+	public function listAll($language=NULL)
 	{
-		$this->__accessLayer->close();
+		//	TODO: missing in the memory interface
 	}
 
-	function sync()
+	public function translate($input,$language=NULL)
 	{
-		$this->__accessLayer->sync();
+		return $this->t($key);
 	}
 
-	function async()
+	public function t($input,$language=NULL)
 	{
-		$this->__accessLayer->async();
+		if(is_string($key) && isset($this->keyStore[$key])){
+			return $this->keyStore[$key];	
+		}
+		
+		return $key;
 	}
 
-	function listAll($language=NULL)
+	public function learn($input,$translation,$database=NULL)
 	{
-		return $this->__accessLayer->listAll($language);
+		return $this->l($key,$value);
 	}
 
-	function translate($input,$language=NULL)
+	public function l($input,$translation,$database=NULL)
 	{
-		return $this->t($input,$language);
+		$this->keyStore[$key] = $value;
 	}
 
-	function t($input,$language=NULL)
-	{
-		return $this->__accessLayer->t($input,$language);
-	}
-
-	function learn($input,$translation,$database=NULL)
-	{
-		$this->l($input,$translation,$database);
-	}
-
-	function l($input,$translation,$database=NULL)
-	{
-		$this->__accessLayer->l($input,$translation,$database);
-	}
-
-	function forget($input,$database=NULL)
+	public function forget($input,$database=NULL)
 	{
 		$this->f($input,$database);
 	}
 
-	function f($input,$database=NULL)
+	public function f($input,$database=NULL)
 	{
-		$this->__accessLayer->f($input,$database);
+		unset($this->keyStore[$input]);
 	}
 
-	function getMissing()
+	public function getMissing()
 	{
-		return $this->__accessLayer->getMissing();
+		//	TODO: missing in the memory interface
 	}
 
-	function updateKey($old,$new,$deleteOld=true)
+	public function updateKey($old,$new,$deleteOld=true)
 	{
-		$this->__accessLayer->updateKey($old,$new,$deleteOld);
+		//	TODO: missing in the memory interface
 	}
 
-	static function &getInstance($database=NULL,$immediateClose=false)
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 
-		if($instance === NULL) $instance = new AntimatterTranslator($database,$immediateClose);
+		if($instance === NULL) $instance = new Amslib_Translator();
 
 		return $instance;
-	}
-}
-
-class Amslib_Translator_BaseAccessLayer
-{
-	function Amslib_Translator_BaseAccessLayer()
-	{
-
 	}
 }
 ?>

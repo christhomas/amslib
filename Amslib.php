@@ -29,6 +29,11 @@ class Amslib
 {
 	static $showErrorTrigger = false;
 	
+	function locate()
+	{
+		return dirname(__FILE__);
+	}
+	
 	function showErrors()
 	{
 		//	Enable all error reporting
@@ -86,8 +91,6 @@ class Amslib
 			if(file_exists($test)) return $p;
 		}
 		
-		if(self::$showErrorTrigger) print("INCLUDE PATH($file) = <pre>".print_r($includePath,true)."</pre>");
-		
 		return false;
 	}
 	
@@ -127,9 +130,12 @@ class Amslib
 		
 	function autoloader()
 	{
+		//	Only register it once.
+		if(function_exists("amslib_autoload")) return;
+		
 		function amslib_autoload($class_name)
 		{
-			if($class_name == "amslib") return;
+			if($class_name == __CLASS__) return false;
 			
 			$path = dirname(__FILE__);
 		
@@ -144,9 +150,14 @@ class Amslib
 				$path		=	"$path/translator/";
 			}
 			
+			//	Redirect to include the correct path for the router system
+			if(strpos($class_name,"Amslib_Router") !== false){
+				$path		=	"$path/router/";
+			}
+			
 			$file = "$path/$class_name.php";
 			
-			if(file_exists($file)) Amslib::requireFile($file);
+			return Amslib::requireFile($file);
 		}
 		
 		//	register a special autoloader that will include correctly all of the amslib classes

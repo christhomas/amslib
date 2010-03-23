@@ -80,7 +80,7 @@ class Amslib_Database
 
 	function __setupLoginDetails()
 	{
-		amslib::include_file($this->__dbFile);
+		Amslib::include_file($this->__dbFile);
 		$this->__loginDetails = getDatabaseAccess();
 	}
 
@@ -251,7 +251,7 @@ class Amslib_Database
 		$result = mysql_query("$command $query",$this->__connection);
 		if($this->__debug) print("<pre>QUERY = '$command $query'<br/></pre>");
 
-		if($result) return mysql_affected_rows();
+		if($result) return mysql_affected_rows() >= 0;
 
 		$this->fatalError("Transaction failed<br/>command = '$command'<br/>query = '$query'");
 
@@ -285,12 +285,12 @@ class Amslib_Database
 	{
 		$this->__loginDetails = NULL;
 		
-		die("FATAL ERROR: $msg<br/>mysql_error = '".mysql_error()."'");
+		die("FATAL ERROR: $msg<br/>mysql_error = '".$this->error()."'");
 	}
 
 	function error()
 	{
-
+		return mysql_error();
 	}
 
 	function setDebug($state)
@@ -318,14 +318,24 @@ class Amslib_Database
 	 */
 	function getConnectionStatus()
 	{
+		return $this->__connection ? true : false;
+	}
+	
+	function getConnection()
+	{
 		return $this->__connection;
+	}
+	
+	function copy($database)
+	{
+		$this->__connection = $database->getConnection();
 	}
 
 	function &getInstance($connect=true)
 	{
 		static  $instance = NULL;
 
-		if($instance === NULL) $instance = new AntimatterDatabase($connect);
+		if($instance === NULL) $instance = new Amslib_Database($connect);
 
 		return $instance;
 	}

@@ -756,7 +756,7 @@ class Amslib_Validator
 	 *
 	 * returns:
 	 * 	If there are no items in the source array, return true or false, depending on whether there are required rules or not
-	 * 	Return whether the result from calling FormValidator::getStatus (true or false, true for no errors)
+	 * 	Return whether the result from calling Amslib_Validator::getStatus (true or false, true for no errors)
 	 *
 	 * operations:
 	 * 	-	Reset the hasExecuted flag to false
@@ -772,7 +772,7 @@ class Amslib_Validator
 	 * 	-	Return the status of the validator (true = no errors)
 	 *
 	 * notes:
-	 * 	-	Rename FormValidator::__items to FormValidator::__rules or something more descriptive
+	 * 	-	Rename Amslib_Validator::__items to Amslib_Validator::__rules or something more descriptive
 	 */
 	function execute()
 	{
