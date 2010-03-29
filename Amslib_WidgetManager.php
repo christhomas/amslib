@@ -26,9 +26,10 @@
 
 class Amslib_WidgetManager
 {
-	protected $key_website_path;
-	protected $key_widget_path;
-	protected $key_amslib_path;
+	protected $key_document_root;	//	Webserver path
+	protected $key_website_path;	//	Website path (relative to webserver path)
+	protected $key_widget_path;		//	Widget path (relative to website path)
+	protected $key_amslib_path;		//	Amslib path (relative to webserver path)
 	
 	protected $xdoc;
 	protected $xpath;
@@ -45,7 +46,6 @@ class Amslib_WidgetManager
 		
 		if(!$file->getAttribute("remote")){
 			$path = "{$this->paths[$name]}/$name/$filename";
-
 			if(!file_exists($path) && ($newpath = Amslib::findPath($filename))){
 				$path = $newpath."/$filename";
 			}
@@ -58,9 +58,10 @@ class Amslib_WidgetManager
 	
 	public function __construct()
 	{
-		$this->key_website_path	=	"widget_website_path";
-		$this->key_widget_path	=	"widget_path";
-		$this->key_amslib_path	=	"widget_amslib_path";
+		$this->key_document_root	=	"widget_document_root";
+		$this->key_website_path		=	"widget_website_path";
+		$this->key_widget_path		=	"widget_path";
+		$this->key_amslib_path		=	"widget_amslib_path";
 	}
 	
 	public function &getInstance()
@@ -72,13 +73,14 @@ class Amslib_WidgetManager
 		return $instance;
 	}
 	
-	public function setupSystem($path)
+	public function setupSystem($path,$websitePath="")
 	{
 		@session_start();
 		
-		Amslib::insertSessionParam($this->key_widget_path,	$path);
-		Amslib::insertSessionParam($this->key_website_path,	$_SERVER["DOCUMENT_ROOT"]);
-		Amslib::insertSessionParam($this->key_amslib_path,	Amslib::locate());
+		Amslib::insertSessionParam($this->key_widget_path,		$path);
+		Amslib::insertSessionParam($this->key_document_root,	$_SERVER["DOCUMENT_ROOT"]);
+		Amslib::insertSessionParam($this->key_website_path,		$websitePath);
+		Amslib::insertSessionParam($this->key_amslib_path,		Amslib::locate());
 		
 		$this->setupWidget();
 	}
@@ -100,13 +102,14 @@ class Amslib_WidgetManager
 		return "";
 	}
 	
-	public function getRelativePath($path)
-	{
+	public function getRelativePath($path="")
+	{	
+		//	Path is already relative
 		if(strpos($path,".") === 0) return $path;
 		
-		$root = $this->getWebsitePath();
+		$root = $this->getWebsitePath()."/";
 		
-		$path = str_replace($root,"",$root."/".$path);
+		$path = str_replace($root,"",$root.$path);
 		return str_replace("//","/",$path);
 	}
 	
@@ -115,9 +118,14 @@ class Amslib_WidgetManager
 		return Amslib::sessionParam($this->key_widget_path);
 	}
 	
-	public function getWebsitePath()
+	public function getWebsitePath($relative=false)
 	{
-		return Amslib::sessionParam($this->key_website_path);
+		$path = "/".Amslib::sessionParam($this->key_website_path);
+		if($relative == false){
+			return Amslib::sessionParam($this->key_document_root).$path;	
+		}
+		
+		return $path;
 	}
 	
 	public function getPackagePath($overridePath)

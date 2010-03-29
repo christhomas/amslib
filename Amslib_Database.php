@@ -191,6 +191,8 @@ class Amslib_Database
 	}
 
 	//	Something along these lines might work
+	//	FIXME: numResult doesnt really get used or shouldnt be, it's a PHP implementation of SQL's limit command, it should be changed
+	//	FIXME: what numResult is used for, is to "optimise" out an array of arrays with only a single row returned, so perhaps it should update to reflect that
 	function select($query,$numResults=0,$fetchMethod="__defaultFetchResult")
 	{
 		if($this->getConnectionStatus() == false) return false;
