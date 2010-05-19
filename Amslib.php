@@ -17,7 +17,7 @@
  * 
  * File: Amslib.php
  * Title: Amslib core utility object
- * Version: 2.6
+ * Version: 2.7
  * Project: Amslib (antimatter studios library)
  * 
  * Contributors/Author:
@@ -88,12 +88,12 @@ class Amslib
 		
 		foreach($includePath as $p){
 			$test = (strpos($file,"/") !== 0) ? "$p/$file" : "{$p}{$file}";
-			if(file_exists($test)) return $p;
+			if(@file_exists($test)) return $p;
 		}
 		
 		return false;
 	}
-	
+		
 	//	DEPRECATED: use includeFile instead
 	function include_file($file,$showError=false){ return self::includeFile($file,$showError); }
 	
@@ -118,7 +118,7 @@ class Amslib
 		
 		$file = "{$path}$file";
 		
-		if(file_exists($file)){
+		if(is_file($file) && file_exists($file)){
 			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
 			require($file);
 			
@@ -297,23 +297,24 @@ class Amslib
 	/**
 	 * 	function:	requestParam
 	 * 	
-	 * 	Obtain a parameter from the GET or POST global array
+	 * 	Obtain a parameter from the REQUEST global array
 	 * 
 	 * 	parameters:
-	 * 		value	-	The value requested
-	 * 		return	-	The value to return if the value does not exist
-	 * 		erase	-	Whether or not to erase the value after it's been read
-	 * 		order	-	A two element array specifying what order to obtain the parameter in { get, post } is the default order
+	 * 		$value		-	The value requested
+	 * 		$default	-	The value to return if the value does not exist
+	 * 		$erase		-	Whether or not to erase the value after it's been read
 	 * 
 	 * 	returns:
-	 * 		-	The value from the GET or POST global array, if not exists, the value of the parameter return
+	 * 		-	The value from the REQUEST global array, if not exists, the value of the parameter return
 	 */
-	function requestParam($value,$default=NULL,$erase=false,$order=array("getParam","postParam"))
+	function requestParam($value,$default=NULL,$erase=false)
 	{
-		$ret = self::$order[0]($value,$default,$erase);
-		if($ret === $default) $ret = self::$order[1]($value,$default,$erase);
-		
-		return $ret;
+		return self::arrayParam($_REQUEST,$value,$default,$erase);
+	}
+	
+	function insertRequestParam($parameter,$value)
+	{
+		$_REQUEST[$parameter] = $value;
 	}
 }
 

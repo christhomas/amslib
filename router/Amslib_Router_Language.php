@@ -28,8 +28,8 @@ class Amslib_Router_Language
 {
 	protected static $enabled = false;
 	protected static $enabledLanguage;
-	protected static $supportedLanguages;
-	protected static $defaultLanguage;
+	protected static $supportedLanguages	=	array();
+	protected static $defaultLanguage		=	"";
 	
 			//	If there was a language passed, make sure it's one of those supported
 	protected static function sanitise($language)
@@ -125,7 +125,7 @@ class Amslib_Router_Language
 	{
 		self::$enabledLanguage = self::sanitise($language);
 	}
-		
+
 	public static function get($url=false)
 	{
 		$lang = "";

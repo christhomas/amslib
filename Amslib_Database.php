@@ -20,7 +20,7 @@
  * description: A database object to centralise all interaction with a mysql databse
  * 		into a single object which nicely hides some of the annoying repetitive
  * 		aspects of a database, whilst giving you a nice candy layer to deal with instead
- * version: 2.1
+ * version: 2.3
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -40,10 +40,10 @@
  */
 class Amslib_Database
 {
-	var $__loginDetails;
+	protected $__loginDetails;
 
 	/**
-	 * 	boolean: _connection
+	 * 	boolean: __connection
 	 *
 	 * 	Boolean true or false value, which gets updated when the server login is attempted
 	 *
@@ -51,73 +51,78 @@ class Amslib_Database
 	 * 		true	-	The database connected successfully
 	 * 		false	-	The database failed to connect
 	 */
-	var $__connection = false;
+	protected $__connection = false;
 
-	var $__dbAction = array();
+	protected $__dbAction = array();
 
-	var $__lastResult = array();
+	protected $__lastResult = array();
 
-	var $__lastInsertId = 0;
+	protected $__lastInsertId = 0;
 
-	var $__lastQuery = array();
+	protected $__lastQuery = array();
 
-	var $__dbFile = "mysql-details.php";
+	protected $__dbFile = "mysql-details.php";
 
-	var $__debug = false;
+	protected $__debug = false;
+	
+	protected $__selectResult = false;
 
 	/**
 	 * 	method:	Amslib_Database
 	 *
 	 * 	This method is called when the database object is created, it connects to the database by default
 	 */
-	function Amslib_Database($connect=true)
+	public function __construct($connect=true)
 	{
 		//	Setup default database actions (just in case someone forgets)
 		$this->__setupDatabaseActions(array("select","insert","update","delete"));
-
+		$this->setFetchMethod("mysql_fetch_assoc");
+		
 		if($connect) $this->connect();
 	}
 
-	function __setupLoginDetails()
+	protected function __setupLoginDetails()
 	{
 		Amslib::include_file($this->__dbFile);
 		$this->__loginDetails = getDatabaseAccess();
 	}
 
-	function __setupDatabaseActions($actions)
+	protected function __setupDatabaseActions($actions)
 	{
 		$this->__dbAction = $actions;
 	}
 
-	function __setDBFile($file)
+	protected function __setDBFile($file)
 	{
 		$this->__dbFile = $file;
 	}
 
-	function __setLastQuery($query)
+	protected function __setLastQuery($query)
 	{
 		$this->__lastQuery[] = $query;
 		if(count($this->__lastQuery) > 100) array_shift($this->__lastQuery);
 	}
 
-	function __defaultFetchResult($result)
-	{
-		return mysql_fetch_assoc($result);
-	}
-
-	function __getLastTransactionId()
+	protected function __getLastTransactionId()
 	{
 		return $this->__lastInsertId;
 	}
 
-	function __getLastResult()
+	protected function __getLastResult()
 	{
 		return $this->__lastResult;
 	}
 
-	function getLastQuery()
+	public function getLastQuery()
 	{
 		return $this->__lastQuery;
+	}
+	
+	public function setFetchMethod($method)
+	{
+		if(function_exists($method)){
+			$this->fetchMethod = $method;
+		}
 	}
 
 	/**
@@ -128,7 +133,7 @@ class Amslib_Database
 	 * 	todo:
 	 * 		-	Need to move the database details to somewhere more secure (like inside the database!! ROFL!! joke, don't do that!!!!)
 	 */
-	function __makeConnection()
+	protected function __makeConnection()
 	{
 		$this->__disconnect();
 
@@ -147,75 +152,56 @@ class Amslib_Database
 		$this->__loginDetails = NULL;
 	}
 
-	function setEncoding($encoding)
+	public function setEncoding($encoding)
 	{
 		mysql_query("SET NAMES $encoding");
 		mysql_query("SET CHARACTER SET $encoding");
 	}
 
-	function __transaction($command,$query,$numResults=0,$fetchMethod="__defaultFetchResult")
+	protected function __transaction($command,$query,$numResults=0)
 	{
-		if($this->getConnectionStatus() == false) return false;
-		
-		$command = strtolower($command);
-
-		if(in_array($command,$this->__dbAction))
-		{
-			$this->__setLastQuery("$command $query");
-			$result = mysql_query("$command $query",$this->__connection);
-			if($this->__debug) print("<pre>QUERY = '$command $query'<br/></pre>");
-
-			if($result){
-				if($command === "insert" && ($this->__lastInsertId = mysql_insert_id())) return $this->__lastInsertId;
-				if($command === "update" || $command === "delete") return $result;
-				if($command === "select" && mysql_num_rows($result) >= 0){
-					$this->__lastResult = array();
-
-					while($r = $this->$fetchMethod($result)){
-						$this->__lastResult[] = $r;
-						if(count($this->__lastResult) == $numResults) break;
-					}
-
-					$c = count($this->__lastResult);
-					if($c == 1 && $numResults == 1) $this->__lastResult = $this->__lastResult[0];
-					if($c == 0) $this->__lastResult = false;
-
-					return $this->__lastResult;
-				}
-			}
-
-			$this->fatalError("Transaction failed<br/>command = $command<br/>query = $query");
+		switch($command){
+			case "select":{	return $this->select($query,$numResults);	}break;
+			case "insert":{	return $this->insert($query);				}break;
+			case "update":{	return $this->update($query);				}break;
+			case "delete":{	return $this->delete($query);				}break;
 		}
-
-		$this->fatalError("A transaction was attempted, which is not permitted:<br/>transaction command = $command<br/>transaction query = $query<br/>");
+		
+		return false;
+	}
+	
+	public function getResults($numResults)
+	{
+		$this->__lastResult = array();
+		
+		$c = 0;
+		while($r = call_user_func($this->fetchMethod,$this->__selectResult)){
+			$this->__lastResult[] = $r;
+			
+			if(++$c == $numResults) break;		
+		}
+		
+		if($c == 1 && $numResults == 1) $this->__lastResult = current($this->__lastResult);
+		if($c == 0) $this->__lastResult = false;
+		
+		return $this->__lastResult;
 	}
 
 	//	Something along these lines might work
 	//	FIXME: numResult doesnt really get used or shouldnt be, it's a PHP implementation of SQL's limit command, it should be changed
 	//	FIXME: what numResult is used for, is to "optimise" out an array of arrays with only a single row returned, so perhaps it should update to reflect that
-	function select($query,$numResults=0,$fetchMethod="__defaultFetchResult")
+	public function select($query,$numResults=0)
 	{
 		if($this->getConnectionStatus() == false) return false;
 
 		$command = "select";
 
 		$this->__setLastQuery("$command $query");
-		$result = mysql_query("$command $query",$this->__connection);
+		$this->__selectResult = mysql_query("$command $query");
 		if($this->__debug) print("<pre>QUERY = '$command $query'<br/></pre>");
 
-		if($result && mysql_num_rows($result) >= 0){
-			$this->__lastResult = array();
-
-			while($r = $this->$fetchMethod($result)){
-				$this->__lastResult[] = $r;
-				if(count($this->__lastResult) == $numResults) break;
-			}
-
-			$c = count($this->__lastResult);
-			if($c == 1 && $numResults == 1) $this->__lastResult = $this->__lastResult[0];
-			if($c == 0) $this->__lastResult = false;
-
-			return $this->__lastResult;
+		if($this->__selectResult && mysql_num_rows($this->__selectResult) >= 0){
+			return $this->getResults($numResults);
 		}
 
 		$this->fatalError("Transaction failed<br/>command = '$command'<br/>query = '$query'");
@@ -223,14 +209,14 @@ class Amslib_Database
 		return false;
 	}
 
-	function insert($query)
+	public function insert($query)
 	{
 		if($this->getConnectionStatus() == false) return false;
 
 		$command = "insert into";
 
 		$this->__setLastQuery("$command $query");
-		$result = mysql_query("$command $query",$this->__connection);
+		$result = mysql_query("$command $query");
 		if($this->__debug) print("<pre>QUERY = '$command $query'<br/></pre>");
 
 		$this->__lastInsertId = mysql_insert_id();
@@ -243,14 +229,14 @@ class Amslib_Database
 		return false;
 	}
 
-	function update($query)
+	public function update($query)
 	{
 		if($this->getConnectionStatus() == false) return false;
 
 		$command = "update";
 
 		$this->__setLastQuery("$command $query");
-		$result = mysql_query("$command $query",$this->__connection);
+		$result = mysql_query("$command $query");
 		if($this->__debug) print("<pre>QUERY = '$command $query'<br/></pre>");
 
 		if($result) return mysql_affected_rows() >= 0;
@@ -260,14 +246,14 @@ class Amslib_Database
 		return false;
 	}
 
-	function delete($query)
+	public function delete($query)
 	{
 		if($this->getConnectionStatus() == false) return false;
 
 		$command = "delete from";
 
 		$this->__setLastQuery("$command $query");
-		$result = mysql_query("$command $query",$this->__connection);
+		$result = mysql_query("$command $query");
 		if($this->__debug) print("<pre>QUERY = '$command $query'<br/></pre>");
 
 		if($result) return mysql_affected_rows();
@@ -277,25 +263,25 @@ class Amslib_Database
 		return false;
 	}
 
-	function connect()
+	public function connect()
 	{
 		$this->__setupLoginDetails();
 		$this->__makeConnection();
 	}
 
-	function fatalError($msg)
+	public function fatalError($msg)
 	{
 		$this->__loginDetails = NULL;
 		
 		die("FATAL ERROR: $msg<br/>mysql_error = '".$this->error()."'");
 	}
 
-	function error()
+	public function error()
 	{
 		return mysql_error();
 	}
 
-	function setDebug($state)
+	public function setDebug($state)
 	{
 		$this->__debug = $state;
 	}
@@ -305,7 +291,7 @@ class Amslib_Database
 	 *
 	 * 	Disconnect from the Database
 	 */
-	function __disconnect()
+	protected function __disconnect()
 	{
 		$this->__connection = false;
 	}
@@ -318,24 +304,24 @@ class Amslib_Database
 	 * 	returns:
 	 * 		-	Boolean true or false depending on whether the database logged in correctly or not
 	 */
-	function getConnectionStatus()
+	public function getConnectionStatus()
 	{
 		return $this->__connection ? true : false;
 	}
 	
-	function getConnection()
+	public function getConnection()
 	{
 		return $this->__connection;
 	}
 	
-	function copy($database)
+	public function copy($database)
 	{
 		$this->__connection = $database->getConnection();
 	}
 
-	function &getInstance($connect=true)
+	public function &getInstance($connect=true)
 	{
-		static  $instance = NULL;
+		static $instance = NULL;
 
 		if($instance === NULL) $instance = new Amslib_Database($connect);
 

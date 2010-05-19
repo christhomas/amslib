@@ -17,7 +17,7 @@
  * 
  * File: Amslib_WidgetManager.php
  * Title: Widget manager for component based development
- * Version: 1.3
+ * Version: 2.0
  * Project: amslib
  * 
  * Contributors/Author:
@@ -34,26 +34,34 @@ class Amslib_WidgetManager
 	protected $xdoc;
 	protected $xpath;
 	
-	protected $paths;
-	
-	protected $layouts;
-	protected $styles;
-	protected $scripts;
-	
-	protected function getPath($name,$file)
-	{
-		$filename = $file->nodeValue;
+	protected $api;
+	protected $stylesheet;
+	protected $javascript;
 		
-		if(!$file->getAttribute("remote")){
-			$path = "{$this->paths[$name]}/$name/$filename";
-			if(!file_exists($path) && ($newpath = Amslib::findPath($filename))){
-				$path = $newpath."/$filename";
+	protected function setAPI($name)
+	{
+		$list = $this->xpath->query("//package/object/api");
+		
+		$api = false;
+
+		if($list->length > 0){
+			$node = $list->item(0);
+			if($node){
+				Amslib::requireFile($this->getWidgetPath()."/$name/objects/{$node->nodeValue}.php");
+				
+				$api = call_user_func(array($node->nodeValue,"getInstance"));
 			}
-			
-			return $this->getRelativePath($path);
 		}
 		
-		return $filename;
+		//	Create a default MVC object			
+		if($api == false) $api = new Amslib_MVC();
+		
+		$this->api[$name] = $api;
+		
+		//	Set the widget manager parent
+		$api->setWidgetManager($this);
+		
+		return $this->api[$name];
 	}
 	
 	public function __construct()
@@ -62,13 +70,16 @@ class Amslib_WidgetManager
 		$this->key_website_path		=	"widget_website_path";
 		$this->key_widget_path		=	"widget_path";
 		$this->key_amslib_path		=	"widget_amslib_path";
+		
+		$this->stylesheet			=	array();
+		$this->javascript			=	array();
 	}
 	
 	public function &getInstance()
 	{
 		static $instance = NULL;
 		
-		if($instance === NULL) $instance = new self();	
+		if($instance === NULL) $instance = new Amslib_WidgetManager();	
 		
 		return $instance;
 	}
@@ -76,7 +87,7 @@ class Amslib_WidgetManager
 	public function setupSystem($path,$websitePath="")
 	{
 		@session_start();
-		
+
 		Amslib::insertSessionParam($this->key_widget_path,		$path);
 		Amslib::insertSessionParam($this->key_document_root,	$_SERVER["DOCUMENT_ROOT"]);
 		Amslib::insertSessionParam($this->key_website_path,		$websitePath);
@@ -87,6 +98,7 @@ class Amslib_WidgetManager
 	
 	public function setupWidget()
 	{
+		//	TODO: determine whether this method is required now with the API in place
 		@session_start();
 		
 		if(isset($_SESSION[$this->key_amslib_path])){
@@ -107,30 +119,57 @@ class Amslib_WidgetManager
 		//	Path is already relative
 		if(strpos($path,".") === 0) return $path;
 		
-		$root = $this->getWebsitePath()."/";
-		
+		$root = $this->getWebsitePath();
 		$path = str_replace($root,"",$root.$path);
+
 		return str_replace("//","/",$path);
 	}
 	
-	public function getWidgetPath()
+	public function DEBUG_getRelativePath($path="")
+	{	
+		//	Path is already relative
+		if(strpos($path,".") === 0) return $path;
+		
+		$root = $this->getWebsitePath();
+		$path = str_replace($root,"",$root.$path);
+
+		return str_replace("//","/",$path);
+	}
+	
+	public function getWidgetPath($relative=false)
 	{
-		return Amslib::sessionParam($this->key_widget_path);
+		$root = $this->getWebsitePath();
+		$path = Amslib::sessionParam($this->key_widget_path);
+		
+		//	Make sure widget path is relative to the website path
+		$path = str_replace($root,"",$path);
+		
+		if($relative == false){
+			$path = $root.$path;
+		}
+		
+		return str_replace("//","/",$path);
 	}
 	
 	public function getWebsitePath($relative=false)
 	{
-		$path = "/".Amslib::sessionParam($this->key_website_path);
+		$root = Amslib::sessionParam($this->key_document_root);
+		$path = Amslib::sessionParam($this->key_website_path);
+		
+		//	Make sure the website path is relative to the document root
+		$path = str_replace($root,"",$path);
+		
 		if($relative == false){
-			return Amslib::sessionParam($this->key_document_root).$path;	
+			$path = $root.$path;
 		}
 		
-		return $path;
+		return str_replace("//","/",$path);
 	}
 	
 	public function getPackagePath($overridePath)
 	{
 		$path = $this->getWidgetPath();
+
 		//	FIXME: is_dir might fail is the path is not relative, or findable without looking at the include path
 		if(is_string($overridePath) && is_dir($overridePath)) $path = $overridePath;
 		 
@@ -148,12 +187,97 @@ class Amslib_WidgetManager
 		$this->xpath = new DOMXPath($this->xdoc);
 	}
 	
-	public function loadConfiguration($path,$name)
+	public function findResource($widget,$node)
 	{
-		$this->paths[$name]		=	$path;
-		$this->layouts[$name]	=	$this->xpath->query("//package/layout/file");
-		$this->scripts[$name]	=	$this->xpath->query("//package/javascript/file");
-		$this->styles[$name]	=	$this->xpath->query("//package/stylesheet/file");
+		if($node->getAttribute("remote")) return $node->nodeValue;
+		
+		$file = $node->nodeValue;
+		$path = false;
+		
+		//	First try to find the file inside the widget itself
+		$wpath = str_replace("//","/",$this->getWidgetPath()."/$widget/$file");
+		//	if you found it inside the widget, use that version over any other
+		if(file_exists($wpath)) $path = $wpath;
+
+		//	If you didn't find it, search the path
+		if($path == false){
+			//	can't find the widget, search the path instead
+			$fpath = Amslib::findPath($file);
+			
+			//	if you found it, assign it
+			if($fpath) $path = "$fpath/$file";
+		}
+		
+		//	relativise the path and reduce the double slashes to single ones.
+		return str_replace("//","/",$this->getRelativePath($path));
+	}
+	
+	public function loadConfiguration($path,$widget)
+	{
+		$api = $this->setAPI($widget);
+		$api->setPath($path);
+		
+		$controllers = $this->xpath->query("//package/controllers/name");
+		for($a=0;$a<$controllers->length;$a++){
+			$name	=	$controllers->item($a)->nodeValue;
+			$file	=	$this->getWidgetPath()."/$widget/controllers/Ct_{$name}.php";
+			$api->setController($name,$file);
+		}
+		
+		$layouts = $this->xpath->query("//package/layout/name");
+		for($a=0;$a<$layouts->length;$a++){
+			$name	=	$layouts->item($a)->nodeValue;
+			$file	=	$this->getWidgetPath()."/$widget/layouts/La_{$name}.php";
+			$api->setLayout($name,$file);
+		}
+		
+		$views = $this->xpath->query("//package/view/name");
+		for($a=0;$a<$views->length;$a++){
+			$name	=	$views->item($a)->nodeValue;
+			$file	=	$this->getWidgetPath()."/$widget/views/Vi_{$name}.php";
+			$api->setView($name,$file);
+		}
+		
+		$objects = $this->xpath->query("//package/object/name");
+		for($a=0;$a<$objects->length;$a++){
+			$name	=	$objects->item($a)->nodeValue;
+			$file	=	$this->getWidgetPath()."/$widget/objects/$name.php";
+			$api->setObject($name,$file);
+		}
+		
+		$services = $this->xpath->query("//package/service/file");
+		for($a=0;$a<$services->length;$a++){
+			$name	=	$services->item($a)->getAttribute("name");
+			$file	=	$services->item($a)->nodeValue;
+			$file	=	$this->getWidgetPath(true)."/$widget/services/$file";
+			$api->setService($name,$file);
+		}
+		
+		$images = $this->xpath->query("//package/image/file");
+		for($a=0;$a<$images->length;$a++){
+			$name	=	$images->item($a)->getAttribute("name");
+			$file	=	$this->findResource($widget,$images->item($a));
+			$api->setImage($name,$file);
+		}
+		
+		$javascript = $this->xpath->query("//package/javascript/file");
+		for($a=0;$a<$javascript->length;$a++){
+			$name	=	$javascript->item($a)->getAttribute("name");
+			$file	=	$this->findResource($widget,$javascript->item($a));
+			$this->setJavascript($name,$file);
+		}
+		
+		$stylesheet = $this->xpath->query("//package/stylesheet/file");
+		for($a=0;$a<$stylesheet->length;$a++){
+			$name	=	$stylesheet->item($a)->getAttribute("name");
+			$file	=	$this->findResource($widget,$stylesheet->item($a));
+			$this->setStylesheet($name,$file);
+		}
+	}
+	
+	public function getAPI($name)
+	{
+		return $this->api[$name];
 	}
 	
 	public function set($name,$data)
@@ -168,146 +292,46 @@ class Amslib_WidgetManager
 		return Amslib::sessionParam("widgets/$name",NULL);
 	}
 	
-	public function setAutoloader($file,$func)
-	{
-		$file = $this->getWebsitePath()."/$file";
-
-		if(!file_exists($file))		return false;
-		if(!function_exists($func))	return false;
-		
-		$this->set("autoloader/cwd",getcwd());
-		$this->set("autoloader/file",$file);
-		$this->set("autoloader/function",$func);
-	}
-	
-	public function runAutoloader()
-	{
-		$cwd	=	$this->get("autoloader/cwd");
-		$file	=	$this->get("autoloader/file");
-		$func	=	$this->get("autoloader/function");
-		
-		//	Include the file for the autoloader
-		if($file === NULL || !file_exists($file)) return false;
-		chdir($cwd);
-		Amslib::requireFile($file);
-		
-		//	Register the autoloader function
-		if($func === NULL || !function_exists($func)) return false;
-		return spl_autoload_register($func);
-	}
-	
-	public function setDatabaseAccess($create,$arguments=array())
-	{
-		if(is_string($create) && !function_exists($create)) return false;
-		
-		if(is_array($create)){
-			if(count($create) == 1 && !function_exists($create[0])) return false;
-			if(count($create) == 2 && !method_exists($create[0],$create[1])) return false;
-			if(count($create) == 2 && !method_exists($create[0],"locate")) return false;	
-		}
-		
-		$database = call_user_func_array($create,$arguments);
-
-		if($database){
-			$this->set("database_access/create",json_encode($create));
-			$this->set("database_access/arguments",json_encode($arguments));
-			$this->set("database_access/location",$database->locate());
-			
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public function getDatabaseAccess()
-	{
-		$create		=	$this->get("database_access/create");
-		$arguments	=	$this->get("database_access/arguments");
-		$location	=	$this->get("database_access/location");
-		
-		$create		=	json_decode($create,true);
-		$arguments	=	json_decode($arguments,true);
-		
-		if($create === NULL || $location === NULL || $arguments === NULL) return false;
-
-		require_once($location);
-		
-		if(is_string($create) && !function_exists($create)) return false;
-		
-		if(is_array($create)){
-			if(count($create) == 1 && !function_exists($create[0])) return false;
-			if(count($create) == 2 && !method_exists($create[0],$create[1])) return false;	
-		}
-	
-		return call_user_func_array($create,$arguments);
-	}
-	
 	public function load($name,$overridePath=NULL)
 	{
 		if(is_array($name)){
 			foreach($name as $w) $this->load($w);
 		}else{
 			$path = $this->getPackagePath($overridePath);
+
 			$this->loadPackage($path,$name);
 			$this->loadConfiguration($path,$name);
 		}
 	}
 	
-	public function getStylesheets()
+	public function setStylesheet($name,$file)
 	{
-		$styles = "";
-		foreach($this->styles as $name=>$s)
-		{
-			for($a=0;$a<$s->length;$a++){
-				$path = $this->getPath($name,$s->item($a));
-				
-				if($path != false){
-					$styles .= "<link rel='stylesheet' type='text/css' href='$path' />";
-				}
-			}
+		if($name && $file){
+			$this->stylesheet[$name] = "<link rel='stylesheet' type='text/css' href='$file' />";
 		}
-		
-		return $styles;
 	}
 	
-	public function getJavascripts()
+	public function getStylesheet()
 	{
-		$scripts = "";
-		foreach($this->scripts as $name=>$s)
-		{
-			for($a=0;$a<$s->length;$a++){
-				$path = $this->getPath($name,$s->item($a));
-				
-				if($path != false){
-					$scripts .= "<script type='text/javascript' src='$path'></script>";	
-				}
-			}
-		}
-		
-		return $scripts;
+		return implode("\n",$this->stylesheet);
+	}
+	
+	public function setJavascript($name,$file)
+	{
+		if($name && $file){
+			$this->javascript[$name] = "<script type='text/javascript' src='$file'></script>";
+		}	
+	}
+	
+	public function getJavascript()
+	{
+		return implode("\n",$this->javascript);
 	}
 	
 	public function render($name,$parameters=array())
 	{
-		$output = false;
+		$api = $this->getAPI($name);
 		
-		if(isset($this->layouts[$name]))
-		{
-			$output = "";
-			
-			for($a=0;$a<$this->layouts[$name]->length;$a++){
-				$l = $this->layouts[$name]->item($a);
-				
-				$parameters["widget_manager"] = $this;
-				$path = "{$this->paths[$name]}/$name/$l->nodeValue";
-				$path = Amslib::findPath($path)."/$path";
-				
-				ob_start();
-				Amslib::requireFile($path,$parameters);
-				$output .= ob_get_clean();
-			}	
-		}
-		
-		return $output;
-	} 
+		return ($api) ? $api->render($parameters) : false;
+	}
 }

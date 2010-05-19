@@ -17,7 +17,7 @@
  * 
  * File: Amslib_Router.php
  * Title: Core router object for the router system
- * Version: 1.1
+ * Version: 1.2
  * Project: Amslib/Router
  * 
  * Contributors/Author:
@@ -29,7 +29,6 @@ class Amslib_Router
 	protected $routes;
 	protected $routeCache;
 	protected $pages;
-	protected $baseDir;
 	protected $option;
 	
 	protected $resource;
@@ -39,14 +38,6 @@ class Amslib_Router
 	
 	protected $language;
 
-	protected function initialise()
-	{
-		Amslib_Router_URL::setRouter($this);
-		
-		$this->setupCache();
-		$this->setupRouter();
-	}
-	
 	protected function pathToOption()
 	{
 		$parts	=	explode("/",$this->routerPath);
@@ -103,7 +94,7 @@ class Amslib_Router
 			{
 				$_SESSION["route_cache"] = array();
 	
-				foreach(Cfg_Routes::$paths as $p=>$d){
+				foreach($this->routes as $p=>$d){
 					if(!isset($d["option"])) $d["option"] = "default";
 					if(!isset($_SESSION["route_cache"][$d["resource"]][$d["option"]])){
 						$_SESSION["route_cache"][$d["resource"]][$d["option"]] = $p;
@@ -119,46 +110,20 @@ class Amslib_Router
 	 * method: __construct
 	 * 
 	 * The constructor for the Router core object
-	 * 
-	 * parameters:
-	 * 	type	-	the type of router to build, right now, only "builtin" is supported and given as default parameter
-	 * 
-	 * notes:
-	 * 	-	what happens when you dont want to use builtin, but a custom method.
-	 * 	-	the whole system is built on Cfg_Routes, which needs to change.
 	 */
-	public function __construct($type=NULL)
+	public function __construct(){}
+	
+	public function initialise()
 	{
-		$this->routes	=	false;
-		//	FIXME: we are assigning the instance here and inside the singleton method
-		self::$instance	=	$this;
+		Amslib_Router_URL::setRouter($this);
 		
-		if($type == NULL) $type = "builtin";
-		
-		switch($type){
-			case "builtin":{
-				$this->routes = Cfg_Routes::$paths;
-			}break;
-			
-			case "database":{
-				//	Setup a database router, a table in the database that contains all the routes and is queried dynamically
-			}
-		}
-		
-		if($this->routes){
-			$this->initialise();
-			$this->setFilePath("");
-		}
+		$this->setupCache();
+		$this->setupRouter();
 	}
 	
-	public function setFilePath($baseDir)
+	public function setRoutes($routes)
 	{
-		$this->baseDir = $baseDir;
-	}
-	
-	public function filePath($path="")
-	{
-		return $this->baseDir.$path;
+		$this->routes = $routes;
 	}
 	
 	public function getOption()
@@ -210,14 +175,12 @@ class Amslib_Router
 		return false;
 	}
 	
-	public function &getInstance($type=NULL)
+	public function &getInstance()
 	{
-		if(self::$instance === NULL){
-			self::$instance = new Amslib_Router($type);
-		}
+		static $instance = NULL;
+		
+		if($instance === NULL) $instance = new Amslib_Router();
 	
-		return self::$instance;
+		return $instance;
 	}
-	
-	public static $instance = NULL;
 }
