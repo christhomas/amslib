@@ -2222,8 +2222,7 @@ Element.Methods = {
 
   setOpacity: function(element, value, force) {
     element = $(element);
-    element.style.opacity = (!force && (value == 1 || value === '')) ? '' :
-      (value < 0.00001) ? 0 : value;
+    element.style.opacity = (value < 0.00001) ? 0 : value;
     return element;
   },
 
@@ -2553,7 +2552,7 @@ else if (Prototype.Browser.IE) {
     return value;
   };
 
-  Element.Methods.setOpacity = function(element, value, force) {
+  Element.Methods.setOpacity = function(element, value) {
     function stripAlpha(filter){
       return filter.replace(/alpha\([^\)]*\)/gi,'');
     }
@@ -2564,15 +2563,9 @@ else if (Prototype.Browser.IE) {
         element.style.zoom = 1;
 
     var filter = element.getStyle('filter'), style = element.style;
-    if (value == 1 || value === '') {
-      if(!force){
-	      (filter = stripAlpha(filter)) ?
-    	    style.filter = filter : style.removeAttribute('filter');
-      }
-      return element;
-    } else if (value < 0.00001) value = 0;
-    style.filter = stripAlpha(filter) +
-      'alpha(opacity=' + (value * 100) + ')';
+    
+    if (value < 0.00001) value = 0;
+    style.filter = stripAlpha(filter) + 'alpha(opacity=' + (value * 100) + ')';
     return element;
   };
 
@@ -2740,19 +2733,17 @@ else if (Prototype.Browser.IE) {
 }
 
 else if (Prototype.Browser.Gecko && /rv:1\.8\.0/.test(navigator.userAgent)) {
-  Element.Methods.setOpacity = function(element, value, force) {
+  Element.Methods.setOpacity = function(element, value) {
     element = $(element);
-    element.style.opacity = (value == 1) ? 0.999999 :
-      (!force && value === '') ? '' : (value < 0.00001) ? 0 : value;
+    element.style.opacity = (value == 1) ? 0.999999 : (value < 0.00001) ? 0 : value;
     return element;
   };
 }
 
 else if (Prototype.Browser.WebKit) {
-  Element.Methods.setOpacity = function(element, value, force) {
+  Element.Methods.setOpacity = function(element, value) {
     element = $(element);
-    element.style.opacity = (!force && (value == 1 || value === '')) ? '' :
-      (value < 0.00001) ? 0 : value;
+    element.style.opacity = (value < 0.00001) ? 0 : value;
 
     if (value == 1)
       if(element.tagName.toUpperCase() == 'IMG' && element.width) {
