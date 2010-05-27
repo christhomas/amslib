@@ -12,16 +12,18 @@ class Amslib_Translator_XML extends Amslib_Translator
 	function open($database,$readAll=false)
 	{
 		$this->__xdoc = new DOMDocument('1.0', 'UTF-8');
-		if(!$this->__xdoc->load($database)) die("XML FILE FAILED TO OPEN<br/>");
-		
-		$this->__xpath = new DOMXPath($this->__xdoc);
-
-		if($readAll){
-			$translations = $this->__xpath->query("//database/translation");
-		
-			foreach($translations as $name=>$t){
-				$this->l($t->getAttribute("name"),$t->nodeValue);	
-			}
+		if($this->__xdoc->load($database)){
+			$this->__xpath = new DOMXPath($this->__xdoc);
+	
+			if($readAll){
+				$translations = $this->__xpath->query("//database/translation");
+			
+				foreach($translations as $name=>$t){
+					$this->l($t->getAttribute("name"),$t->nodeValue);	
+				}
+			}	
+		}else{
+			print("XML TRANSLATION DATABASE: '$database' FAILED TO OPEN<br/>");
 		}
 	}
 

@@ -8,12 +8,14 @@ class Amslib_MVC
 	 */
 	protected $path;
 	
+	protected $database;
 	protected $controller;
 	protected $layout;
 	protected $object;
 	protected $view;
 	protected $images;
 	protected $service;
+	protected $value;
 	
 	protected $widgetManager;
 	
@@ -27,7 +29,13 @@ class Amslib_MVC
 		$this->object			=	array();
 		$this->view				=	array();
 		$this->service			=	array();
+		$this->value			=	array();
 		$this->widgetManager	=	NULL;
+	}
+	
+	public function setDatabase($database)
+	{
+		$this->database = $database;
 	}
 	
 	public function setWidgetManager($widgetManager)
@@ -50,6 +58,16 @@ class Amslib_MVC
 	public function getPath()
 	{
 		return $this->path;
+	}
+	
+	public function setValue($name,$value)
+	{
+		$this->value[$name] = $value;
+	}
+	
+	public function getValue($name)
+	{
+		return (isset($this->value[$name])) ? $this->value[$name] : NULL;	
 	}
 	
 	public function setController($name,$file)
@@ -101,6 +119,14 @@ class Amslib_MVC
 	public function getService($name)
 	{
 		return (isset($this->service[$name])) ? $this->service[$name] : false;
+	}
+	
+	public function copyService($src,$name,$copyAs=NULL)
+	{
+		if($copyAs === NULL) $copyAs = $name;
+		
+		$api = $this->widgetManager->getAPI($src);
+		$this->setService($copyAs,$api->getService($name));
 	}
 	
 	public function setImage($name,$file)

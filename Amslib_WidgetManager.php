@@ -24,15 +24,18 @@
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
+/**
+ * FIXME: move as much functionality into protected as 
+ * possible, far too much is public right now
+ */
 class Amslib_WidgetManager
 {
-	protected $key_document_root;	//	Webserver path
-	protected $key_website_path;	//	Website path (relative to webserver path)
-	protected $key_widget_path;		//	Widget path (relative to website path)
-	protected $key_amslib_path;		//	Amslib path (relative to webserver path)
-	
 	protected $xdoc;
 	protected $xpath;
+	
+	protected $documentRoot;
+	protected $widgetPath;
+	protected $websitePath;
 	
 	protected $api;
 	protected $stylesheet;
@@ -49,7 +52,9 @@ class Amslib_WidgetManager
 			if($node){
 				Amslib::requireFile($this->getWidgetPath()."/$name/objects/{$node->nodeValue}.php");
 				
-				$api = call_user_func(array($node->nodeValue,"getInstance"));
+				if(method_exists($node->nodeValue,"getInstance")){
+					$api = call_user_func(array($node->nodeValue,"getInstance"));
+				}
 			}
 		}
 		
@@ -66,13 +71,11 @@ class Amslib_WidgetManager
 	
 	public function __construct()
 	{
-		$this->key_document_root	=	"widget_document_root";
-		$this->key_website_path		=	"widget_website_path";
-		$this->key_widget_path		=	"widget_path";
-		$this->key_amslib_path		=	"widget_amslib_path";
+		//	Setup the basic system like this, it's 99% correct everytime
+		$this->setup("{$_SERVER["DOCUMENT_ROOT"]}/widgets",$_SERVER["DOCUMENT_ROOT"]);
 		
-		$this->stylesheet			=	array();
-		$this->javascript			=	array();
+		$this->stylesheet	=	array();
+		$this->javascript	=	array();
 	}
 	
 	public function &getInstance()
@@ -84,51 +87,19 @@ class Amslib_WidgetManager
 		return $instance;
 	}
 	
-	public function setupSystem($path,$websitePath="")
+	//	initialise all the required basic information
+	public function setup($widgetPath,$websitePath="")
 	{
-		@session_start();
-
-		Amslib::insertSessionParam($this->key_widget_path,		$path);
-		Amslib::insertSessionParam($this->key_document_root,	$_SERVER["DOCUMENT_ROOT"]);
-		Amslib::insertSessionParam($this->key_website_path,		$websitePath);
-		Amslib::insertSessionParam($this->key_amslib_path,		Amslib::locate());
-		
-		$this->setupWidget();
-	}
-	
-	public function setupWidget()
-	{
-		//	TODO: determine whether this method is required now with the API in place
-		@session_start();
-		
-		if(isset($_SESSION[$this->key_amslib_path])){
-			require_once($_SESSION[$this->key_amslib_path]."/Amslib.php");
-			
-			Amslib::addIncludePath($this->getWebsitePath()."/".$this->getWidgetPath());
-			Amslib::addIncludePath($this->getWebsitePath());
-			Amslib::addIncludePath(Amslib::locate());
-			
-			return $this->getWebsitePath();
-		}
-		
-		return "";
+		$this->documentRoot =	$_SERVER["DOCUMENT_ROOT"];
+		$this->widgetPath	=	$widgetPath;	
+		$this->websitePath	=	$websitePath;
 	}
 	
 	public function getRelativePath($path="")
 	{	
 		//	Path is already relative
 		if(strpos($path,".") === 0) return $path;
-		
-		$root = $this->getWebsitePath();
-		$path = str_replace($root,"",$root.$path);
 
-		return str_replace("//","/",$path);
-	}
-	
-	public function DEBUG_getRelativePath($path="")
-	{	
-		//	Path is already relative
-		if(strpos($path,".") === 0) return $path;
 		
 		$root = $this->getWebsitePath();
 		$path = str_replace($root,"",$root.$path);
@@ -139,7 +110,7 @@ class Amslib_WidgetManager
 	public function getWidgetPath($relative=false)
 	{
 		$root = $this->getWebsitePath();
-		$path = Amslib::sessionParam($this->key_widget_path);
+		$path = $this->widgetPath;
 		
 		//	Make sure widget path is relative to the website path
 		$path = str_replace($root,"",$path);
@@ -153,8 +124,8 @@ class Amslib_WidgetManager
 	
 	public function getWebsitePath($relative=false)
 	{
-		$root = Amslib::sessionParam($this->key_document_root);
-		$path = Amslib::sessionParam($this->key_website_path);
+		$root = $this->documentRoot;
+		$path = $this->websitePath;
 		
 		//	Make sure the website path is relative to the document root
 		$path = str_replace($root,"",$path);
@@ -182,9 +153,16 @@ class Amslib_WidgetManager
 		$xml = Amslib::findPath($xml)."/$xml";
 		
 		$this->xdoc = new DOMDocument('1.0', 'UTF-8');
-		if(!$this->xdoc->load($xml)) die("XML FILE FAILED TO OPEN<br/>");
-		$this->xdoc->preserveWhiteSpace = false;
-		$this->xpath = new DOMXPath($this->xdoc);
+		if(@$this->xdoc->load($xml)){
+			$this->xdoc->preserveWhiteSpace = false;
+			$this->xpath = new DOMXPath($this->xdoc);
+			
+			return true;
+		}else{
+			print("XML FILE FAILED TO OPEN: '$xml'<br/>");
+			
+			return false;
+		}
 	}
 	
 	public function findResource($widget,$node)
@@ -198,7 +176,7 @@ class Amslib_WidgetManager
 		$wpath = str_replace("//","/",$this->getWidgetPath()."/$widget/$file");
 		//	if you found it inside the widget, use that version over any other
 		if(file_exists($wpath)) $path = $wpath;
-
+		
 		//	If you didn't find it, search the path
 		if($path == false){
 			//	can't find the widget, search the path instead
@@ -280,18 +258,6 @@ class Amslib_WidgetManager
 		return $this->api[$name];
 	}
 	
-	public function set($name,$data)
-	{
-		if(session_id() == "") @session_start();	
-		Amslib::insertSessionParam("widgets/$name",$data);
-	}
-	
-	public function get($name)
-	{
-		if(session_id() == "") @session_start();
-		return Amslib::sessionParam("widgets/$name",NULL);
-	}
-	
 	public function load($name,$overridePath=NULL)
 	{
 		if(is_array($name)){
@@ -299,8 +265,9 @@ class Amslib_WidgetManager
 		}else{
 			$path = $this->getPackagePath($overridePath);
 
-			$this->loadPackage($path,$name);
-			$this->loadConfiguration($path,$name);
+			if($this->loadPackage($path,$name)){
+				$this->loadConfiguration($path,$name);
+			}
 		}
 	}
 	
@@ -320,7 +287,7 @@ class Amslib_WidgetManager
 	{
 		if($name && $file){
 			$this->javascript[$name] = "<script type='text/javascript' src='$file'></script>";
-		}	
+		}
 	}
 	
 	public function getJavascript()
