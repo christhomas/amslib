@@ -40,6 +40,10 @@
  */
 class Amslib_Database
 {
+/******************************************************************************
+ *	PROTECTED MEMBERS
+ *****************************************************************************/
+	
 	protected $__loginDetails;
 
 	/**
@@ -66,22 +70,6 @@ class Amslib_Database
 	protected $__debug = false;
 	
 	protected $__selectResult = false;
-	
-	protected $fifoSelectResult = array();
-
-	/**
-	 * 	method:	Amslib_Database
-	 *
-	 * 	This method is called when the database object is created, it connects to the database by default
-	 */
-	public function __construct($connect=true)
-	{
-		//	Setup default database actions (just in case someone forgets)
-		$this->__setupDatabaseActions(array("select","insert","update","delete"));
-		$this->setFetchMethod("mysql_fetch_assoc");
-		
-		if($connect) $this->connect();
-	}
 
 	protected function __setupLoginDetails()
 	{
@@ -109,54 +97,12 @@ class Amslib_Database
 	{
 		return $this->__lastInsertId;
 	}
-	
-	public function getLastQuery()
-	{
-		return $this->__lastQuery;
-	}
-	
+
 	protected function __getLastResult()
 	{
 		return $this->__lastResult;
 	}
 	
-
-	/**
-	 * method:	getRealResultCount
-	 * 
-	 * Obtain a real row count from the previous query, if you use limit and want to know how many
-	 * a query WOULD return without the limit, you can use this method, but in the query, you need
-	 * to put SQL_CALC_FOUND_ROWS as one of the selected fields
-	 * 
-	 * returns:
-	 * 	The number of results the previous query would have returned without the limit statement, 
-	 * 	if using SQL_CALC_FOUND_ROWS in the query
-	 * 
-	 * notes:
-	 * 	-	this method uses the select result stack to store the previous query, which is assumed
-	 * 		to be the query that generated the results, but you need the real result count before you 
-	 * 		process all the results, normally, calling this method would destroy the previous query 
-	 * 		and all your results with it.
-	 */
-	public function getRealResultCount()
-	{
-		$result = $this->select("FOUND_ROWS() as num_results",1);
-		
-		return (isset($result["num_results"])) ? $result["num_results"] : false;
-	}
-	
-	public function getSearchResultHandle()
-	{
-		return $this->__selectResult;
-	}
-	
-	public function setFetchMethod($method)
-	{
-		if(function_exists($method)){
-			$this->fetchMethod = $method;
-		}
-	}
-
 	/**
 	 * 	method:	__makeConnection
 	 *
@@ -183,6 +129,111 @@ class Amslib_Database
 		
 		$this->__loginDetails = NULL;
 	}
+	
+	/**
+	 * 	method:	__disconnect
+	 *
+	 * 	Disconnect from the Database
+	 */
+	protected function __disconnect()
+	{
+		$this->__connection = false;
+	}
+
+/******************************************************************************
+ *	PUBLIC MEMBERS
+ *****************************************************************************/
+
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	This method is called when the database object is created, it connects to the database by default
+	 */
+	public function __construct($connect=true)
+	{
+		//	Setup default database actions (just in case someone forgets)
+		$this->__setupDatabaseActions(array("select","insert","update","delete"));
+		$this->setFetchMethod("mysql_fetch_assoc");
+		
+		if($connect) $this->connect();
+	}
+	
+	/**
+	 * method:	getRealResultCount
+	 * 
+	 * Obtain a real row count from the previous query, if you use limit and want to know how many
+	 * a query WOULD return without the limit, you can use this method, but in the query, you need
+	 * to put SQL_CALC_FOUND_ROWS as one of the selected fields
+	 * 
+	 * returns:
+	 * 	The number of results the previous query would have returned without the limit statement, 
+	 * 	if using SQL_CALC_FOUND_ROWS in the query
+	 * 
+	 * notes:
+	 * 	-	this method uses the select result stack to store the previous query, which is assumed
+	 * 		to be the query that generated the results, but you need the real result count before you 
+	 * 		process all the results, normally, calling this method would destroy the previous query 
+	 * 		and all your results with it.
+	 */
+	public function getRealResultCount()
+	{
+		$result = $this->select("FOUND_ROWS() as num_results",1);
+		
+		return (isset($result["num_results"])) ? $result["num_results"] : false;
+	}
+	
+	public function getLastQuery()
+	{
+		return $this->__lastQuery;
+	}
+	
+	public function setFetchMethod($method)
+	{
+		if(function_exists($method)){
+			$this->fetchMethod = $method;
+		}
+	}
+	
+	public function getSearchResultHandle()
+	{
+		return $this->__selectResult;
+	}
+
+	/**
+	 * method: hasTable
+	 * 
+	 * Find out whether the connected mysql database has a table on the database given
+	 * this is useful for determining whether a database can support certain functionality
+	 * or not
+	 * 
+	 * parameters:	
+	 * 	$database	-	The database to check for the table
+	 * 	$table		-	The table to check for
+	 * 
+	 * returns:
+	 * 	A boolean true or false result, depending on the existence of the table
+	 */
+	public function hasTable($database,$table)
+	{
+		$database	=	mysql_real_escape_string($database);
+		$table		=	mysql_real_escape_string($table);
+		
+$query=<<<HAS_TABLE
+			COUNT(*) 
+		from 
+			information_schema.tables 
+		where 
+			table_schema = '$database' and table_name='$table'
+HAS_TABLE;
+
+		$result = $this->select($query,1);
+		
+		if(isset($result["COUNT(*)"])){
+			return $result["COUNT(*)"] ? true : false;
+		}
+		
+		return false;
+	}
 
 	public function setEncoding($encoding)
 	{
@@ -196,18 +247,6 @@ class Amslib_Database
 					"I can't allow you to continue<br/>".
 					"allowed encodings = <pre>".print_r($allowedEncodings,true)."</pre>");
 		}
-	}
-
-	protected function __transaction($command,$query,$numResults=0)
-	{
-		switch($command){
-			case "select":{	return $this->select($query,$numResults);	}break;
-			case "insert":{	return $this->insert($query);				}break;
-			case "update":{	return $this->update($query);				}break;
-			case "delete":{	return $this->delete($query);				}break;
-		}
-		
-		return false;
 	}
 	
 	public function getResults($numResults,$resultHandle=NULL)
@@ -228,10 +267,7 @@ class Amslib_Database
 		
 		return $this->__lastResult;
 	}
-	
-	//	Something along these lines might work
-	//	FIXME: numResult doesnt really get used or shouldnt be, it's a PHP implementation of SQL's limit command, it should be changed
-	//	FIXME: what numResult is used for, is to "optimise" out an array of arrays with only a single row returned, so perhaps it should update to reflect that
+
 	public function select($query,$numResults=0)
 	{
 		if($this->getConnectionStatus() == false) return false;
@@ -329,16 +365,6 @@ class Amslib_Database
 	}
 
 	/**
-	 * 	method:	__disconnect
-	 *
-	 * 	Disconnect from the Database
-	 */
-	protected function __disconnect()
-	{
-		$this->__connection = false;
-	}
-
-	/**
 	 * 	method:	getConnectionStatus
 	 *
 	 * 	Return the status of the database connection
@@ -351,6 +377,14 @@ class Amslib_Database
 		return $this->__connection ? true : false;
 	}
 	
+	/**
+	 * method: getConnection
+	 * 
+	 * Return the current mysql connection created when the database was connected
+	 * 
+	 * returns:
+	 * 	A mysql database connection resource, or false, if it's not yet connected or failed to connect
+	 */
 	public function getConnection()
 	{
 		return $this->__connection;
