@@ -70,7 +70,7 @@ class Amslib_Translator
 		return $this->t($key);
 	}
 
-	public function t($input,$language=NULL)
+	public function t($key,$language=NULL)
 	{
 		if(is_string($key) && isset($this->keyStore[$key])){
 			return $this->keyStore[$key];	
@@ -79,24 +79,24 @@ class Amslib_Translator
 		return $key;
 	}
 
-	public function learn($input,$translation,$database=NULL)
+	public function learn($key,$translation,$database=NULL)
 	{
-		return $this->l($key,$value);
+		return $this->l($key,$translation);
 	}
 
-	public function l($input,$translation,$database=NULL)
+	public function l($key,$translation,$database=NULL)
 	{
-		$this->keyStore[$key] = $value;
+		$this->keyStore[$key] = $translation;
 	}
 
-	public function forget($input,$database=NULL)
+	public function forget($key,$database=NULL)
 	{
-		$this->f($input,$database);
+		$this->f($key,$database);
 	}
 
-	public function f($input,$database=NULL)
+	public function f($key,$database=NULL)
 	{
-		unset($this->keyStore[$input]);
+		unset($this->keyStore[$key]);
 	}
 
 	public function getMissing()
