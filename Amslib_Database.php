@@ -20,7 +20,7 @@
  * description: A database object to centralise all interaction with a mysql databse
  * 		into a single object which nicely hides some of the annoying repetitive
  * 		aspects of a database, whilst giving you a nice candy layer to deal with instead
- * version: 2.3
+ * version: 2.4
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -66,6 +66,8 @@ class Amslib_Database
 	protected $__debug = false;
 	
 	protected $__selectResult = false;
+	
+	protected $fifoSelectResult = array();
 
 	/**
 	 * 	method:	Amslib_Database
@@ -107,15 +109,45 @@ class Amslib_Database
 	{
 		return $this->__lastInsertId;
 	}
-
+	
+	public function getLastQuery()
+	{
+		return $this->__lastQuery;
+	}
+	
 	protected function __getLastResult()
 	{
 		return $this->__lastResult;
 	}
+	
 
-	public function getLastQuery()
+	/**
+	 * method:	getRealResultCount
+	 * 
+	 * Obtain a real row count from the previous query, if you use limit and want to know how many
+	 * a query WOULD return without the limit, you can use this method, but in the query, you need
+	 * to put SQL_CALC_FOUND_ROWS as one of the selected fields
+	 * 
+	 * returns:
+	 * 	The number of results the previous query would have returned without the limit statement, 
+	 * 	if using SQL_CALC_FOUND_ROWS in the query
+	 * 
+	 * notes:
+	 * 	-	this method uses the select result stack to store the previous query, which is assumed
+	 * 		to be the query that generated the results, but you need the real result count before you 
+	 * 		process all the results, normally, calling this method would destroy the previous query 
+	 * 		and all your results with it.
+	 */
+	public function getRealResultCount()
 	{
-		return $this->__lastQuery;
+		$result = $this->select("FOUND_ROWS() as num_results",1);
+		
+		return (isset($result["num_results"])) ? $result["num_results"] : false;
+	}
+	
+	public function getSearchResultHandle()
+	{
+		return $this->__selectResult;
 	}
 	
 	public function setFetchMethod($method)
@@ -140,7 +172,7 @@ class Amslib_Database
 		if($this->__loginDetails){
 			if($c = mysql_connect($this->__loginDetails["server"],$this->__loginDetails["username"],$this->__loginDetails["password"],true))
 			{
-				if(!mysql_select_db($this->__loginDetails["database"])) $this->__disconnect();
+				if(!mysql_select_db($this->__loginDetails["database"],$c)) $this->__disconnect();
 				else{
 					$this->__connection = $c;
 				}
@@ -154,8 +186,16 @@ class Amslib_Database
 
 	public function setEncoding($encoding)
 	{
-		mysql_query("SET NAMES $encoding");
-		mysql_query("SET CHARACTER SET $encoding");
+		$allowedEncodings = array("utf8");
+		
+		if(in_array($encoding,$allowedEncodings)){
+			mysql_query("SET NAMES '$encoding'",$this->__connection);
+			mysql_query("SET CHARACTER SET $encoding",$this->__connection);
+		}else{
+			die(	"FATAL ERROR: Your encoding is wrong, this can cause database corruption.".
+					"I can't allow you to continue<br/>".
+					"allowed encodings = <pre>".print_r($allowedEncodings,true)."</pre>");
+		}
 	}
 
 	protected function __transaction($command,$query,$numResults=0)
@@ -170,12 +210,14 @@ class Amslib_Database
 		return false;
 	}
 	
-	public function getResults($numResults)
+	public function getResults($numResults,$resultHandle=NULL)
 	{
 		$this->__lastResult = array();
 		
+		if($resultHandle == NULL) $resultHandle = $this->__selectResult;
+		
 		$c = 0;
-		while($r = call_user_func($this->fetchMethod,$this->__selectResult)){
+		while($r = call_user_func($this->fetchMethod,$resultHandle)){
 			$this->__lastResult[] = $r;
 			
 			if(++$c == $numResults) break;		
@@ -186,7 +228,7 @@ class Amslib_Database
 		
 		return $this->__lastResult;
 	}
-
+	
 	//	Something along these lines might work
 	//	FIXME: numResult doesnt really get used or shouldnt be, it's a PHP implementation of SQL's limit command, it should be changed
 	//	FIXME: what numResult is used for, is to "optimise" out an array of arrays with only a single row returned, so perhaps it should update to reflect that
@@ -197,7 +239,7 @@ class Amslib_Database
 		$command = "select";
 
 		$this->__setLastQuery("$command $query");
-		$this->__selectResult = mysql_query("$command $query");
+		$this->__selectResult = mysql_query("$command $query",$this->__connection);
 		if($this->__debug) print("<pre>QUERY = '$command $query'<br/></pre>");
 
 		if($this->__selectResult && mysql_num_rows($this->__selectResult) >= 0){
@@ -216,7 +258,7 @@ class Amslib_Database
 		$command = "insert into";
 
 		$this->__setLastQuery("$command $query");
-		$result = mysql_query("$command $query");
+		$result = mysql_query("$command $query",$this->__connection);
 		if($this->__debug) print("<pre>QUERY = '$command $query'<br/></pre>");
 
 		$this->__lastInsertId = mysql_insert_id();
@@ -236,7 +278,7 @@ class Amslib_Database
 		$command = "update";
 
 		$this->__setLastQuery("$command $query");
-		$result = mysql_query("$command $query");
+		$result = mysql_query("$command $query",$this->__connection);
 		if($this->__debug) print("<pre>QUERY = '$command $query'<br/></pre>");
 
 		if($result) return mysql_affected_rows() >= 0;
@@ -253,7 +295,7 @@ class Amslib_Database
 		$command = "delete from";
 
 		$this->__setLastQuery("$command $query");
-		$result = mysql_query("$command $query");
+		$result = mysql_query("$command $query",$this->__connection);
 		if($this->__debug) print("<pre>QUERY = '$command $query'<br/></pre>");
 
 		if($result) return mysql_affected_rows();
