@@ -329,4 +329,3 @@ class Amslib
 		$_REQUEST[$parameter] = $value;
 	}
 }
-
