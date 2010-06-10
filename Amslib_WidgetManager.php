@@ -17,19 +17,18 @@
  * 
  * File: Amslib_WidgetManager.php
  * Title: Widget manager for component based development
- * Version: 2.0
+ * Version: 2.1
  * Project: amslib
  * 
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-/**
- * FIXME: move as much functionality into protected as 
- * possible, far too much is public right now
- */
 class Amslib_WidgetManager
 {
+/*******************************************************************************
+ *	PROTECTED MEMBERS
+ *******************************************************************************/
 	protected $xdoc;
 	protected $xpath;
 	
@@ -50,10 +49,12 @@ class Amslib_WidgetManager
 		if($list->length > 0){
 			$node = $list->item(0);
 			if($node){
-				Amslib::requireFile($this->getWidgetPath()."/$name/objects/{$node->nodeValue}.php");
+				Amslib::requireFile($this->widgetPath."/$name/objects/{$node->nodeValue}.php");
 				
 				if(method_exists($node->nodeValue,"getInstance")){
 					$api = call_user_func(array($node->nodeValue,"getInstance"));
+				}else{
+					die("FATAL ERROR(Amslib_WidgetManager::setAPI): Could not find the getInstance method in the API object '{$node->nodeValue}' for widget '$name'<br/>");
 				}
 			}
 		}
@@ -65,10 +66,145 @@ class Amslib_WidgetManager
 		
 		//	Set the widget manager parent
 		$api->setWidgetManager($this);
+		$api->setWidgetName($name);
 		
 		return $this->api[$name];
 	}
 	
+	protected function preparePath($path)
+	{
+		$path = "{$path}__END__";
+		//	Make sure the path doesnt end with a trailing slash
+		$path = str_replace("/__END__","",$path);
+		//	Cleanup after the attempt to detect trailing slash	
+		$path = str_replace("__END__","",$path);
+		
+		return $path;
+	}
+		
+	protected function getRelativePath($path="")
+	{	
+		//	Path is already relative
+		if(strpos($path,".") === 0) return $path;
+
+		$root = $this->documentRoot;
+		$path = str_replace($root,"",$root.$path);
+
+		return $path;
+	}
+	
+	protected function loadPackage($path,$name)
+	{
+		$xml = "$path/$name/package.xml";
+		if($p = Amslib::findPath($xml)) $xml = "$p/$xml";
+		
+		$this->xdoc = new DOMDocument('1.0', 'UTF-8');
+		if(@$this->xdoc->load($xml)){
+			$this->xdoc->preserveWhiteSpace = false;
+			$this->xpath = new DOMXPath($this->xdoc);
+			
+			return true;
+		}else{
+			print("XML FILE FAILED TO OPEN: path[$path], name[$name], xml[$xml]<br/>");
+			
+			return false;
+		}
+	}
+	
+	protected function findResource($widget,$node)
+	{
+		if($node->getAttribute("remote")) return $node->nodeValue;
+		
+		$file = $node->nodeValue;
+		$path = false;
+		
+		//	First try to find the file inside the widget itself
+		$wpath = str_replace("//","/","{$this->widgetPath}/$widget/$file");
+		//	if you found it inside the widget, use that version over any other
+		if(file_exists($wpath)) $path = $wpath;
+		
+		//	If you didn't find it, search the path
+		if($path == false){
+			//	can't find the widget, search the path instead
+			$fpath = Amslib::findPath($file);
+			
+			//	if you found it, assign it
+			if($fpath) $path = "$fpath/$file";
+		}
+		
+		//	relativise the path and reduce the double slashes to single ones.
+		return str_replace("//","/",$this->getRelativePath($path));
+	}
+	
+	protected function loadConfiguration($path,$widget)
+	{
+		$api = $this->setAPI($widget);
+		$api->setPath($path);
+		
+		$controllers = $this->xpath->query("//package/controllers/name");
+		for($a=0;$a<$controllers->length;$a++){
+			$name = $controllers->item($a)->nodeValue;
+			$api->setController($name);
+		}
+		
+		$layouts = $this->xpath->query("//package/layout/name");
+		for($a=0;$a<$layouts->length;$a++){
+			$name = $layouts->item($a)->nodeValue;
+			$api->setLayout($name);
+		}
+		
+		$views = $this->xpath->query("//package/view/name");
+		for($a=0;$a<$views->length;$a++){
+			$name = $views->item($a)->nodeValue;
+			$api->setView($name);
+		}
+		
+		$objects = $this->xpath->query("//package/object/name");
+		for($a=0;$a<$objects->length;$a++){
+			$name = $objects->item($a)->nodeValue;
+			$api->setObject($name);
+		}
+		
+		$theme = $this->xpath->query("//package/theme/name");
+		for($a=0;$a<$theme->length;$a++){
+			$name = $theme->item($a)->nodeValue;
+			$api->setTheme($name);
+		}
+		
+		//	FIXME: why are services treated differently then other parts of the MVC system?
+		$services = $this->xpath->query("//package/service/file");
+		for($a=0;$a<$services->length;$a++){
+			$name = $services->item($a)->getAttribute("name");
+			$file = $services->item($a)->nodeValue;
+			$file = $this->getRelativePath($this->widgetPath."/$widget/services/$file");
+			$api->setService($name,$file);
+		}
+		
+		$images = $this->xpath->query("//package/image/file");
+		for($a=0;$a<$images->length;$a++){
+			$name = $images->item($a)->getAttribute("name");
+			$file = $this->findResource($widget,$images->item($a));
+			$api->setImage($name,$file);
+		}
+		
+		$javascript = $this->xpath->query("//package/javascript/file");
+		for($a=0;$a<$javascript->length;$a++){
+			$name = $javascript->item($a)->getAttribute("name");
+			$file = $this->findResource($widget,$javascript->item($a));
+			$this->setJavascript($name,$file);
+		}
+		
+		$stylesheet = $this->xpath->query("//package/stylesheet/file");
+		for($a=0;$a<$stylesheet->length;$a++){
+			$name = $stylesheet->item($a)->getAttribute("name");
+			$file = $this->findResource($widget,$stylesheet->item($a));
+			$this->setStylesheet($name,$file);
+		}
+	}
+	
+/*******************************************************************************
+ *	PUBLIC METHODS
+ *******************************************************************************/
 	public function __construct()
 	{
 		//	Setup the basic system like this, it's 99% correct everytime
@@ -88,169 +224,24 @@ class Amslib_WidgetManager
 	}
 	
 	//	initialise all the required basic information
-	public function setup($widgetPath,$websitePath="")
+	public function setup($widgetPath,$websitePath=NULL)
 	{
-		$this->documentRoot =	$_SERVER["DOCUMENT_ROOT"];
-		$this->widgetPath	=	$widgetPath;	
-		$this->websitePath	=	$websitePath;
-	}
-	
-	public function getRelativePath($path="")
-	{	
-		//	Path is already relative
-		if(strpos($path,".") === 0) return $path;
-
+		//	Make sure the website path is not null, default to the server root (99% correct everytime)
+		if($websitePath == NULL) $websitePath = $_SERVER["DOCUMENT_ROOT"];
 		
-		$root = $this->getWebsitePath();
-		$path = str_replace($root,"",$root.$path);
-
-		return str_replace("//","/",$path);
-	}
-	
-	public function getWidgetPath($relative=false)
-	{
-		$root = $this->getWebsitePath();
-		$path = $this->widgetPath;
+		$this->documentRoot =	$this->preparePath($_SERVER["DOCUMENT_ROOT"]);
+		$this->widgetPath	=	$this->preparePath($widgetPath);
+		$this->websitePath	=	$this->preparePath($websitePath);
+				
+		//	Make website path into an absolute path
+		$path = $this->documentRoot.$this->websitePath;
+		$path = str_replace($this->documentRoot,"",$path);
+		$this->websitePath = $this->documentRoot.$path;
 		
-		//	Make sure widget path is relative to the website path
-		$path = str_replace($root,"",$path);
-		
-		if($relative == false){
-			$path = $root.$path;
-		}
-		
-		return str_replace("//","/",$path);
-	}
-	
-	public function getWebsitePath($relative=false)
-	{
-		$root = $this->documentRoot;
-		$path = $this->websitePath;
-		
-		//	Make sure the website path is relative to the document root
-		$path = str_replace($root,"",$path);
-		
-		if($relative == false){
-			$path = $root.$path;
-		}
-		
-		return str_replace("//","/",$path);
-	}
-	
-	public function getPackagePath($overridePath)
-	{
-		$path = $this->getWidgetPath();
-
-		//	FIXME: is_dir might fail is the path is not relative, or findable without looking at the include path
-		if(is_string($overridePath) && is_dir($overridePath)) $path = $overridePath;
-		 
-		return $path;
-	}
-	
-	public function loadPackage($path,$name)
-	{
-		$xml = "$path/$name/package.xml";
-		$xml = Amslib::findPath($xml)."/$xml";
-		
-		$this->xdoc = new DOMDocument('1.0', 'UTF-8');
-		if(@$this->xdoc->load($xml)){
-			$this->xdoc->preserveWhiteSpace = false;
-			$this->xpath = new DOMXPath($this->xdoc);
-			
-			return true;
-		}else{
-			print("XML FILE FAILED TO OPEN: '$xml'<br/>");
-			
-			return false;
-		}
-	}
-	
-	public function findResource($widget,$node)
-	{
-		if($node->getAttribute("remote")) return $node->nodeValue;
-		
-		$file = $node->nodeValue;
-		$path = false;
-		
-		//	First try to find the file inside the widget itself
-		$wpath = str_replace("//","/",$this->getWidgetPath()."/$widget/$file");
-		//	if you found it inside the widget, use that version over any other
-		if(file_exists($wpath)) $path = $wpath;
-		
-		//	If you didn't find it, search the path
-		if($path == false){
-			//	can't find the widget, search the path instead
-			$fpath = Amslib::findPath($file);
-			
-			//	if you found it, assign it
-			if($fpath) $path = "$fpath/$file";
-		}
-		
-		//	relativise the path and reduce the double slashes to single ones.
-		return str_replace("//","/",$this->getRelativePath($path));
-	}
-	
-	public function loadConfiguration($path,$widget)
-	{
-		$api = $this->setAPI($widget);
-		$api->setPath($path);
-		
-		$controllers = $this->xpath->query("//package/controllers/name");
-		for($a=0;$a<$controllers->length;$a++){
-			$name	=	$controllers->item($a)->nodeValue;
-			$file	=	$this->getWidgetPath()."/$widget/controllers/Ct_{$name}.php";
-			$api->setController($name,$file);
-		}
-		
-		$layouts = $this->xpath->query("//package/layout/name");
-		for($a=0;$a<$layouts->length;$a++){
-			$name	=	$layouts->item($a)->nodeValue;
-			$file	=	$this->getWidgetPath()."/$widget/layouts/La_{$name}.php";
-			$api->setLayout($name,$file);
-		}
-		
-		$views = $this->xpath->query("//package/view/name");
-		for($a=0;$a<$views->length;$a++){
-			$name	=	$views->item($a)->nodeValue;
-			$file	=	$this->getWidgetPath()."/$widget/views/Vi_{$name}.php";
-			$api->setView($name,$file);
-		}
-		
-		$objects = $this->xpath->query("//package/object/name");
-		for($a=0;$a<$objects->length;$a++){
-			$name	=	$objects->item($a)->nodeValue;
-			$file	=	$this->getWidgetPath()."/$widget/objects/$name.php";
-			$api->setObject($name,$file);
-		}
-		
-		$services = $this->xpath->query("//package/service/file");
-		for($a=0;$a<$services->length;$a++){
-			$name	=	$services->item($a)->getAttribute("name");
-			$file	=	$services->item($a)->nodeValue;
-			$file	=	$this->getWidgetPath(true)."/$widget/services/$file";
-			$api->setService($name,$file);
-		}
-		
-		$images = $this->xpath->query("//package/image/file");
-		for($a=0;$a<$images->length;$a++){
-			$name	=	$images->item($a)->getAttribute("name");
-			$file	=	$this->findResource($widget,$images->item($a));
-			$api->setImage($name,$file);
-		}
-		
-		$javascript = $this->xpath->query("//package/javascript/file");
-		for($a=0;$a<$javascript->length;$a++){
-			$name	=	$javascript->item($a)->getAttribute("name");
-			$file	=	$this->findResource($widget,$javascript->item($a));
-			$this->setJavascript($name,$file);
-		}
-		
-		$stylesheet = $this->xpath->query("//package/stylesheet/file");
-		for($a=0;$a<$stylesheet->length;$a++){
-			$name	=	$stylesheet->item($a)->getAttribute("name");
-			$file	=	$this->findResource($widget,$stylesheet->item($a));
-			$this->setStylesheet($name,$file);
-		}
+		//	Make widgetPath into an absolute path
+		$path = $this->documentRoot.$this->widgetPath;
+		$path = str_replace($this->documentRoot,"",$path);
+		$this->widgetPath = $this->documentRoot.$path;
 	}
 	
 	public function getAPI($name)
@@ -258,17 +249,46 @@ class Amslib_WidgetManager
 		return $this->api[$name];
 	}
 	
-	public function load($name,$overridePath=NULL)
+	/**
+	 * method: overrideAPI
+	 * 
+	 * A way to provide a custom API object that deals with your application specific
+	 * layer and perhaps provides a customised way to deal with the widget in question
+	 * and your qpplication.
+	 * 
+	 * parameters:
+	 * 	$name	-	The name of the widget being overriden
+	 * 	$api	-	An object which is to be used to override the default widget api
+	 * 
+	 * example:
+	 *		require_once("CustomApp_Amstudios_Message_List.php");
+	 *		class CustomApp_Amstudios_Message_List extends Amstudios_Message_List{}
+	 *		$api = CustomApp_Amstudios_Message_List::getInstance();
+	 *		$api->setValue("key","value");
+	 *		$widgetManager->overrideAPI("amstudios_message_list",$api);
+	 *		$widgetManager->render("amstudios_message_list");
+	 */
+	public function overrideAPI($name,$api)
+	{
+		$this->api[$name] = $api;
+	}
+	
+	public function load($name)
 	{
 		if(is_array($name)){
 			foreach($name as $w) $this->load($w);
 		}else{
-			$path = $this->getPackagePath($overridePath);
+			$path = $this->widgetPath;
 
 			if($this->loadPackage($path,$name)){
 				$this->loadConfiguration($path,$name);
 			}
 		}
+	}
+	
+	public function getWidgetPath()
+	{
+		return $this->widgetPath;
 	}
 	
 	public function setStylesheet($name,$file)
