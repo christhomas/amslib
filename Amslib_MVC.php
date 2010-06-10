@@ -16,8 +16,25 @@ class Amslib_MVC
 	protected $images;
 	protected $service;
 	protected $value;
+	protected $hidden;
+	
+	//	MVC Configuration
+	protected $controllerDir	=	"controllers";
+	protected $controllerPrefix	=	"Ct_";
+	protected $layoutDir		=	"layouts";
+	protected $layoutPrefix		=	"La_";	
+	protected $viewDir			=	"views";
+	protected $viewPrefix		=	"Vi_";
+	protected $themeDir			=	"themes";
+	protected $themePrefix		=	"Th_";
+	protected $objectDir		=	"objects";
+	protected $objectPrefix		=	"";
+	protected $serviceDir		=	"services";
+	protected $servicePrefix	=	"Sv_";
 	
 	protected $widgetManager;
+	protected $widgetName;
+	protected $widgetPath;
 	
 	protected function initialise(){}
 	
@@ -31,6 +48,43 @@ class Amslib_MVC
 		$this->service			=	array();
 		$this->value			=	array();
 		$this->widgetManager	=	NULL;
+		$this->widgetPath		=	NULL;
+		$this->widgetName		=	NULL;
+	}
+	
+	public function setupMVC($type,$dir,$prefix)
+	{
+		switch($type){
+			case "controllers":{
+				$this->controllerDir	=	$dir;
+				$this->controllerPrefix	=	$prefix;
+			}break;
+			
+			case "layouts":{
+				$this->layoutDir		=	$dir;
+				$this->layoutPrefix		=	$prefix;
+			}break;
+			
+			case "views":{
+				$this->viewDir			=	$dir;
+				$this->viewPrefix		=	$prefix;
+			}break;
+			
+			case "themes":{
+				$this->themeDir			=	$dir;
+				$this->themePrefix		=	$prefix;
+			}
+			
+			case "objects":{
+				$this->objectDir		=	$dir;
+				$this->objectPrefix		=	$prefix;
+			}break;
+			
+			case "services":{
+				$this->serviceDir		=	$dir;
+				$this->servicePrefix	=	$prefix;
+			}break;
+		}
 	}
 	
 	public function setDatabase($database)
@@ -40,7 +94,8 @@ class Amslib_MVC
 	
 	public function setWidgetManager($widgetManager)
 	{
-		$this->widgetManager = $widgetManager;
+		$this->widgetManager	=	$widgetManager;
+		$this->widgetPath		=	$widgetManager->getWidgetPath();
 		
 		$this->initialise();
 	}
@@ -50,13 +105,21 @@ class Amslib_MVC
 		return $this->widgetManager;
 	}
 	
+	public function setWidgetName($name)
+	{
+		$this->widgetName	=	$name;
+		$this->widgetPath	=	"{$this->widgetPath}/{$this->widgetName}";
+	}
+	
 	public function setPath($path)
 	{
+		//	NOTE: What is this for?
 		$this->path = $path;
 	}
 	
 	public function getPath()
 	{
+		//	NOTE: What is this for?
 		return $this->path;
 	}
 	
@@ -70,8 +133,12 @@ class Amslib_MVC
 		return (isset($this->value[$name])) ? $this->value[$name] : NULL;	
 	}
 	
-	public function setController($name,$file)
+	public function setController($name,$file=NULL)
 	{
+		if($file === NULL){
+			$file = "{$this->widgetPath}/{$this->controllerDir}/{$this->controllerPrefix}{$name}.php";
+		}
+		
 		$this->controllers[$name] = $file;
 	}
 	
@@ -80,8 +147,12 @@ class Amslib_MVC
 		return $this->controllers[$name];
 	}
 	
-	public function setLayout($name,$file)
+	public function setLayout($name,$file=NULL)
 	{
+		if($file === NULL){
+			$file = "{$this->widgetPath}/{$this->layoutDir}/{$this->layoutPrefix}{$name}.php";
+		}
+
 		$this->layout[$name] = $file;
 	}
 	
@@ -92,8 +163,12 @@ class Amslib_MVC
 		return $this->layout;
 	}
 	
-	public function setObject($name,$file)
+	public function setObject($name,$file=NULL)
 	{
+		if($file === NULL){
+			$file = "{$this->widgetPath}/{$this->objectDir}/{$this->objectPrefix}{$name}.php";
+		}
+		
 		$this->object[$name] = $file;
 	}
 	
@@ -114,11 +189,27 @@ class Amslib_MVC
 	public function setService($name,$file)
 	{
 		$this->service[$name] = $file;
+		
+		//	Set this as a service url for the javascript to acquire
+		$this->hidden["service:$name"] = $file;
 	}
 	
 	public function getService($name)
 	{
 		return (isset($this->service[$name])) ? $this->service[$name] : false;
+	}
+	
+	public function getHiddenParameters()
+	{
+		$list = "";
+		
+		foreach($this->hidden as $k=>$v){
+			if(is_bool($v)) $v = ($v) ? "true" : "false";
+			
+			$list.="<input type='hidden' name='$k' value='$v' />";
+		}
+		
+		return "<div class='widget_parameters'>$list</div>";
 	}
 	
 	public function copyService($src,$name,$copyAs=NULL)
@@ -139,8 +230,12 @@ class Amslib_MVC
 		return (isset($this->images[$name])) ? $this->images[$name] : false;
 	}
 	
-	public function setView($name,$file)
+	public function setView($name,$file=NULL)
 	{
+		if($file === NULL){
+			$file = "{$this->widgetPath}/{$this->viewDir}/{$this->viewPrefix}{$name}.php";
+		}
+		
 		$this->view[$name] = $file;
 	}
 	
@@ -168,6 +263,9 @@ class Amslib_MVC
 	 * 
 	 * returns:
 	 * 	A string of HTML or empty string which represents the first layout
+	 * 
+	 * notes:
+	 * 	we only render the first layout in the widget, what happens if there are 10 layouts?
 	 */
 	public function render($parameters=array())
 	{
@@ -179,5 +277,12 @@ class Amslib_MVC
 		ob_start();
 		Amslib::requireFile($layout,$parameters);
 		return ob_get_clean();
+	}
+	
+	public function replyJSON($response)
+	{
+		header("Content-Type: application/json");
+		$response = json_encode($response);
+		die($response);
 	}
 }
