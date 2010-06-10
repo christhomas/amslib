@@ -85,23 +85,33 @@ class Amslib
 	function findPath($file)
 	{
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
-		
+
 		foreach($includePath as $p){
 			$test = (strpos($file,"/") !== 0) ? "$p/$file" : "{$p}{$file}";
 			if(@file_exists($test)) return $p;
 		}
-		
+
 		return false;
 	}
-		
-	//	DEPRECATED: use includeFile instead
-	function include_file($file,$showError=false){ return self::includeFile($file,$showError); }
-	
-	function includeFile($file,$showError=false)
+
+	function includeFile($file,$data=array())
 	{
-		$p = self::findPath($file);
+		$path = "";
 		
-		if($p !== false) return include("$p/$file");
+		if(!file_exists($file)){
+			$path = self::findPath($file);
+
+			if($path !== false && strlen($path)) $path = "$path/";
+		}
+		
+		$file = "{$path}$file";
+		
+		if(is_file($file) && file_exists($file)){
+			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
+			include($file);
+			
+			return true;
+		}
 		
 		return false;
 	}
@@ -120,7 +130,9 @@ class Amslib
 		
 		if(is_file($file) && file_exists($file)){
 			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
-			require($file);
+			
+			if(isset($data["require_once"])) require_once($file);
+			else require($file);
 			
 			return true;
 		}
