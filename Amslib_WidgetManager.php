@@ -17,7 +17,7 @@
  * 
  * File: Amslib_WidgetManager.php
  * Title: Widget manager for component based development
- * Version: 2.1
+ * Version: 2.2
  * Project: amslib
  * 
  * Contributors/Author:
@@ -81,18 +81,7 @@ class Amslib_WidgetManager
 		
 		return $path;
 	}
-		
-	protected function getRelativePath($path="")
-	{	
-		//	Path is already relative
-		if(strpos($path,".") === 0) return $path;
 
-		$root = $this->documentRoot;
-		$path = str_replace($root,"",$root.$path);
-
-		return $path;
-	}
-	
 	protected function loadPackage($path,$name)
 	{
 		$xml = "$path/$name/package.xml";
@@ -290,6 +279,18 @@ class Amslib_WidgetManager
 	{
 		return $this->widgetPath;
 	}
+	
+	public function getRelativePath($path="")
+	{	
+		//	Path is already relative
+		if(strpos($path,".") === 0) return $path;
+
+		$root = $this->documentRoot;
+		$path = str_replace($root,"",$root.$path);
+
+		return $path;
+	}
+	
 	
 	public function setStylesheet($name,$file)
 	{

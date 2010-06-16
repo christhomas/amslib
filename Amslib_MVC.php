@@ -13,6 +13,7 @@ class Amslib_MVC
 	protected $layout;
 	protected $object;
 	protected $view;
+	protected $theme;
 	protected $images;
 	protected $service;
 	protected $value;
@@ -47,6 +48,7 @@ class Amslib_MVC
 		$this->view				=	array();
 		$this->service			=	array();
 		$this->value			=	array();
+		$this->theme			=	array();
 		$this->widgetManager	=	NULL;
 		$this->widgetPath		=	NULL;
 		$this->widgetName		=	NULL;
@@ -252,6 +254,31 @@ class Amslib_MVC
 			return ob_get_clean();
 		}
 		
+		return "";
+	}
+	
+	public function setTheme($name,$file=NULL)
+	{
+		if($file === NULL){
+			$file = "{$this->widgetPath}/{$this->themeDir}/{$this->themePrefix}{$name}.php";
+		}
+		
+		$this->theme[$name] = $file;
+	}
+	
+	public function decorate($theme,$parameters)
+	{
+		if(isset($this->theme[$theme])){
+			$theme = $this->theme[$theme];
+
+			$parameters["widget_manager"]	=	$this->widgetManager;
+			$parameters["api"]				=	$this;
+				
+			ob_start();
+			Amslib::requireFile($theme,$parameters);
+			return ob_get_clean();
+		}
+				
 		return "";
 	}
 	
