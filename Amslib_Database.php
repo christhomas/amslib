@@ -41,22 +41,14 @@
 class Amslib_Database
 {
 /******************************************************************************
- *	PROTECTED MEMBERS
+ *	PRIVATE MEMBERS
+ *
+ *	These members are for private use only, if you have to use
+ *	them yourself in the higher layers, maybe it's because you're DOING_IT_WRONG
+ *
+ *	NOTE: they are not converted to private yet because they are being
+ *	explored for possible problems
  *****************************************************************************/
-	
-	protected $__loginDetails;
-
-	/**
-	 * 	boolean: __connection
-	 *
-	 * 	Boolean true or false value, which gets updated when the server login is attempted
-	 *
-	 * 	values:
-	 * 		true	-	The database connected successfully
-	 * 		false	-	The database failed to connect
-	 */
-	protected $__connection = false;
-
 	protected $__dbAction = array();
 
 	protected $__lastResult = array();
@@ -70,8 +62,39 @@ class Amslib_Database
 	protected $__debug = false;
 	
 	protected $__selectResult = false;
+	
+/******************************************************************************
+ *	PROTECTED MEMBERS
+ *****************************************************************************/
+	
+	/**
+	 * 	array: $__loginDetails
+	 * 
+	 * 	An array of login data which contains the values that you want to connect with
+	 * 
+	 * 	values:
+	 * 		server		-	string(url:port)
+	 * 		username	-	string
+	 * 		password	-	string
+	 * 		database	-	string
+	 */
+	protected $__loginDetails;
 
-	protected function __setupLoginDetails()
+	/**
+	 * 	boolean: __connection
+	 *
+	 * 	Boolean true or false value, which gets updated when the server login is attempted
+	 *
+	 * 	values:
+	 * 		true	-	The database connected successfully
+	 * 		false	-	The database failed to connect
+	 */
+	protected $__connection = false;
+
+
+	//	DEPRECATED: use getDatabaseLogin
+	protected function __setupLoginDetails(){ return $this->getDatabaseLogin(); }
+	protected function getDatabaseLogin()
 	{
 		Amslib::include_file($this->__dbFile);
 		$this->__loginDetails = getDatabaseAccess();
