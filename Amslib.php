@@ -146,32 +146,30 @@ class Amslib
 	{
 		//	Only register it once.
 		if(function_exists("amslib_autoload")) return;
+		self::addIncludePath(dirname(__FILE__));
 
 		function amslib_autoload($class_name)
 		{
 			if($class_name == __CLASS__) return false;
 
-			$path = dirname(__FILE__);
-
 			//	Special case for the FirePHP library
 			if($class_name == "FirePHP"){
-				$path		=	"$path/util/FirePHPCore";
-				$class_name	=	"$class_name.class";
+				$class_name	=	"util/FirePHPCore/$class_name.class";
 			}
 
 			//	Redirect to include the correct path for the translator system
 			if(strpos($class_name,"Amslib_Translator") !== false){
-				$path		=	"$path/translator/";
+				$class_name	=	"translator/$class_name";
 			}
 
 			//	Redirect to include the correct path for the router system
 			if(strpos($class_name,"Amslib_Router") !== false){
-				$path		=	"$path/router/";
+				$class_name	=	"router/$class_name";
 			}
 
-			$file = "$path/$class_name.php";
+			$class_name = str_replace("//","/","$class_name.php");
 
-			return Amslib::requireFile($file);
+			return Amslib::requireFile($class_name);
 		}
 
 		//	register a special autoloader that will include correctly all of the amslib classes
