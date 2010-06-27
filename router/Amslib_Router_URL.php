@@ -47,9 +47,4 @@ class Amslib_Router_URL
 	{
 		return self::getRoute("Home");
 	}
-
-	public static function Error_404()
-	{
-		return self::getRoute("ERROR","404");
-	}
 }
