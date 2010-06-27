@@ -1,0 +1,12 @@
+#Wed May 12 14:53:09 CEST 2010
+Create\ Empty\ Directories=true
+Password=FUB23H
+Recurse\ Subdirectories=true
+Save\ Password=true
+Site\ Root=/
+Username=amslib@gastraum.de
+eclipse.preferences.version=1
+port=21
+protocol=1
+server=gastraum.com
+timeout=30
