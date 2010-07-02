@@ -11,13 +11,26 @@ class Amslib_Filesystem
 		$phpself	=	str_replace("/","\\",$_SERVER["PHP_SELF"]);
 		//	delete from script filename, the php self, which should reveal the base directory
 		$root		=	str_replace($phpself,"",$_SERVER["SCRIPT_FILENAME"]);
+
+		return self::removeWindowsDrive($root);
+	}
+
+	static public function removeWindowsDrive($location)
+	{
 		//	explode on the windows path separator,
 		//	shift off the first element (the drive symbols)
 		//	then re-implode it on the unix path separator
-		$root		=	explode("\\",$root);
-		array_shift($root);
-		$root = "/".implode("/",$root);
+		$location		=	explode(DIRECTORY_SEPARATOR,$location);
+		array_shift($location);
+		$location = "/".implode("/",$location);
 		//	we should now have the root
-		return $root;
+		return $location;
+	}
+
+	static public function dirname($location)
+	{
+		$dirname = dirname($location);
+
+		return (strpos($dirname,":") !== false) ? self::removeWindowsDrive($dirname) : $dirname;
 	}
 }
