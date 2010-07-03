@@ -146,7 +146,10 @@ class Amslib
 	{
 		//	Only register it once.
 		if(function_exists("amslib_autoload")) return;
+		//	add the amslib directory and it's parent to the include path
+		//	99.9999% of times, you want this to happen, so I just make it default
 		self::addIncludePath(dirname(__FILE__));
+		self::addIncludePath(dirname(dirname(__FILE__)));
 
 		function amslib_autoload($class_name)
 		{
