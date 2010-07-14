@@ -1,4 +1,29 @@
 <?php
+/*******************************************************************************
+ * Copyright (c) {15/03/2008} {Christopher Thomas}
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * File: Amslib_Image.php
+ * Title: Amslib Image manipulation object
+ * Version: 1.2
+ * Project: Amslib (antimatter studios library)
+ *
+ * Contributors/Author:
+ *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *******************************************************************************/
+
 class Amslib_Image
 {
 	protected $images;
@@ -32,7 +57,7 @@ class Amslib_Image
 		return false;
 	}
 
-	protected function testWriteLocation($destination)
+	protected function testWriteLocation($destination,$overwrite=false)
 	{
 		$directory = dirname($destination);
 
@@ -41,7 +66,7 @@ class Amslib_Image
 			return false;
 		}
 
-		if(file_exists($destination)){
+		if($overwrite == false && file_exists($destination)){
 			$this->setError(self::ERROR_WRITE_FILE_EXIST);
 			return false;
 		}
@@ -54,34 +79,10 @@ class Amslib_Image
 		return $d3 * ($d1 / $d2);
 	}
 
-	public function __construct()
+	protected function getFromCache($parameters)
 	{
-		if(!function_exists('imagecreatetruecolor')) {
-			$this->setError(self::ERROR_PHPGD_NOT_FOUND);
-		}
-
-		$this->cache		=	false;
-		$this->images		=	array();
-		$this->allowedTypes	=	array("jpeg","jpg","gif","png");
-	}
-
-	public function enableCache($location)
-	{
-		$this->cache = $this->getAbsoluteLocation($location);
-	}
-
-	public function clearCache()
-	{
-		$files = glob("$location/*");
-
-		foreach($files as $f){
-			//	Just in case someone managed to write a file with .. in it (back directory)
-			@unlink(str_replace("..","",$f));
-		}
-	}
-
-	public function getFromCache($parameters)
-	{
+		if(is_string($parameters)) $parameters = array("image"=>$parameters);
+		
 		//	If caching is disabled, or the source file is not found, return false
 		if(!$this->cache) return false;
 		if(!isset($parameters["image"])) return false;
@@ -103,22 +104,50 @@ class Amslib_Image
 		return false;
 	}
 
-	public function getCacheFilename($filename)
+	protected function getCacheFilename($filename)
 	{
 		return str_replace("//","/",$this->cache."/".$filename);
 	}
 
-	public function getAbsoluteLocation($filename)
+	protected function validExtension($filename)
 	{
-		$root		=	Amslib_Filesystem::documentRoot();
-		$filename	=	str_replace($root,"",$filename);
-		return str_replace("//","/","$root/$filename");
+		$extension = strtolower(end(explode(".",$filename)));
+		return (in_array($extension,$this->allowedTypes)) ? $extension : false;
+	}
+	
+	public function __construct()
+	{
+		if(!function_exists('imagecreatetruecolor')) {
+			$this->setError(self::ERROR_PHPGD_NOT_FOUND);
+		}
+
+		$this->cache		=	false;
+		$this->images		=	array();
+		$this->allowedTypes	=	array("jpeg","jpg","gif","png");
+	}
+
+	public function enableCache($location)
+	{
+		$this->cache = Amslib_Filesystem::absolute($location);
+	}
+
+	public function clearCache()
+	{
+		$files = glob("$location/*");
+
+		foreach($files as $f){
+			//	Just in case someone managed to write a file with .. in it (back directory)
+			@unlink(str_replace("..","",$f));
+		}
 	}
 
 	public function create($parameters,$overwrite=false)
 	{
+		//	If a filename is passed as a string, make it an array, just to keep the logic simple
+		if(is_string($parameters)) $parameters = array("image"=>$parameters);
+		
 		//	Make the path absolute and obtain a unique name for this requested file
-		$parameters["image"]	=	$this->getAbsoluteLocation($parameters["image"]);
+		$parameters["image"]	=	Amslib_Filesystem::absolute($parameters["image"]);
 		//	Get the extension for this file
 		$extension				=	end(explode(".",strtolower($parameters["image"])));
 		$uniqueName				=	sha1(http_build_query($parameters)).".$extension";
@@ -137,7 +166,8 @@ class Amslib_Image
 		if($overwrite == false && isset($this->images[$filename])) return false;
 
 		//	Check the extension is valid and the file exists on disk
-		if(in_array($extension,$this->allowedTypes))
+		$extension = $this->validExtension($parameters["image"]);
+		if($extension)
 		{
 			$handle = false;
 
@@ -225,6 +255,11 @@ class Amslib_Image
 
 		return $filename;
 	}
+	
+	public function cropArea($filename,$x,$y,$width,$height)
+	{
+		return $this->crop($filename,$x,$y,0,0,$width,$height,$width,$height);	
+	}
 
 	public function crop($filename,$sx,$sy,$dx,$dy,$sw,$sh,$dw,$dh)
 	{
@@ -290,10 +325,10 @@ class Amslib_Image
 
 		$image	=	$this->images[$filename];
 
-		$width	=	$image["width"]*$scale/100;
-		$height	=	$image["height"]*$scale/100;
+		$width	=	($image["width"]*$scale)/100;
+		$height	=	($image["height"]*$scale)/100;
 
-		return $this->resize($width,$height);
+		return $this->resize($filename,$width,$height);
 	}
 
 	public function getDimensions($filename)
@@ -317,8 +352,8 @@ class Amslib_Image
 		if($image["cache"]) return true;
 
 		//	Grab the extension and test whether it's valid or not
-		$extension = end(explode(".",$image["file"]));
-		if(in_array($extension,$this->allowedTypes))
+		$extension = $this->validExtension($image["file"]);
+		if($extension)
 		{
 			//	If cache is enabled, set the output to be a file
 			$destination = $this->getCacheFilename($filename);
@@ -348,12 +383,12 @@ class Amslib_Image
 		if($image["cache"]){
 			readfile($filename);
 
-			return true;
+			return $filename;
 		}
 
 		//	Grab the extension and test whether it's valid or not
-		$extension = end(explode(".",$image["file"]));
-		if(in_array($extension,$this->allowedTypes))
+		$extension = $this->validExtension($image["file"]);
+		if($extension)
 		{
 			//	If cache is enabled, set the output to be a file
 			$destination = ($this->cache) ? $this->getCacheFilename($filename) : NULL;
@@ -371,7 +406,8 @@ class Amslib_Image
 				readfile($destination);
 			}
 
-			return true;
+			//	FIXME: Should I return filename or destination here??
+			return $filename;
 		}
 
 		$this->setError(self::ERROR_FILE_EXTENSION_INVALID);
@@ -379,13 +415,13 @@ class Amslib_Image
 		return false;
 	}
 
-	public function writeToDisk($filename,$destination)
+	public function writeToDisk($filename,$destination,$overwrite=false)
 	{
 		if(!isset($this->images[$filename])) return false;
 
 		$image = $this->images[$filename];
 
-		$destination = $this->testWriteLocation($destination);
+		$destination = $this->testWriteLocation($destination,$overwrite);
 		if(!$destination) return false;
 
 		//	Image is cached, just copy it to the new location
@@ -393,12 +429,13 @@ class Amslib_Image
 			copy($filename,$destination);
 			chmod($destination,0777);
 
-			return true;
+			//	FIXME: Should I return filename or destination here??
+			return $filename;
 		}
 
 		//	Grab the extension and test whether it's valid or not
-		$extension = end(explode(".",$destination));
-		if(in_array($extension,$this->allowedTypes)){
+		$extension = $this->validExtension($destination);
+		if($extension){
 			switch($extension){
 				case "jpeg":
 				case "jpg":{	imagejpeg($image["handle"],$destination);		}break;
@@ -416,8 +453,8 @@ class Amslib_Image
 					copy($destination,$cacheName);
 					chmod($cacheName,0777);
 				}
-
-				return true;
+				
+				return $destination;
 			}
 		}
 
