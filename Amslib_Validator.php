@@ -33,7 +33,9 @@
  * 	-	OPTIONS: DELEGATED -> This means that one validation method has called a more generic validation method
  * 		to perform common validation, but does not wish that method to set the validData, because the delegated
  * 		method is not responsible for this, an example would be the __alpha method using __text to validate it's
- * 		a valid text string first, THEN using it's extended validation methods to determine whether it's alphabetical or not
+ * 		a valid text string first, THEN using it's extended validation methods to determine whether it's 
+ * 		alphabetical or not, the __text method can succeed or fail, but the __alpha method is what determines
+ * 		whether the value passes validation
  *
  * future improvements
  * 	-	Add a url validator method perhaps?
@@ -101,6 +103,7 @@ class Amslib_Validator
 	 * return false
 	 */
 	var $__areRequiredRules;
+	var $__hasRequiredRules; // maybe a potentially better name?
 
 	/**
 	 * method:	Amslib_Validator
