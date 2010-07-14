@@ -33,4 +33,20 @@ class Amslib_Filesystem
 
 		return (strpos($dirname,":") !== false) ? self::removeWindowsDrive($dirname) : $dirname;
 	}
+	
+	static public function absolute($filename)
+	{
+		$docroot	=	self::documentRoot();
+		$filename	=	str_replace($docroot,"",$filename);
+		
+		return str_replace("//","/",$docroot.$filename);
+	}
+	
+	static public function relative($filename)
+	{
+		$docroot	=	self::documentRoot();
+		$filename	=	str_replace($docroot,"",$filename);
+
+		return str_replace("//","/",$filename);
+	}
 }

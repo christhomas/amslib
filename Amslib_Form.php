@@ -20,4 +20,19 @@ class Amslib_Form
 		
 		return $options;
 	}
+	
+	static public function getFilename($name)
+	{
+		$file = Amslib::filesParam($name);
+		Amslib_FirePHP::output("getFilename",$file);
+		
+		return ($file && isset($file["name"])) ? $file["name"] : false;
+	}
+	
+	static public function getTempFilename($name)
+	{
+		$file = Amslib::filesParam($name);
+		
+		return ($file && isset($file["tmp_name"])) ? $file["tmp_name"] : false;
+	}
 }
