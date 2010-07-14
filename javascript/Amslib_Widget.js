@@ -6,7 +6,10 @@ var Amslib_Widget = Class.create(
 	
 	initialize: function(selector)
 	{
-		this.mainWidget = $(document.body).down(selector);
+		//	Try first to just pass it through prototype, then if fails, use as a selector
+		this.mainWidget = $(selector);
+		if(!selector) this.mainWidget = $(document.body).down(selector);
+		
 		this.readParameters();
 	},
 
