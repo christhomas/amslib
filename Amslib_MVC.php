@@ -1,4 +1,29 @@
-<?php 
+<?php
+/*******************************************************************************
+ * Copyright (c) {15/03/2008} {Christopher Thomas}
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * File: Amslib_MVC.php
+ * Title: Model/View/Controller implementation for use with Amslib projects
+ * Version: 2.0
+ * Project: amslib
+ *
+ * Contributors/Author:
+ *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *******************************************************************************/
+ 
 class Amslib_MVC
 {
 	/*********************************
@@ -17,7 +42,6 @@ class Amslib_MVC
 	protected $images;
 	protected $service;
 	protected $value;
-	protected $hidden;
 	
 	//	MVC Configuration
 	protected $controllerDir	=	"controllers";
@@ -43,7 +67,7 @@ class Amslib_MVC
 	{
 		$this->path				=	"";
 		$this->controller		=	array();
-		$this->layout			=	array();
+		$this->layout			=	array("default"=>false);
 		$this->object			=	array();
 		$this->view				=	array();
 		$this->service			=	array();
@@ -135,116 +159,112 @@ class Amslib_MVC
 		return (isset($this->value[$name])) ? $this->value[$name] : NULL;	
 	}
 	
-	public function setController($name,$file=NULL)
+	public function setController($id,$name)
 	{
-		if($file === NULL){
-			$file = "{$this->widgetPath}/{$this->controllerDir}/{$this->controllerPrefix}{$name}.php";
-		}
+		$file = "{$this->widgetPath}/{$this->controllerDir}/{$this->controllerPrefix}{$name}.php";
 		
-		$this->controllers[$name] = $file;
+		$this->controllers[$id] = $file;
 	}
 	
-	public function getController($name)
+	public function getController($id)
 	{
-		return $this->controllers[$name];
+		return $this->controllers[$id];
 	}
 	
-	public function setLayout($name,$file=NULL)
+	public function setLayout($id,$name)
 	{
-		if($file === NULL){
-			$file = "{$this->widgetPath}/{$this->layoutDir}/{$this->layoutPrefix}{$name}.php";
-		}
+		$file = "{$this->widgetPath}/{$this->layoutDir}/{$this->layoutPrefix}{$name}.php";
 
-		$this->layout[$name] = $file;
+		$this->layout[$id] = $file;
+		
+		if($this->layout["default"] == false) $this->layout["default"] = $this->layout[$id];
 	}
 	
-	public function getLayout($name=NULL)
+	public function getLayout($id=NULL)
 	{
-		if($name && isset($this->layout[$name])) return $this->layout[$name];
+		if($id && isset($this->layout[$id])) return $this->layout[$id];
 		
 		return $this->layout;
 	}
 	
-	public function setObject($name,$file=NULL)
+	public function setObject($id,$name)
 	{
-		if($file === NULL){
-			$file = "{$this->widgetPath}/{$this->objectDir}/{$this->objectPrefix}{$name}.php";
-		}
-		
-		$this->object[$name] = $file;
+		$file = "{$this->widgetPath}/{$this->objectDir}/{$this->objectPrefix}{$name}.php";
+				
+		$this->object[$id] = $file;
 	}
 	
-	public function getObject($name,$singleton=false)
+	public function getObject($id,$singleton=false)
 	{
-		if(isset($this->object[$name]) && Amslib::requireFile($this->object[$name]))
+		if(isset($this->object[$id]) && Amslib::requireFile($this->object[$id]))
 		{
 			if($singleton){
-				return call_user_func(array($name,"getInstance"));
+				return call_user_func(array($id,"getInstance"));
 			}
 			
-			return new $name;
+			return new $id;
 		}
 		
 		return false;
 	}
 	
-	public function setService($name,$file)
+	public function setService($id,$file)
 	{
-		$this->service[$name] = $file;
+		$this->service[$id] = $file;
 		
 		//	Set this as a service url for the javascript to acquire
-		$this->hidden["service:$name"] = $file;
+		$this->setValue("service:$id", $file);
 	}
 	
-	public function getService($name)
+	public function getService($id)
 	{
-		return (isset($this->service[$name])) ? $this->service[$name] : false;
+		return (isset($this->service[$id])) ? $this->service[$id] : false;
 	}
 	
 	public function getHiddenParameters()
 	{
-		$list = "";
+		 $list = "";
 		
-		foreach($this->hidden as $k=>$v){
+		foreach($this->value as $k=>$v){
 			if(is_bool($v)) $v = ($v) ? "true" : "false";
 			
-			$list.="<input type='hidden' name='$k' value='$v' />";
+			$list.="<input type=\"hidden\" name=\"$k\" value=\"$v\" />";
 		}
 		
 		return "<div class='widget_parameters'>$list</div>";
 	}
 	
-	public function copyService($src,$name,$copyAs=NULL)
+	public function copyService($src,$id,$copyAs=NULL)
 	{
-		if($copyAs === NULL) $copyAs = $name;
+		if($copyAs === NULL) $copyAs = $id;
 		
 		$api = $this->widgetManager->getAPI($src);
-		$this->setService($copyAs,$api->getService($name));
+		$this->setService($copyAs,$api->getService($id));
 	}
 	
-	public function setImage($name,$file)
+	public function setImage($id,$file)
 	{
-		$this->images[$name] = $file;
+		$this->images[$id] = $file;
 	}
 	
-	public function getImage($name)
+	public function getImage($id)
 	{
-		return (isset($this->images[$name])) ? $this->images[$name] : false;
+		return (isset($this->images[$id])) ? $this->images[$id] : false;
 	}
 	
-	public function setView($name,$file=NULL)
+	public function setView($id,$name)
 	{
-		if($file === NULL){
-			$file = "{$this->widgetPath}/{$this->viewDir}/{$this->viewPrefix}{$name}.php";
-		}
+		$file = "{$this->widgetPath}/{$this->viewDir}/{$this->viewPrefix}{$name}.php";
 		
-		$this->view[$name] = $file;
+		$id = (strlen($id)) ? $id : $name;
+		
+		$this->view[$id] = $file;
 	}
 	
-	public function getView($name,$parameters=array())
+	public function getView($id,$parameters=array())
 	{
-		if(isset($this->view[$name])){
-			$view = $this->view[$name];
+		if(isset($this->view[$id])){
+			$view = $this->view[$id];
 			
 			$parameters["widget_manager"]	=	$this->widgetManager;
 			$parameters["api"]				=	$this;
@@ -257,13 +277,11 @@ class Amslib_MVC
 		return "";
 	}
 	
-	public function setTheme($name,$file=NULL)
+	public function setTheme($id,$name)
 	{
-		if($file === NULL){
-			$file = "{$this->widgetPath}/{$this->themeDir}/{$this->themePrefix}{$name}.php";
-		}
-		
-		$this->theme[$name] = $file;
+		$file = "{$this->widgetPath}/{$this->themeDir}/{$this->themePrefix}{$name}.php";
+				
+		$this->theme[$id] = $file;
 	}
 	
 	public function decorate($theme,$parameters)
@@ -294,10 +312,9 @@ class Amslib_MVC
 	 * notes:
 	 * 	we only render the first layout in the widget, what happens if there are 10 layouts?
 	 */
-	public function render($parameters=array())
+	public function render($layout="default",$parameters=array())
 	{
-		$layout = reset($this->layout);
-		
+		$layout							=	$this->layout[$layout];
 		$parameters["widget_manager"]	=	$this->widgetManager;
 		$parameters["api"]				=	$this;
 		

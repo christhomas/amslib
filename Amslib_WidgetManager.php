@@ -17,7 +17,7 @@
  *
  * File: Amslib_WidgetManager.php
  * Title: Widget manager for component based development
- * Version: 2.3
+ * Version: 2.6
  * Project: amslib
  *
  * Contributors/Author:
@@ -70,6 +70,11 @@ class Amslib_WidgetManager
 
 		return $this->api[$name];
 	}
+	
+	protected function isWidgetLoaded($name)
+	{
+		return (isset($this->api[$name])) ? true : false;
+	}
 
 	protected function preparePath($path)
 	{
@@ -98,6 +103,22 @@ class Amslib_WidgetManager
 
 			return false;
 		}
+	}
+	
+	protected function loadDependencies()
+	{
+		$hasDependencies = false;
+		
+		$deps = $this->xpath->query("//package/requires/widget");
+		for($a=0;$a<$deps->length;$a++){
+			$name = $deps->item($a)->nodeValue;
+			
+			$this->load($name);
+			
+			$hasDependencies = true;
+		}
+		
+		return $hasDependencies;
 	}
 
 	protected function findResource($widget,$node)
@@ -132,62 +153,67 @@ class Amslib_WidgetManager
 
 		$controllers = $this->xpath->query("//package/controllers/name");
 		for($a=0;$a<$controllers->length;$a++){
-			$name = $controllers->item($a)->nodeValue;
-			$api->setController($name);
+			$id		=	$controllers->item($a)->getAttribute("id");
+			$name	=	$controllers->item($a)->nodeValue;
+			$api->setController($id,$name);
 		}
 
 		$layouts = $this->xpath->query("//package/layout/name");
 		for($a=0;$a<$layouts->length;$a++){
-			$name = $layouts->item($a)->nodeValue;
-			$api->setLayout($name);
+			$id		=	$layouts->item($a)->getAttribute("id");
+			$name	=	$layouts->item($a)->nodeValue;
+			$api->setLayout($id,$name);
 		}
 
 		$views = $this->xpath->query("//package/view/name");
 		for($a=0;$a<$views->length;$a++){
-			$name = $views->item($a)->nodeValue;
-			$api->setView($name);
+			$id		=	$views->item($a)->getAttribute("id");
+			$name	=	$views->item($a)->nodeValue;
+			$api->setView($id,$name);
 		}
 
 		$objects = $this->xpath->query("//package/object/name");
 		for($a=0;$a<$objects->length;$a++){
-			$name = $objects->item($a)->nodeValue;
-			$api->setObject($name);
+			$id		=	$objects->item($a)->getAttribute("id");
+			$name	=	$objects->item($a)->nodeValue;
+			$api->setObject($id,$name);
 		}
 
 		$theme = $this->xpath->query("//package/theme/name");
 		for($a=0;$a<$theme->length;$a++){
-			$name = $theme->item($a)->nodeValue;
-			$api->setTheme($name);
+			$id		=	$theme->item($a)->getAttribute("id");
+			$name	=	$theme->item($a)->nodeValue;
+			$api->setTheme($id,$name);
 		}
 
 		//	FIXME: why are services treated differently then other parts of the MVC system?
 		$services = $this->xpath->query("//package/service/file");
 		for($a=0;$a<$services->length;$a++){
-			$name = $services->item($a)->getAttribute("name");
-			$file = $services->item($a)->nodeValue;
-			$file = $this->getRelativePath($this->widgetPath."/$widget/services/$file");
-			$api->setService($name,$file);
+			$id		=	$services->item($a)->getAttribute("id");
+			$file	=	$services->item($a)->nodeValue;
+			$file	=	$this->getRelativePath($this->widgetPath."/$widget/services/$file");
+			$api->setService($id,$file);
 		}
 
 		$images = $this->xpath->query("//package/image/file");
 		for($a=0;$a<$images->length;$a++){
-			$name = $images->item($a)->getAttribute("name");
+			$id = $images->item($a)->getAttribute("id");
 			$file = $this->findResource($widget,$images->item($a));
-			$api->setImage($name,$file);
+			$api->setImage($id,$file);
 		}
 
 		$javascript = $this->xpath->query("//package/javascript/file");
 		for($a=0;$a<$javascript->length;$a++){
-			$name = $javascript->item($a)->getAttribute("name");
+			$id = $javascript->item($a)->getAttribute("id");
 			$file = $this->findResource($widget,$javascript->item($a));
-			$this->setJavascript($name,$file);
+			$this->setJavascript($id,$file);
 		}
 
 		$stylesheet = $this->xpath->query("//package/stylesheet/file");
 		for($a=0;$a<$stylesheet->length;$a++){
-			$name = $stylesheet->item($a)->getAttribute("name");
-			$file = $this->findResource($widget,$stylesheet->item($a));
-			$this->setStylesheet($name,$file);
+			$id		=	$stylesheet->item($a)->getAttribute("id");
+			$file	=	$this->findResource($widget,$stylesheet->item($a));
+			$this->setStylesheet($id,$file);
 		}
 	}
 
@@ -235,7 +261,7 @@ class Amslib_WidgetManager
 
 	public function getAPI($name)
 	{
-		return $this->api[$name];
+		return isset($this->api[$name]) ? $this->api[$name] : false;
 	}
 
 	/**
@@ -268,8 +294,18 @@ class Amslib_WidgetManager
 			foreach($name as $w) $this->load($w);
 		}else{
 			$path = $this->widgetPath;
+			
+			if($this->isWidgetLoaded($name)) return;
 
 			if($this->loadPackage($path,$name)){
+				$xdoc	=	$this->xdoc;
+				$xpath	=	$this->xpath;
+				
+				if($this->loadDependencies()){
+					$this->xdoc		=	$xdoc;
+					$this->xpath	=	$xpath;
+				}
+				
 				$this->loadConfiguration($path,$name);
 			}
 		}
@@ -320,6 +356,6 @@ class Amslib_WidgetManager
 	{
 		$api = $this->getAPI($name);
 
-		return ($api) ? $api->render($parameters) : false;
+		return ($api) ? $api->render("default",$parameters) : false;
 	}
 }
