@@ -17,7 +17,7 @@
  *
  * File: Amslib.php
  * Title: Amslib core utility object
- * Version: 2.7
+ * Version: 2.8
  * Project: Amslib (antimatter studios library)
  *
  * Contributors/Author:
@@ -169,10 +169,15 @@ class Amslib
 			if(strpos($class_name,"Amslib_Router") !== false){
 				$class_name	=	"router/$class_name";
 			}
+			
+			//	Redirect to include the correct path for the router system
+			if(strpos($class_name,"Amslib_Database") !== false){
+				$class_name	=	"database/$class_name";
+			}
 
-			$class_name = str_replace("//","/","$class_name.php");
-
-			return Amslib::requireFile($class_name);
+			$filename = str_replace("//","/","$class_name.php");
+			
+			return Amslib::requireFile($filename);
 		}
 
 		//	register a special autoloader that will include correctly all of the amslib classes
