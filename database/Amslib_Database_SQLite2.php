@@ -74,6 +74,11 @@ class Amslib_Database_SQLite2 extends Amslib_Database
 		if($connect) $this->connect();
 	}
 	
+	public function escape($value)
+	{
+		return sqlite_escape_string($value);
+	}
+	
 	/**
 	 * method:	getRealResultCount
 	 * 

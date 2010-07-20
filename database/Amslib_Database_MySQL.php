@@ -69,9 +69,15 @@ class Amslib_Database_MySQL extends Amslib_Database
 		if($this->loginDetails){
 			if($c = mysql_connect($this->loginDetails["server"],$this->loginDetails["username"],$this->loginDetails["password"],true))
 			{
-				if(!mysql_select_db($this->loginDetails["database"],$c)) $this->disconnect();
+				if(!mysql_select_db($this->loginDetails["database"],$c)){
+					$this->disconnect();
+					$this->fatalError("Failed to open database requested '{$this->loginDetails["database"]}'");
+				}
 				else{
 					$this->connection = $c;
+					
+					$this->setFetchMethod("mysql_fetch_assoc");
+					$this->setEncoding("utf8");		
 				}
 			// Replace these errors with PHPTranslator codes instead (language translation)
 			}else $this->fatalError("Failed to connect to database: {$this->loginDetails["database"]}<br/>");
@@ -93,10 +99,13 @@ class Amslib_Database_MySQL extends Amslib_Database
 	public function __construct($connect=true)
 	{
 		parent::__construct();
-		$this->setFetchMethod("mysql_fetch_assoc");
-		$this->setEncoding("utf8");
 		
 		if($connect) $this->connect();
+	}
+	
+	public function escape($value)
+	{
+		return mysql_real_escape_string($value);
 	}
 	
 	/**
@@ -166,7 +175,7 @@ HAS_TABLE;
 	 */
 	public function disconnect()
 	{
-		mysql_close($this->connection);
+		if($this->connection) mysql_close($this->connection);
 		$this->connection = false;
 	}
 	
@@ -194,13 +203,14 @@ HAS_TABLE;
 		$this->selectResult = mysql_query("select $query",$this->connection);
 		if($this->debug) print("<pre>QUERY = 'select $query'<br/></pre>");
 
-		$rowCount = mysql_num_rows($this->selectResult);
-		
-		if($this->selectResult && $rowCount >= 0){
+		if($this->selectResult){
+			$rowCount = mysql_num_rows($this->selectResult);
+			
 			if($numResults == 0) $numResults = $rowCount;
+			
 			return $this->getResults($numResults);
 		}
-
+		
 		$this->fatalError("Transaction failed<br/>command = 'select'<br/>query = '$query'");
 
 		return false;

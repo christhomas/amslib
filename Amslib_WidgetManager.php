@@ -50,11 +50,21 @@ class Amslib_WidgetManager
 			$node = $list->item(0);
 			if($node){
 				Amslib::requireFile($this->widgetPath."/$name/objects/{$node->nodeValue}.php");
-
+				
 				if(method_exists($node->nodeValue,"getInstance")){
 					$api = call_user_func(array($node->nodeValue,"getInstance"));
 				}else{
-					die("FATAL ERROR(Amslib_WidgetManager::setAPI): Could not find the getInstance method in the API object '{$node->nodeValue}' for widget '$name'<br/>");
+					$error = "FATAL ERROR(Amslib_WidgetManager::setAPI) Could not __ERROR__ for widget '$name'<br/>";
+					
+					if(!class_exists($node->nodeValue)){
+						//	class does not exist
+						$error = str_replace("__ERROR__","find class '{$node->nodeValue}'",$error);
+					}else{
+						//	class exists, but method does not
+						$error = str_replace("__ERROR__","find the getInstance method in the API object '{$node->nodeValue}'");	
+					}
+					
+					die($error);
 				}
 			}
 		}
@@ -149,7 +159,6 @@ class Amslib_WidgetManager
 	protected function loadConfiguration($path,$widget)
 	{
 		$api = $this->setAPI($widget);
-		$api->setPath($path);
 
 		$controllers = $this->xpath->query("//package/controllers/name");
 		for($a=0;$a<$controllers->length;$a++){

@@ -8,14 +8,14 @@ var Amslib_Widget = Class.create(
 	{
 		//	Try first to just pass it through prototype, then if fails, use as a selector
 		this.mainWidget = $(selector);
-		if(!selector) this.mainWidget = $(document.body).down(selector);
+		if(!this.mainWidget) this.mainWidget = $(document.body).down(selector);
 		
 		this.readParameters();
 	},
 
 	readParameters: function()
 	{
-		if(this.mainWidget == false) return false;
+		if(!this.mainWidget) return false;
 		
 		var po = this;
 		this.mainWidget.select(".widget_parameters input[type='hidden']").each(function(p){

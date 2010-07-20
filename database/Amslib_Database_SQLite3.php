@@ -69,8 +69,13 @@ class Amslib_Database_SQLite3 extends Amslib_Database
 	public function __construct($connect=true)
 	{
 		parent::__construct();
-		
+
 		if($connect) $this->connect();
+	}
+	
+	public function escape($value)
+	{
+		return $this->connection->quote($value);
 	}
 	
 	/**
@@ -153,16 +158,26 @@ class Amslib_Database_SQLite3 extends Amslib_Database
 	{
 		if($this->getConnectionStatus() == false) return false;
 		
+		if($this->selectResult) $this->selectResult->closeCursor();
+		
 		$this->setLastQuery("insert into $query");
 		$result = $this->connection->exec("insert into $query");
 		if($this->debug) print("<pre>QUERY = 'insert into $query'<br/></pre>");
 
-		$this->lastInsertId = $this->connection->lastInsertRowID();
+		$this->lastInsertId = $this->connection->lastInsertId();
 		if($result && ($this->lastInsertId !== false)) return $this->lastInsertId;
 		
 		$this->lastInsertId = false;
+		
+$text=<<<DATABASE_ERROR
+	Transaction failed<br/>
+	command = 'insert into'<br/>
+	query = '$query'<br/>
+	<pre>result = '$result'</pre>
+	lastInsertId = '$this->lastInsertId'<br/>
+DATABASE_ERROR;
 
-		$this->fatalError("Transaction failed<br/>command = 'insert into'<br/>query = '$query'<br/><pre>result = '".print_r($result,true)."'</pre>lastInsertId = '$this->lastInsertId'<br/>mysql_insert_id() = '".mysql_insert_id()."'");
+		$this->fatalError($text);
 		
 		return false;
 	}
@@ -170,6 +185,8 @@ class Amslib_Database_SQLite3 extends Amslib_Database
 	public function update($query)
 	{
 		if($this->getConnectionStatus() == false) return false;
+		
+		if($this->selectResult) $this->selectResult->closeCursor();
 
 		$this->setLastQuery("update $query");
 		$result = $this->connection->exec("update $query");
@@ -185,6 +202,8 @@ class Amslib_Database_SQLite3 extends Amslib_Database
 	public function delete($query)
 	{
 		if($this->getConnectionStatus() == false) return false;
+		
+		if($this->selectResult) $this->selectResult->closeCursor();
 		
 		$this->setLastQuery("delete from $query");
 		$result = $this->connection->exec("delete from $query");

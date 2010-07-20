@@ -133,20 +133,23 @@ class Amslib_MVC
 	
 	public function setWidgetName($name)
 	{
-		$this->widgetName	=	$name;
-		$this->widgetPath	=	"{$this->widgetPath}/{$this->widgetName}";
+		$this->widgetName = $name;
+		$this->setWidgetPath("{$this->widgetPath}/{$this->widgetName}");
 	}
 	
-	public function setPath($path)
+	public function getWidgetName()
 	{
-		//	NOTE: What is this for?
-		$this->path = $path;
+		return $this->widgetName;
 	}
 	
-	public function getPath()
+	public function setWidgetPath($path)
 	{
-		//	NOTE: What is this for?
-		return $this->path;
+		$this->widgetPath = $path;
+	}
+	
+	public function getWidgetPath()
+	{
+		return $this->widgetPath;
 	}
 	
 	public function setValue($name,$value)
@@ -221,6 +224,25 @@ class Amslib_MVC
 		return (isset($this->service[$id])) ? $this->service[$id] : false;
 	}
 	
+	/**
+	 * method: getHiddenParameters
+	 * 
+	 * This outputs a block of hidden inputs for javascript or a web form to use when posting
+	 * or processing data.
+	 * 
+	 * returns:	A string of HTML, containing all the parameters
+	 * 
+	 * notes:
+	 * 	-	This is perhaps not the best way, because any value will be output, perhaps even secret information
+	 * 		that the user puts accidentally and doesnt realise it'll be output as plain text in the HTML
+	 * 	-	I hate the fact that I'm outputting HTML here, but I dont really have any other alternative which is cheap
+	 * 		and relatively easy and clean, it's simpler, but not the best way I am sure.
+	 * 
+	 * warning:
+	 * 	-	do not change \" for single quote ' or similar, it's done like this to prevent certain types 
+	 * 		of bugs I found with certain combinations of code, it's important to prevent future problems 
+	 * 		to keep \" because it was the only way to prevent strings from becoming broken
+	 */
 	public function getHiddenParameters()
 	{
 		 $list = "";
@@ -228,6 +250,10 @@ class Amslib_MVC
 		foreach($this->value as $k=>$v){
 			if(is_bool($v)) $v = ($v) ? "true" : "false";
 			
+			//	WARNING:	do not change \" for single quote ' or similar, it's done like this to prevent 
+			//				certain types of bugs I found with certain combinations of code, it's important
+			//				to prevent future problems to keep \" because it was the only way to prevent strings
+			//				from becoming broken
 			$list.="<input type=\"hidden\" name=\"$k\" value=\"$v\" />";
 		}
 		
@@ -317,7 +343,7 @@ class Amslib_MVC
 		$layout							=	$this->layout[$layout];
 		$parameters["widget_manager"]	=	$this->widgetManager;
 		$parameters["api"]				=	$this;
-		
+
 		ob_start();
 		Amslib::requireFile($layout,$parameters);
 		return ob_get_clean();
