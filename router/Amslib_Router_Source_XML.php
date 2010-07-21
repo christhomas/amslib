@@ -19,7 +19,11 @@ class Amslib_Router_Source_XML
 
 	public function load($source)
 	{
-		$source = Amslib_Filesystem::find($source);
+		$source = Amslib_Filesystem::find($source,true);
+		
+		if(!file_exists($source)){
+			die("Amslib_Router_Source_XML::load(), source file does not exist [$source]");	
+		}
 		
 		$this->document = new DOMDocument('1.0', 'UTF-8');
 		if($this->document->load($source)){
