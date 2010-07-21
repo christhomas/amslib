@@ -50,13 +50,15 @@ class Amslib_Filesystem
 		return str_replace("//","/",$filename);
 	}
 	
-	static public function find($filename)
+	static public function find($filename,$includeFilename=false)
 	{
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
 
-		foreach($includePath as $p){
-			$test = (strpos($file,"/") !== 0) ? "$p/$file" : "{$p}{$file}";
-			if(@file_exists($test)) return $p;
+		foreach($includePath as $path){
+			$test = (strpos($filename,"/") !== 0) ? "$path/$filename" : "{$path}{$filename}";
+			if(@file_exists($test)){
+				return ($includeFilename) ? $test : $path;
+			}
 		}
 
 		return false;
