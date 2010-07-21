@@ -84,24 +84,12 @@ class Amslib
 		return ($preformat) ? "<pre>$dump</pre>" : $dump;
 	}
 
-	function findPath($file)
-	{
-		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
-
-		foreach($includePath as $p){
-			$test = (strpos($file,"/") !== 0) ? "$p/$file" : "{$p}{$file}";
-			if(@file_exists($test)) return $p;
-		}
-
-		return false;
-	}
-
 	function includeFile($file,$data=array())
 	{
 		$path = "";
 
 		if(!file_exists($file)){
-			$path = self::findPath($file);
+			$path = Amslib_Filesystem::find($file);
 
 			if($path !== false && strlen($path)) $path = "$path/";
 		}
@@ -123,7 +111,7 @@ class Amslib
 		$path = "";
 
 		if(!file_exists($file)){
-			$path = self::findPath($file);
+			$path = Amslib_Filesystem::findfindPath($file);
 
 			if($path !== false && strlen($path)) $path = "$path/";
 		}

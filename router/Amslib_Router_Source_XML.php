@@ -19,6 +19,8 @@ class Amslib_Router_Source_XML
 
 	public function load($source)
 	{
+		$source = Amslib_Filesystem::find($source);
+		
 		$this->document = new DOMDocument('1.0', 'UTF-8');
 		if($this->document->load($source)){
 			$this->xpath = new DOMXPath($this->document);
@@ -113,11 +115,13 @@ class Amslib_Router_Source_XML
 		return $route;
 	}
 
-	public function &getInstance()
+	public function &getInstance($source=NULL)
 	{
 		static $instance = NULL;
 
 		if($instance === NULL) $instance = new Amslib_Router_Source_XML();
+		
+		if($source && $instance) $instance->load($source);
 
 		return $instance;
 	}

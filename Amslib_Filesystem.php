@@ -49,4 +49,16 @@ class Amslib_Filesystem
 
 		return str_replace("//","/",$filename);
 	}
+	
+	static public function find($filename)
+	{
+		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
+
+		foreach($includePath as $p){
+			$test = (strpos($file,"/") !== 0) ? "$p/$file" : "{$p}{$file}";
+			if(@file_exists($test)) return $p;
+		}
+
+		return false;
+	}
 }

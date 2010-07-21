@@ -43,10 +43,30 @@ class Amslib_Router2
 		$this->webdir = "";
 	}
 
-	public function load($source,$webdir="")
+	public function load($source,$webdir=NULL)
 	{
+		if(!$webdir) $webdir = Amslib_Filesystem::documentRoot();
+		
 		$this->source = $source;
 		$this->webdir = $webdir;
+	}
+	
+	/**
+	 * method: loadXML
+	 * 
+	 * Convenience method for loading a XML router configuration
+	 * 
+	 * parameters:
+	 * 	$source	-	The filename of the XML router configuration to load
+	 * 
+	 * notes:
+	 * 	-	This might be a bad idea, but it seems a nice way to simplify the client code
+	 */
+	public function loadXML($source)
+	{
+		$source = Amslib_Router_Source_XML::getInstance($source);
+		
+		$this->load($source);
 	}
 
 	public function execute()
