@@ -43,20 +43,18 @@ class Amslib_Database
 	protected $lastQuery = array();
 
 	protected $debug = false;
-	
+
 	protected $selectResult = false;
-	
-	protected $optimiseSingleResult = true;
-	
+
 /******************************************************************************
  *	PROTECTED MEMBERS
  *****************************************************************************/
-	
+
 	/**
 	 * 	array: $loginDetails
-	 * 
+	 *
 	 * 	An array of login data which contains the values that you want to connect with
-	 * 
+	 *
 	 * 	values:
 	 * 		server		-	string(url:port)
 	 * 		username	-	string
@@ -73,7 +71,7 @@ class Amslib_Database
 	 * 	values:
 	 * 		true	-	The database connected successfully
 	 * 		false	-	The database failed to connect
-	 * 
+	 *
 	 * 	FIXME: The description of this member is incorrect
 	 */
 	protected $connection = false;
@@ -83,7 +81,7 @@ class Amslib_Database
 		$this->lastQuery[] = $query;
 		if(count($this->lastQuery) > 100) array_shift($this->lastQuery);
 	}
-	
+
 	protected function getDatabaseLogin()
 	{
 		die("Your database layer need to implement this method");
@@ -98,26 +96,26 @@ class Amslib_Database
 	{
 		return $this->lastResult;
 	}
-	
+
 	public function __construct(){}
-	
+
 	public function getLastQuery()
 	{
 		return $this->lastQuery;
 	}
-	
+
 	public function setFetchMethod($method)
 	{
 		if(function_exists($method)){
 			$this->fetchMethod = $method;
 		}
 	}
-	
+
 	public function getSearchResultHandle()
 	{
 		return $this->selectResult;
 	}
-	
+
 	public function connect()
 	{
 		$this->getDatabaseLogin();
@@ -127,7 +125,7 @@ class Amslib_Database
 	public function fatalError($msg)
 	{
 		$this->loginDetails = NULL;
-		
+
 		die("FATAL ERROR: $msg<br/>mysql_error = '".$this->error()."'");
 	}
 
@@ -148,12 +146,12 @@ class Amslib_Database
 	{
 		return $this->connection ? true : false;
 	}
-	
+
 	/**
 	 * method: getConnection
-	 * 
+	 *
 	 * Return the current mysql connection created when the database was connected
-	 * 
+	 *
 	 * returns:
 	 * 	A mysql database connection resource, or false, if it's not yet connected or failed to connect
 	 */
@@ -161,7 +159,7 @@ class Amslib_Database
 	{
 		return $this->connection;
 	}
-	
+
 	public function copy($database)
 	{
 		$this->connection = $database->getConnection();
