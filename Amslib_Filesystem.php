@@ -33,15 +33,15 @@ class Amslib_Filesystem
 
 		return (strpos($dirname,":") !== false) ? self::removeWindowsDrive($dirname) : $dirname;
 	}
-	
+
 	static public function absolute($filename)
 	{
 		$docroot	=	self::documentRoot();
 		$filename	=	str_replace($docroot,"",$filename);
-		
-		return str_replace("//","/",$docroot.$filename);
+
+		return str_replace("//","/",$docroot."/".$filename);
 	}
-	
+
 	static public function relative($filename)
 	{
 		$docroot	=	self::documentRoot();
@@ -49,7 +49,7 @@ class Amslib_Filesystem
 
 		return str_replace("//","/",$filename);
 	}
-	
+
 	static public function find($filename,$includeFilename=false)
 	{
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
