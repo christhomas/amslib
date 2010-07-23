@@ -50,20 +50,20 @@ class Amslib_WidgetManager
 			$node = $list->item(0);
 			if($node){
 				Amslib::requireFile($this->widgetPath."/$name/objects/{$node->nodeValue}.php");
-				
+
 				if(method_exists($node->nodeValue,"getInstance")){
 					$api = call_user_func(array($node->nodeValue,"getInstance"));
 				}else{
 					$error = "FATAL ERROR(Amslib_WidgetManager::setAPI) Could not __ERROR__ for widget '$name'<br/>";
-					
+
 					if(!class_exists($node->nodeValue)){
 						//	class does not exist
 						$error = str_replace("__ERROR__","find class '{$node->nodeValue}'",$error);
 					}else{
 						//	class exists, but method does not
-						$error = str_replace("__ERROR__","find the getInstance method in the API object '{$node->nodeValue}'");	
+						$error = str_replace("__ERROR__","find the getInstance method in the API object '{$node->nodeValue}'");
 					}
-					
+
 					die($error);
 				}
 			}
@@ -80,7 +80,7 @@ class Amslib_WidgetManager
 
 		return $this->api[$name];
 	}
-	
+
 	protected function isWidgetLoaded($name)
 	{
 		return (isset($this->api[$name])) ? true : false;
@@ -100,7 +100,7 @@ class Amslib_WidgetManager
 	protected function loadPackage($path,$name)
 	{
 		$xml = "$path/$name/package.xml";
-		if($p = Amslib::findPath($xml)) $xml = "$p/$xml";
+		if($p = Amslib_Filesystem::find($xml)) $xml = "$p/$xml";
 
 		$this->xdoc = new DOMDocument('1.0', 'UTF-8');
 		if(@$this->xdoc->load($xml)){
@@ -114,20 +114,20 @@ class Amslib_WidgetManager
 			return false;
 		}
 	}
-	
+
 	protected function loadDependencies()
 	{
 		$hasDependencies = false;
-		
+
 		$deps = $this->xpath->query("//package/requires/widget");
 		for($a=0;$a<$deps->length;$a++){
 			$name = $deps->item($a)->nodeValue;
-			
+
 			$this->load($name);
-			
+
 			$hasDependencies = true;
 		}
-		
+
 		return $hasDependencies;
 	}
 
@@ -303,18 +303,18 @@ class Amslib_WidgetManager
 			foreach($name as $w) $this->load($w);
 		}else{
 			$path = $this->widgetPath;
-			
+
 			if($this->isWidgetLoaded($name)) return;
 
 			if($this->loadPackage($path,$name)){
 				$xdoc	=	$this->xdoc;
 				$xpath	=	$this->xpath;
-				
+
 				if($this->loadDependencies()){
 					$this->xdoc		=	$xdoc;
 					$this->xpath	=	$xpath;
 				}
-				
+
 				$this->loadConfiguration($path,$name);
 			}
 		}
