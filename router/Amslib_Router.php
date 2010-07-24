@@ -60,7 +60,7 @@ class Amslib_Router
 
 		if($this->resource == "router"){
 			$this->routerPath = Amslib::getParam("router_path",Amslib_Router_URL::Home());
-
+			
 			Amslib_Router_Language::detect($this->routerPath);
 
 			if(Cfg_Routes::$phpFileAsOption == true) $this->pathToOption();

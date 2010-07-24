@@ -45,6 +45,6 @@ class Amslib_Router_URL
 
 	public static function Home()
 	{
-		return self::getRoute("Home");
+		die("You need to specify at least the Home() method in your URL object");
 	}
 }

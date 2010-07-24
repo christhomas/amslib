@@ -78,7 +78,8 @@ class Amslib_Router2
 		if($this->routerPath !== NULL){
 			$this->routerPath = $this->relativePath($this->routerPath);
 
-			Amslib_Router_Language::detect($this->routerPath);
+			Amslib_Router_Language2::setRouter($this);
+			Amslib_Router_Language2::detect($this->routerPath);
 
 			//	FIXME:	What happens if someone sets up a system
 			//			which uses a php file as a router path?
@@ -102,11 +103,15 @@ class Amslib_Router2
 	{
 		//	Return the current active route
 		if($name == NULL){
-			return $this->activeRoute["route"];
+			$name		=	$this->activeRoute["name"];
+			$version	=	$this->activeRoute["version"];
 		}
+		
 		//	This is in response to a query for a url
-		//	based on the name of the route and version requested
-		return $this->source->getRoute($name,$version);
+		//	based on the name of the route, version and language requested
+		$lang = Amslib_Router_Language2::getCode();
+		
+		return Amslib_Router_Language2::get(true).$this->source->getRoute($name,$version,$lang);
 	}
 
 	public function isRouted()
@@ -121,6 +126,8 @@ class Amslib_Router2
 
 	public function getCurrentRoute()
 	{
+		//	TODO: Hmmmm, I dont like this, I want to use it for something else
+		//	TODO: Is this used for anything?
 		return $this->activeRoute;
 	}
 
