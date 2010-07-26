@@ -14,11 +14,34 @@ class Amslib_Router_Source_XML
 
 		return explode("/",$params);
 	}
+	
+	protected function decodeSources($src)
+	{
+		$src_list = array();
+		
+		foreach($src as $s){
+			$version = $s->getAttribute("version");
+			if(!$version) $version = "default";
+			
+			$lang = $s->getAttribute("lang");
+			if(!$lang) $lang = "all";
+			
+			$src_list[$version][$lang] = $s->nodeValue;
+		}
+
+		return $src_list;
+	}
 
 	public function __construct(){}
 
 	public function load($source)
 	{
+		$source = Amslib_Filesystem::find($source,true);
+		
+		if(!file_exists($source)){
+			die("Amslib_Router_Source_XML::load(), source file does not exist [$source]");	
+		}
+		
 		$this->document = new DOMDocument('1.0', 'UTF-8');
 		if($this->document->load($source)){
 			$this->xpath = new DOMXPath($this->document);
@@ -33,33 +56,31 @@ class Amslib_Router_Source_XML
 
 				$dest	=	$dest->item(0)->nodeValue;
 
-				$src_list = array();
-				foreach($src as $s){
-					$version = $s->getAttribute("version");
-					if(!$version) $version = "default";
-
-					$src_list[$version] = $s->nodeValue;
-				}
+				$src_list = $this->decodeSources($src);
 
 				$this->routes[$name] = array(
 					"src"		=>	$src_list,
 					"resource"	=>	$dest
 				);
 			}
-
+			
 			//	Process all the routes into the inverse, so you can do the lookup from the url as well
 			$this->url = array();
 			foreach($this->routes as $name=>$r)
 			{
-				foreach($r["src"] as $version=>$url){
-					$this->url[$url] = array(
-						"version"	=>	$version,
-						"name"		=>	$name,
-						"resource"	=>	$r["resource"],
-						"route"		=>	$url
-					);
+				foreach($r["src"] as $version=>$src){
+					foreach($src as $lang=>$url){
+						$this->url[$url] = array(
+							"version"	=>	$version,
+							"name"		=>	$name,
+							"resource"	=>	$r["resource"],
+							"route"		=>	$url,
+							"lang"		=>	$lang
+						);
+					}
 				}
 			}
+
 		}else{
 			print("XML ROUTER DATABASE: '$source' FAILED TO OPEN<br/>");
 		}
@@ -70,12 +91,16 @@ class Amslib_Router_Source_XML
 		return (isset($this->url[$url])) ? $this->url[$url] : false;
 	}
 
-	public function getRoute($name,$version)
+	public function getRoute($name,$version,$lang="all")
 	{
 		if(	isset($this->routes[$name]) &&
 			isset($this->routes[$name]["src"][$version]))
 		{
-			return $this->routes[$name]["src"][$version];
+			$v = $this->routes[$name]["src"][$version];
+			
+			if(!empty($v)){
+				return (isset($v[$lang])) ? $v[$lang] : current($v);
+			}
 		}
 
 		return false;
@@ -113,11 +138,13 @@ class Amslib_Router_Source_XML
 		return $route;
 	}
 
-	public function &getInstance()
+	public function &getInstance($source=NULL)
 	{
 		static $instance = NULL;
 
 		if($instance === NULL) $instance = new Amslib_Router_Source_XML();
+		
+		if($source && $instance) $instance->load($source);
 
 		return $instance;
 	}

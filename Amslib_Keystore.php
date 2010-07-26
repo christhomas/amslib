@@ -1,4 +1,4 @@
-<?php
+<?php 
 /*******************************************************************************
  * Copyright (c) {15/03/2008} {Christopher Thomas}
  * This library is free software; you can redistribute it and/or
@@ -15,36 +15,30 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: Amslib_Router_URL.php
- * Title: Base resource<->URL convertor for the router system
+ * File: Amslib_Keystore.php
+ * Title: Amslib key/value storage mechanism
  * Version: 1.0
- * Project: Amslib/Router
+ * Project: Amslib (antimatter studios library)
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-class Amslib_Router_URL
+class Amslib_Keystore
 {
-	protected static $router;
-
-	protected static function getRoute($route,$option="default")
+	protected static $store;
+	
+	static public function set($name,$value)
 	{
-		return self::$router->getRoute($route,$option);
+		if(!is_string($name)) return false;
+		
+		self::$store[$name] = $value;
+		
+		return self::get($name);
 	}
-
-	public static function setRouter($router)
+	
+	static public function get($name)
 	{
-		self::$router = $router;
-	}
-
-	public static function AddHost($url)
-	{
-		return "http://{$_SERVER["SERVER_NAME"]}$url";
-	}
-
-	public static function Home()
-	{
-		die("You need to specify at least the Home() method in your URL object");
+		return (isset(self::$store[$name])) ? self::$store[$name] : false;
 	}
 }

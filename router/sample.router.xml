@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<router requires="Amslib_Router2">
+	<path name="home">
+		<src>/</src>
+		<resource>home.php</resource>
+	</path>
+	
+	<path name="maintenance">
+		<src lang="en_GB">/maintenance/</src>
+		<src lang="es_ES">/mantenimiento/</src>
+		<resource>maintenance.php</resource>
+	</path>
+	
+	<path name="contact">
+		<src lang="en_GB">/contact/</src>
+		<src lang="es_ES">/contacto/</src>
+		<resource>contact.php</resource>
+	</path>
+</router>

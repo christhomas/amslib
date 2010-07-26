@@ -29,14 +29,26 @@ class Amslib
 {
 	const VERSION = 2.8;
 
-	static $showErrorTrigger = false;
+	static protected $showErrorTrigger = false;
 
-	function locate()
+	static protected function findFile($filename)
+	{
+		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
+
+		foreach($includePath as $path){
+			$test = (strpos($filename,"/") !== 0) ? "$path/$filename" : "{$path}{$filename}";
+			if(@file_exists($test)) return $path;
+		}
+
+		return false;
+	}
+
+	static public function locate()
 	{
 		return dirname(__FILE__);
 	}
 
-	function showErrors()
+	static public function showErrors()
 	{
 		//	Enable all error reporting
 		ini_set("display_errors", "On");
@@ -52,7 +64,7 @@ class Amslib
 	 *	parameters:
 	 *		$path	-	The path to add to the PHP include path
 	 */
-	function addIncludePath($path)
+	static public function addIncludePath($path)
 	{
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
 
@@ -65,7 +77,7 @@ class Amslib
 		ini_set("include_path",implode(PATH_SEPARATOR,$includePath));
 	}
 
-	function getIncludeContents($filename)
+	static public function getIncludeContents($filename)
 	{
 		ob_start();
 		include($filename);
@@ -74,7 +86,7 @@ class Amslib
 		return $contents;
 	}
 
-	function var_dump($dump,$preformat=false)
+	static public function var_dump($dump,$preformat=false)
 	{
 		ob_start();
 		var_dump($dump);
@@ -84,24 +96,12 @@ class Amslib
 		return ($preformat) ? "<pre>$dump</pre>" : $dump;
 	}
 
-	function findPath($file)
-	{
-		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
-
-		foreach($includePath as $p){
-			$test = (strpos($file,"/") !== 0) ? "$p/$file" : "{$p}{$file}";
-			if(@file_exists($test)) return $p;
-		}
-
-		return false;
-	}
-
-	function includeFile($file,$data=array())
+	static public function includeFile($file,$data=array())
 	{
 		$path = "";
 
 		if(!file_exists($file)){
-			$path = self::findPath($file);
+			$path = self::findFile($file);
 
 			if($path !== false && strlen($path)) $path = "$path/";
 		}
@@ -118,12 +118,12 @@ class Amslib
 		return false;
 	}
 
-	function requireFile($file,$data=array())
+	static public function requireFile($file,$data=array())
 	{
 		$path = "";
 
 		if(!file_exists($file)){
-			$path = self::findPath($file);
+			$path = self::findFile($file);
 
 			if($path !== false && strlen($path)) $path = "$path/";
 		}
@@ -142,7 +142,7 @@ class Amslib
 		return false;
 	}
 
-	function autoloader()
+	static public function autoloader()
 	{
 		//	Only register it once.
 		if(function_exists("amslib_autoload")) return;
@@ -169,14 +169,14 @@ class Amslib
 			if(strpos($class_name,"Amslib_Router") !== false){
 				$class_name	=	"router/$class_name";
 			}
-			
+
 			//	Redirect to include the correct path for the router system
 			if(strpos($class_name,"Amslib_Database") !== false){
 				$class_name	=	"database/$class_name";
 			}
 
 			$filename = str_replace("//","/","$class_name.php");
-			
+
 			return Amslib::requireFile($filename);
 		}
 
@@ -184,7 +184,7 @@ class Amslib
 		spl_autoload_register("amslib_autoload");
 	}
 
-	function findKey($key,$source)
+	static public function findKey($key,$source)
 	{
 		foreach($source as $k=>$ignore){
 			if(strpos($k,$key) !== false) return $k;
@@ -206,7 +206,7 @@ class Amslib
 	 * 	returns:
 	 * 		-	The value from the GET global array, if not exists, the value of the parameter return
 	 */
-	function getParam($value,$default=NULL,$erase=false)
+	static public function getParam($value,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_GET,$value,$default,$erase);
 	}
@@ -223,7 +223,7 @@ class Amslib
 	 *	notes:
 	 *		-	Sometimes this is helpful, because it can let you build certain types of code flow which arent possible otherwise
 	 */
-	function insertGetParam($parameter,$value)
+	static public function insertGetParam($parameter,$value)
 	{
 		$_GET[$parameter] = $value;
 	}
@@ -241,7 +241,7 @@ class Amslib
 	 * 	returns:
 	 * 		-	The value from the POST global array, if not exists, the value of the parameter return
 	 */
-	function postParam($value,$default=NULL,$erase=false)
+	static public function postParam($value,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_POST,$value,$default,$erase);
 	}
@@ -258,7 +258,7 @@ class Amslib
 	 *	notes:
 	 *		-	Sometimes this is helpful, because it can let you build certain types of code flow which arent possible otherwise
 	 */
-	function insertPostParam($parameter,$value)
+	static public function insertPostParam($parameter,$value)
 	{
 		$_POST[$parameter] = $value;
 	}
@@ -276,12 +276,12 @@ class Amslib
 	 * 	returns:
 	 * 		-	The value from the SESSION global array, if not exists, the value of the parameter return
 	 */
-	function sessionParam($value,$default=NULL,$erase=false)
+	static public function sessionParam($value,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_SESSION,$value,$default,$erase);
 	}
 
-	function insertSessionParam($parameter,$value)
+	static public function insertSessionParam($parameter,$value)
 	{
 		$_SESSION[$parameter] = $value;
 	}
@@ -299,12 +299,12 @@ class Amslib
 	 * 	returns:
 	 * 		-	The value from the FILES global array, if not exists, the value of the parameter return
 	 */
-	function filesParam($value,$default=NULL,$erase=false)
+	static public function filesParam($value,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_FILES,$value,$default,$erase);
 	}
 
-	function arrayParam(&$source,$value,$default=NULL,$erase=false)
+	static public function arrayParam(&$source,$value,$default=NULL,$erase=false)
 	{
 		if(isset($source[$value])){
 			$default = $source[$value];
@@ -327,12 +327,12 @@ class Amslib
 	 * 	returns:
 	 * 		-	The value from the REQUEST global array, if not exists, the value of the parameter return
 	 */
-	function requestParam($value,$default=NULL,$erase=false)
+	static public function requestParam($value,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_REQUEST,$value,$default,$erase);
 	}
 
-	function insertRequestParam($parameter,$value)
+	static public function insertRequestParam($parameter,$value)
 	{
 		$_REQUEST[$parameter] = $value;
 	}

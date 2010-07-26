@@ -43,7 +43,7 @@ class Amslib_Translator
 
 	public function __construct()
 	{
-		$this->open(array());
+		$this->keyStore = array();
 	}
 
 	public function open($database)
@@ -113,7 +113,7 @@ class Amslib_Translator
 	{
 		static $instance = NULL;
 
-		if($instance === NULL) $instance = new Amslib_Translator();
+		if($instance === NULL) $instance = new self();
 
 		return $instance;
 	}

@@ -79,31 +79,6 @@ class Amslib_Image
 		return $d3 * ($d1 / $d2);
 	}
 
-	protected function getFromCache($parameters)
-	{
-		if(is_string($parameters)) $parameters = array("image"=>$parameters);
-		
-		//	If caching is disabled, or the source file is not found, return false
-		if(!$this->cache) return false;
-		if(!isset($parameters["image"])) return false;
-
-		$parameters["cache"]	=	true;
-		$filename				=	$this->create($parameters,false);
-
-		//	check cache file exists
-		if($filename){
-			$data			=	$this->images[$filename];
-			$data["cache"]	=	true;
-
-			return $filename;
-		}
-
-		//	The attempt to open the cache file failed, so close off any used resources
-		$this->close($filename);
-
-		return false;
-	}
-
 	protected function getCacheFilename($filename)
 	{
 		return str_replace("//","/",$this->cache."/".$filename);
@@ -114,7 +89,7 @@ class Amslib_Image
 		$extension = strtolower(end(explode(".",$filename)));
 		return (in_array($extension,$this->allowedTypes)) ? $extension : false;
 	}
-	
+
 	public function __construct()
 	{
 		if(!function_exists('imagecreatetruecolor')) {
@@ -141,11 +116,36 @@ class Amslib_Image
 		}
 	}
 
+	public function getFromCache($parameters)
+	{
+		if(is_string($parameters)) $parameters = array("image"=>$parameters);
+
+		//	If caching is disabled, or the source file is not found, return false
+		if(!$this->cache) return false;
+		if(!isset($parameters["image"])) return false;
+
+		$parameters["cache"]	=	true;
+		$filename				=	$this->create($parameters,false);
+
+		//	check cache file exists
+		if($filename){
+			$data			=	$this->images[$filename];
+			$data["cache"]	=	true;
+
+			return $filename;
+		}
+
+		//	The attempt to open the cache file failed, so close off any used resources
+		$this->close($filename);
+
+		return false;
+	}
+
 	public function create($parameters,$overwrite=false)
 	{
 		//	If a filename is passed as a string, make it an array, just to keep the logic simple
 		if(is_string($parameters)) $parameters = array("image"=>$parameters);
-		
+
 		//	Make the path absolute and obtain a unique name for this requested file
 		$parameters["image"]	=	Amslib_Filesystem::absolute($parameters["image"]);
 		//	Get the extension for this file
@@ -255,10 +255,10 @@ class Amslib_Image
 
 		return $filename;
 	}
-	
+
 	public function cropArea($filename,$x,$y,$width,$height)
 	{
-		return $this->crop($filename,$x,$y,0,0,$width,$height,$width,$height);	
+		return $this->crop($filename,$x,$y,0,0,$width,$height,$width,$height);
 	}
 
 	public function crop($filename,$sx,$sy,$dx,$dy,$sw,$sh,$dw,$dh)
@@ -453,7 +453,7 @@ class Amslib_Image
 					copy($destination,$cacheName);
 					chmod($cacheName,0777);
 				}
-				
+
 				return $destination;
 			}
 		}

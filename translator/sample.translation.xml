@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+	<translation name="THIS_IS_SOME">advice on how to use the system:</translation>
+	<translation name="YOU_PUT_THE">name of the key as the name attribute</translation>
+	<translation name="AND_THEN_PUT">the string of the translation as the text node</translation>
+	<translation name="OF_EACH_TRANSLATION">that you need</translation>
+	<translation name="BUT_IT_IS_IMPORTANT">that you keep a system</translation>
+	<translation name="IN_HOW_TO_ARRANGE">all the translation database</translation>
+	<translation name="SO_THAT_YOUR_CODE">looks at least respectable</translation>
+	<translation name="SO_THERE_ARE_SOME_RULES">which act as a good style guide</translation>
+	<translation name="IN_HOW_TO_ARRANGE_YOUR_NAME_KEYS">so the translation system</translation>
+	<translation name="DOESNT_BREAK_DOWN">and resemble a horrible mess</translation>
+	<translation name="FOR_THE_NAME_TRY">to use ALL CAPS and then</translation>
+	<translation name="DONT_PUT_SPACES">in the translation key, put underscores</translation>
+	<translation name="AND_THIS_WILL_KEEP">the it looking all neat and tidy</translation>
+</database>
