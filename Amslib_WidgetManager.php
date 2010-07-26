@@ -88,11 +88,10 @@ class Amslib_WidgetManager
 
 	protected function preparePath($path)
 	{
-		$path = "{$path}__END__";
-		//	Make sure the path doesnt end with a trailing slash
-		$path = str_replace("/__END__","",$path);
-		//	Cleanup after the attempt to detect trailing slash
-		$path = str_replace("__END__","",$path);
+		//	Make sure the path starts with a slash, also remove double slashes
+		$path = str_replace("//","/","/{$path}__END__");
+		//	Remove any trailing slash from the path
+		$path = Amslib_Filesystem::removeTrailingSlash($path);
 
 		return $path;
 	}
@@ -146,7 +145,7 @@ class Amslib_WidgetManager
 		//	If you didn't find it, search the path
 		if($path == false){
 			//	can't find the widget, search the path instead
-			$fpath = Amslib::findPath($file);
+			$fpath = Amslib_Filesystem::find($file);
 
 			//	if you found it, assign it
 			if($fpath) $path = "$fpath/$file";
@@ -258,14 +257,10 @@ class Amslib_WidgetManager
 		$this->websitePath	=	$this->preparePath($websitePath);
 
 		//	Make website path into an absolute path
-		$path = $this->documentRoot.$this->websitePath;
-		$path = str_replace($this->documentRoot,"",$path);
-		$this->websitePath = $this->documentRoot.$path;
+		$this->websitePath	=	Amslib_Filesystem::absolute($this->websitePath);
 
 		//	Make widgetPath into an absolute path
-		$path = $this->documentRoot.$this->widgetPath;
-		$path = str_replace($this->documentRoot,"",$path);
-		$this->widgetPath = $this->documentRoot.$path;
+		$this->widgetPath	=	Amslib_Filesystem::absolute($this->widgetPath);
 	}
 
 	public function getAPI($name)
