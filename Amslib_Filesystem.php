@@ -49,7 +49,7 @@ class Amslib_Filesystem
 
 		return str_replace("//","/",$filename);
 	}
-
+	
 	static public function find($filename,$includeFilename=false)
 	{
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
@@ -62,5 +62,15 @@ class Amslib_Filesystem
 		}
 
 		return false;
+	}
+	
+	static public function removeTrailingSlash($path)
+	{
+		//	Make sure the path doesnt end with a trailing slash
+		$path = str_replace("/__END__","",$path);
+		//	Cleanup after the attempt to detect trailing slash
+		$path = str_replace("__END__","",$path);
+		
+		return $path;
 	}
 }

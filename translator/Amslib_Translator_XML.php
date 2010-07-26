@@ -26,7 +26,7 @@ class Amslib_Translator_XML extends Amslib_Translator
 				$translations = $this->__xpath->query("//database/translation");
 			
 				foreach($translations as $name=>$t){
-					$this->l($t->getAttribute("name"),$t->nodeValue);	
+					$this->l($t->getAttribute("name"),$this->__xdoc->saveXML($t));	
 				}
 			}	
 		}else{
