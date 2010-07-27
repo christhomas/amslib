@@ -1,12 +1,12 @@
 var Amslib_Widget = Class.create(
 {
 	mainWidget: false,
-	params:		false,
+	value:		false,
 	services:	false,
 	
 	initialize: function(selector)
 	{
-		this.params		=	new Hash();
+		this.value		=	new Hash();
 		this.services	=	new Hash();
 		
 		//	Try first to just pass it through prototype, then if fails, use as a selector
@@ -23,24 +23,28 @@ var Amslib_Widget = Class.create(
 	{
 		if(!this.mainWidget) return false;
 		
-		var po = this;
 		this.mainWidget.select(".widget_parameters input[type='hidden']").each(function(p){
 			if(p.name.indexOf("service:") >= 0){
-				po.services.set(p.name.replace("service:",""),p.value);
+				this.setService(p.name.replace("service:",""),p.value);
 			}else{
-				po.value.set(p.name,p.value);
+				this.setValue(p.name,p.value);
 			}
-		});
+		}.bind(this));
 	},
 	
-	setValue: function(name)
+	setValue: function(name,value)
 	{
-		this.value.set(name);
+		this.value.set(name,value);
 	},
 	
 	getValue: function(name)
 	{
 		return this.value.get(name);
+	},
+	
+	setService: function(name,value)
+	{
+		this.services.set(name,value);
 	},
 		
 	getService: function(name)

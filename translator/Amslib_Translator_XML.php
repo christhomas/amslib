@@ -14,6 +14,8 @@ class Amslib_Translator_XML extends Amslib_Translator
 	
 	function load($database,$readAll=false)
 	{
+		if(!file_exists($database)) $database = Amslib_Filesystem::find($database,true);
+		
 		if(!file_exists($database)){
 			print("XML TRANSLATION DATABASE: '$database' DOES NOT EXIST<br/>");
 		}
