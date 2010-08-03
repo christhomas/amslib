@@ -64,13 +64,18 @@ class Amslib_Translator
 	{
 		//	TODO: missing in the memory interface
 	}
-
-	public function translate($input,$language=NULL)
+	
+	public function getKeys()
 	{
-		return $this->t($key);
+		return array_keys($this->keyStore);
 	}
 
 	public function t($key,$language=NULL)
+	{
+		return $this->translate($key);
+	}
+
+	public function translate($key,$language=NULL)
 	{
 		if(is_string($key) && isset($this->keyStore[$key])){
 			return $this->keyStore[$key];	
@@ -78,23 +83,24 @@ class Amslib_Translator
 		
 		return $key;
 	}
-
-	public function learn($key,$translation,$database=NULL)
-	{
-		return $this->l($key,$translation);
-	}
-
+	
 	public function l($key,$translation,$database=NULL)
 	{
+		return $this->learn($key,$translation);
+	}
+	
+	public function learn($key,$translation,$database=NULL)
+	{
+		
 		$this->keyStore[$key] = $translation;
 	}
-
-	public function forget($key,$database=NULL)
+	
+	public function f($key,$database=NULL)
 	{
 		$this->f($key,$database);
 	}
 
-	public function f($key,$database=NULL)
+	public function forget($key,$database=NULL)
 	{
 		unset($this->keyStore[$key]);
 	}
