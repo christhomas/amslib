@@ -34,8 +34,7 @@ class Amslib_Router2
 
 	protected function relativePath($path)
 	{
-		$absolutePath = Amslib_Filesystem::documentRoot().$path;
-		return str_replace($this->webdir,"",$absolutePath);
+		return Amslib_Filesystem::relative($path);
 	}
 
 	public function __construct()
@@ -92,6 +91,7 @@ class Amslib_Router2
 		}
 	}
 
+	//	FIXME: wtf? something? why have I left this parameter named 'something' ???
 	public function getResource($something=NULL)
 	{
 		if($something == NULL) return $this->activeRoute["resource"];
