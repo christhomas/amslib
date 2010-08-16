@@ -91,13 +91,12 @@ class Amslib_Translator
 	
 	public function learn($key,$translation,$database=NULL)
 	{
-		
 		$this->keyStore[$key] = $translation;
 	}
 	
 	public function f($key,$database=NULL)
 	{
-		$this->f($key,$database);
+		$this->forget($key,$database);
 	}
 
 	public function forget($key,$database=NULL)
