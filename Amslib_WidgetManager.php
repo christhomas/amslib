@@ -223,6 +223,8 @@ class Amslib_WidgetManager
 			$file	=	$this->findResource($widget,$stylesheet->item($a));
 			$this->setStylesheet($id,$file);
 		}
+		
+		return $api;
 	}
 
 /*******************************************************************************
@@ -294,25 +296,23 @@ class Amslib_WidgetManager
 
 	public function load($name)
 	{
-		if(is_array($name)){
-			foreach($name as $w) $this->load($w);
-		}else{
-			$path = $this->widgetPath;
-
-			if($this->isWidgetLoaded($name)) return;
-
-			if($this->loadPackage($path,$name)){
-				$xdoc	=	$this->xdoc;
-				$xpath	=	$this->xpath;
-
-				if($this->loadDependencies()){
-					$this->xdoc		=	$xdoc;
-					$this->xpath	=	$xpath;
-				}
-
-				$this->loadConfiguration($path,$name);
-			}
+		if($this->isWidgetLoaded($name)){
+			return $this->getAPI($name);
 		}
+
+		if($this->loadPackage($this->widgetPath,$name)){
+			$xdoc	=	$this->xdoc;
+			$xpath	=	$this->xpath;
+
+			if($this->loadDependencies()){
+				$this->xdoc		=	$xdoc;
+				$this->xpath	=	$xpath;
+			}
+
+			return $this->loadConfiguration($this->widgetPath,$name);
+		}
+		
+		return false;
 	}
 
 	public function getWidgetPath()
@@ -320,6 +320,7 @@ class Amslib_WidgetManager
 		return $this->widgetPath;
 	}
 
+	//	FIXME: replace with Amslib_Filesystem::relative()
 	public function getRelativePath($path="")
 	{
 		//	Path is already relative
@@ -330,8 +331,7 @@ class Amslib_WidgetManager
 
 		return $path;
 	}
-
-
+	
 	public function setStylesheet($name,$file)
 	{
 		if($name && $file){
