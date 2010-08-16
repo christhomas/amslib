@@ -110,9 +110,9 @@ class Amslib
 
 		if(is_file($file) && file_exists($file)){
 			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
-			include($file);
-
-			return true;
+			
+			if(isset($data["include_once"])) return include_once($file);
+			return include($file);
 		}
 
 		return false;
@@ -133,10 +133,8 @@ class Amslib
 		if(is_file($file) && file_exists($file)){
 			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
 
-			if(isset($data["require_once"])) require_once($file);
-			else require($file);
-
-			return true;
+			if(isset($data["require_once"])) return require_once($file);
+			return require($file);
 		}
 
 		return false;
@@ -174,7 +172,7 @@ class Amslib
 			if(strpos($class_name,"Amslib_Database") !== false){
 				$class_name	=	"database/$class_name";
 			}
-
+			
 			$filename = str_replace("//","/","$class_name.php");
 
 			return Amslib::requireFile($filename);
@@ -209,6 +207,11 @@ class Amslib
 	static public function getParam($value,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_GET,$value,$default,$erase);
+	}
+	
+	static public function hasGet($value)
+	{
+		return (isset($_GET[$value])) ? true : false;
 	}
 
 	/**
@@ -245,6 +248,11 @@ class Amslib
 	{
 		return self::arrayParam($_POST,$value,$default,$erase);
 	}
+	
+	static public function hasPost($value)
+	{
+		return (isset($_POST[$value])) ? true : false;
+	}
 
 	/**
 	 *	function:	insertPostParameter
@@ -279,6 +287,11 @@ class Amslib
 	static public function sessionParam($value,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_SESSION,$value,$default,$erase);
+	}
+	
+	static public function hasSession($value)
+	{
+		return (isset($_SESSION[$value])) ? true : false;
 	}
 
 	static public function insertSessionParam($parameter,$value)
