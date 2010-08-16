@@ -20,7 +20,7 @@
  * description: A database object to centralise all interaction with a mysql databse
  * 		into a single object which nicely hides some of the annoying repetitive
  * 		aspects of a database, whilst giving you a nice candy layer to deal with instead
- * version: 2.5
+ * version: 2.6
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -234,7 +234,7 @@ HAS_TABLE;
 
 		$this->setLastQuery("select $query");
 		$this->selectResult = mysql_query("select $query",$this->connection);
-		if($this->debug) print("<pre>QUERY = 'select $query'<br/></pre>");
+		if($this->debug) Amslib_Keystore::set("db_query_".microtime(true),"<pre>QUERY = 'select $query'<br/></pre>");
 
 		if($this->selectResult){
 			$rowCount = mysql_num_rows($this->selectResult);
@@ -255,7 +255,7 @@ HAS_TABLE;
 
 		$this->setLastQuery("insert into $query");
 		$result = mysql_query("insert into $query",$this->connection);
-		if($this->debug) print("<pre>QUERY = 'insert into $query'<br/></pre>");
+		if($this->debug) Amslib_Keystore::set("db_query_".microtime(true),"<pre>QUERY = 'insert into $query'<br/></pre>");
 
 		$this->lastInsertId = mysql_insert_id();
 		if($result && ($this->lastInsertId !== false)) return $this->lastInsertId;
@@ -273,7 +273,7 @@ HAS_TABLE;
 
 		$this->setLastQuery("update $query");
 		$result = mysql_query("update $query",$this->connection);
-		if($this->debug) print("<pre>QUERY = 'update $query'<br/></pre>");
+		if($this->debug) Amslib_Keystore::set("db_query_".microtime(true),"<pre>QUERY = 'update $query'<br/></pre>");
 
 		if($result) return mysql_affected_rows() >= 0;
 
@@ -288,7 +288,7 @@ HAS_TABLE;
 
 		$this->setLastQuery("delete from $query");
 		$result = mysql_query("delete from $query",$this->connection);
-		if($this->debug) print("<pre>QUERY = 'delete from $query'<br/></pre>");
+		if($this->debug) Amslib_Keystore::set("db_query_".microtime(true),"<pre>QUERY = 'delete from $query'<br/></pre>");
 
 		if($result) return mysql_affected_rows();
 
