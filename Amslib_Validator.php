@@ -33,7 +33,7 @@
  * 	-	OPTIONS: DELEGATED -> This means that one validation method has called a more generic validation method
  * 		to perform common validation, but does not wish that method to set the validData, because the delegated
  * 		method is not responsible for this, an example would be the __alpha method using __text to validate it's
- * 		a valid text string first, THEN using it's extended validation methods to determine whether it's 
+ * 		a valid text string first, THEN using it's extended validation methods to determine whether it's
  * 		alphabetical or not, the __text method can succeed or fail, but the __alpha method is what determines
  * 		whether the value passes validation
  *
@@ -48,12 +48,12 @@ class Amslib_Validator
 {
 	/**
 	 * array:	$__types
-	 * 
+	 *
 	 * Contains all the registered types that are allowed to validate, in order to add a new validator
 	 * you must register it's type in the constructor
 	 */
 	var $__types;
-	
+
 	/**
 	 * array:	$__error
 	 *
@@ -134,7 +134,7 @@ class Amslib_Validator
 		$this->register("date",				array("Amslib_Validator","__date"));
 		$this->register("file",				array("Amslib_Validator","__file"));
 	}
-	
+
 	/**
 	 * method:	__text
 	 *
@@ -256,13 +256,13 @@ class Amslib_Validator
 		if(isset($options["p1"]) && isset($options["p2"])){
 			$f1 = $options["p1"];
 			$f2 = $options["p2"];
-			
+
 			if((!isset($this->__source[$f1]) || !isset($this->__source[$f2]))){
 				if($required) return "VALIDATOR_PASSWORD_FIELDS_MISSING";
-				
+
 				return true;
 			}
-			
+
 			$p1 = $this->__source[$f1];
 			$p2 = $this->__source[$f2];
 
@@ -640,7 +640,7 @@ class Amslib_Validator
 	function __file($name,$value,$required,$options)
 	{
 		$value = Amslib::filesParam($name);
-		
+
 		if($value !== NULL){
 			if(is_file($value["tmp_name"])){
 				$this->setValid($name,$value);
@@ -660,18 +660,18 @@ class Amslib_Validator
 		}
 
 		if($required == false){
-			//	I am 100% sure this is a bug, what?? setting valid data to an error message????
-			if(!isset($options["delegated"])) $this->setValid($name,"VALIDATOR_FILE_REQUEST_FILE_NOT_FOUND");
+			if(!isset($options["delegated"])) $this->setValid($name,$value);
 			return true;
 		}
 
+		//	Unknown error, just comment it here so I can't lose the info: "VALIDATOR_FILE_REQUEST_FILE_NOT_FOUND"
 		return "VALIDATOR_FILE_NOT_FOUND";
 	}
-	
+
 	function setValid($name,$value)
 	{
 		$this->__validData[$name] = $value;
-	}	
+	}
 
 	/**
 	 * method:	add
@@ -717,22 +717,22 @@ class Amslib_Validator
 
 		$this->__checkRequiredRules();
 	}
-	
+
 	/**
 	 * method: register
-	 * 
+	 *
 	 * Register a validation type, this allows the importation of external validator methods to act like
 	 * native ones
-	 * 
+	 *
 	 * parameters:
 	 * 	$name		-	The name of the validation method to implment (you can override built in types here)
 	 * 	$callback	-	The name of the callback, can be array of two items if callback is from a class (see: call_user_func)
 	 */
-	
+
 	function register($name,$callback)
 	{
 		$this->__types[$name] = $callback;
-	}	
+	}
 
 	/**
 	 * For description: read the member variables related to this method, they explain all
@@ -787,9 +787,9 @@ class Amslib_Validator
 			$this->__hasExecuted = true;
 
 			$value = (isset($this->__source[$name])) ? $this->__source[$name] : NULL;
-			
+
 			if(is_string($value)) $value = trim($value);
-			
+
 			$success = call_user_func(
 							$this->__types[$validator["type"]],
 							$name,
@@ -797,7 +797,7 @@ class Amslib_Validator
 							$validator["required"],
 							$validator["options"]
 						);
-						
+
 			if($success !== true){
 				$this->__error[] = array($name,$value,$success);
 			}
