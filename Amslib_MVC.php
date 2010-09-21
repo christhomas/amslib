@@ -23,16 +23,16 @@
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
- 
+
 class Amslib_MVC
 {
 	/*********************************
 	 * string: $path
-	 * 
+	 *
 	 * The path to the MVC base path within the website filesystem
 	 */
 	protected $path;
-	
+
 	protected $database;
 	protected $controller;
 	protected $layout;
@@ -42,12 +42,12 @@ class Amslib_MVC
 	protected $images;
 	protected $service;
 	protected $value;
-	
+
 	//	MVC Configuration
 	protected $controllerDir	=	"controllers";
 	protected $controllerPrefix	=	"Ct_";
 	protected $layoutDir		=	"layouts";
-	protected $layoutPrefix		=	"La_";	
+	protected $layoutPrefix		=	"La_";
 	protected $viewDir			=	"views";
 	protected $viewPrefix		=	"Vi_";
 	protected $themeDir			=	"themes";
@@ -56,13 +56,13 @@ class Amslib_MVC
 	protected $objectPrefix		=	"";
 	protected $serviceDir		=	"services";
 	protected $servicePrefix	=	"Sv_";
-	
+
 	protected $widgetManager;
 	protected $widgetName;
 	protected $widgetPath;
-	
+
 	protected function initialise(){}
-	
+
 	public function __construct()
 	{
 		$this->path				=	"";
@@ -77,7 +77,7 @@ class Amslib_MVC
 		$this->widgetPath		=	NULL;
 		$this->widgetName		=	NULL;
 	}
-	
+
 	public function setupMVC($type,$dir,$prefix)
 	{
 		switch($type){
@@ -85,118 +85,118 @@ class Amslib_MVC
 				$this->controllerDir	=	$dir;
 				$this->controllerPrefix	=	$prefix;
 			}break;
-			
+
 			case "layouts":{
 				$this->layoutDir		=	$dir;
 				$this->layoutPrefix		=	$prefix;
 			}break;
-			
+
 			case "views":{
 				$this->viewDir			=	$dir;
 				$this->viewPrefix		=	$prefix;
 			}break;
-			
+
 			case "themes":{
 				$this->themeDir			=	$dir;
 				$this->themePrefix		=	$prefix;
 			}
-			
+
 			case "objects":{
 				$this->objectDir		=	$dir;
 				$this->objectPrefix		=	$prefix;
 			}break;
-			
+
 			case "services":{
 				$this->serviceDir		=	$dir;
 				$this->servicePrefix	=	$prefix;
 			}break;
 		}
 	}
-	
+
 	public function setDatabase($database)
 	{
 		$this->database = $database;
 	}
-	
+
 	public function setWidgetManager($widgetManager)
 	{
 		$this->widgetManager	=	$widgetManager;
 		$this->widgetPath		=	$widgetManager->getWidgetPath();
-		
+
 		$this->initialise();
 	}
-	
+
 	public function getWidgetManager()
 	{
 		return $this->widgetManager;
 	}
-	
+
 	public function setWidgetName($name)
 	{
 		$this->widgetName = $name;
 		$this->setWidgetPath("{$this->widgetPath}/{$this->widgetName}");
 	}
-	
+
 	public function getWidgetName()
 	{
 		return $this->widgetName;
 	}
-	
+
 	public function setWidgetPath($path)
 	{
 		$this->widgetPath = $path;
 	}
-	
+
 	public function getWidgetPath()
 	{
 		return $this->widgetPath;
 	}
-	
+
 	public function setValue($name,$value)
 	{
 		$this->value[$name] = $value;
 	}
-	
+
 	public function getValue($name)
 	{
-		return (isset($this->value[$name])) ? $this->value[$name] : NULL;	
+		return (isset($this->value[$name])) ? $this->value[$name] : NULL;
 	}
-	
+
 	public function setController($id,$name)
 	{
 		$file = "{$this->widgetPath}/{$this->controllerDir}/{$this->controllerPrefix}{$name}.php";
-		
+
 		$this->controllers[$id] = $file;
 	}
-	
+
 	public function getController($id)
 	{
 		return $this->controllers[$id];
 	}
-	
+
 	public function setLayout($id,$name)
 	{
 		$file = "{$this->widgetPath}/{$this->layoutDir}/{$this->layoutPrefix}{$name}.php";
 
 		$this->layout[$id] = $file;
-		
+
 		if($this->layout["default"] == false) $this->layout["default"] = $this->layout[$id];
 	}
-	
+
 	public function getLayout($id=NULL)
 	{
 		if($id && isset($this->layout[$id])) return $this->layout[$id];
-		
+
 		return $this->layout;
 	}
-	
+
 	public function setObject($id,$name)
 	{
 		$file = "{$this->widgetPath}/{$this->objectDir}/{$this->objectPrefix}{$name}.php";
-				
+
 		$this->object[$id] = $file;
 	}
-	
+
 	public function getObject($id,$singleton=false)
 	{
 		if(isset($this->object[$id]) && Amslib::requireFile($this->object[$id]))
@@ -204,112 +204,112 @@ class Amslib_MVC
 			if($singleton){
 				return call_user_func(array($id,"getInstance"));
 			}
-			
+
 			return new $id;
 		}
-		
+
 		return false;
 	}
-	
+
 	public function setService($id,$file)
 	{
 		$this->service[$id] = $file;
-		
+
 		//	Set this as a service url for the javascript to acquire
 		$this->setValue("service:$id", $file);
 	}
-	
+
 	public function getService($id)
 	{
 		return (isset($this->service[$id])) ? $this->service[$id] : false;
 	}
-	
+
 	/**
 	 * method: getHiddenParameters
-	 * 
+	 *
 	 * This outputs a block of hidden inputs for javascript or a web form to use when posting
 	 * or processing data.
-	 * 
+	 *
 	 * returns:	A string of HTML, containing all the parameters
-	 * 
+	 *
 	 * notes:
 	 * 	-	This is perhaps not the best way, because any value will be output, perhaps even secret information
 	 * 		that the user puts accidentally and doesnt realise it'll be output as plain text in the HTML
 	 * 	-	I hate the fact that I'm outputting HTML here, but I dont really have any other alternative which is cheap
 	 * 		and relatively easy and clean, it's simpler, but not the best way I am sure.
-	 * 
+	 *
 	 * warning:
-	 * 	-	do not change \" for single quote ' or similar, it's done like this to prevent certain types 
-	 * 		of bugs I found with certain combinations of code, it's important to prevent future problems 
+	 * 	-	do not change \" for single quote ' or similar, it's done like this to prevent certain types
+	 * 		of bugs I found with certain combinations of code, it's important to prevent future problems
 	 * 		to keep \" because it was the only way to prevent strings from becoming broken
 	 */
 	public function getHiddenParameters()
 	{
 		 $list = "";
-		
+
 		foreach($this->value as $k=>$v){
 			if(is_bool($v)) $v = ($v) ? "true" : "false";
-			
-			//	WARNING:	do not change \" for single quote ' or similar, it's done like this to prevent 
+
+			//	WARNING:	do not change \" for single quote ' or similar, it's done like this to prevent
 			//				certain types of bugs I found with certain combinations of code, it's important
 			//				to prevent future problems to keep \" because it was the only way to prevent strings
 			//				from becoming broken
 			$list.="<input type=\"hidden\" name=\"$k\" value=\"$v\" />";
 		}
-		
+
 		return "<div class='widget_parameters'>$list</div>";
 	}
-	
+
 	public function copyService($src,$id,$copyAs=NULL)
 	{
 		if($copyAs === NULL) $copyAs = $id;
-		
+
 		$api = $this->widgetManager->getAPI($src);
 		$this->setService($copyAs,$api->getService($id));
 	}
-	
+
 	public function setImage($id,$file)
 	{
 		$this->images[$id] = $file;
 	}
-	
+
 	public function getImage($id)
 	{
 		return (isset($this->images[$id])) ? $this->images[$id] : false;
 	}
-	
+
 	public function setView($id,$name)
 	{
 		$file = "{$this->widgetPath}/{$this->viewDir}/{$this->viewPrefix}{$name}.php";
-		
+
 		$id = (strlen($id)) ? $id : $name;
-		
+
 		$this->view[$id] = $file;
 	}
-	
+
 	public function getView($id,$parameters=array())
 	{
 		if(isset($this->view[$id])){
 			$view = $this->view[$id];
-			
+
 			$parameters["widget_manager"]	=	$this->widgetManager;
 			$parameters["api"]				=	$this;
-			
+
 			ob_start();
 			Amslib::requireFile($view,$parameters);
 			return ob_get_clean();
 		}
-		
+
 		return "";
 	}
-	
+
 	public function setTheme($id,$name)
 	{
 		$file = "{$this->widgetPath}/{$this->themeDir}/{$this->themePrefix}{$name}.php";
-				
+
 		$this->theme[$id] = $file;
 	}
-	
+
 	public function decorate($theme,$parameters)
 	{
 		if(isset($this->theme[$theme])){
@@ -317,24 +317,24 @@ class Amslib_MVC
 
 			$parameters["widget_manager"]	=	$this->widgetManager;
 			$parameters["api"]				=	$this;
-				
+
 			ob_start();
 			Amslib::requireFile($theme,$parameters);
 			return ob_get_clean();
 		}
-				
+
 		return "";
 	}
-	
+
 	/**************************************************************************
 	 * method: render
-	 * 
-	 * render the output from this MVC, the basic version just renders the 
+	 *
+	 * render the output from this MVC, the basic version just renders the
 	 * first layout as defined in the XML, without a controller.
-	 * 
+	 *
 	 * returns:
 	 * 	A string of HTML or empty string which represents the first layout
-	 * 
+	 *
 	 * notes:
 	 * 	we only render the first layout in the widget, what happens if there are 10 layouts?
 	 */
@@ -348,11 +348,17 @@ class Amslib_MVC
 		Amslib::requireFile($layout,$parameters);
 		return ob_get_clean();
 	}
-	
-	public function replyJSON($response)
+
+	static public function replyJSON($response)
 	{
 		header("Content-Type: application/json");
 		$response = json_encode($response);
 		die($response);
+	}
+
+	static public function safeRedirect($location)
+	{
+		header("Location: $location");
+		die("waiting to redirect");
 	}
 }
