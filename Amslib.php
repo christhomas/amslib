@@ -56,6 +56,16 @@ class Amslib
 		self::$showErrorTrigger = true;
 	}
 
+	static public function lchop($str,$search)
+	{
+		return ($p = strpos($str,$search)) !== false ? substr($str,$p) : $str;
+	}
+
+	static public function rchop($str,$search)
+	{
+		return ($p = strrpos($str,$search)) !== false ? substr($str,0,$p) : $str;
+	}
+
 	/**
 	 *	function:	addIncludePath
 	 *
@@ -302,6 +312,11 @@ class Amslib
 	static public function filesParam($value,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_FILES,$value,$default,$erase);
+	}
+
+	static public function insertFilesParam($parameter,$value)
+	{
+		$_FILES[$parameter] = $value;
 	}
 
 	static public function arrayParam(&$source,$value,$default=NULL,$erase=false)
