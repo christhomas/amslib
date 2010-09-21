@@ -642,12 +642,12 @@ class Amslib_Validator
 		$value = Amslib::filesParam($name);
 
 		if($value !== NULL){
-			if(is_file($value["tmp_name"])){
+			if(strlen($value["tmp_name"]) && is_file($value["tmp_name"])){
 				$this->setValid($name,$value);
 				return true;
-			}else{
-				if($required == false) return true;
 			}
+
+			if($required == false) return true;
 
 			//	Return some alternative errors to FILE_NOT_FOUND
 			if($value["error"] == UPLOAD_ERR_INI_SIZE)		return "VALIDATOR_FILE_EXCEED_INI_SIZE";
@@ -659,10 +659,7 @@ class Amslib_Validator
 			if($value["error"] == UPLOAD_ERR_EXTENSION)		return "VALIDATOR_FILE_BANNED_EXTENSION";
 		}
 
-		if($required == false){
-			if(!isset($options["delegated"])) $this->setValid($name,$value);
-			return true;
-		}
+		if($required == false) return true;
 
 		//	Unknown error, just comment it here so I can't lose the info: "VALIDATOR_FILE_REQUEST_FILE_NOT_FOUND"
 		return "VALIDATOR_FILE_NOT_FOUND";
