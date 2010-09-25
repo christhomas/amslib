@@ -9,8 +9,17 @@ class Amslib_Translator_XML extends Amslib_Translator
 		parent::__construct();
 	}
 
-	function open($database,$readAll=false)
+	/** DEPRECATED: use load() instead **/
+	function open($database,$readAll=false){ $this->load($database,$readAll); }
+	
+	function load($database,$readAll=false)
 	{
+		if(!file_exists($database)) $database = Amslib_Filesystem::find($database,true);
+		
+		if(!file_exists($database)){
+			print("XML TRANSLATION DATABASE: '$database' DOES NOT EXIST<br/>");
+		}
+		
 		$this->__xdoc = new DOMDocument('1.0', 'UTF-8');
 		if($this->__xdoc->load($database)){
 			$this->__xpath = new DOMXPath($this->__xdoc);
@@ -19,7 +28,7 @@ class Amslib_Translator_XML extends Amslib_Translator
 				$translations = $this->__xpath->query("//database/translation");
 			
 				foreach($translations as $name=>$t){
-					$this->l($t->getAttribute("name"),$t->nodeValue);	
+					$this->l($t->getAttribute("name"),$this->__xdoc->saveXML($t));	
 				}
 			}	
 		}else{
@@ -44,5 +53,19 @@ class Amslib_Translator_XML extends Amslib_Translator
 		}
 		
 		return $t;
+	}
+	
+	function learn($key,$value,$database=NULL)
+	{
+		return parent::learn($key,$value,$database);
+	}
+	
+	static public function &getInstance()
+	{
+		static $instance = NULL;
+
+		if($instance === NULL) $instance = new self();
+
+		return $instance;
 	}
 }

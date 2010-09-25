@@ -84,7 +84,7 @@ class Amslib_Database
 
 	protected function getDatabaseLogin()
 	{
-		die("Your database layer need to implement this method");
+		die("Your database layer need to implement this method: getDatabaseLogin");
 	}
 
 	protected function getLastTransactionId()
@@ -121,12 +121,18 @@ class Amslib_Database
 		$this->getDatabaseLogin();
 		$this->makeConnection();
 	}
-
+	
 	public function fatalError($msg)
 	{
-		$this->loginDetails = NULL;
-
-		die("FATAL ERROR: $msg<br/>mysql_error = '".$this->error()."'");
+		//	Protect sensitive data
+		$this->loginDetails		=	"*PROTECTED*";
+		$this->__lastResult		=	"*PROTECTED*";
+		$this->__lastQuery		=	"*PROTECTED*";
+		
+		die("	FATAL ERROR: $msg<br/>
+				database error = '".$this->error()."'<br/>
+				location of error = ".Amslib::var_dump(array_slice(debug_backtrace(),1,2),true)
+		);
 	}
 
 	public function setDebug($state)
