@@ -21,6 +21,21 @@ class Amslib_Form
 		return $options;
 	}
 	
+	static public function numericSelectOptions($start,$stop,$selected=NULL)
+	{
+		if(!$start || !is_numeric($start)) return false;
+		if(!$stop || !is_numeric($stop)) return false;
+		
+		$options = "";
+		
+		for($a=$start;$a<$stop;$a++){
+			$enabled = ($a == $selected) ? "selected='selected'" : "";
+			$options .= "<option $enabled value='$a'>$a</option>";
+		}
+		
+		return $options;
+	}
+	
 	static public function getFilename($name)
 	{
 		$file = Amslib::filesParam($name);

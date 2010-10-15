@@ -68,6 +68,7 @@ class Amslib_Router_Language2
 		self::enable();
 		 
 		//	If the language passed was invalid, set the language requested to the default
+		//	FIXME: This doesn't make much sense since setting default in method "add" is different to this
 		$langName = self::sanitise($langName);
 		
 		//	If there is no session language, set it to the language being requested
