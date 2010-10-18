@@ -224,6 +224,8 @@ class Amslib_WidgetManager
 			$file	=	$this->findResource($widget,$stylesheet->item($a));
 			$this->setStylesheet($id,$file);
 		}
+		
+		$api->initialise();
 	}
 
 /*******************************************************************************

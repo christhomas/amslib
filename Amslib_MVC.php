@@ -61,7 +61,7 @@ class Amslib_MVC
 	protected $widgetName;
 	protected $widgetPath;
 
-	protected function initialise(){}
+	public function initialise(){}
 
 	public function __construct()
 	{
@@ -127,8 +127,6 @@ class Amslib_MVC
 	{
 		$this->widgetManager	=	$widgetManager;
 		$this->widgetPath		=	$widgetManager->getWidgetPath();
-
-		$this->initialise();
 	}
 
 	public function getWidgetManager()
