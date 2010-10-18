@@ -117,6 +117,11 @@ class Amslib_MVC
 	{
 		$this->database = $database;
 	}
+	
+	public function getDatabase()
+	{
+		return $this->database;
+	}
 
 	public function setWidgetManager($widgetManager)
 	{
@@ -271,6 +276,8 @@ class Amslib_MVC
 	public function setImage($id,$file)
 	{
 		$this->images[$id] = $file;
+		
+		$this->setValue("image:$id", $file);
 	}
 
 	public function getImage($id)
