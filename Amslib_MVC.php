@@ -363,7 +363,11 @@ class Amslib_MVC
 
 	static public function safeRedirect($location)
 	{
-		header("Location: $location");
-		die("waiting to redirect");
+		if(strlen($location)){
+			header("Location: $location");
+			die("waiting to redirect");
+		}else{
+			die("The 'return_url' parameter was empty, you cannot redirect to an empty location");
+		}
 	}
 }

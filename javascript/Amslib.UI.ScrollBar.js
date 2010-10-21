@@ -1,7 +1,8 @@
 if(Amslib.UI == "undefined")
 	throw "Amslib.UI.ScrollBar requires Amslib.UI to be loaded.";
 
-Amslib.UI.ScrollBar = Class.create(Amslib.UI,{
+Amslib.UI.ScrollBar = Class.create(Amslib.UI,
+{
 	parent:		false,
 	content:	false,
 	handle:		false,
@@ -33,6 +34,11 @@ Amslib.UI.ScrollBar = Class.create(Amslib.UI,{
 	
 	hide: function()
 	{
+		//	Reset the view to the top
+		this.handle.setStyle({top: "0px"});
+		this.position = 0;
+		this.updateContent();
+		//	Now hide the track
 		this.track.hide();
 	},
 	
