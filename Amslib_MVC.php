@@ -53,8 +53,6 @@ class Amslib_MVC
 	protected $widgetName;
 	protected $widgetPath;
 	
-	protected function initialise(){}
-	
 	protected function getComponentPath($component,$name)
 	{
 		return "{$this->widgetPath}/{$this->dir[$component]}/{$this->prefix[$component]}{$name}.php";
@@ -81,6 +79,11 @@ class Amslib_MVC
 		$this->setupMVC("object",		"objects",		"");
 		$this->setupMVC("service",		"services",		"Sv_");
 		$this->setupMVC("theme",		"themes",		"Th_");
+	}
+	
+	public function initialise()
+	{
+		//	You can implement this method in your API and it'll be called after the system has opened the plugin correctly
 	}
 
 	public function setupMVC($type,$dir,$prefix)
