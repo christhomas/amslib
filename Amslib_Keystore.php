@@ -51,9 +51,4 @@ class Amslib_Keystore
 	{
 		return self::$store;
 	}
-	
-	static public function getAll()
-	{
-		return self::$store;
-	}
 }
