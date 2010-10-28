@@ -282,12 +282,12 @@ class Amslib_WidgetManager
 	 * 	$api	-	An object which is to be used to override the default widget api
 	 *
 	 * example:
-	 *		require_once("CustomApp_Amstudios_Message_List.php");
-	 *		class CustomApp_Amstudios_Message_List extends Amstudios_Message_List{}
-	 *		$api = CustomApp_Amstudios_Message_List::getInstance();
+	 *		require_once("CustomApp_Amstudios_Message_Thread_List.php");
+	 *		class CustomApp_Amstudios_Message_Thread_List extends Amstudios_Message_Thread_List{}
+	 *		$api = CustomApp_Amstudios_Message_Thread_List::getInstance();
 	 *		$api->setValue("key","value");
-	 *		$widgetManager->overrideAPI("amstudios_message_list",$api);
-	 *		$widgetManager->render("amstudios_message_list");
+	 *		$widgetManager->overrideAPI("amstudios_message_thread_list",$api);
+	 *		$widgetManager->render("amstudios_message_thread_list");
 	 */
 	public function overrideAPI($name,$api)
 	{

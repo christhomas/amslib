@@ -73,4 +73,23 @@ class Amslib_Filesystem
 		
 		return $path;
 	}
+	
+	static public function getList($dir,$recurse=false)
+	{
+		$list = array();
+		
+		if(is_dir($dir)){
+			$list = glob("$dir/*");
+			
+			if($recurse){
+				foreach($list as $l){
+					$subdir = self::getList($l,$recurse);
+					
+					$list = array_merge($list,$subdir);
+				}
+			}
+		}
+		
+		return $list;
+	}
 }

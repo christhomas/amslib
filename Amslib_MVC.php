@@ -239,7 +239,10 @@ class Amslib_MVC
 		$service = $this->getService($id);
 		$service = Amslib_Filesystem::absolute($service);
 		
-		return Amslib::requireFile($service);
+		$parameters["widget_manager"]	=	$this->widgetManager;
+		$parameters["api"]				=	$this;
+		
+		return Amslib::requireFile($service,$parameters);
 	}
 	
 	public function setTranslation($name,$value)

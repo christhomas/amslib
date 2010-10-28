@@ -17,7 +17,7 @@
  *
  * File: Amslib_Validator.php
  * Title: Antimatter Form Validator
- * Version: 2.5
+ * Version: 2.8
  * Project: amslib
  *
  * Contributors:
@@ -28,14 +28,6 @@
  * class: Amslib_Validator
  *
  * Validates a form posted from the browser to see whether the data conforms to the expected types
- *
- * notes:
- * 	-	OPTIONS: DELEGATED -> This means that one validation method has called a more generic validation method
- * 		to perform common validation, but does not wish that method to set the validData, because the delegated
- * 		method is not responsible for this, an example would be the __alpha method using __text to validate it's
- * 		a valid text string first, THEN using it's extended validation methods to determine whether it's 
- * 		alphabetical or not, the __text method can succeed or fail, but the __alpha method is what determines
- * 		whether the value passes validation
  *
  * future improvements
  * 	-	Add a url validator method perhaps?
@@ -121,11 +113,13 @@ class Amslib_Validator
 		$this->__hasExecuted		=	false;
 
 		$this->__setRequiredRules(false);
+
 		$this->register("text",				array("Amslib_Validator","__text"));
+		//	Sometimes people mistake text<->string so make string an alias of text
+		$this->register("string",			array("Amslib_Validator","__text"));
 		$this->register("alpha",			array("Amslib_Validator","__alpha"));
 		$this->register("alpha_relaxed",	array("Amslib_Validator","__alpha_relaxed"));
 		$this->register("password",			array("Amslib_Validator","__password"));
-		$this->register("dni",				array("Amslib_Validator","__dni"));
 		$this->register("boolean",			array("Amslib_Validator","__boolean"));
 		$this->register("number",			array("Amslib_Validator","__number"));
 		$this->register("email",			array("Amslib_Validator","__email"));
@@ -133,6 +127,12 @@ class Amslib_Validator
 		$this->register("phone",			array("Amslib_Validator","__phone"));
 		$this->register("date",				array("Amslib_Validator","__date"));
 		$this->register("file",				array("Amslib_Validator","__file"));
+
+		//	Methods to validate spanish national identification document (dni)
+		$this->register("dni",				array("Amslib_Validator","__dni"));
+		$this->register("cif",				array("Amslib_Validator","__cif"));
+		$this->register("nif",				array("Amslib_Validator","__nif"));
+		$this->register("nie",				array("Amslib_Validator","__nie"));
 	}
 	
 	/**
@@ -144,7 +144,7 @@ class Amslib_Validator
 	 * 	name		-	The name of the field
 	 * 	value		-	The value of the field
 	 * 	required	-	Boolean true or false whether the field is mandatory or not
-	 * 	options		-	Validation restrictions: minlength,maxlength,delegated are supported
+	 * 	options		-	Validation restrictions: minlength,maxlength
 	 *
 	 * returns:
 	 * 	If failed with the string length is zero and required being enabled, return "VALIDATOR_TEXT_LENGTH_ZERO"
@@ -158,7 +158,7 @@ class Amslib_Validator
 	 * 	-	If the length of the string is below the minimum set, return VALIDATOR_TEXT_LENGTH_IS_BELOW_MINIMUM
 	 * 	-	If the length of the string is above the maximum set, return VALIDATOR_TEXT_LENGTH_IS_ABOVE_MAXIMUM
 	 * 	-	else the validation passed, move to setting the validData
-	 * 	-	Only set the validData item for this method, if the delegated field does not exist (read class notes at top for what delegated means)
+	 * 	-	if successfully validated Set the validData item for this method
 	 *
 	 * notes:
 	 * 	-	we should create a shared method for doing simple calculations, like "checkLength" to see whether the value passes this test or not
@@ -177,7 +177,7 @@ class Amslib_Validator
 			if(in_array($value,$options["invalid"])) return "VALIDATOR_TEXT_INVALID_INPUT";
 		}
 
-		if(!isset($options["delegated"])) $this->setValid($name,$value);
+		$this->setValid($name,$value);
 
 		return true;
 	}
@@ -191,21 +191,18 @@ class Amslib_Validator
 	 * 	name		-	The name of the field
 	 * 	value		-	The value of the field
 	 * 	required	-	Boolean true or false whether the field is mandatory or not
-	 * 	options		-	Validation restrictions: minlength,maxlength,delegated supported
+	 * 	options		-	Validation restrictions: minlength,maxlength
 	 *
 	 * returns:
 	 * 	If failed, will return a text string representing the error (this can be used to represent a language translation key)
 	 * 	If successful, will return true and assign the valid data into the $__validData array for retrieval later
 	 *
 	 * operations:
-	 * 	-	Delegate text validation to the __text method, if return value is NOT true, return the status returned
 	 * 	-	Otherwise, validate as a alphabetical string only
 	 * 	-	If success, validation passed, set the validData to store the data and return true
 	 */
 	function __alpha($name,$value,$required,$options)
 	{
-		$options["delegated"] = true;
-
 		$status = $this->__text($name,$value,$required,$options);
 
 		//	Text validation failed, drop out here
@@ -213,7 +210,7 @@ class Amslib_Validator
 
 		if(!ctype_alpha($value)) return "VALIDATOR_TEXT_NOT_ALPHABETICAL";
 
-		if(!isset($options["delegated"])) $this->setValid($name,$value);
+		$this->setValid($name,$value);
 
 		return true;
 	}
@@ -224,10 +221,10 @@ class Amslib_Validator
 	 * Validate a text field contains alphabetical (A-Za-z) characters and some other normal human text characters
 	 *
 	 * parameters:
-	 * 	name	-	The name of the field
-	 * 	value	-	The value of the field
+	 * 	name		-	The name of the field
+	 * 	value		-	The value of the field
 	 * 	required	-	Boolean true or false whether the field is mandatory or not
-	 * 	options	-	Validation restrictions: minlength,maxlength,delegated supported
+	 * 	options		-	Validation restrictions: minlength,maxlength
 	 *
 	 * returns:
 	 * 	If failed, will return a text string representing the error (this can be used to represent a language translation key)
@@ -235,8 +232,6 @@ class Amslib_Validator
 	 */
 	function __alpha_relaxed($name,$value,$required,$options)
 	{
-		$options["delegated"] = true;
-
 		$status = $this->__text($name,$value,$required,$options);
 
 		//	Text validation failed, drop out here
@@ -246,13 +241,14 @@ class Amslib_Validator
 
 		if($regexp != 0) return "VALIDATOR_TEXT_NOT_ALPHABETICAL";
 
-		if(!isset($options["delegated"])) $this->setValid($name,$value);
+		$this->setValid($name,$value);
 
 		return true;
 	}
 
 	function __password($name,$value,$required,$options)
 	{
+		//	TODO: This seems unnecessarily complex
 		if(isset($options["p1"]) && isset($options["p2"])){
 			$f1 = $options["p1"];
 			$f2 = $options["p2"];
@@ -287,19 +283,20 @@ class Amslib_Validator
 					return "VALIDATOR_PASSWORDS_EMPTY";
 				}
 
-				$this->__validData[$name] = $p1;
+				$this->setValid($name,$p1);
 				return true;
 			}
 		}else{
-			$options["delegated"] = true;
 			$status = $this->__text($name,$value,$required,$options);
 
-			if($status !== true) return $status;
-			else{
-				$this->__validData[$name] = $value;
-
+			if($status === true){
+				$this->setValid($name,$value);
 				return true;
 			}
+			
+			if($required == false) return true;
+			
+			return $status;
 		}
 
 		return false;
@@ -315,36 +312,172 @@ class Amslib_Validator
 	 *
 	 * parameters:
 	 * 	name		-	The name of the field
-	 * 	value		-	The value of the field
+	 * 	$code		-	The value of the field
 	 * 	required	-	Boolean true or false whether the field is mandatory or not
-	 * 	options		-	Validation restrictions: delegated supported
+	 * 	options		-	Validation restrictions
 	 *
 	 * returns:
-	 * 	if failed, will return a text string representing the error (this can be used to represent a language translation key)
-	 * 	if successful, will set the validData structure and then return true
+	 *	If code does not match any DNI like profile, will return "VALIDATOR_DNI_INVALID"
+	 * 	If code does match, look for __nif, __cif or __nie for the return information, it completely delegates everything
 	 *
-	 * operations:
-	 * 	-	call DNI::validate to validate the DNI number
-	 * 	-	if the result is greater than zero, one of the types of DNI passed validation (check the number for the actual validation that took place)
-	 * 	-	If successful, set the validData structure and return true
-	 * 	-	If failed, return "VALIDATOR_DNI_INVALID"
+	 * returns:
+	 * 	Will set the valid value, or return VALIDATOR_DNI_INVALID for a invalid code
 	 */
-	function __dni($name,$dni,$required,$options)
+	function __dni($name,$code,$required,$options)
 	{
-		Amslib::requireFile("amslib/lib/dni.php");
-
-		$result = DNI::validate($dni);
-
-		if($result > 0){
-			if(!isset($options["delegated"])) $this->setValid($name,$dni);
-			return true;
+		$code = strtoupper($code);
+		
+		if(ereg("^[JABCDEFGHI]{1}[0-9]{7}[A-Z0-9]{1}$",$code)){
+			return $this->__cif($name,$code,$required,$options);
 		}
-
-		if($required == false) return true;
+		
+		//	FIXME:	this regexp looks wrong, can you have letters in the 
+		//			middle of a nie? I thought it was identical	to NIF??
+		if(ereg("^[TX]{1}[A-Z0-9]{8}[A-Z]?$",$code)){
+			return $this->__nie($name,$code,$required,$options);
+		}
+		
+		if(ereg("^[0-9]{8}[A-Z]{1}$",$code)){
+			return $this->__nif($name,$code,$required,$options);
+		}
 
 		return "VALIDATOR_DNI_INVALID";
 	}
+	
+	/**
+	 * function: __nif
+	 * 
+	 * Validate a Spanish NIF identication code
+	 * 
+	 * parameters:
+	 * 	$code	-	The NIF DNI code to check
+	 * 
+	 * returns:
+	 * 	If failed because the end character did not match the correct calculated one, return "VALIDATOR_NIF_INVALID
+	 * 	If failed because the last letter was not a alpha character, return "VALIDATOR_NIF_ENDCHAR_NOT_ALPHA"
+	 * 	If successful, will set the valid data array and return true
+	 * 
+	 * operations:
+	 * 	-	Check the end character is a letter
+	 * 	-	obtain the numerical part and modulus against 23
+	 * 	-	The result, will be an array index into a list of validation characters
+	 * 	-	If the end letter from the dni was the same letter as the validation character then the DNI is valid
+	 */
+	function __nif($name,$code,$required,$options)
+	{
+		$endLetter = substr($code,strlen($code)-1); 
+		if(!is_numeric($endLetter)){
+			$source = "TRWAGMYFPDXBNJZSQVHLCKET";
+			
+			$code	=	substr($code,0,-1);
+			$sum	=	$code%23;
+	
+			$calcLetter = substr($source,$sum,1);
+	
+			if($endLetter != $calcLetter) return "VALIDATOR_NIF_INVALID";
+			
+			$this->setValid($name,$code);
+			
+			return true;
+		}
+		
+		if(!$required) return true;
+	
+		return "VALIDATOR_NIF_ENDCHAR_NOT_ALPHA";
+	}
+	
+	
+	/**
+	 * function: __cif
+	 * 
+	 * Validate a Spanish CIF identification code
+	 * 
+	 * parameters:
+	 * 	$code	-	The CIF to check
+	 * 
+	 * returns:
+	 *	If failed, will return a string "VALIDATOR_CIF_INVALID"
+	 * 	If successful, will set the valid data array and return true
+	 * 
+	 * operations:
+	 * 	-	grab the last value, this is the checksum value
+	 * 	-	sum all the odd numbers together
+	 * 	-	double each even number and if above 9, add both digits together like the luhn algoritum [15 -> 6 (1+5)] and add the result to the sum
+	 * 	-	obtain the modulus of the resulting sum as the control (obtain the modulus of the that as well (in case of sum = 10)
+	 * 	-	If the control equals the last value, or the letter at that index, then return positively, otherwise, failure
+	 */
+	function __cif($name,$code,$required,$options)
+	{
+		$lastLetter = array("J", "A", "B", "C", "D", "E", "F", "G", "H", "I");
+	
+		$numeric = substr($code,1);
+		
+		$last = substr($numeric,strlen($numeric)-1);	
+		$sum = 0;
+		
+		//	Sum up all the even numbers
+		for($pos=1;$pos<7;$pos+=2){
+			$sum += (int)(substr($numeric,$pos,1));
+		}
+		
+		//	Sum up all the odd numbers (but differently)
+		//	This uses the Luhn Algorithm: 
+		//		Any value greater than 10, comprises two numbers (etc: 15 is [1, 5] )
+		//		Add both together, this is the value to sum
+		for($pos=0;$pos<8;$pos+=2){
+			$val = 2*(int)(substr($numeric,$pos,1));
+			$val = str_pad($val,2,"0",STR_PAD_LEFT);
+			$sum += (int)$val[0]+(int)$val[1];
+		}
+			
+		//	Obtain the modulus of 10 and subtract it from 10, if the sum was 10, control is 0 (second modulus)
+		$control = (10 - ($sum % 10)) % 10;
+		
+		if(($last == $control) || ($last == $lastLetter[$control])){
+			$this->setValid($name,$code);
 
+			return true;
+		}
+		
+		if(!$required) return true;
+		
+		return "VALIDATOR_CIF_INVALID";
+	}
+	
+	/**
+	 * function: __nie
+	 * 
+	 * Validate a Spanish NIE identification code
+	 * 
+	 * parameters:
+	 * 	$code	-	The NIE DNI code to check
+	 * 
+	 * returns:
+	 * 	If failed, will return a string "VALIDATOR_NIE_INVALID"
+	 * 	If successful, will set the valid data array and return true 
+	 * 
+	 * notes:
+	 * 	-	This is a proxy method for validateNIF, which is identical in calculation, except we need to remove the
+	 * 		X from the front of the NIE and then check the remaining string (which is a valid NIE, or should be)
+	 */
+	function __nie($name,$code,$required,$options)
+	{
+		$firstCharacter = substr($code,0,1);
+		if($firstCharacter == "X"){
+			$nif = substr($code,1);
+			
+			if($this->__nif($name,$nif,$required,$options)){
+				$this->setValid($name,$code);
+				
+				return true;
+			}
+		}
+		
+		if(!$required) return true;
+		
+		return "VALIDATOR_NIE_INVALID";
+	}
+	
 	/**
 	 * method:	__boolean
 	 *
@@ -354,7 +487,7 @@ class Amslib_Validator
 	 * 	name		-	The name of the field
 	 * 	value		-	The value of the field
 	 * 	required	-	Boolean true or false whether the field is mandatory or not
-	 * 	options		-	Validation restrictions: delegated supported
+	 * 	options		-	Validation restrictions
 	 *
 	 * returns:
 	 * 	If failed, will return a string "VALIDATOR_BOOLEAN_INVALID"
@@ -389,7 +522,7 @@ class Amslib_Validator
 			$bool = (bool)$value;
 		}
 
-		if(!isset($options["delegated"])) $this->setValid($name,$bool);
+		$this->setValid($name,$bool);
 
 		if(!$required) return true;
 
@@ -405,7 +538,7 @@ class Amslib_Validator
 	 * 	name		-	The name of the field
 	 * 	value		-	The value of the field
 	 * 	required	-	Boolean true or false, whether the field is mandatory or not
-	 * 	options		-	Validation restrictions: minvalue, maxvalue, delegated supported
+	 * 	options		-	Validation restrictions: minvalue, maxvalue
 	 *
 	 * returns:
 	 * 	If failed to validate because value is NULL, will return string "VALIDATOR_NUMBER_IS_NULL"
@@ -439,7 +572,7 @@ class Amslib_Validator
 			if(!in_array($value,$options["limit-input"])) return "VALIDATOR_NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
 		}
 
-		if(!isset($options["delegated"])) $this->setValid($name,$value);
+		$this->setValid($name,$value);
 
 		return true;
 	}
@@ -453,7 +586,7 @@ class Amslib_Validator
 	 * 	name		-	The name of the field
 	 * 	value		-	The value of the field
 	 * 	required	-	Boolean true or false, whether the field is mandatory or not
-	 * 	options		-	Validation restrictions: delegated supported
+	 * 	options		-	Validation restrictions
 	 *
 	 * returns:
 	 * 	If failed because string was empty, will return "VALIDATOR_EMAIL_EMPTY"
@@ -474,9 +607,10 @@ class Amslib_Validator
 
 		if(strlen($value) == 0 && $required == true) return "VALIDATOR_EMAIL_EMPTY";
 
+		//	LOL REGEXP
 		$pattern = "^[a-z0-9,!#\$%&'\*\+/=\?\^_`\{\|}~-]+(\.[a-z0-9,!#\$%&'\*\+/=\?\^_`\{\|}~-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*\.([a-z]{2,})$";
 		if(eregi($pattern,$value)){
-			if(!isset($options["delegated"])) $this->setValid($name,$value);
+			$this->setValid($name,$value);
 			return true;
 		}
 
@@ -494,7 +628,7 @@ class Amslib_Validator
 	 * 	name		-	The name of the field
 	 * 	value		-	The value of the field (domain name)
 	 * 	required	-	Boolean true or false, whether the field is mandatory or not
-	 * 	options		-	Validation restrictions: delegated supported
+	 * 	options		-	Validation restrictions
 	 *
 	 * returns:
 	 * 	If domain name was an empty string, will return "VALIDATOR_DOMAIN_EMPTY"
@@ -514,7 +648,7 @@ class Amslib_Validator
 		$record = dns_get_record($value);
 
 		if($record){
-			if(!isset($options["delegated"])) $this->setValid($name,$value);
+			$this->setValid($name,$value);
 			return true;
 		}
 
@@ -532,7 +666,7 @@ class Amslib_Validator
 	 * 	name		-	The name of the field
 	 * 	value		-	The value of the field
 	 * 	required	-	Boolean true or false, whether the field is mandatory or not
-	 * 	options		-	Validation restrictions: minlength, delegated supported
+	 * 	options		-	Validation restrictions: minlength
 	 *
 	 * returns:
 	 * 	If failed because string was empty, but required, return "VALIDATOR_PHONE_EMPTY"
@@ -567,11 +701,10 @@ class Amslib_Validator
 		$temp = preg_replace("/\d/","",$temp);
 		$temp = trim($temp);
 
-		if(!strlen($temp)){
-			if(!isset($options["delegated"])) $this->setValid($name,$value);
-			return true;
-		}
-		return "VALIDATOR_PHONE_INVALID";
+		if(strlen($temp)) return "VALIDATOR_PHONE_INVALID"; 
+
+		$this->setValid($name,$value);
+		return true;
 	}
 
 	/**
@@ -583,7 +716,7 @@ class Amslib_Validator
 	 * 	name		-	The name of the field
 	 * 	value		-	The value of the field
 	 * 	required	-	Boolean true or false, whether the field is mandatory or not
-	 * 	options		-	Validation restrictions: delegated supported
+	 * 	options		-	Validation restrictions
 	 *
 	 * returns:
 	 * 	Boolean true is required AND success were both true
@@ -595,7 +728,7 @@ class Amslib_Validator
 		$success = strtotime($value);
 
 		if($required && $success || !$required){
-			if(!isset($options["delegated"])) $this->setValid($name,$value);
+			$this->setValid($name,$value);
 			return true;
 		}
 
@@ -612,7 +745,7 @@ class Amslib_Validator
 	 * 	name		-	The name of the field
 	 * 	value		-	The value of the field
 	 * 	required	-	Boolean true or false, whether the field is mandatory or not
-	 * 	options		-	Validation restrictions: delegated supported
+	 * 	options		-	Validation restrictions
 	 *
 	 * returns:
 	 * 	If failed because file was too large for the PHP configuration, return "VALIDATOR_FILE_EXCEED_INI_SIZE"
@@ -661,7 +794,7 @@ class Amslib_Validator
 
 		if($required == false){
 			//	I am 100% sure this is a bug, what?? setting valid data to an error message????
-			if(!isset($options["delegated"])) $this->setValid($name,"VALIDATOR_FILE_REQUEST_FILE_NOT_FOUND");
+			$this->setValid($name,"VALIDATOR_FILE_REQUEST_FILE_NOT_FOUND");
 			return true;
 		}
 
