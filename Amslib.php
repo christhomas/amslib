@@ -17,7 +17,7 @@
  *
  * File: Amslib.php
  * Title: Amslib core utility object
- * Version: 2.8
+ * Version: 3.0
  * Project: Amslib (antimatter studios library)
  *
  * Contributors/Author:
@@ -27,7 +27,7 @@
 //	Amslib helper class
 class Amslib
 {
-	const VERSION = 2.8;
+	const VERSION = 3.0;
 
 	static protected $showErrorTrigger = false;
 
@@ -84,6 +84,11 @@ class Amslib
 		$contents = ob_get_contents();
 		ob_end_clean();
 		return $contents;
+	}
+	
+	static public function trimString($string,$maxlen,$postfix="...")
+	{
+		return (strlen($string) > $maxlen) ? substr($string,0,$maxlen).$postfix : $string;
 	}
 
 	static public function var_dump($dump,$preformat=false)
