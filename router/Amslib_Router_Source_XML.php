@@ -15,6 +15,20 @@ class Amslib_Router_Source_XML
 		return explode("/",$params);
 	}
 	
+	protected function decodeParameters($parameters)
+	{
+		$parameter_list = array();
+		
+		foreach($parameters as $p){
+			$id = $p->getAttribute("id");
+			if(!$id) continue;
+			
+			$parameter_list[$id] = $p->nodeValue;
+		}
+		
+		return $parameter_list;
+	}
+	
 	protected function decodeSources($src)
 	{
 		$src_list = array();
@@ -49,18 +63,19 @@ class Amslib_Router_Source_XML
 			$paths = $this->xpath->query("//router/path");
 
 			foreach($paths as $p){
-				$name	=	$p->getAttribute("name");
+				$name			=	$p->getAttribute("name");
 
-				$src	=	$this->xpath->query("src",$p);
-				$dest	=	$this->xpath->query("resource",$p);
+				$src			=	$this->xpath->query("src",$p);
+				$dest			=	$this->xpath->query("resource",$p);
+				$parameter		=	$this->xpath->query("parameter",$p);
 
-				$dest	=	$dest->item(0)->nodeValue;
-
-				$src_list = $this->decodeSources($src);
+				$src_list 		=	$this->decodeSources($src);
+				$parameter_list	=	$this->decodeParameters($parameter);
 
 				$this->routes[$name] = array(
 					"src"		=>	$src_list,
-					"resource"	=>	$dest
+					"resource"	=>	$dest->item(0)->nodeValue,
+					"data"		=>	$parameter_list
 				);
 			}
 			
@@ -75,7 +90,8 @@ class Amslib_Router_Source_XML
 							"name"		=>	$name,
 							"resource"	=>	$r["resource"],
 							"route"		=>	$url,
-							"lang"		=>	$lang
+							"lang"		=>	$lang,
+							"data"		=>	$r["data"]
 						);
 					}
 				}

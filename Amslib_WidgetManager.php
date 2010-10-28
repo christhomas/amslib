@@ -61,7 +61,7 @@ class Amslib_WidgetManager
 						$error = str_replace("__ERROR__","find class '{$node->nodeValue}'",$error);
 					}else{
 						//	class exists, but method does not
-						$error = str_replace("__ERROR__","find the getInstance method in the API object '{$node->nodeValue}'");
+						$error = str_replace("__ERROR__","find the getInstance method in the API object '{$node->nodeValue}'",$error);
 					}
 
 					die($error);
@@ -99,7 +99,8 @@ class Amslib_WidgetManager
 	protected function loadPackage($path,$name)
 	{
 		$xml = "$path/$name/package.xml";
-		if($p = Amslib_Filesystem::find($xml)) $xml = "$p/$xml";
+		//	I don't think the following command does anything useful, apart from cause bugs
+		//if($p = Amslib_Filesystem::find($xml)) $xml = "$p/$xml";
 
 		$this->xdoc = new DOMDocument('1.0', 'UTF-8');
 		if(@$this->xdoc->load($xml)){
@@ -224,6 +225,8 @@ class Amslib_WidgetManager
 			$this->setStylesheet($id,$file);
 		}
 		
+		$api->initialise();
+		
 		return $api;
 	}
 
@@ -332,10 +335,26 @@ class Amslib_WidgetManager
 		return $path;
 	}
 	
-	public function setStylesheet($name,$file)
+	public function getService($path)
+	{
+		$parts		=	explode("/",$path);
+
+		$widget		=	array_shift($parts);
+		$service	=	array_shift($parts);
+		
+		$api = $this->getAPI($widget);
+				
+		return $api ? $api->getService($service) : false;
+	}
+
+	public function setStylesheet($name,$file,$conditional=NULL)
 	{
 		if($name && $file){
 			$this->stylesheet[$name] = "<link rel='stylesheet' type='text/css' href='$file' />";
+			
+			if($conditional !== NULL){
+				$this->stylesheet[$name] = "<!--[$conditional]>{$this->stylesheet[$name]}<![endif]-->";
+			}
 		}
 	}
 

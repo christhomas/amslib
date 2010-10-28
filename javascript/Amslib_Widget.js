@@ -1,10 +1,11 @@
 var Amslib_Widget = Class.create(
 {
 	mainWidget: 	false,
-	value:			false,
-	services:		false,
-	translation:	false,
-	callback:		false,
+	value:				false,
+	services:			false,
+	translation:		false,
+	callback:			false,
+	images:			false,
 	
 	initialize: function(selector)
 	{
@@ -12,6 +13,7 @@ var Amslib_Widget = Class.create(
 		this.services		=	new Hash();
 		this.callback		=	new Hash();
 		this.translation	=	new Hash();
+		this.images		=	new Hash();
 		
 		//	Try first to just pass it through prototype, then if fails, use as a selector
 		this.mainWidget = $(selector);
@@ -58,6 +60,8 @@ var Amslib_Widget = Class.create(
 				this.setService(p.name.replace("service:",""),p.value);
 			}else if(p.name.indexOf("translation:") >= 0){
 				this.setTranslation(p.name.replace("translation:",""),p.value);
+			}else if(p.name.indexOf("image:") >= 0){
+				this.setImage(p.name.replace("image:",""),p.value);
 			}else{
 				this.setValue(p.name,p.value);
 			}
@@ -92,5 +96,15 @@ var Amslib_Widget = Class.create(
 	getTranslation: function(name)
 	{
 		return this.translation.get(name);
+	},
+	
+	setImage: function(name,value)
+	{
+		this.images.set(name,value);
+	},
+	
+	getImage: function(name)
+	{
+		return this.images.get(name);
 	}
 });
