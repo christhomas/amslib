@@ -26,7 +26,7 @@
 
 class Amslib_Keystore
 {
-	protected static $store;
+	protected static $store = array();
 	
 	static public function set($name,$value)
 	{
@@ -40,5 +40,10 @@ class Amslib_Keystore
 	static public function get($name)
 	{
 		return (isset(self::$store[$name])) ? self::$store[$name] : false;
+	}
+	
+	static public function getAll()
+	{
+		return self::$store;
 	}
 }
