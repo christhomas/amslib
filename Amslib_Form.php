@@ -25,8 +25,7 @@ class Amslib_Form
 	{
 		$options = "";
 
-		if(!$start || !is_numeric($start)) return $options;
-		if(!$stop || !is_numeric($stop)) return $options;
+		if(!is_numeric($start) || !is_numeric($stop)) return $options;
 
 		for($a=$start;$a<=$stop;$a++){
 			$enabled = ($a == $selected) ? "selected='selected'" : "";
