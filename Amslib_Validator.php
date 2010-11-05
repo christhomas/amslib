@@ -133,6 +133,10 @@ class Amslib_Validator
 		$this->register("phone",			array("Amslib_Validator","__phone"));
 		$this->register("date",				array("Amslib_Validator","__date"));
 		$this->register("file",				array("Amslib_Validator","__file"));
+		
+		//	Register some alternatives which keep cropping up to make life easier
+		$this->register("string",			array("Amslib_Validator","__text"));
+		$this->register("numeric",			array("Amslib_Validator","__number"));
 	}
 
 	/**
