@@ -37,6 +37,17 @@ class Amslib_Keystore
 		return self::get($name);
 	}
 	
+	static public function add($name,$value)
+	{
+		if(!isset(self::$store[$name])) self::$store[$name] = array();
+		if(!is_array(self::$store[$name])) return false;
+		if(!is_string($name)) return false;
+		
+		self::$store[$name][] = $value;
+		
+		return self::get($name);
+	}
+	
 	static public function get($name)
 	{
 		return (isset(self::$store[$name])) ? self::$store[$name] : false;
