@@ -123,6 +123,11 @@ class Amslib_Router2
 	{
 		return $this->paramsRoute;
 	}
+	
+	public function hasParameter($name)
+	{
+		return in_array($name,$this->paramsRoute) ? true : false;
+	}
 
 	public function getCurrentRoute()
 	{

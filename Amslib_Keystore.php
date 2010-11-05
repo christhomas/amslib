@@ -26,15 +26,20 @@
 
 class Amslib_Keystore
 {
-	protected static $store;
+	protected static $store = array();
 	
 	static public function set($name,$value)
 	{
-		if(!is_string($name)) return false;
+		if(!is_string($name)) return NULL;
 		
 		self::$store[$name] = $value;
 		
-		return self::get($name);
+		return $value;
+	}
+	
+	static public function has($name)
+	{
+		return (isset(self::$store[$name])) ? true : false;
 	}
 	
 	static public function add($name,$value)
@@ -50,6 +55,11 @@ class Amslib_Keystore
 	
 	static public function get($name)
 	{
-		return (isset(self::$store[$name])) ? self::$store[$name] : false;
+		return (isset(self::$store[$name])) ? self::$store[$name] : NULL;
+	}
+	
+	static public function getAll()
+	{
+		return self::$store;
 	}
 }

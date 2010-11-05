@@ -23,18 +23,26 @@ class Amslib_Translator_XML extends Amslib_Translator
 		
 		$this->__xdoc = new DOMDocument('1.0', 'UTF-8');
 		if($this->__xdoc->load($database)){
+			$this->__xdoc->preserveWhiteSpace = false;
 			$this->__xpath = new DOMXPath($this->__xdoc);
 	
 			if($readAll){
-				$translations = $this->__xpath->query("//database/translation");
-			
-				foreach($translations as $name=>$t){
-					$this->l($t->getAttribute("name"),$this->__xdoc->saveXML($t));	
-				}
+				$keys = $this->getKeys();
+				foreach($keys as $k) $this->t($k);
 			}	
 		}else{
-			print("XML TRANSLATION DATABASE: '$database' FAILED TO OPEN<br/>");
+			die("XML TRANSLATION DATABASE: '$database' FAILED TO OPEN<br/>");
 		}
+	}
+	
+	function getKeys()
+	{
+		$values = $this->__xpath->query("//database/translation/attribute::name");
+		
+		$keys = array();
+		foreach($values as $v) $keys[] = $v->value;
+		
+		return $keys;
 	}
 
 	//	TODO: This method has no way to translate from other languages
@@ -42,15 +50,19 @@ class Amslib_Translator_XML extends Amslib_Translator
 	{
 		$t = parent::translate($key);
 		
-		if(!$t){
-			$node = $this->__xpath->query("//database/translation[@name='$key']");
-			
-			if(count($node) == 1){
+		if($t == $key){
+			$node = $this->__xpath->query("//database/translation[@name='$key'][1]");
+
+			if($node->length > 0){
+				$t = "";
+				
 				$node = $node->item(0);
-				if($node){
-					$this->l($key,$node->nodeValue);
-					return $node->nodeValue;
-				}
+
+				foreach($node->childNodes as $n) $t .= $this->__xdoc->saveXML($n);
+				$t = trim($t);
+
+				if(strlen($t)) $this->l($key,$t);
+				else $t = $key;
 			}
 		}
 		
