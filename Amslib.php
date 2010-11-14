@@ -183,9 +183,14 @@ class Amslib
 				$class_name	=	"router/$class_name";
 			}
 
-			//	Redirect to include the correct path for the router system
+			//	Redirect to include the correct path for the database system
 			if(strpos($class_name,"Amslib_Database") !== false){
 				$class_name	=	"database/$class_name";
+			}
+			
+			//	Redirect to include the correct path for the xml system
+			if(strpos($class_name,"Amslib_XML") !== false){
+				$class_name =	"xml/$class_name";
 			}
 			
 			$filename = str_replace("//","/","$class_name.php");

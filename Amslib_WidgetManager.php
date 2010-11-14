@@ -196,6 +196,7 @@ class Amslib_WidgetManager
 		}
 
 		//	FIXME: why are services treated differently then other parts of the MVC system?
+		//	FIXME: suggestion: Sv_Service_Name
 		$services = $this->xpath->query("//package/service/file");
 		for($a=0;$a<$services->length;$a++){
 			$id		=	$services->item($a)->getAttribute("id");
