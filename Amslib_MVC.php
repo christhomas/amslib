@@ -38,9 +38,10 @@ class Amslib_MVC
 	protected $layout;
 	protected $object;
 	protected $view;
-	protected $theme;
 	protected $images;
 	protected $service;
+	protected $stylesheet;
+	protected $javascript;
 	protected $value;
 
 	protected $translation;
@@ -66,9 +67,15 @@ class Amslib_MVC
 		$this->object			=	array();
 		$this->view				=	array();
 		$this->service			=	array();
+		$this->stylesheet		=	array();
+		$this->javascript		=	array();
 		$this->value			=	array();
-		$this->theme			=	array();
 		$this->translation		=	array();
+
+		//	These three parameters might not exist in every MVC environment
+		//	Not all environments are widgets or have a widget manager, this is 
+		//	something I assumed in the past, but now with the possibility to
+		//	use this with generic projects, I have to think past that
 		$this->widgetManager	=	NULL;
 		$this->widgetPath		=	NULL;
 		$this->widgetName		=	NULL;
@@ -78,12 +85,11 @@ class Amslib_MVC
 		$this->setupMVC("view",			"views",		"Vi_");
 		$this->setupMVC("object",		"objects",		"");
 		$this->setupMVC("service",		"services",		"Sv_");
-		$this->setupMVC("theme",		"themes",		"Th_");
 	}
 	
 	public function initialise()
 	{
-		//	You can implement this method in your API and it'll be called after the system has opened the plugin correctly
+		return $this;
 	}
 
 	public function setupMVC($type,$dir,$prefix)
@@ -213,13 +219,13 @@ class Amslib_MVC
 	public function getView($id,$parameters=array())
 	{
 		if(isset($this->view[$id])){
-			$view = $this->view[$id];
+			$file							=	$this->view[$id];
 			
 			$parameters["widget_manager"]	=	$this->widgetManager;
 			$parameters["api"]				=	$this;
 			
 			ob_start();
-			Amslib::requireFile($view,$parameters);
+			Amslib::requireFile($file,$parameters);
 			return ob_get_clean();
 		}
 		
@@ -252,13 +258,47 @@ class Amslib_MVC
 		return Amslib::requireFile($service,$parameters);
 	}
 	
+	public function setStylesheet($id,$file,$conditional=NULL)
+	{
+		$this->stylesheet[$id] = array("file"=>$file,"conditional"=>$conditional);
+	}
+	
+	public function addStylesheet($id)
+	{
+		Amslib_ResourceCompiler::addStylesheet($id,$this->stylesheet[$id]["file"],$this->stylesheet[$id]["conditional"]);
+	}
+	
+	public function removeStylesheet($id)
+	{
+		Amslib_ResourceCompiler::removeStylesheet($id);
+	}
+	
+	public function setJavascript($id,$file,$conditional=NULL)
+	{
+		$this->javascript[$id] = array("file"=>$file,"conditional"=>$conditional);
+	}
+	
+	public function addJavascript($id)
+	{
+		Amslib_ResourceCompiler::addJavascript($id,$this->javascript[$id]["file"],$this->javascript[$id]["conditional"]);
+	}
+	
+	public function removeJavascript($id)
+	{
+		Amslib_ResourceCompiler::removeJavascript($id);
+	}
+	
+	//	NOTE:	Shouldn't this use the translation system? not reimplement somethign that already exists?
+	//			This is basically what the in-memory translator does
 	public function setTranslation($name,$value)
 	{
 		$this->translation[$name] = $value;
 		
 		$this->setValue("translation:$name",$value);
 	}
-	
+
+	//	NOTE:	Shouldn't this use the translation system? not reimplement somethign that already exists?
+	//			This is basically what the in-memory translator does
 	public function getTranslation($name)
 	{
 		return (isset($this->translation[$name])) ? $this->translation[$name] : NULL;
@@ -320,22 +360,6 @@ class Amslib_MVC
 		return (isset($this->images[$id])) ? $this->images[$id] : false;
 	}
 
-	public function decorate($theme,$parameters)
-	{
-		if(isset($this->theme[$theme])){
-			$theme = $this->theme[$theme];
-
-			$parameters["widget_manager"]	=	$this->widgetManager;
-			$parameters["api"]				=	$this;
-
-			ob_start();
-			Amslib::requireFile($theme,$parameters);
-			return ob_get_clean();
-		}
-
-		return "";
-	}
-
 	/**************************************************************************
 	 * method: render
 	 *
@@ -348,15 +372,20 @@ class Amslib_MVC
 	 * notes:
 	 * 	we only render the first layout in the widget, what happens if there are 10 layouts?
 	 */
-	public function render($layout="default",$parameters=array())
+	public function render($id="default",$parameters=array())
 	{
-		$layout							=	$this->layout[$layout];
-		$parameters["widget_manager"]	=	$this->widgetManager;
-		$parameters["api"]				=	$this;
+		if(isset($this->layout[$id])){
+			$file							=	$this->layout[$id];
+			
+			$parameters["widget_manager"]	=	$this->widgetManager;
+			$parameters["api"]				=	$this;
 
-		ob_start();
-		Amslib::requireFile($layout,$parameters);
-		return ob_get_clean();
+			ob_start();
+			Amslib::requireFile($file,$parameters);
+			return ob_get_clean();
+		}
+		
+		return "";
 	}
 
 	static public function replyJSON($response)

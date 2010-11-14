@@ -37,8 +37,6 @@ class Amslib_WidgetManager
 	protected $websitePath;
 
 	protected $api;
-	protected $stylesheet;
-	protected $javascript;
 
 	protected function setAPI($name)
 	{
@@ -56,6 +54,7 @@ class Amslib_WidgetManager
 				}else{
 					$error = "FATAL ERROR(Amslib_WidgetManager::setAPI) Could not __ERROR__ for widget '$name'<br/>";
 
+					//	FIXME: These errors should move into the Amslib_Keystore 
 					if(!class_exists($node->nodeValue)){
 						//	class does not exist
 						$error = str_replace("__ERROR__","find class '{$node->nodeValue}'",$error);
@@ -162,73 +161,74 @@ class Amslib_WidgetManager
 
 		$controllers = $this->xpath->query("//package/controllers/name");
 		for($a=0;$a<$controllers->length;$a++){
-			$id		=	$controllers->item($a)->getAttribute("id");
-			$name	=	$controllers->item($a)->nodeValue;
+			$c		=	$controllers->item($a);
+			$id		=	$c->getAttribute("id");
+			$name	=	$c->nodeValue;
 			$api->setController($id,$name);
 		}
 
 		$layouts = $this->xpath->query("//package/layout/name");
 		for($a=0;$a<$layouts->length;$a++){
-			$id		=	$layouts->item($a)->getAttribute("id");
-			$name	=	$layouts->item($a)->nodeValue;
+			$l		=	$layouts->item($a);
+			$id		=	$l->getAttribute("id");
+			$name	=	$l->nodeValue;
 			$api->setLayout($id,$name);
 		}
 
 		$views = $this->xpath->query("//package/view/name");
 		for($a=0;$a<$views->length;$a++){
-			$id		=	$views->item($a)->getAttribute("id");
-			$name	=	$views->item($a)->nodeValue;
+			$v		=	$views->item($a);
+			$id		=	$v->getAttribute("id");
+			$name	=	$v->nodeValue;
 			$api->setView($id,$name);
 		}
 
 		$objects = $this->xpath->query("//package/object/name");
 		for($a=0;$a<$objects->length;$a++){
-			$id		=	$objects->item($a)->getAttribute("id");
-			$name	=	$objects->item($a)->nodeValue;
+			$o		=	$objects->item($a);
+			$id		=	$o->getAttribute("id");
+			$name	=	$o->nodeValue;
 			$api->setObject($id,$name);
-		}
-
-		$theme = $this->xpath->query("//package/theme/name");
-		for($a=0;$a<$theme->length;$a++){
-			$id		=	$theme->item($a)->getAttribute("id");
-			$name	=	$theme->item($a)->nodeValue;
-			$api->setTheme($id,$name);
 		}
 
 		//	FIXME: why are services treated differently then other parts of the MVC system?
 		//	FIXME: suggestion: Sv_Service_Name
 		$services = $this->xpath->query("//package/service/file");
 		for($a=0;$a<$services->length;$a++){
-			$id		=	$services->item($a)->getAttribute("id");
-			$file	=	$services->item($a)->nodeValue;
+			$s		=	$services->item($a);
+			$id		=	$s->getAttribute("id");
+			$file	=	$s->nodeValue;
 			$file	=	$this->getRelativePath($this->widgetPath."/$widget/services/$file");
 			$api->setService($id,$file);
 		}
 
 		$images = $this->xpath->query("//package/image/file");
 		for($a=0;$a<$images->length;$a++){
-			$id = $images->item($a)->getAttribute("id");
-			$file = $this->findResource($widget,$images->item($a));
+			$i		=	$images->item($a);
+			$id 	=	$i->getAttribute("id");
+			$file	=	$this->findResource($widget,$i);
 			$api->setImage($id,$file);
 		}
 
 		$javascript = $this->xpath->query("//package/javascript/file");
 		for($a=0;$a<$javascript->length;$a++){
-			$id = $javascript->item($a)->getAttribute("id");
-			$file = $this->findResource($widget,$javascript->item($a));
-			$this->setJavascript($id,$file);
+			$j		=	$javascript->item($a);
+			$id		=	$j->getAttribute("id");
+			$cond	=	$j->getAttribute("cond");
+			$file	=	$this->findResource($widget,$j);
+			$api->setJavascript($id,$file,$cond);
 		}
 
 		$stylesheet = $this->xpath->query("//package/stylesheet/file");
 		for($a=0;$a<$stylesheet->length;$a++){
-			$id		=	$stylesheet->item($a)->getAttribute("id");
-			$file	=	$this->findResource($widget,$stylesheet->item($a));
-			$this->setStylesheet($id,$file);
+			$s		=	$stylesheet->item($a);
+			$id		=	$s->getAttribute("id");
+			$cond	=	$s->getAttribute("cond");
+			$file	=	$this->findResource($widget,$s);
+			$api->setStylesheet($id,$file,$cond);
 		}
 		
-		$api->initialise();
-		
-		return $api;
+		return $api->initialise();
 	}
 
 /*******************************************************************************
@@ -238,9 +238,6 @@ class Amslib_WidgetManager
 	{
 		//	Setup the basic system like this, it's 99% correct everytime
 		$this->setup(Amslib_Filesystem::documentRoot()."/widgets",Amslib_Filesystem::documentRoot());
-
-		$this->stylesheet	=	array();
-		$this->javascript	=	array();
 	}
 
 	public function &getInstance()
@@ -336,44 +333,18 @@ class Amslib_WidgetManager
 		return $path;
 	}
 	
-	public function getService($path)
+	public function getView($widget,$view,$parameters=array())
 	{
-		$parts		=	explode("/",$path);
-
-		$widget		=	array_shift($parts);
-		$service	=	array_shift($parts);
+		$api = $this->getAPI($widget);
 		
+		return $api ? $api->getView($view,$parameters) : false;
+	}
+	
+	public function getService($widget,$service)
+	{
 		$api = $this->getAPI($widget);
 				
 		return $api ? $api->getService($service) : false;
-	}
-
-	public function setStylesheet($name,$file,$conditional=NULL)
-	{
-		if($name && $file){
-			$this->stylesheet[$name] = "<link rel='stylesheet' type='text/css' href='$file' />";
-			
-			if($conditional !== NULL){
-				$this->stylesheet[$name] = "<!--[$conditional]>{$this->stylesheet[$name]}<![endif]-->";
-			}
-		}
-	}
-
-	public function getStylesheet()
-	{
-		return implode("\n",$this->stylesheet);
-	}
-
-	public function setJavascript($name,$file)
-	{
-		if($name && $file){
-			$this->javascript[$name] = "<script type='text/javascript' src='$file'></script>";
-		}
-	}
-
-	public function getJavascript()
-	{
-		return implode("\n",$this->javascript);
 	}
 
 	public function render($name,$parameters=array())

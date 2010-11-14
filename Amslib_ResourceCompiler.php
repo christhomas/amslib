@@ -1,14 +1,48 @@
 <?php
 class Amslib_ResourceCompiler
 {
-	public function __construct()
+	static protected $stylesheet = array();
+	static protected $javascript = array();
+	
+	static public function addStylesheet($name,$file,$conditional=NULL)
 	{
-		//	Need to think how this would work.
+		if($name && $file){
+			self::$stylesheet[$name] = "<link rel='stylesheet' type='text/css' href='$file' />";
+			
+			if(is_string($conditional) && strlen($conditional)){
+				self::$stylesheet[$name] = "<!--[$conditional]>".self::$stylesheet[$name]."<![endif]-->";
+			}
+		}
+	}
 
-		//	for stylesheets and javascripts, we need to read all the contents, but in the sequence that they are given
-		//	outputting a single field
+	static public function getStylesheet()
+	{
+		return implode("\n",self::$stylesheet);
+	}
+	
+	static public function removeStylesheet($id)
+	{
+		unset(self::$stylesheet[$id]);
+	}
+	
+	static public function addJavascript($name,$file,$conditional=NULL)
+	{
+		if($name && $file){
+			self::$javascript[$name] = "<script type='text/javascript' src='$file'></script>";
+			
+			if(is_string($conditional) && strlen($conditional)){
+				self::$javascript[$name] = "<!--[$conditional]>".self::$javascript[$name]."<![endif]-->";
+			}
+		}
+	}
 
-		//	but we need to use a single object to manage both
-		//	at the same time, don't mix the contents
+	static public function getJavascript()
+	{
+		return implode("\n",self::$javascript);
+	}
+	
+	static public function removeJavascript($id)
+	{
+		unset(self::$javascript[$id]);
 	}
 }
