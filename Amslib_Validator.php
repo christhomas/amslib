@@ -133,6 +133,10 @@ class Amslib_Validator
 		$this->register("cif",				array("Amslib_Validator","__cif"));
 		$this->register("nif",				array("Amslib_Validator","__nif"));
 		$this->register("nie",				array("Amslib_Validator","__nie"));
+		
+		//	Register some alternatives which keep cropping up to make life easier
+		$this->register("string",			array("Amslib_Validator","__text"));
+		$this->register("numeric",			array("Amslib_Validator","__number"));		
 	}
 
 	/**

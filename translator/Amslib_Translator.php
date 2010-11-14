@@ -60,10 +60,8 @@ class Amslib_Translator
 	public function sync(){}
 	public function async(){}
 	
-	public function listAll($language=NULL)
-	{
-		//	TODO: missing in the memory interface
-	}
+	//	TODO: missing in the memory interface
+	public function listAll($language=NULL){}
 	
 	public function getKeys()
 	{
@@ -75,6 +73,7 @@ class Amslib_Translator
 		return $this->translate($key);
 	}
 
+	//	TODO: This method has no way to translate multiple languages
 	public function translate($key,$language=NULL)
 	{
 		if(is_string($key) && isset($this->keyStore[$key])){
@@ -84,12 +83,13 @@ class Amslib_Translator
 		return $key;
 	}
 	
-	public function l($key,$translation,$database=NULL)
+	public function l($key,$translation,$language=NULL)
 	{
-		return $this->learn($key,$translation);
+		return $this->learn($key,$translation,$language);
 	}
 	
-	public function learn($key,$translation,$database=NULL)
+	//	TODO: This method cannot learn from various languages
+	public function learn($key,$translation,$language=NULL)
 	{
 		$this->keyStore[$key] = $translation;
 	}
@@ -99,22 +99,19 @@ class Amslib_Translator
 		$this->forget($key,$database);
 	}
 
-	public function forget($key,$database=NULL)
+	//	TODO: This language has no concept of languages, so the parameter is not used
+	public function forget($key,$language=NULL)
 	{
 		unset($this->keyStore[$key]);
 	}
 
-	public function getMissing()
-	{
-		//	TODO: missing in the memory interface
-	}
+	//	TODO: missing in the memory interface
+	public function getMissing(){}
 
-	public function updateKey($old,$new,$deleteOld=true)
-	{
-		//	TODO: missing in the memory interface
-	}
+	//	TODO: missing in the memory interface
+	public function updateKey($old,$new,$deleteOld=true){}
 
-	static public function &getInstance()
+	public function &getInstance()
 	{
 		static $instance = NULL;
 

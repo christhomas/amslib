@@ -12,6 +12,7 @@ class Amslib_Translator_XML extends Amslib_Translator
 	/** DEPRECATED: use load() instead **/
 	function open($database,$readAll=false){ $this->load($database,$readAll); }
 	
+	//	TODO: readAll parameter is ignored for now
 	function load($database,$readAll=false)
 	{
 		if(!file_exists($database)) $database = Amslib_Filesystem::find($database,true);
@@ -44,12 +45,13 @@ class Amslib_Translator_XML extends Amslib_Translator
 		return $keys;
 	}
 
-	function translate($key)
+	//	TODO: This method has no way to translate from other languages
+	function translate($expression,$language=NULL)
 	{
-		$t = parent::translate($key);
+		$t = parent::translate($expression);
 		
-		if($t == $key){
-			$node = $this->__xpath->query("//database/translation[@name='$key'][1]");
+		if($t == $expression){
+			$node = $this->__xpath->query("//database/translation[@name='$expression'][1]");
 
 			if($node->length > 0){
 				$t = "";
@@ -59,17 +61,18 @@ class Amslib_Translator_XML extends Amslib_Translator
 				foreach($node->childNodes as $n) $t .= $this->__xdoc->saveXML($n);
 				$t = trim($t);
 
-				if(strlen($t)) $this->l($key,$t);
-				else $t = $key;
+				if(strlen($t)) $this->l($expression,$t);
+				else $t = $expression;
 			}
 		}
 		
 		return $t;
 	}
 	
-	function learn($key,$value,$database=NULL)
+	//	TODO: This method just stores new translations in memory, doesnt write them to xml
+	function learn($expression,$string,$language=NULL)
 	{
-		return parent::learn($key,$value,$database);
+		return parent::learn($expression,$string,$language);
 	}
 	
 	static public function &getInstance()
