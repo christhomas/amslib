@@ -151,8 +151,8 @@ class Amslib_WidgetManager
 			if($fpath) $path = "$fpath/$file";
 		}
 
-		//	relativise the path and reduce the double slashes to single ones.
-		return str_replace("//","/",$this->getRelativePath($path));
+		//	make the path relative
+		return Amslib_Filesystem::relative($path);
 	}
 
 	protected function loadConfiguration($path,$widget)
@@ -198,7 +198,7 @@ class Amslib_WidgetManager
 			$s		=	$services->item($a);
 			$id		=	$s->getAttribute("id");
 			$file	=	$s->nodeValue;
-			$file	=	$this->getRelativePath($this->widgetPath."/$widget/services/$file");
+			$file	=	Amslib_Filesystem::relative($this->widgetPath."/$widget/services/$file");
 			$api->setService($id,$file);
 		}
 
@@ -237,7 +237,7 @@ class Amslib_WidgetManager
 	public function __construct()
 	{
 		//	Setup the basic system like this, it's 99% correct everytime
-		$this->setup(Amslib_Filesystem::documentRoot()."/widgets",Amslib_Filesystem::documentRoot());
+		$this->setup(Amslib_Filesystem::absolute("/widgets"),Amslib_Filesystem::documentRoot());
 	}
 
 	public function &getInstance()
@@ -320,18 +320,6 @@ class Amslib_WidgetManager
 	{
 		return $this->widgetPath;
 	}
-
-	//	FIXME: replace with Amslib_Filesystem::relative()
-	public function getRelativePath($path="")
-	{
-		//	Path is already relative
-		if(strpos($path,".") === 0) return $path;
-
-		$root = $this->documentRoot;
-		$path = str_replace($root,"",$root.$path);
-
-		return $path;
-	}
 	
 	public function getView($widget,$view,$parameters=array())
 	{
@@ -346,10 +334,31 @@ class Amslib_WidgetManager
 				
 		return $api ? $api->getService($service) : false;
 	}
-
-	public function render($name,$parameters=array())
+	
+	public function callService($widget,$service)
 	{
-		$api = $this->getAPI($name);
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->callService($service) : false;
+	}
+	
+	public function addStylesheet($widget,$stylesheet)
+	{
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->addStylesheet($stylesheet) : false;
+	}
+	
+	public function addJavascript($widget,$javascript)
+	{
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->addJavascript($javascript) : false;
+	}
+
+	public function render($widget,$parameters=array())
+	{
+		$api = $this->getAPI($widget);
 
 		return ($api) ? $api->render("default",$parameters) : false;
 	}

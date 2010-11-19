@@ -75,7 +75,7 @@ class Amslib_Translator_XML extends Amslib_Translator
 		return parent::learn($expression,$string,$language);
 	}
 	
-	static public function &getInstance()
+	public function &getInstance()
 	{
 		static $instance = NULL;
 

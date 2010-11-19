@@ -37,7 +37,7 @@ class Amslib_Filesystem
 	static public function absolute($filename)
 	{
 		$docroot	=	self::documentRoot();
-		$filename	=	str_replace($docroot,"",$filename);
+		$filename	=	Amslib::lchop($filename,$docroot);
 
 		return str_replace("//","/",$docroot."/".$filename);
 	}
@@ -45,7 +45,7 @@ class Amslib_Filesystem
 	static public function relative($filename)
 	{
 		$docroot	=	self::documentRoot();
-		$filename	=	str_replace($docroot,"",$filename);
+		$filename	=	Amslib::lchop($filename,$docroot);
 
 		return str_replace("//","/",$filename);
 	}
