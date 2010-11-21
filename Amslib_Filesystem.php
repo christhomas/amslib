@@ -37,7 +37,7 @@ class Amslib_Filesystem
 	static public function absolute($filename)
 	{
 		$docroot	=	self::documentRoot();
-		$filename	=	str_replace($docroot,"",$filename);
+		$filename	=	Amslib::lchop($filename,$docroot);
 
 		return str_replace("//","/",$docroot."/".$filename);
 	}
@@ -45,13 +45,17 @@ class Amslib_Filesystem
 	static public function relative($filename)
 	{
 		$docroot	=	self::documentRoot();
-		$filename	=	str_replace($docroot,"",$filename);
+		$filename	=	Amslib::lchop($filename,$docroot);
 
 		return str_replace("//","/",$filename);
 	}
 	
 	static public function find($filename,$includeFilename=false)
 	{
+		if(@file_exists($filename)){
+			return ($includeFilename) ? $filename : Amslib::rchop($filename,"/");	
+		}
+		
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
 
 		foreach($includePath as $path){
@@ -67,10 +71,29 @@ class Amslib_Filesystem
 	static public function removeTrailingSlash($path)
 	{
 		//	Make sure the path doesnt end with a trailing slash
-		$path = str_replace("/__END__","",$path);
+		$path = str_replace("/__END__","",$path."__END__");
 		//	Cleanup after the attempt to detect trailing slash
 		$path = str_replace("__END__","",$path);
 		
 		return $path;
+	}
+	
+	static public function getList($dir,$recurse=false)
+	{
+		$list = array();
+		
+		if(is_dir($dir)){
+			$list = glob("$dir/*");
+			
+			if($recurse){
+				foreach($list as $l){
+					$subdir = self::getList($l,$recurse);
+					
+					$list = array_merge($list,$subdir);
+				}
+			}
+		}
+		
+		return $list;
 	}
 }

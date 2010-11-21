@@ -15,6 +15,33 @@ class Amslib_Router_Source_XML
 		return explode("/",$params);
 	}
 	
+	protected function findNodes($name,$parent)
+	{
+		if(!$parent || !$parent->hasChildNodes()) return array();
+
+		$results = array();
+		
+		foreach($parent->childNodes as $p){
+			if($p->nodeName == $name) $results[] = $p;
+		}
+		
+		return $results;
+	}
+	
+	protected function decodeParameters($parameters)
+	{
+		$parameter_list = array();
+		
+		foreach($parameters as $p){
+			$id = $p->getAttribute("id");
+			if(!$id) continue;
+			
+			$parameter_list[$id] = $p->nodeValue;
+		}
+		
+		return $parameter_list;
+	}
+	
 	protected function decodeSources($src)
 	{
 		$src_list = array();
@@ -31,14 +58,29 @@ class Amslib_Router_Source_XML
 
 		return $src_list;
 	}
+	
+	protected function decodeResource($resource)
+	{
+		if($resource && count($resource) > 0){
+			$resource = current($resource);
 
-	public function __construct(){}
+			return $resource->nodeValue;
+		}
+		
+		return false;
+	}
+
+	public function __construct()
+	{
+		$this->routes = array();
+	}
 
 	public function load($source)
 	{
 		$source = Amslib_Filesystem::find($source,true);
 		
 		if(!file_exists($source)){
+			//	TODO: Should move to using Amslib_Keystore("error") instead
 			die("Amslib_Router_Source_XML::load(), source file does not exist [$source]");	
 		}
 		
@@ -47,43 +89,73 @@ class Amslib_Router_Source_XML
 			$this->xpath = new DOMXPath($this->document);
 
 			$paths = $this->xpath->query("//router/path");
-
-			foreach($paths as $p){
-				$name	=	$p->getAttribute("name");
-
-				$src	=	$this->xpath->query("src",$p);
-				$dest	=	$this->xpath->query("resource",$p);
-
-				$dest	=	$dest->item(0)->nodeValue;
-
-				$src_list = $this->decodeSources($src);
-
-				$this->routes[$name] = array(
-					"src"		=>	$src_list,
-					"resource"	=>	$dest
-				);
-			}
 			
-			//	Process all the routes into the inverse, so you can do the lookup from the url as well
-			$this->url = array();
-			foreach($this->routes as $name=>$r)
-			{
-				foreach($r["src"] as $version=>$src){
-					foreach($src as $lang=>$url){
-						$this->url[$url] = array(
-							"version"	=>	$version,
-							"name"		=>	$name,
-							"resource"	=>	$r["resource"],
-							"route"		=>	$url,
-							"lang"		=>	$lang
-						);
-					}
-				}
-			}
-
+			foreach($paths as $p) $this->addPath($p);
+			
+			$this->calculateInverseRoutes();
 		}else{
+			//	TODO: Should move to using Amslib_Keystore("error") instead
 			print("XML ROUTER DATABASE: '$source' FAILED TO OPEN<br/>");
 		}
+	}
+	
+	public function calculateInverseRoutes()
+	{
+		//	Process all the routes into the inverse, so you can do the lookup from the url as well
+		$this->url = array();
+		
+		foreach($this->routes as $name=>$r)
+		{
+			foreach($r["src"] as $version=>$src){
+				foreach($src as $lang=>$url){
+					$this->url[$url] = array(
+						"version"	=>	$version,
+						"name"		=>	$name,
+						"resource"	=>	$r["resource"],
+						"route"		=>	$url,
+						"lang"		=>	$lang,
+						"data"		=>	$r["data"]
+					);
+				}
+			}
+		}
+	}
+		
+	/**
+	 * method: addPath
+	 * 
+	 * A method to add a path to the routes configured by the system, it finds and decodes
+	 * all the appropriate nodes in the xml to find all the configuration information
+	 * 
+	 * parameters:
+	 * 	path	-	The XML Node in the amslib_router.xml called "path"
+	 * 
+	 * notes:
+	 * 	This method is exposed as public because it is useful sometimes to store the xml configuration
+	 * 	in another document, but "graft" the route onto the main router configuration as if there 
+	 * 	was no difference between them.  The administration panel project is a good example of this,
+	 * 	The admin_panel.xml file stores each plugin, plus the router configuration, in this case, we need
+	 * 	to decode that config, but we dont want to duplicate the decoding mechanism.
+	 * 
+	 *  IMPORTANT: not entirely sure whether this is a good idea, or just exposing a security hole
+	 */
+	public function addPath($path)
+	{
+		$name			=	$path->getAttribute("name");
+		
+		$src			=	$this->findNodes("src",$path);
+		$resource		=	$this->findNodes("resource",$path);
+		$parameter		=	$this->findNodes("parameter",$path);
+
+		$src_list 		=	$this->decodeSources($src);
+		$resource		=	$this->decodeResource($resource);
+		$parameter_list	=	$this->decodeParameters($parameter);
+		
+		$this->routes[$name] = array(
+			"src"		=>	$src_list,
+			"resource"	=>	$resource,
+			"data"		=>	$parameter_list
+		);
 	}
 
 	public function getURL($url)

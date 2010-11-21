@@ -12,6 +12,7 @@ class Amslib_Translator_XML extends Amslib_Translator
 	/** DEPRECATED: use load() instead **/
 	function open($database,$readAll=false){ $this->load($database,$readAll); }
 	
+	//	TODO: readAll parameter is ignored for now
 	function load($database,$readAll=false)
 	{
 		if(!file_exists($database)) $database = Amslib_Filesystem::find($database,true);
@@ -22,17 +23,15 @@ class Amslib_Translator_XML extends Amslib_Translator
 		
 		$this->__xdoc = new DOMDocument('1.0', 'UTF-8');
 		if($this->__xdoc->load($database)){
+			$this->__xdoc->preserveWhiteSpace = false;
 			$this->__xpath = new DOMXPath($this->__xdoc);
 	
 			if($readAll){
-				$translations = $this->__xpath->query("//database/translation");
-			
-				foreach($translations as $name=>$t){
-					$this->l($t->getAttribute("name"),$this->__xdoc->saveXML($t));	
-				}
+				$keys = $this->getKeys();
+				foreach($keys as $k) $this->t($k);
 			}	
 		}else{
-			print("XML TRANSLATION DATABASE: '$database' FAILED TO OPEN<br/>");
+			die("XML TRANSLATION DATABASE: '$database' FAILED TO OPEN<br/>");
 		}
 	}
 	
@@ -41,31 +40,47 @@ class Amslib_Translator_XML extends Amslib_Translator
 		$this->load("translations/".Amslib_Router_Language2::getCode().".xml",true);
 	}
 
-	function translate($key)
+	function getKeys()
 	{
-		$t = parent::translate($key);
+		$values = $this->__xpath->query("//database/translation/attribute::name");
 		
-		if(!$t){
-			$node = $this->__xpath->query("//database/translation[@name='$key']");
-			
-			if(count($node) == 1){
+		$keys = array();
+		foreach($values as $v) $keys[] = $v->value;
+		
+		return $keys;
+	}
+
+	//	TODO: This method has no way to translate from other languages
+	function translate($expression,$language=NULL)
+	{
+		$t = parent::translate($expression);
+		
+		if($t == $expression){
+			$node = $this->__xpath->query("//database/translation[@name='$expression'][1]");
+
+			if($node->length > 0){
+				$t = "";
+				
 				$node = $node->item(0);
-				if($node){
-					$this->l($key,$node->nodeValue);
-					return $node->nodeValue;
-				}
+
+				foreach($node->childNodes as $n) $t .= $this->__xdoc->saveXML($n);
+				$t = trim($t);
+
+				if(strlen($t)) $this->l($expression,$t);
+				else $t = $expression;
 			}
 		}
 		
 		return $t;
 	}
 	
-	function learn($key,$value,$database=NULL)
+	//	TODO: This method just stores new translations in memory, doesnt write them to xml
+	function learn($expression,$string,$language=NULL)
 	{
-		return parent::learn($key,$value,$database);
+		return parent::learn($expression,$string,$language);
 	}
 	
-	static public function &getInstance()
+	public function &getInstance()
 	{
 		static $instance = NULL;
 

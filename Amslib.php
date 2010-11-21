@@ -17,7 +17,7 @@
  *
  * File: Amslib.php
  * Title: Amslib core utility object
- * Version: 2.8
+ * Version: 3.1
  * Project: Amslib (antimatter studios library)
  *
  * Contributors/Author:
@@ -27,11 +27,14 @@
 //	Amslib helper class
 class Amslib
 {
-	const VERSION = 2.8;
+	const VERSION = 3.1;
 
 	static protected $showErrorTrigger = false;
 
-	static protected function findFile($filename)
+	//	DEPRECATED: should use findPath instead, makes more sense
+	static protected function findFile($filename){ return self::findPath($filename); }
+	
+	static protected function findPath($filename)
 	{
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
 
@@ -58,7 +61,7 @@ class Amslib
 
 	static public function lchop($str,$search)
 	{
-		return ($p = strpos($str,$search)) !== false ? substr($str,$p) : $str;
+		return ($p = strpos($str,$search)) !== false ? substr($str,$p+strlen($search)) : $str;
 	}
 
 	static public function rchop($str,$search)
@@ -95,13 +98,17 @@ class Amslib
 		ob_end_clean();
 		return $contents;
 	}
+	
+	static public function trimString($string,$maxlen,$postfix="...")
+	{
+		return (strlen($string) > $maxlen) ? substr($string,0,$maxlen).$postfix : $string;
+	}
 
 	static public function var_dump($dump,$preformat=false)
 	{
 		ob_start();
 		var_dump($dump);
-		$dump = ob_get_contents();
-		ob_end_clean();
+		$dump = ob_get_clean();
 
 		return ($preformat) ? "<pre>$dump</pre>" : $dump;
 	}
@@ -120,9 +127,9 @@ class Amslib
 
 		if(is_file($file) && file_exists($file)){
 			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
-			include($file);
-
-			return true;
+			
+			if(isset($data["include_once"])) return include_once($file);
+			return include($file);
 		}
 
 		return false;
@@ -143,10 +150,8 @@ class Amslib
 		if(is_file($file) && file_exists($file)){
 			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
 
-			if(isset($data["require_once"])) require_once($file);
-			else require($file);
-
-			return true;
+			if(isset($data["require_once"])) return require_once($file);
+			return require($file);
 		}
 
 		return false;
@@ -180,11 +185,16 @@ class Amslib
 				$class_name	=	"router/$class_name";
 			}
 
-			//	Redirect to include the correct path for the router system
+			//	Redirect to include the correct path for the database system
 			if(strpos($class_name,"Amslib_Database") !== false){
 				$class_name	=	"database/$class_name";
 			}
-
+			
+			//	Redirect to include the correct path for the xml system
+			if(strpos($class_name,"Amslib_XML") !== false){
+				$class_name =	"xml/$class_name";
+			}
+			
 			$filename = str_replace("//","/","$class_name.php");
 
 			return Amslib::requireFile($filename);
@@ -219,6 +229,11 @@ class Amslib
 	static public function getParam($value,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_GET,$value,$default,$erase);
+	}
+	
+	static public function hasGet($value)
+	{
+		return (isset($_GET[$value])) ? true : false;
 	}
 
 	/**
@@ -255,6 +270,11 @@ class Amslib
 	{
 		return self::arrayParam($_POST,$value,$default,$erase);
 	}
+	
+	static public function hasPost($value)
+	{
+		return (isset($_POST[$value])) ? true : false;
+	}
 
 	/**
 	 *	function:	insertPostParameter
@@ -289,6 +309,11 @@ class Amslib
 	static public function sessionParam($value,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_SESSION,$value,$default,$erase);
+	}
+	
+	static public function hasSession($value)
+	{
+		return (isset($_SESSION[$value])) ? true : false;
 	}
 
 	static public function insertSessionParam($parameter,$value)
