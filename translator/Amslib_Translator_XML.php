@@ -35,6 +35,11 @@ class Amslib_Translator_XML extends Amslib_Translator
 			print("XML TRANSLATION DATABASE: '$database' FAILED TO OPEN<br/>");
 		}
 	}
+	
+	function loadFromRouter()
+	{
+		$this->load("translations/".Amslib_Router_Language2::getCode().".xml",true);
+	}
 
 	function translate($key)
 	{
