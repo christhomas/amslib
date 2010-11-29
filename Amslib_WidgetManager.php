@@ -328,6 +328,13 @@ class Amslib_WidgetManager
 		return $api ? $api->getView($view,$parameters) : false;
 	}
 	
+	public function setService($widget,$id,$service)
+	{
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->setService($id,$service) : false;
+	}
+	
 	public function getService($widget,$service)
 	{
 		$api = $this->getAPI($widget);
@@ -342,11 +349,25 @@ class Amslib_WidgetManager
 		return $api ? $api->callService($service) : false;
 	}
 	
+	public function setStylesheet($widget,$id,$file,$conditional=NULL)
+	{
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->setStylesheet($id,$file,$conditional) : false;
+	}
+	
 	public function addStylesheet($widget,$stylesheet)
 	{
 		$api = $this->getAPI($widget);
 		
 		return $api ? $api->addStylesheet($stylesheet) : false;
+	}
+	
+	public function setJavacsript($widget,$id,$file,$conditional=NULL)
+	{
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->setJavascript($id,$file,$conditional) : false;
 	}
 	
 	public function addJavascript($widget,$javascript)

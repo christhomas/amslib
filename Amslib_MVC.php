@@ -43,6 +43,7 @@ class Amslib_MVC
 	protected $stylesheet;
 	protected $javascript;
 	protected $value;
+	protected $slots;
 
 	protected $translation;
 	
@@ -358,6 +359,28 @@ class Amslib_MVC
 	public function getImage($id)
 	{
 		return (isset($this->images[$id])) ? $this->images[$id] : false;
+	}
+	
+	public function setSlot($name,$content,$index=NULL)
+	{
+		if($index){
+			$this->slots[$name][$index] = $content;
+		}else{
+			$this->slots[$name] = $content;
+		}
+	}
+	
+	public function getSlot($name,$index=NULL)
+	{
+		if(isset($this->slots[$name])){
+			if(is_array($this->slots[$name])){
+				return ($index) ? $this->slots[$name][$index] : current($this->slots[$name]);
+			}
+			
+			return $this->slots[$name];
+		}
+		
+		return "";
 	}
 
 	/**************************************************************************

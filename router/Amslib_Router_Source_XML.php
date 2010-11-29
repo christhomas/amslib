@@ -101,6 +101,8 @@ class Amslib_Router_Source_XML
 	
 	public function calculateInverseRoutes()
 	{
+		//	TODO: This shouldnt be a batch calculation but done on each route that is constructed
+		
 		//	Process all the routes into the inverse, so you can do the lookup from the url as well
 		$this->url = array();
 		
