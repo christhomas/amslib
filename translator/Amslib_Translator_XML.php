@@ -35,6 +35,11 @@ class Amslib_Translator_XML extends Amslib_Translator
 		}
 	}
 	
+	function loadFromRouter()
+	{
+		$this->load("translations/".Amslib_Router_Language2::getCode().".xml",true);
+	}
+
 	function getKeys()
 	{
 		$values = $this->__xpath->query("//database/translation/attribute::name");
@@ -75,7 +80,7 @@ class Amslib_Translator_XML extends Amslib_Translator
 		return parent::learn($expression,$string,$language);
 	}
 	
-	static public function &getInstance()
+	public function &getInstance()
 	{
 		static $instance = NULL;
 

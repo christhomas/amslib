@@ -17,7 +17,7 @@
  *
  * File: Amslib.php
  * Title: Amslib core utility object
- * Version: 3.0
+ * Version: 3.1
  * Project: Amslib (antimatter studios library)
  *
  * Contributors/Author:
@@ -27,11 +27,14 @@
 //	Amslib helper class
 class Amslib
 {
-	const VERSION = 3.0;
+	const VERSION = 3.1;
 
 	static protected $showErrorTrigger = false;
 
-	static protected function findFile($filename)
+	//	DEPRECATED: should use findPath instead, makes more sense
+	static protected function findFile($filename){ return self::findPath($filename); }
+	
+	static protected function findPath($filename)
 	{
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
 
@@ -58,7 +61,7 @@ class Amslib
 
 	static public function lchop($str,$search)
 	{
-		return ($p = strpos($str,$search)) !== false ? substr($str,$p) : $str;
+		return ($p = strpos($str,$search)) !== false ? substr($str,$p+strlen($search)) : $str;
 	}
 
 	static public function rchop($str,$search)
@@ -105,8 +108,7 @@ class Amslib
 	{
 		ob_start();
 		var_dump($dump);
-		$dump = ob_get_contents();
-		ob_end_clean();
+		$dump = ob_get_clean();
 
 		return ($preformat) ? "<pre>$dump</pre>" : $dump;
 	}
@@ -183,9 +185,14 @@ class Amslib
 				$class_name	=	"router/$class_name";
 			}
 
-			//	Redirect to include the correct path for the router system
+			//	Redirect to include the correct path for the database system
 			if(strpos($class_name,"Amslib_Database") !== false){
 				$class_name	=	"database/$class_name";
+			}
+			
+			//	Redirect to include the correct path for the xml system
+			if(strpos($class_name,"Amslib_XML") !== false){
+				$class_name =	"xml/$class_name";
 			}
 			
 			$filename = str_replace("//","/","$class_name.php");

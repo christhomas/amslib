@@ -134,9 +134,10 @@ class Amslib_Validator
 		$this->register("nif",				array("Amslib_Validator","__nif"));
 		$this->register("nie",				array("Amslib_Validator","__nie"));
 		
-		//	Register some alternatives which keep cropping up to make life easier
+		//	Register some popular mispellings which keep cropping up to make life easier
 		$this->register("string",			array("Amslib_Validator","__text"));
-		$this->register("numeric",			array("Amslib_Validator","__number"));		
+		$this->register("numeric",			array("Amslib_Validator","__number"));
+		$this->register("alpha-relaxed",	array("Amslib_Validator","__alpha_relaxed"));		
 	}
 
 	/**
@@ -562,7 +563,7 @@ class Amslib_Validator
 	 */
 	function __number($name,$value,$required,$options)
 	{
-		if($value == NULL && !isset($options["ignorenull"])) return "VALIDATOR_NUMBER_IS_NULL";
+		if($value == NULL && $required && !isset($options["ignorenull"])) return "VALIDATOR_NUMBER_IS_NULL";
 
 		if(strlen($value)){
 			if(is_numeric($value) == false) return "VALIDATOR_NUMBER_NAN";

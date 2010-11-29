@@ -3,12 +3,14 @@ if(Amslib == "undefined")
 
 Amslib.UI = Class.create(Amslib,
 {
-	callback: false,
+	parent:		false,
+	callback:	false,
 	
-	initialize: function($super){
+	initialize: function($super,parent){
 		$super();
 		
-		this.callback = new Hash();
+		this.parent		=	parent;
+		this.callback	=	new Hash();
 	},
 	
 	observe: function(eventName,callback)

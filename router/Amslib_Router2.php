@@ -113,6 +113,11 @@ class Amslib_Router2
 		
 		return Amslib_Router_Language2::get(true).$this->source->getRoute($name,$version,$lang);
 	}
+	
+	public function getName()
+	{
+		return isset($this->activeRoute["name"]) ? $this->activeRoute["name"] : false;
+	}
 
 	public function isRouted()
 	{

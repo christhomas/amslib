@@ -1,10 +1,10 @@
 var Amslib_Widget = Class.create(
 {
 	mainWidget: 	false,
-	value:				false,
-	services:			false,
-	translation:		false,
-	callback:			false,
+	value:			false,
+	services:		false,
+	translation:	false,
+	callback:		false,
 	images:			false,
 	
 	initialize: function(selector)
@@ -13,7 +13,7 @@ var Amslib_Widget = Class.create(
 		this.services		=	new Hash();
 		this.callback		=	new Hash();
 		this.translation	=	new Hash();
-		this.images		=	new Hash();
+		this.images			=	new Hash();
 		
 		//	Try first to just pass it through prototype, then if fails, use as a selector
 		this.mainWidget = $(selector);
@@ -51,11 +51,13 @@ var Amslib_Widget = Class.create(
 		return (cb) ? cb : this.defaultCallback;
 	},
 
-	readParameters: function()
+	readParameters: function(override)
 	{
 		if(!this.mainWidget) return false;
 		
-		this.mainWidget.select(".widget_parameters input[type='hidden']").each(function(p){
+		var parent = override || this.mainWidget;
+		
+		parent.select(".widget_parameters input[type='hidden']").each(function(p){
 			if(p.name.indexOf("service:") >= 0){
 				this.setService(p.name.replace("service:",""),p.value);
 			}else if(p.name.indexOf("translation:") >= 0){
