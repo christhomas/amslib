@@ -265,12 +265,12 @@ class Amslib_MVC
 	
 	public function addStylesheet($id)
 	{
-		Amslib_ResourceCompiler::addStylesheet($id,$this->stylesheet[$id]["file"],$this->stylesheet[$id]["conditional"]);
+		Amslib_Resource_Compiler::addStylesheet($id,$this->stylesheet[$id]["file"],$this->stylesheet[$id]["conditional"]);
 	}
 	
 	public function removeStylesheet($id)
 	{
-		Amslib_ResourceCompiler::removeStylesheet($id);
+		Amslib_Resource_Compiler::removeStylesheet($id);
 	}
 	
 	public function setJavascript($id,$file,$conditional=NULL)
@@ -280,12 +280,12 @@ class Amslib_MVC
 	
 	public function addJavascript($id)
 	{
-		Amslib_ResourceCompiler::addJavascript($id,$this->javascript[$id]["file"],$this->javascript[$id]["conditional"]);
+		Amslib_Resource_Compiler::addJavascript($id,$this->javascript[$id]["file"],$this->javascript[$id]["conditional"]);
 	}
 	
 	public function removeJavascript($id)
 	{
-		Amslib_ResourceCompiler::removeJavascript($id);
+		Amslib_Resource_Compiler::removeJavascript($id);
 	}
 	
 	//	NOTE:	Shouldn't this use the translation system? not reimplement somethign that already exists?
