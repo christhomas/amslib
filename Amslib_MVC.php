@@ -414,7 +414,7 @@ class Amslib_MVC
 	static public function replyJSON($response)
 	{
 		header("Content-Type: application/json");
-		//	MAYBE TODO:Can't use die anymore, because I might run child scripts
+		//	TODO:Can't use die anymore, because I might run child scripts
 		die(json_encode($response));
 	}
 
