@@ -220,13 +220,11 @@ class Amslib_MVC
 	public function getView($id,$parameters=array())
 	{
 		if(isset($this->view[$id])){
-			$file							=	$this->view[$id];
-			
 			$parameters["widget_manager"]	=	$this->widgetManager;
 			$parameters["api"]				=	$this;
 			
 			ob_start();
-			Amslib::requireFile($file,$parameters);
+			Amslib::requireFile($this->view[$id],$parameters);
 			return ob_get_clean();
 		}
 		
