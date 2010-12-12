@@ -68,7 +68,7 @@ var Amslib = Class.create(
 	{
 		var handle = this.callback.get(eventName);
 		
-		if(handle) handle(data);
+		return (handle) ? handle(data) : false;
 	},
 	
 	getObserver: function(eventName)
