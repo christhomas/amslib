@@ -784,24 +784,18 @@ class Amslib_Validator
 				$this->setValid($name,$value);
 				return true;
 			}
-
-			if($required == false) return true;
-
-			//	Return some alternative errors to FILE_NOT_FOUND
-			if($value["error"] == UPLOAD_ERR_INI_SIZE)		return "VALIDATOR_FILE_EXCEED_INI_SIZE";
-			if($value["error"] == UPLOAD_ERR_FORM_SIZE)		return "VALIDATOR_FILE_EXCEED_FORM_SIZE";
-			if($value["error"] == UPLOAD_ERR_PARTIAL)		return "VALIDATOR_FILE_PARTIAL_FILE";
-			if($value["error"] == UPLOAD_ERR_NO_FILE)		return "VALIDATOR_FILE_MISSING_FILE";
-			if($value["error"] == UPLOAD_ERR_NO_TMP_DIR)	return "VALIDATOR_FILE_NO_TMP_DIRECTORY";
-			if($value["error"] == UPLOAD_ERR_CANT_WRITE)	return "VALIDATOR_FILE_CANNOT_WRITE";
-			if($value["error"] == UPLOAD_ERR_EXTENSION)		return "VALIDATOR_FILE_BANNED_EXTENSION";
 		}
 
-		if($required == false){
-			//	I am 100% sure this is a bug, what?? setting valid data to an error message????
-			$this->setValid($name,"VALIDATOR_FILE_REQUEST_FILE_NOT_FOUND");
-			return true;
-		}
+		if($required == false) return true;
+		
+		//	Return some alternative errors to FILE_NOT_FOUND
+		if($value["error"] == UPLOAD_ERR_INI_SIZE)		return "VALIDATOR_FILE_EXCEED_INI_SIZE";
+		if($value["error"] == UPLOAD_ERR_FORM_SIZE)		return "VALIDATOR_FILE_EXCEED_FORM_SIZE";
+		if($value["error"] == UPLOAD_ERR_PARTIAL)		return "VALIDATOR_FILE_PARTIAL_FILE";
+		if($value["error"] == UPLOAD_ERR_NO_FILE)		return "VALIDATOR_FILE_MISSING_FILE";
+		if($value["error"] == UPLOAD_ERR_NO_TMP_DIR)	return "VALIDATOR_FILE_NO_TMP_DIRECTORY";
+		if($value["error"] == UPLOAD_ERR_CANT_WRITE)	return "VALIDATOR_FILE_CANNOT_WRITE";
+		if($value["error"] == UPLOAD_ERR_EXTENSION)		return "VALIDATOR_FILE_BANNED_EXTENSION";
 
 		//	Unknown error, just comment it here so I can't lose the info: "VALIDATOR_FILE_REQUEST_FILE_NOT_FOUND"
 		return "VALIDATOR_FILE_NOT_FOUND";

@@ -19,6 +19,12 @@
  * Title: Base resource<->URL convertor for the router system
  * Version: 1.0
  * Project: Amslib/Router
+ * 
+ * NEXT VERSION: 
+ * 	In reality this object is largely redundant because of a series of optimisations
+ * 	done in Amslib_Router2, so basically we need a couple extra static methods to merge
+ * 	Amslib_Router2 and Amslib_Router_URL together, keeping Amslib_Router_URL around just for 
+ * 	backwards compatibility
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -27,11 +33,6 @@
 class Amslib_Router_URL
 {
 	protected static $router;
-
-	protected static function getRoute($route,$option="default")
-	{
-		return self::$router->getRoute($route,$option);
-	}
 
 	public static function setRouter($router)
 	{
@@ -42,9 +43,9 @@ class Amslib_Router_URL
 	{
 		return "http://{$_SERVER["SERVER_NAME"]}$url";
 	}
-
-	public static function Home()
+	
+	public static function getRoute($route,$option="default")
 	{
-		die("You need to specify at least the Home() method in your URL object");
+		return self::$router->getRoute($route,$option);
 	}
 }
