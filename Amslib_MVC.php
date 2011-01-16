@@ -44,6 +44,7 @@ class Amslib_MVC
 	protected $javascript;
 	protected $value;
 	protected $routes;
+	protected $slots;
 
 	protected $translation;
 	
@@ -221,13 +222,11 @@ class Amslib_MVC
 	public function getView($id,$parameters=array())
 	{
 		if(isset($this->view[$id])){
-			$file							=	$this->view[$id];
-			
 			$parameters["widget_manager"]	=	$this->widgetManager;
 			$parameters["api"]				=	$this;
 			
 			ob_start();
-			Amslib::requireFile($file,$parameters);
+			Amslib::requireFile($this->view[$id],$parameters);
 			return ob_get_clean();
 		}
 		
@@ -388,6 +387,28 @@ class Amslib_MVC
 	{
 		return (isset($this->images[$id])) ? $this->images[$id] : false;
 	}
+	
+	public function setSlot($name,$content,$index=NULL)
+	{
+		if($index){
+			$this->slots[$name][$index] = $content;
+		}else{
+			$this->slots[$name] = $content;
+		}
+	}
+	
+	public function getSlot($name,$index=NULL)
+	{
+		if(isset($this->slots[$name])){
+			if(is_array($this->slots[$name])){
+				return ($index) ? $this->slots[$name][$index] : current($this->slots[$name]);
+			}
+			
+			return $this->slots[$name];
+		}
+		
+		return "";
+	}
 
 	/**************************************************************************
 	 * method: render
@@ -420,7 +441,7 @@ class Amslib_MVC
 	static public function replyJSON($response)
 	{
 		header("Content-Type: application/json");
-		//	MAYBE TODO:Can't use die anymore, because I might run child scripts
+		//	TODO:Can't use die anymore, because I might run child scripts
 		die(json_encode($response));
 	}
 

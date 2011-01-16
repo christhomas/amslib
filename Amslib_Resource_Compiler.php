@@ -45,4 +45,14 @@ class Amslib_Resource_Compiler
 	{
 		unset(self::$javascript[$id]);
 	}
+	
+	static public function addGoogleFont($name,$font)
+	{
+		Amslib_Resource_Compiler::addStylesheet($name,"http://fonts.googleapis.com/css?$font");
+	}
+	
+	static public function removeGoogleFont($name)
+	{
+		Amslib_Resource_Compiler::removeStylesheet($name);
+	}
 }

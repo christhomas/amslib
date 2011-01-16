@@ -96,7 +96,7 @@ class Amslib_Router_Source_XML
 			print("XML ROUTER DATABASE: '$source' FAILED TO OPEN<br/>");
 		}
 	}
-		
+	
 	/**
 	 * method: addPath
 	 * 

@@ -1,27 +1,10 @@
 if(Amslib == "undefined")
 	throw "Amslib.UI requires Amslib to be loaded.";
 
+//	TODO: perhaps this class should be removed because it's ultimately useless
 Amslib.UI = Class.create(Amslib,
 {
-	parent:		false,
-	callback:	false,
-	
 	initialize: function($super,parent){
-		$super();
-		
-		this.parent		=	parent;
-		this.callback	=	new Hash();
-	},
-	
-	observe: function(eventName,callback)
-	{
-		this.callback.set(eventName,callback);
-	},
-	
-	callObserver: function(eventName,data)
-	{
-		var handle = this.callback.get(eventName);
-		
-		if(handle) handle(data);
+		return $super(parent);
 	}
 })

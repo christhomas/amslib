@@ -1,112 +1,12 @@
-var Amslib_Widget = Class.create(
-{
-	mainWidget: 	false,
-	value:			false,
-	services:		false,
-	translation:	false,
-	callback:		false,
-	images:			false,
-	
-	initialize: function(selector)
-	{
-		this.value			=	new Hash();
-		this.services		=	new Hash();
-		this.callback		=	new Hash();
-		this.translation	=	new Hash();
-		this.images			=	new Hash();
-		
-		//	Try first to just pass it through prototype, then if fails, use as a selector
-		this.mainWidget = $(selector);
-		if(!this.mainWidget) this.mainWidget = $(document.body).down(selector);
-		if(!this.mainWidget) return false;
-		
-		this.readParameters();
-		
-		return this;
-	},
-	
-	getNode: function()
-	{
-		return this.mainWidget;
-	},
-	
-	identify: function()
-	{
-		return this.mainWidget.identify();
-	},
-	
-	setCallback: function(type,callback)
-	{
-		this.callback.set(type,callback);
-	},
-	
-	defaultCallback: function(){
-		if(console && console.log) console.log("DEFAULT CALLBACK CALLED");
-	},
-	
-	getCallback: function(type)
-	{
-		var cb = this.callback.get(type);
-				
-		return (cb) ? cb : this.defaultCallback;
-	},
+if(Amslib == "undefined")
+	throw "Amslib_Widget requires Amslib to be loaded.";
 
-	readParameters: function(override)
+//	This is now just a dummy class to make sure all the other code works whilst 
+//	it's still in use, this class should actually be removed and not used anymore
+var Amslib_Widget = Class.create(Amslib,
+{
+	initialize: function($super,selector)
 	{
-		if(!this.mainWidget) return false;
-		
-		var parent = override || this.mainWidget;
-		
-		parent.select(".widget_parameters input[type='hidden']").each(function(p){
-			if(p.name.indexOf("service:") >= 0){
-				this.setService(p.name.replace("service:",""),p.value);
-			}else if(p.name.indexOf("translation:") >= 0){
-				this.setTranslation(p.name.replace("translation:",""),p.value);
-			}else if(p.name.indexOf("image:") >= 0){
-				this.setImage(p.name.replace("image:",""),p.value);
-			}else{
-				this.setValue(p.name,p.value);
-			}
-		}.bind(this));
-	},
-	
-	setValue: function(name,value)
-	{
-		this.value.set(name,value);
-	},
-	
-	getValue: function(name)
-	{
-		return this.value.get(name);
-	},
-	
-	setService: function(name,value)
-	{
-		this.services.set(name,value);
-	},
-		
-	getService: function(name)
-	{
-		return this.services.get(name);
-	},
-	
-	setTranslation: function(name,value)
-	{
-		this.translation.set(name,value);
-	},
-	
-	getTranslation: function(name)
-	{
-		return this.translation.get(name);
-	},
-	
-	setImage: function(name,value)
-	{
-		this.images.set(name,value);
-	},
-	
-	getImage: function(name)
-	{
-		return this.images.get(name);
+		return $super(selector);
 	}
 });
