@@ -17,7 +17,7 @@
  *
  * File: Amslib_MVC.php
  * Title: Model/View/Controller implementation for use with Amslib projects
- * Version: 2.0
+ * Version: 2.1
  * Project: amslib
  *
  * Contributors/Author:
@@ -43,6 +43,7 @@ class Amslib_MVC
 	protected $stylesheet;
 	protected $javascript;
 	protected $value;
+	protected $routes;
 
 	protected $translation;
 	
@@ -108,6 +109,7 @@ class Amslib_MVC
 		return $this->database;
 	}
 
+	//	FIXME: Remove dependency on widget manager
 	public function setWidgetManager($widgetManager)
 	{
 		$this->widgetManager	=	$widgetManager;
@@ -303,6 +305,33 @@ class Amslib_MVC
 	{
 		return (isset($this->translation[$name])) ? $this->translation[$name] : NULL;
 	}
+	
+	public function addRouteByXmlNode($name,$node)
+	{
+		//	NOTE: What happens if a plugin loads AFTERWARDS, which claims the same route names?
+		//	NOTE: We need a way to deregister this plugin because the new one takes control
+		//	NOTE: This situation doesnt happen right now because we don't have enough plugins so never possible to collide
+		$source = Amslib_Router_Source_XML::getInstance();
+		
+		$this->routes[$name] = $source->addPath($node);
+	}
+	
+	public function removeRoute($name)
+	{
+		$source = Amslib_Router_Source_XML::getInstance();
+		
+		//	TODO: we can't actually remove the route yet, because this has never been done before.
+	}
+	
+	public function hasRoute($name)
+	{
+		return isset($this->routes[$name]);
+	}
+	
+	public function getRoute($name)
+	{
+		return isset($this->routes[$name]) ? $this->routes[$name] : false;
+	}
 
 	/**
 	 * method: getHiddenParameters
@@ -401,7 +430,7 @@ class Amslib_MVC
 			header("Location: $location");
 			die("waiting to redirect");
 		}else{
-			die("The 'return_url' parameter was empty, you cannot redirect to an empty location");
+			die("Amslib_MVC::safeRedirect-> The \$location parameter was an empty string");
 		}
 	}
 }

@@ -55,6 +55,8 @@ class Amslib_WidgetManager
 					$error = "FATAL ERROR(Amslib_WidgetManager::setAPI) Could not __ERROR__ for widget '$name'<br/>";
 
 					//	FIXME: These errors should move into the Amslib_Keystore 
+					//	FIXME: There should also be a centralised way to record and log errors
+					//	FIXME: Then they should go out through a standard logger which can write to disk or db or something log4php?
 					if(!class_exists($node->nodeValue)){
 						//	class does not exist
 						$error = str_replace("__ERROR__","find class '{$node->nodeValue}'",$error);
@@ -226,6 +228,13 @@ class Amslib_WidgetManager
 			$cond	=	$s->getAttribute("cond");
 			$file	=	$this->findResource($widget,$s);
 			$api->setStylesheet($id,$file,$cond);
+		}
+		
+		$route = $this->xpath->query("//package/route");
+		for($a=0;$a<$route->length;$a++){
+			$r		=	$route->item($a);
+			$name	=	$r->getAttribute("name");
+			$api->addRouteByXmlNode($name,$r);
 		}
 		
 		return $api->initialise();

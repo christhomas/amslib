@@ -40,6 +40,8 @@ class Amslib_Router2
 	public function __construct()
 	{
 		$this->webdir = "";
+		
+		Amslib_Router_URL::setRouter($this);
 	}
 
 	public function load($source,$webdir=NULL)
@@ -70,8 +72,6 @@ class Amslib_Router2
 
 	public function execute()
 	{
-		Amslib_Router_URL::setRouter($this);
-
 		$this->routerPath = Amslib::getParam("router_path");
 
 		if($this->routerPath !== NULL){
@@ -91,6 +91,7 @@ class Amslib_Router2
 		}
 	}
 
+	//	TODO: This is a bullshit function I copied from the old router, probably doesnt mean anything now
 	//	FIXME: wtf? something? why have I left this parameter named 'something' ???
 	public function getResource($something=NULL)
 	{

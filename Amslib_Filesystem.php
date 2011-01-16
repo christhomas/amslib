@@ -96,4 +96,15 @@ class Amslib_Filesystem
 		
 		return $list;
 	}
+	
+	static public function glob($path,$relative=false)
+	{
+		$list = glob(Amslib_Filesystem::absolute($path));
+		
+		if($relative && !empty($list)) foreach($list as &$l){
+			$l = Amslib_Filesystem::relative($l);
+		}
+		
+		return $list;
+	}
 }
