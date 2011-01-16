@@ -29,13 +29,18 @@ var Amslib = Class.create(
 		this.images			=	new Hash();
 				
 		this.readParameters();
-		
+		this.setupDefaultObservers();
 		this.setupAmslib();
 		
 		//	NOTE: This should be eventually removed in favour of using parent all the time
 		this.mainWidget		=	this.parent;
 		
 		return this;
+	},
+	
+	setupDefaultObservers: function()
+	{
+		//	Do nothing, overload in your child class and put the default observers you want
 	},
 	
 	setupAmslib: function()
@@ -64,11 +69,13 @@ var Amslib = Class.create(
 		this.callback.set(eventName,callback);
 	},
 	
-	callObserver: function(eventName,data)
+	callObserver: function(eventName)
 	{
 		var handle = this.callback.get(eventName);
 		
-		return (handle) ? handle(data) : false;
+		//	We slice off the first parameter because it's eventName and we 
+		//	dont want that passed along to the function
+		return (handle) ? handle.apply(handle,$A(arguments).slice(1)) : false;
 	},
 	
 	getObserver: function(eventName)

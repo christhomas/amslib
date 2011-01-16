@@ -43,6 +43,7 @@ class Amslib_MVC
 	protected $stylesheet;
 	protected $javascript;
 	protected $value;
+	protected $viewParams;
 	protected $slots;
 
 	protected $translation;
@@ -71,6 +72,7 @@ class Amslib_MVC
 		$this->stylesheet		=	array();
 		$this->javascript		=	array();
 		$this->value			=	array();
+		$this->viewParams		=	array();
 		$this->translation		=	array();
 
 		//	These three parameters might not exist in every MVC environment
@@ -148,7 +150,17 @@ class Amslib_MVC
 
 	public function getValue($name)
 	{
-		return (isset($this->value[$name])) ? $this->value[$name] : NULL;
+		return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name);
+	}
+	
+	public function setViewParam($parameters)
+	{
+		$this->viewParams = $parameters;
+	}
+	
+	public function getViewParam($name)
+	{
+		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
 	}
 
 	public function setController($id,$name)
@@ -219,7 +231,10 @@ class Amslib_MVC
 	//	TODO: investigate: this method is very similar to render, can refactor??
 	public function getView($id,$parameters=array())
 	{
-		if(isset($this->view[$id])){
+		if(isset($this->view[$id]))
+		{
+			if(!empty($parameters)) $this->setViewParam($parameters);
+			
 			$parameters["widget_manager"]	=	$this->widgetManager;
 			$parameters["api"]				=	$this;
 			
