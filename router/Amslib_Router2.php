@@ -40,6 +40,8 @@ class Amslib_Router2
 	public function __construct()
 	{
 		$this->webdir = "";
+		
+		Amslib_Router_URL::setRouter($this);
 	}
 
 	public function load($source,$webdir=NULL)
@@ -70,8 +72,6 @@ class Amslib_Router2
 
 	public function execute()
 	{
-		Amslib_Router_URL::setRouter($this);
-
 		$this->routerPath = Amslib::getParam("router_path");
 
 		if($this->routerPath !== NULL){
@@ -91,6 +91,7 @@ class Amslib_Router2
 		}
 	}
 
+	//	TODO: This is a bullshit function I copied from the old router, probably doesnt mean anything now
 	//	FIXME: wtf? something? why have I left this parameter named 'something' ???
 	public function getResource($something=NULL)
 	{
@@ -113,6 +114,11 @@ class Amslib_Router2
 		
 		return Amslib_Router_Language2::get(true).$this->source->getRoute($name,$version,$lang);
 	}
+	
+	public function getName()
+	{
+		return isset($this->activeRoute["name"]) ? $this->activeRoute["name"] : false;
+	}
 
 	public function isRouted()
 	{
@@ -122,6 +128,11 @@ class Amslib_Router2
 	public function getParameters()
 	{
 		return $this->paramsRoute;
+	}
+	
+	public function hasParameter($name)
+	{
+		return in_array($name,$this->paramsRoute) ? true : false;
 	}
 
 	public function getCurrentRoute()

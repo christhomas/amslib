@@ -37,8 +37,6 @@ class Amslib_WidgetManager
 	protected $websitePath;
 
 	protected $api;
-	protected $stylesheet;
-	protected $javascript;
 
 	protected function setAPI($name)
 	{
@@ -56,6 +54,9 @@ class Amslib_WidgetManager
 				}else{
 					$error = "FATAL ERROR(Amslib_WidgetManager::setAPI) Could not __ERROR__ for widget '$name'<br/>";
 
+					//	FIXME: These errors should move into the Amslib_Keystore 
+					//	FIXME: There should also be a centralised way to record and log errors
+					//	FIXME: Then they should go out through a standard logger which can write to disk or db or something log4php?
 					if(!class_exists($node->nodeValue)){
 						//	class does not exist
 						$error = str_replace("__ERROR__","find class '{$node->nodeValue}'",$error);
@@ -152,8 +153,8 @@ class Amslib_WidgetManager
 			if($fpath) $path = "$fpath/$file";
 		}
 
-		//	relativise the path and reduce the double slashes to single ones.
-		return str_replace("//","/",$this->getRelativePath($path));
+		//	make the path relative
+		return Amslib_Filesystem::relative($path);
 	}
 
 	protected function loadConfiguration($path,$widget)
@@ -162,68 +163,81 @@ class Amslib_WidgetManager
 
 		$controllers = $this->xpath->query("//package/controllers/name");
 		for($a=0;$a<$controllers->length;$a++){
-			$id		=	$controllers->item($a)->getAttribute("id");
-			$name	=	$controllers->item($a)->nodeValue;
+			$c		=	$controllers->item($a);
+			$id		=	$c->getAttribute("id");
+			$name	=	$c->nodeValue;
 			$api->setController($id,$name);
 		}
 
 		$layouts = $this->xpath->query("//package/layout/name");
 		for($a=0;$a<$layouts->length;$a++){
-			$id		=	$layouts->item($a)->getAttribute("id");
-			$name	=	$layouts->item($a)->nodeValue;
+			$l		=	$layouts->item($a);
+			$id		=	$l->getAttribute("id");
+			$name	=	$l->nodeValue;
 			$api->setLayout($id,$name);
 		}
 
 		$views = $this->xpath->query("//package/view/name");
 		for($a=0;$a<$views->length;$a++){
-			$id		=	$views->item($a)->getAttribute("id");
-			$name	=	$views->item($a)->nodeValue;
+			$v		=	$views->item($a);
+			$id		=	$v->getAttribute("id");
+			$name	=	$v->nodeValue;
 			$api->setView($id,$name);
 		}
 
 		$objects = $this->xpath->query("//package/object/name");
 		for($a=0;$a<$objects->length;$a++){
-			$id		=	$objects->item($a)->getAttribute("id");
-			$name	=	$objects->item($a)->nodeValue;
+			$o		=	$objects->item($a);
+			$id		=	$o->getAttribute("id");
+			$name	=	$o->nodeValue;
 			$api->setObject($id,$name);
 		}
 
-		$theme = $this->xpath->query("//package/theme/name");
-		for($a=0;$a<$theme->length;$a++){
-			$id		=	$theme->item($a)->getAttribute("id");
-			$name	=	$theme->item($a)->nodeValue;
-			$api->setTheme($id,$name);
-		}
-
 		//	FIXME: why are services treated differently then other parts of the MVC system?
+		//	FIXME: suggestion: Sv_Service_Name
 		$services = $this->xpath->query("//package/service/file");
 		for($a=0;$a<$services->length;$a++){
-			$id		=	$services->item($a)->getAttribute("id");
-			$file	=	$services->item($a)->nodeValue;
-			$file	=	$this->getRelativePath($this->widgetPath."/$widget/services/$file");
+			$s		=	$services->item($a);
+			$id		=	$s->getAttribute("id");
+			$file	=	$s->nodeValue;
+			$file	=	Amslib_Filesystem::relative($this->widgetPath."/$widget/services/$file");
 			$api->setService($id,$file);
 		}
 
 		$images = $this->xpath->query("//package/image/file");
 		for($a=0;$a<$images->length;$a++){
-			$id = $images->item($a)->getAttribute("id");
-			$file = $this->findResource($widget,$images->item($a));
+			$i		=	$images->item($a);
+			$id 	=	$i->getAttribute("id");
+			$file	=	$this->findResource($widget,$i);
 			$api->setImage($id,$file);
 		}
 
 		$javascript = $this->xpath->query("//package/javascript/file");
 		for($a=0;$a<$javascript->length;$a++){
-			$id = $javascript->item($a)->getAttribute("id");
-			$file = $this->findResource($widget,$javascript->item($a));
-			$this->setJavascript($id,$file);
+			$j		=	$javascript->item($a);
+			$id		=	$j->getAttribute("id");
+			$cond	=	$j->getAttribute("cond");
+			$file	=	$this->findResource($widget,$j);
+			$api->setJavascript($id,$file,$cond);
 		}
 
 		$stylesheet = $this->xpath->query("//package/stylesheet/file");
 		for($a=0;$a<$stylesheet->length;$a++){
-			$id		=	$stylesheet->item($a)->getAttribute("id");
-			$file	=	$this->findResource($widget,$stylesheet->item($a));
-			$this->setStylesheet($id,$file);
+			$s		=	$stylesheet->item($a);
+			$id		=	$s->getAttribute("id");
+			$cond	=	$s->getAttribute("cond");
+			$file	=	$this->findResource($widget,$s);
+			$api->setStylesheet($id,$file,$cond);
 		}
+		
+		$route = $this->xpath->query("//package/route");
+		for($a=0;$a<$route->length;$a++){
+			$r		=	$route->item($a);
+			$name	=	$r->getAttribute("name");
+			$api->addRouteByXmlNode($name,$r);
+		}
+		
+		return $api->initialise();
 	}
 
 /*******************************************************************************
@@ -232,10 +246,7 @@ class Amslib_WidgetManager
 	public function __construct()
 	{
 		//	Setup the basic system like this, it's 99% correct everytime
-		$this->setup(Amslib_Filesystem::documentRoot()."/widgets",Amslib_Filesystem::documentRoot());
-
-		$this->stylesheet	=	array();
-		$this->javascript	=	array();
+		$this->setup(Amslib_Filesystem::absolute("/widgets"),Amslib_Filesystem::documentRoot());
 	}
 
 	public function &getInstance()
@@ -281,12 +292,12 @@ class Amslib_WidgetManager
 	 * 	$api	-	An object which is to be used to override the default widget api
 	 *
 	 * example:
-	 *		require_once("CustomApp_Amstudios_Message_List.php");
-	 *		class CustomApp_Amstudios_Message_List extends Amstudios_Message_List{}
-	 *		$api = CustomApp_Amstudios_Message_List::getInstance();
+	 *		require_once("CustomApp_Amstudios_Message_Thread_List.php");
+	 *		class CustomApp_Amstudios_Message_Thread_List extends Amstudios_Message_Thread_List{}
+	 *		$api = CustomApp_Amstudios_Message_Thread_List::getInstance();
 	 *		$api->setValue("key","value");
-	 *		$widgetManager->overrideAPI("amstudios_message_list",$api);
-	 *		$widgetManager->render("amstudios_message_list");
+	 *		$widgetManager->overrideAPI("amstudios_message_thread_list",$api);
+	 *		$widgetManager->render("amstudios_message_thread_list");
 	 */
 	public function overrideAPI($name,$api)
 	{
@@ -295,86 +306,89 @@ class Amslib_WidgetManager
 
 	public function load($name)
 	{
-		if(is_array($name)){
-			foreach($name as $w) $this->load($w);
-		}else{
-			$path = $this->widgetPath;
-
-			if($this->isWidgetLoaded($name)) return;
-
-			if($this->loadPackage($path,$name)){
-				$xdoc	=	$this->xdoc;
-				$xpath	=	$this->xpath;
-
-				if($this->loadDependencies()){
-					$this->xdoc		=	$xdoc;
-					$this->xpath	=	$xpath;
-				}
-
-				$this->loadConfiguration($path,$name);
-			}
+		if($this->isWidgetLoaded($name)){
+			return $this->getAPI($name);
 		}
+
+		if($this->loadPackage($this->widgetPath,$name)){
+			$xdoc	=	$this->xdoc;
+			$xpath	=	$this->xpath;
+
+			if($this->loadDependencies()){
+				$this->xdoc		=	$xdoc;
+				$this->xpath	=	$xpath;
+			}
+
+			return $this->loadConfiguration($this->widgetPath,$name);
+		}
+		
+		return false;
 	}
 
 	public function getWidgetPath()
 	{
 		return $this->widgetPath;
 	}
-
-	public function getRelativePath($path="")
+	
+	public function getView($widget,$view,$parameters=array())
 	{
-		//	Path is already relative
-		if(strpos($path,".") === 0) return $path;
-
-		$root = $this->documentRoot;
-		$path = str_replace($root,"",$root.$path);
-
-		return $path;
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->getView($view,$parameters) : false;
 	}
 	
-	public function getService($path)
+	public function setService($widget,$id,$service)
 	{
-		$parts		=	explode("/",$path);
-
-		$widget		=	array_shift($parts);
-		$service	=	array_shift($parts);
+		$api = $this->getAPI($widget);
 		
+		return $api ? $api->setService($id,$service) : false;
+	}
+	
+	public function getService($widget,$service)
+	{
 		$api = $this->getAPI($widget);
 				
 		return $api ? $api->getService($service) : false;
 	}
-
-	public function setStylesheet($name,$file,$conditional=NULL)
+	
+	public function callService($widget,$service)
 	{
-		if($name && $file){
-			$this->stylesheet[$name] = "<link rel='stylesheet' type='text/css' href='$file' />";
-			
-			if($conditional !== NULL){
-				$this->stylesheet[$name] = "<!--[$conditional]>{$this->stylesheet[$name]}<![endif]-->";
-			}
-		}
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->callService($service) : false;
+	}
+	
+	public function setStylesheet($widget,$id,$file,$conditional=NULL)
+	{
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->setStylesheet($id,$file,$conditional) : false;
+	}
+	
+	public function addStylesheet($widget,$stylesheet)
+	{
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->addStylesheet($stylesheet) : false;
+	}
+	
+	public function setJavacsript($widget,$id,$file,$conditional=NULL)
+	{
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->setJavascript($id,$file,$conditional) : false;
+	}
+	
+	public function addJavascript($widget,$javascript)
+	{
+		$api = $this->getAPI($widget);
+		
+		return $api ? $api->addJavascript($javascript) : false;
 	}
 
-	public function getStylesheet()
+	public function render($widget,$parameters=array())
 	{
-		return implode("\n",$this->stylesheet);
-	}
-
-	public function setJavascript($name,$file)
-	{
-		if($name && $file){
-			$this->javascript[$name] = "<script type='text/javascript' src='$file'></script>";
-		}
-	}
-
-	public function getJavascript()
-	{
-		return implode("\n",$this->javascript);
-	}
-
-	public function render($name,$parameters=array())
-	{
-		$api = $this->getAPI($name);
+		$api = $this->getAPI($widget);
 
 		return ($api) ? $api->render("default",$parameters) : false;
 	}

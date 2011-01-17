@@ -21,15 +21,16 @@ class Amslib_Form
 		return $options;
 	}
 
-	static public function numberSequenceToSelectOptions($start,$stop,$selected=NULL)
+	static public function numberSequenceToSelectOptions($start,$stop,$selected=NULL,$pad=NULL)
 	{
 		$options = "";
 
-		if(!$start || !is_numeric($start)) return $options;
-		if(!$stop || !is_numeric($stop)) return $options;
+		if(!is_numeric($start) || !is_numeric($stop)) return $options;
 
 		for($a=$start;$a<=$stop;$a++){
 			$enabled = ($a == $selected) ? "selected='selected'" : "";
+			
+			if($pad !== NULL && is_string($pad)) $a = str_pad($a,strlen($pad),$pad[0],STR_PAD_LEFT); 
 
 			$options .= "<option $enabled value='$a'>$a</option>";
 		}

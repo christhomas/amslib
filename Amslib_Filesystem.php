@@ -37,7 +37,7 @@ class Amslib_Filesystem
 	static public function absolute($filename)
 	{
 		$docroot	=	self::documentRoot();
-		$filename	=	str_replace($docroot,"",$filename);
+		$filename	=	Amslib::lchop($filename,$docroot);
 
 		return str_replace("//","/",$docroot."/".$filename);
 	}
@@ -45,7 +45,7 @@ class Amslib_Filesystem
 	static public function relative($filename)
 	{
 		$docroot	=	self::documentRoot();
-		$filename	=	str_replace($docroot,"",$filename);
+		$filename	=	Amslib::lchop($filename,$docroot);
 
 		return str_replace("//","/",$filename);
 	}
@@ -76,5 +76,35 @@ class Amslib_Filesystem
 		$path = str_replace("__END__","",$path);
 		
 		return $path;
+	}
+	
+	static public function getList($dir,$recurse=false)
+	{
+		$list = array();
+		
+		if(is_dir($dir)){
+			$list = glob("$dir/*");
+			
+			if($recurse){
+				foreach($list as $l){
+					$subdir = self::getList($l,$recurse);
+					
+					$list = array_merge($list,$subdir);
+				}
+			}
+		}
+		
+		return $list;
+	}
+	
+	static public function glob($path,$relative=false)
+	{
+		$list = glob(Amslib_Filesystem::absolute($path));
+		
+		if($relative && !empty($list)) foreach($list as &$l){
+			$l = Amslib_Filesystem::relative($l);
+		}
+		
+		return $list;
 	}
 }

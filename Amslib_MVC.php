@@ -17,7 +17,7 @@
  *
  * File: Amslib_MVC.php
  * Title: Model/View/Controller implementation for use with Amslib projects
- * Version: 2.0
+ * Version: 2.1
  * Project: amslib
  *
  * Contributors/Author:
@@ -38,31 +38,30 @@ class Amslib_MVC
 	protected $layout;
 	protected $object;
 	protected $view;
-	protected $theme;
 	protected $images;
 	protected $service;
+	protected $stylesheet;
+	protected $javascript;
 	protected $value;
+	protected $viewParams;
+	protected $routes;
+	protected $slots;
 
+	protected $translation;
+	
 	//	MVC Configuration
-	protected $controllerDir	=	"controllers";
-	protected $controllerPrefix	=	"Ct_";
-	protected $layoutDir		=	"layouts";
-	protected $layoutPrefix		=	"La_";
-	protected $viewDir			=	"views";
-	protected $viewPrefix		=	"Vi_";
-	protected $themeDir			=	"themes";
-	protected $themePrefix		=	"Th_";
-	protected $objectDir		=	"objects";
-	protected $objectPrefix		=	"";
-	protected $serviceDir		=	"services";
-	protected $servicePrefix	=	"Sv_";
-
+	protected $prefix			=	array();
+	protected $dir				=	array();
+	
 	protected $widgetManager;
 	protected $widgetName;
 	protected $widgetPath;
-
-	protected function initialise(){}
-
+	
+	protected function getComponentPath($component,$name)
+	{
+		return "{$this->widgetPath}/{$this->dir[$component]}/{$this->prefix[$component]}{$name}.php";
+	}
+	
 	public function __construct()
 	{
 		$this->path				=	"";
@@ -71,46 +70,36 @@ class Amslib_MVC
 		$this->object			=	array();
 		$this->view				=	array();
 		$this->service			=	array();
+		$this->stylesheet		=	array();
+		$this->javascript		=	array();
 		$this->value			=	array();
-		$this->theme			=	array();
+		$this->viewParams		=	array();
+		$this->translation		=	array();
+
+		//	These three parameters might not exist in every MVC environment
+		//	Not all environments are widgets or have a widget manager, this is 
+		//	something I assumed in the past, but now with the possibility to
+		//	use this with generic projects, I have to think past that
 		$this->widgetManager	=	NULL;
 		$this->widgetPath		=	NULL;
 		$this->widgetName		=	NULL;
+		
+		$this->setupMVC("controller",	"controllers",	"Ct_");
+		$this->setupMVC("layout",		"layouts",		"La_");
+		$this->setupMVC("view",			"views",		"Vi_");
+		$this->setupMVC("object",		"objects",		"");
+		$this->setupMVC("service",		"services",		"Sv_");
+	}
+	
+	public function initialise()
+	{
+		return $this;
 	}
 
 	public function setupMVC($type,$dir,$prefix)
 	{
-		switch($type){
-			case "controllers":{
-				$this->controllerDir	=	$dir;
-				$this->controllerPrefix	=	$prefix;
-			}break;
-
-			case "layouts":{
-				$this->layoutDir		=	$dir;
-				$this->layoutPrefix		=	$prefix;
-			}break;
-
-			case "views":{
-				$this->viewDir			=	$dir;
-				$this->viewPrefix		=	$prefix;
-			}break;
-
-			case "themes":{
-				$this->themeDir			=	$dir;
-				$this->themePrefix		=	$prefix;
-			}
-
-			case "objects":{
-				$this->objectDir		=	$dir;
-				$this->objectPrefix		=	$prefix;
-			}break;
-
-			case "services":{
-				$this->serviceDir		=	$dir;
-				$this->servicePrefix	=	$prefix;
-			}break;
-		}
+		$this->prefix[$type]	=	$prefix;
+		$this->dir[$type]		=	$dir;
 	}
 
 	public function setDatabase($database)
@@ -123,12 +112,11 @@ class Amslib_MVC
 		return $this->database;
 	}
 
+	//	FIXME: Remove dependency on widget manager
 	public function setWidgetManager($widgetManager)
 	{
 		$this->widgetManager	=	$widgetManager;
 		$this->widgetPath		=	$widgetManager->getWidgetPath();
-
-		$this->initialise();
 	}
 
 	public function getWidgetManager()
@@ -164,13 +152,25 @@ class Amslib_MVC
 
 	public function getValue($name)
 	{
-		return (isset($this->value[$name])) ? $this->value[$name] : NULL;
+		return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name);
+	}
+	
+	public function setViewParam($parameters)
+	{
+		$this->viewParams = $parameters;
+	}
+	
+	public function getViewParam($name)
+	{
+		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
 	}
 
 	public function setController($id,$name)
 	{
-		$file = "{$this->widgetPath}/{$this->controllerDir}/{$this->controllerPrefix}{$name}.php";
-
+		if(!$id || strlen($id) == 0) $id = $name;
+		
+		$file = $this->getComponentPath("controller",$name);
+		
 		$this->controllers[$id] = $file;
 	}
 
@@ -181,7 +181,9 @@ class Amslib_MVC
 
 	public function setLayout($id,$name)
 	{
-		$file = "{$this->widgetPath}/{$this->layoutDir}/{$this->layoutPrefix}{$name}.php";
+		if(!$id || strlen($id) == 0) $id = $name;
+		
+		$file = $this->getComponentPath("layout",$name);
 
 		$this->layout[$id] = $file;
 
@@ -197,27 +199,59 @@ class Amslib_MVC
 
 	public function setObject($id,$name)
 	{
-		$file = "{$this->widgetPath}/{$this->objectDir}/{$this->objectPrefix}{$name}.php";
+		if(!$id || strlen($id) == 0) $id = $name;
+		
+		$file = $this->getComponentPath("object",$name);
 
 		$this->object[$id] = $file;
 	}
 
 	public function getObject($id,$singleton=false)
 	{
-		if(isset($this->object[$id]) && Amslib::requireFile($this->object[$id]))
-		{
-			if($singleton){
-				return call_user_func(array($id,"getInstance"));
-			}
+		if(!isset($this->object[$id])) return false;	
+		
+		$status = Amslib::requireFile($this->object[$id],array("require_once"=>true));
 
+		if(class_exists($id)){
+			if($singleton) return call_user_func(array($id,"getInstance"));
+				
 			return new $id;
 		}
 
 		return false;
 	}
 
+	public function setView($id,$name)
+	{
+		if(!$id || strlen($id) == 0) $id = $name;
+		
+		$file = $this->getComponentPath("view",$name);
+		
+		$this->view[$id] = $file;
+	}
+	
+	//	TODO: investigate: this method is very similar to render, can refactor??
+	public function getView($id,$parameters=array())
+	{
+		if(isset($this->view[$id]))
+		{
+			if(!empty($parameters)) $this->setViewParam($parameters);
+			
+			$parameters["widget_manager"]	=	$this->widgetManager;
+			$parameters["api"]				=	$this;
+			
+			ob_start();
+			Amslib::requireFile($this->view[$id],$parameters);
+			return ob_get_clean();
+		}
+		
+		return "";
+	}
+	
 	public function setService($id,$file)
 	{
+		if(!$id || strlen($id) == 0) $id = $name;
+		
 		$this->service[$id] = $file;
 
 		//	Set this as a service url for the javascript to acquire
@@ -226,7 +260,91 @@ class Amslib_MVC
 
 	public function getService($id)
 	{
-		return (isset($this->service[$id])) ? $this->service[$id] : false;
+		return (isset($this->service[$id])) ? $this->service[$id] : NULL;
+	}
+	
+	public function callService($id)
+	{
+		$service = $this->getService($id);
+		$service = Amslib_Filesystem::absolute($service);
+		
+		$parameters["widget_manager"]	=	$this->widgetManager;
+		$parameters["api"]				=	$this;
+		
+		return Amslib::requireFile($service,$parameters);
+	}
+	
+	public function setStylesheet($id,$file,$conditional=NULL)
+	{
+		$this->stylesheet[$id] = array("file"=>$file,"conditional"=>$conditional);
+	}
+	
+	public function addStylesheet($id)
+	{
+		Amslib_Resource_Compiler::addStylesheet($id,$this->stylesheet[$id]["file"],$this->stylesheet[$id]["conditional"]);
+	}
+	
+	public function removeStylesheet($id)
+	{
+		Amslib_Resource_Compiler::removeStylesheet($id);
+	}
+	
+	public function setJavascript($id,$file,$conditional=NULL)
+	{
+		$this->javascript[$id] = array("file"=>$file,"conditional"=>$conditional);
+	}
+	
+	public function addJavascript($id)
+	{
+		Amslib_Resource_Compiler::addJavascript($id,$this->javascript[$id]["file"],$this->javascript[$id]["conditional"]);
+	}
+	
+	public function removeJavascript($id)
+	{
+		Amslib_Resource_Compiler::removeJavascript($id);
+	}
+	
+	//	NOTE:	Shouldn't this use the translation system? not reimplement somethign that already exists?
+	//			This is basically what the in-memory translator does
+	public function setTranslation($name,$value)
+	{
+		$this->translation[$name] = $value;
+		
+		$this->setValue("translation:$name",$value);
+	}
+
+	//	NOTE:	Shouldn't this use the translation system? not reimplement somethign that already exists?
+	//			This is basically what the in-memory translator does
+	public function getTranslation($name)
+	{
+		return (isset($this->translation[$name])) ? $this->translation[$name] : NULL;
+	}
+	
+	public function addRouteByXmlNode($name,$node)
+	{
+		//	NOTE: What happens if a plugin loads AFTERWARDS, which claims the same route names?
+		//	NOTE: We need a way to deregister this plugin because the new one takes control
+		//	NOTE: This situation doesnt happen right now because we don't have enough plugins so never possible to collide
+		$source = Amslib_Router_Source_XML::getInstance();
+		
+		$this->routes[$name] = $source->addPath($node);
+	}
+	
+	public function removeRoute($name)
+	{
+		$source = Amslib_Router_Source_XML::getInstance();
+		
+		//	TODO: we can't actually remove the route yet, because this has never been done before.
+	}
+	
+	public function hasRoute($name)
+	{
+		return isset($this->routes[$name]);
+	}
+	
+	public function getRoute($name)
+	{
+		return isset($this->routes[$name]) ? $this->routes[$name] : false;
 	}
 
 	/**
@@ -284,52 +402,26 @@ class Amslib_MVC
 	{
 		return (isset($this->images[$id])) ? $this->images[$id] : false;
 	}
-
-	public function setView($id,$name)
+	
+	public function setSlot($name,$content,$index=NULL)
 	{
-		$file = "{$this->widgetPath}/{$this->viewDir}/{$this->viewPrefix}{$name}.php";
-
-		$id = (strlen($id)) ? $id : $name;
-
-		$this->view[$id] = $file;
-	}
-
-	public function getView($id,$parameters=array())
-	{
-		if(isset($this->view[$id])){
-			$view = $this->view[$id];
-
-			$parameters["widget_manager"]	=	$this->widgetManager;
-			$parameters["api"]				=	$this;
-
-			ob_start();
-			Amslib::requireFile($view,$parameters);
-			return ob_get_clean();
+		if($index){
+			$this->slots[$name][$index] = $content;
+		}else{
+			$this->slots[$name] = $content;
 		}
-
-		return "";
 	}
-
-	public function setTheme($id,$name)
+	
+	public function getSlot($name,$index=NULL)
 	{
-		$file = "{$this->widgetPath}/{$this->themeDir}/{$this->themePrefix}{$name}.php";
-
-		$this->theme[$id] = $file;
-	}
-
-	public function decorate($theme,$parameters)
-	{
-		if(isset($this->theme[$theme])){
-			$theme = $this->theme[$theme];
-
-			$parameters["widget_manager"]	=	$this->widgetManager;
-			$parameters["api"]				=	$this;
-
-			ob_start();
-			Amslib::requireFile($theme,$parameters);
-			return ob_get_clean();
+		if(isset($this->slots[$name])){
+			if(is_array($this->slots[$name])){
+				return ($index) ? $this->slots[$name][$index] : current($this->slots[$name]);
+			}
+			
+			return $this->slots[$name];
 		}
-
+		
 		return "";
 	}
 
@@ -345,22 +437,27 @@ class Amslib_MVC
 	 * notes:
 	 * 	we only render the first layout in the widget, what happens if there are 10 layouts?
 	 */
-	public function render($layout="default",$parameters=array())
+	public function render($id="default",$parameters=array())
 	{
-		$layout							=	$this->layout[$layout];
-		$parameters["widget_manager"]	=	$this->widgetManager;
-		$parameters["api"]				=	$this;
+		if(isset($this->layout[$id])){
+			$file							=	$this->layout[$id];
+			
+			$parameters["widget_manager"]	=	$this->widgetManager;
+			$parameters["api"]				=	$this;
 
-		ob_start();
-		Amslib::requireFile($layout,$parameters);
-		return ob_get_clean();
+			ob_start();
+			Amslib::requireFile($file,$parameters);
+			return ob_get_clean();
+		}
+		
+		return "";
 	}
 
 	static public function replyJSON($response)
 	{
 		header("Content-Type: application/json");
-		$response = json_encode($response);
-		die($response);
+		//	TODO:Can't use die anymore, because I might run child scripts
+		die(json_encode($response));
 	}
 
 	static public function safeRedirect($location)
@@ -369,7 +466,7 @@ class Amslib_MVC
 			header("Location: $location");
 			die("waiting to redirect");
 		}else{
-			die("The 'return_url' parameter was empty, you cannot redirect to an empty location");
+			die("Amslib_MVC::safeRedirect-> The \$location parameter was an empty string");
 		}
 	}
 }

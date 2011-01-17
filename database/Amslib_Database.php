@@ -45,6 +45,8 @@ class Amslib_Database
 	protected $debug = false;
 
 	protected $selectResult = false;
+	
+	protected $seq = 0;
 
 /******************************************************************************
  *	PROTECTED MEMBERS
@@ -97,7 +99,10 @@ class Amslib_Database
 		return $this->lastResult;
 	}
 
-	public function __construct(){}
+	public function __construct()
+	{
+		$this->seq = 0;
+	}
 
 	public function getLastQuery()
 	{
