@@ -1,0 +1,32 @@
+@CHARSET "UTF-8";
+
+.amslib_ui_fileupload {
+	display: inline-block;
+	vertical-align: middle;
+	position: relative;
+	padding: 5px;
+	white-space: nowrap;
+	text-align: right;
+}
+
+.amslib_ui_fileupload .fakefile{
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 1;
+	white-space: nowrap;
+}
+
+.amslib_ui_fileupload input.file{
+	position: absolute;
+	top: 0;
+	right: 0;
+	display: inline-block;
+	width: inherit;
+	text-align: right;
+	filter: alpha(opacity=0);
+	opacity: 0;
+	z-index: 2;
+	padding: 10px 0 !important;
+	margin: 0 !important;
+}
