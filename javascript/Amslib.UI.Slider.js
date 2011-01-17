@@ -7,16 +7,20 @@ Amslib.UI.Slider = Class.create(Amslib.UI,
 	handle:			false,
 	position:		false,
 	axis:			false,
+	axisKey:		false,
 	updateMethod:	false,
 	
 	initialize: function($super,track,handle,options){
-		$super();
+		$super(track);
 		
 		this.track	=	track;
 		this.handle	=	handle;
 		Object.extend(this,options || {});
 		
-		this.updateMethod = (this.axis == "veritcal") ? this.updateVertical : this.updateHorizontal;
+		this.updateMethod	=	(this.axis == "vertical") ? this.updateVertical : this.updateHorizontal;
+		this.axisKey		=	(this.axis == "vertical") ? "top" : "left";
+		
+		this.handle.observe("mousedown",this.startDrag.bindAsEventListener(this));
 	},
 	
 	startDrag: function(event)
@@ -39,7 +43,26 @@ Amslib.UI.Slider = Class.create(Amslib.UI,
 	
 	updateHorizontal: function(event)
 	{
-		//	TODO: Write functionality
+		//		Obtain the mouse vertical position
+		var x = Event.pointerX(event);
+		
+		//	Calculate the position of the handle, restricted to the track area
+		var p = this.parent.cumulativeOffset();
+		var w = this.handle.getDimensions().width;
+		
+		var m = this.track.getDimensions().width;
+		
+		p.left = (x-p.left) - w/2;
+		if(p.left < 0) p.left = 0;
+		if(p.left > m) p.left = m;
+		this.handle.setStyle({left: p.left+"px"});
+		
+		this.position = this.handle.positionedOffset().left / m;
+		
+		this.callObserver("change",this.position, p.left);
+		
+		event.stop();
+		return false;
 	},
 	
 	updateVertical: function(event)
@@ -51,8 +74,7 @@ Amslib.UI.Slider = Class.create(Amslib.UI,
 		var p = this.parent.cumulativeOffset();
 		var h = this.handle.getDimensions().height;
 		
-		// FIXME: the -2 calculating 'm' is hardcoded from the margin
-		var m = this.track.getDimensions().height - h;
+		var m = this.track.getDimensions().height;
 		
 		p.top = (y-p.top) - h/2;
 		if(p.top < 0) p.top = 0;
@@ -70,13 +92,25 @@ Amslib.UI.Slider = Class.create(Amslib.UI,
 	setPosition: function(pos)
 	{
 		//	we should require the units here also so we dont have to guess
+	},
+	
+	setPercent: function(percent)
+	{
+		//	NOTE: Internet Explorer didnt like that sometimes this number was NaN
+		if(!isNaN(percent)){
+			s = {};
+			s[this.axisKey] = percent+"%";
+			
+			this.handle.setStyle(s);	
+		}
 	}
 });
 
 Amslib.UI.Slider.config = {
+	//	NOTE: These are just copied from the Scrollbar object, we need to customise them
 	css: {
 		parent:		"amslib_ui_scrollbar_parent", 
 		track:		"amslib_ui_scrollbar_track",
 		handle:		"amslib_ui_scrollbar_handle"
 	}
-}
+};
