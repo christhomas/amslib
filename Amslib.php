@@ -93,9 +93,9 @@ class Amslib
 	static public function getIncludeContents($filename)
 	{
 		ob_start();
-		include($filename);
-		$contents = ob_get_contents();
-		ob_end_clean();
+		Amslib::includeFile($filename);
+		$contents = ob_get_clean();
+		
 		return $contents;
 	}
 	
