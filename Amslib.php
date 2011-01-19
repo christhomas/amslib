@@ -174,6 +174,10 @@ class Amslib
 			if($class_name == "FirePHP"){
 				$class_name	=	"util/FirePHPCore/$class_name.class";
 			}
+			
+			if($class_name == "phpQuery"){
+				$class_name =	"util/phpquery.php";
+			}
 
 			//	Redirect to include the correct path for the translator system
 			if(strpos($class_name,"Amslib_Translator") !== false){

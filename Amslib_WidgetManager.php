@@ -54,7 +54,9 @@ class Amslib_WidgetManager
 				}else{
 					$error = "FATAL ERROR(Amslib_WidgetManager::setAPI) Could not __ERROR__ for widget '$name'<br/>";
 
-					//	FIXME: These errors should move into the Amslib_Keystore 
+					//	FIXME: These errors should move into the Amslib_Keystore
+					//	FIXME: There should also be a centralised way to record and log errors
+					//	FIXME: Then they should go out through a standard logger which can write to disk or db or something log4php?
 					if(!class_exists($node->nodeValue)){
 						//	class does not exist
 						$error = str_replace("__ERROR__","find class '{$node->nodeValue}'",$error);
@@ -227,7 +229,14 @@ class Amslib_WidgetManager
 			$file	=	$this->findResource($widget,$s);
 			$api->setStylesheet($id,$file,$cond);
 		}
-		
+
+		$route = $this->xpath->query("//package/route");
+		for($a=0;$a<$route->length;$a++){
+			$r		=	$route->item($a);
+			$name	=	$r->getAttribute("name");
+			$api->addRouteByXmlNode($name,$r);
+		}
+
 		return $api->initialise();
 	}
 
@@ -312,7 +321,7 @@ class Amslib_WidgetManager
 
 			return $this->loadConfiguration($this->widgetPath,$name);
 		}
-		
+
 		return false;
 	}
 
@@ -320,60 +329,60 @@ class Amslib_WidgetManager
 	{
 		return $this->widgetPath;
 	}
-	
+
 	public function getView($widget,$view,$parameters=array())
 	{
 		$api = $this->getAPI($widget);
-		
+
 		return $api ? $api->getView($view,$parameters) : false;
 	}
-	
+
 	public function setService($widget,$id,$service)
 	{
 		$api = $this->getAPI($widget);
-		
+
 		return $api ? $api->setService($id,$service) : false;
 	}
-	
+
 	public function getService($widget,$service)
 	{
 		$api = $this->getAPI($widget);
-				
+
 		return $api ? $api->getService($service) : false;
 	}
-	
+
 	public function callService($widget,$service)
 	{
 		$api = $this->getAPI($widget);
-		
+
 		return $api ? $api->callService($service) : false;
 	}
-	
+
 	public function setStylesheet($widget,$id,$file,$conditional=NULL)
 	{
 		$api = $this->getAPI($widget);
-		
+
 		return $api ? $api->setStylesheet($id,$file,$conditional) : false;
 	}
-	
+
 	public function addStylesheet($widget,$stylesheet)
 	{
 		$api = $this->getAPI($widget);
-		
+
 		return $api ? $api->addStylesheet($stylesheet) : false;
 	}
-	
-	public function setJavacsript($widget,$id,$file,$conditional=NULL)
+
+	public function setJavascript($widget,$id,$file,$conditional=NULL)
 	{
 		$api = $this->getAPI($widget);
-		
+
 		return $api ? $api->setJavascript($id,$file,$conditional) : false;
 	}
-	
+
 	public function addJavascript($widget,$javascript)
 	{
 		$api = $this->getAPI($widget);
-		
+
 		return $api ? $api->addJavascript($javascript) : false;
 	}
 

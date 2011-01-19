@@ -17,7 +17,7 @@
  *
  * File: Amslib_MVC.php
  * Title: Model/View/Controller implementation for use with Amslib projects
- * Version: 2.0
+ * Version: 2.1
  * Project: amslib
  *
  * Contributors/Author:
@@ -43,6 +43,8 @@ class Amslib_MVC
 	protected $stylesheet;
 	protected $javascript;
 	protected $value;
+	protected $viewParams;
+	protected $routes;
 	protected $slots;
 
 	protected $translation;
@@ -71,6 +73,7 @@ class Amslib_MVC
 		$this->stylesheet		=	array();
 		$this->javascript		=	array();
 		$this->value			=	array();
+		$this->viewParams		=	array();
 		$this->translation		=	array();
 
 		//	These three parameters might not exist in every MVC environment
@@ -109,6 +112,7 @@ class Amslib_MVC
 		return $this->database;
 	}
 
+	//	FIXME: Remove dependency on widget manager
 	public function setWidgetManager($widgetManager)
 	{
 		$this->widgetManager	=	$widgetManager;
@@ -148,7 +152,17 @@ class Amslib_MVC
 
 	public function getValue($name)
 	{
-		return (isset($this->value[$name])) ? $this->value[$name] : NULL;
+		return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name);
+	}
+	
+	public function setViewParam($parameters)
+	{
+		$this->viewParams = $parameters;
+	}
+	
+	public function getViewParam($name)
+	{
+		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
 	}
 
 	public function setController($id,$name)
@@ -219,14 +233,15 @@ class Amslib_MVC
 	//	TODO: investigate: this method is very similar to render, can refactor??
 	public function getView($id,$parameters=array())
 	{
-		if(isset($this->view[$id])){
-			$file							=	$this->view[$id];
+		if(isset($this->view[$id]))
+		{
+			if(!empty($parameters)) $this->setViewParam($parameters);
 			
 			$parameters["widget_manager"]	=	$this->widgetManager;
 			$parameters["api"]				=	$this;
 			
 			ob_start();
-			Amslib::requireFile($file,$parameters);
+			Amslib::requireFile($this->view[$id],$parameters);
 			return ob_get_clean();
 		}
 		
@@ -303,6 +318,33 @@ class Amslib_MVC
 	public function getTranslation($name)
 	{
 		return (isset($this->translation[$name])) ? $this->translation[$name] : NULL;
+	}
+	
+	public function addRouteByXmlNode($name,$node)
+	{
+		//	NOTE: What happens if a plugin loads AFTERWARDS, which claims the same route names?
+		//	NOTE: We need a way to deregister this plugin because the new one takes control
+		//	NOTE: This situation doesnt happen right now because we don't have enough plugins so never possible to collide
+		$source = Amslib_Router_Source_XML::getInstance();
+		
+		$this->routes[$name] = $source->addPath($node);
+	}
+	
+	public function removeRoute($name)
+	{
+		$source = Amslib_Router_Source_XML::getInstance();
+		
+		//	TODO: we can't actually remove the route yet, because this has never been done before.
+	}
+	
+	public function hasRoute($name)
+	{
+		return isset($this->routes[$name]);
+	}
+	
+	public function getRoute($name)
+	{
+		return isset($this->routes[$name]) ? $this->routes[$name] : false;
 	}
 
 	/**
@@ -414,7 +456,7 @@ class Amslib_MVC
 	static public function replyJSON($response)
 	{
 		header("Content-Type: application/json");
-		//	MAYBE TODO:Can't use die anymore, because I might run child scripts
+		//	TODO:Can't use die anymore, because I might run child scripts
 		die(json_encode($response));
 	}
 
@@ -424,7 +466,7 @@ class Amslib_MVC
 			header("Location: $location");
 			die("waiting to redirect");
 		}else{
-			die("The 'return_url' parameter was empty, you cannot redirect to an empty location");
+			die("Amslib_MVC::safeRedirect-> The \$location parameter was an empty string");
 		}
 	}
 }

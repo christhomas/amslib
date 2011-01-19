@@ -298,7 +298,7 @@ HAS_TABLE;
 		$result = mysql_query("delete from $query",$this->connection);
 		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = 'delete from $query'<br/></pre>");
 
-		if($result) return mysql_affected_rows();
+		if($result) return mysql_affected_rows() >= 0;
 
 		$this->fatalError("Transaction failed<br/>command = 'delete from'<br/>query = '$query'");
 

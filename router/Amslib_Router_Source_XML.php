@@ -9,10 +9,9 @@ class Amslib_Router_Source_XML
 	//	FIXME: This should move down a layer to a generic part
 	protected function extractParameters($url,$route)
 	{
-		$params = substr($url,strlen($route));
-		$params = trim($params,"/");
-
-		return explode("/",$params);
+		$params = Amslib::lchop($url,$route);
+		
+		return (!empty($params)) ? explode("/",$params) : array();
 	}
 	
 	protected function findNodes($name,$parent)
@@ -72,7 +71,8 @@ class Amslib_Router_Source_XML
 
 	public function __construct()
 	{
-		$this->routes = array();
+		$this->routes	=	array();
+		$this->url		=	array();
 	}
 
 	public function load($source)
@@ -91,38 +91,12 @@ class Amslib_Router_Source_XML
 			$paths = $this->xpath->query("//router/path");
 			
 			foreach($paths as $p) $this->addPath($p);
-			
-			$this->calculateInverseRoutes();
 		}else{
 			//	TODO: Should move to using Amslib_Keystore("error") instead
 			print("XML ROUTER DATABASE: '$source' FAILED TO OPEN<br/>");
 		}
 	}
 	
-	public function calculateInverseRoutes()
-	{
-		//	TODO: This shouldnt be a batch calculation but done on each route that is constructed
-		
-		//	Process all the routes into the inverse, so you can do the lookup from the url as well
-		$this->url = array();
-		
-		foreach($this->routes as $name=>$r)
-		{
-			foreach($r["src"] as $version=>$src){
-				foreach($src as $lang=>$url){
-					$this->url[$url] = array(
-						"version"	=>	$version,
-						"name"		=>	$name,
-						"resource"	=>	$r["resource"],
-						"route"		=>	$url,
-						"lang"		=>	$lang,
-						"data"		=>	$r["data"]
-					);
-				}
-			}
-		}
-	}
-		
 	/**
 	 * method: addPath
 	 * 
@@ -139,7 +113,13 @@ class Amslib_Router_Source_XML
 	 * 	The admin_panel.xml file stores each plugin, plus the router configuration, in this case, we need
 	 * 	to decode that config, but we dont want to duplicate the decoding mechanism.
 	 * 
-	 *  IMPORTANT: not entirely sure whether this is a good idea, or just exposing a security hole
+	 *  IMPORTANT:	Not entirely sure whether this is a good idea, or just exposing a security hole
+	 *  
+	 *  TODO:		I actually need this for dynamically allowing widgets to insert their own routes by being installed
+	 *  			you can't expect the installer to know how to update the router xml, so they have to supply their own routes
+	 *  			and be loaded here, so instead, we need to SUPER VALIDATE everything that passes through this method.
+	 *  			Because it's ALL user defined and therefore bullshit, broken and mischevious :)
+	 *  NOTE:		actually, the router xml is defined by the user too, so it should be protected in any situation
 	 */
 	public function addPath($path)
 	{
@@ -158,6 +138,29 @@ class Amslib_Router_Source_XML
 			"resource"	=>	$resource,
 			"data"		=>	$parameter_list
 		);
+		
+		$this->addInversePath($path);
+		
+		return $this->routes[$name];
+	}
+	
+	public function addInversePath($path)
+	{
+		$name	=	$path->getAttribute("name");
+		$route	=	$this->routes[$name];
+
+		foreach($route["src"] as $version=>$src){
+			foreach($src as $lang=>$url){
+				$this->url[$url] = array(
+					"version"	=>	$version,
+					"name"		=>	$name,
+					"resource"	=>	$route["resource"],
+					"route"		=>	$url,
+					"lang"		=>	$lang,
+					"data"		=>	$route["data"]
+				);
+			}
+		}
 	}
 
 	public function getURL($url)
@@ -188,8 +191,6 @@ class Amslib_Router_Source_XML
 		if(isset($this->url[$url])){
 			$route				=	$this->url[$url];
 			$route["params"]	=	array();
-
-			return $route;
 		}else{
 			$key = array_keys($this->url);
 
@@ -208,7 +209,6 @@ class Amslib_Router_Source_XML
 			}
 		}
 
-		//	if matches nothing, return false;
 		return $route;
 	}
 
@@ -218,7 +218,7 @@ class Amslib_Router_Source_XML
 
 		if($instance === NULL) $instance = new Amslib_Router_Source_XML();
 		
-		if($source && $instance) $instance->load($source);
+		if($instance && $source) $instance->load($source);
 
 		return $instance;
 	}
