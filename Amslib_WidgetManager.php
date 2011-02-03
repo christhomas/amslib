@@ -99,8 +99,10 @@ class Amslib_WidgetManager
 
 	protected function loadPackage($path,$name)
 	{
+		//	NOTE:	This means we can't load widgets from customised locations
+		//			It pretty much makes it impossible anyway without lots of hacking about (UGLY)
 		$xml = "$path/$name/package.xml";
-		//	I don't think the following command does anything useful, apart from cause bugs
+		//	NOTE:	I don't think the following command does anything useful, apart from cause bugs (3/2/2011)
 		//if($p = Amslib_Filesystem::find($xml)) $xml = "$p/$xml";
 
 		$this->xdoc = new DOMDocument('1.0', 'UTF-8');
@@ -128,7 +130,7 @@ class Amslib_WidgetManager
 
 			$hasDependencies = true;
 		}
-
+		
 		return $hasDependencies;
 	}
 
@@ -253,7 +255,7 @@ class Amslib_WidgetManager
 	{
 		static $instance = NULL;
 
-		if($instance === NULL) $instance = new Amslib_WidgetManager();
+		if($instance === NULL) $instance = new self();
 
 		return $instance;
 	}
@@ -304,6 +306,12 @@ class Amslib_WidgetManager
 		$this->api[$name] = $api;
 	}
 
+	/*	NOTE:	I think the loading code for the widget manager has reached it's limits.
+	 * 			What I would like to do is be able to load an external widget into the same
+	 * 			object but have it come from a completely alien location, with nothing stopping
+	 * 			it from running a plugin, but all the resources being in a completely different
+	 * 			location
+	*/
 	public function load($name)
 	{
 		if($this->isWidgetLoaded($name)){
