@@ -17,7 +17,7 @@
  *
  * File: Amslib_WidgetManager.php
  * Title: Widget manager for component based development
- * Version: 2.6
+ * Version: 2.7
  * Project: amslib
  *
  * Contributors/Author:
@@ -85,16 +85,6 @@ class Amslib_WidgetManager
 	protected function isWidgetLoaded($name)
 	{
 		return (isset($this->api[$name])) ? true : false;
-	}
-
-	protected function preparePath($path)
-	{
-		//	Make sure the path starts with a slash, also remove double slashes
-		$path = str_replace("//","/","/{$path}__END__");
-		//	Remove any trailing slash from the path
-		$path = Amslib_Filesystem::removeTrailingSlash($path);
-
-		return $path;
 	}
 
 	protected function loadPackage($path,$name)
@@ -266,9 +256,9 @@ class Amslib_WidgetManager
 		//	Make sure the website path is not null, default to the server root (99% correct everytime)
 		if($websitePath == NULL) $websitePath = Amslib_Filesystem::documentRoot();
 
-		$this->documentRoot =	$this->preparePath(Amslib_Filesystem::documentRoot());
-		$this->widgetPath	=	$this->preparePath($widgetPath);
-		$this->websitePath	=	$this->preparePath($websitePath);
+		$this->documentRoot	=	Amslib_Filesystem::removeTrailingSlash(Amslib_Filesystem::documentRoot());
+		$this->widgetPath	=	Amslib_Filesystem::removeTrailingSlash($widgetPath);
+		$this->websitePath	=	Amslib_Filesystem::removeTrailingSlash($websitePath);
 
 		//	Make website path into an absolute path
 		$this->websitePath	=	Amslib_Filesystem::absolute($this->websitePath);
