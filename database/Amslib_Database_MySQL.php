@@ -314,7 +314,7 @@ HAS_TABLE;
 	{
 		static $instance = NULL;
 
-		if($instance === NULL) $instance = new Amslib_Database_MySQL($connect);
+		if($instance === NULL) $instance = new self($connect);
 
 		return $instance;
 	}

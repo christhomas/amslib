@@ -86,7 +86,7 @@ class Amslib_Database
 
 	protected function getDatabaseLogin()
 	{
-		die("Your database layer need to implement this method: getDatabaseLogin");
+		die(get_class($this)."::getDatabaseLogin() -> Your database class is missing this method");
 	}
 
 	protected function getLastTransactionId()
