@@ -33,7 +33,6 @@ class Amslib_MVC
 	 */
 	protected $path;
 
-	protected $database;
 	protected $controller;
 	protected $layout;
 	protected $object;
@@ -57,6 +56,8 @@ class Amslib_MVC
 	protected $widgetName;
 	protected $widgetPath;
 	
+	static protected $database;
+	
 	protected function getComponentPath($component,$name)
 	{
 		return "{$this->widgetPath}/{$this->dir[$component]}/{$this->prefix[$component]}{$name}.php";
@@ -76,10 +77,10 @@ class Amslib_MVC
 		$this->viewParams		=	array();
 		$this->translation		=	array();
 
-		//	These three parameters might not exist in every MVC environment
-		//	Not all environments are widgets or have a widget manager, this is 
-		//	something I assumed in the past, but now with the possibility to
-		//	use this with generic projects, I have to think past that
+		//	TODO:	These three parameters might not exist in every MVC environment
+		//			Not all environments are widgets or have a widget manager, this is 
+		//			something I assumed in the past, but now with the possibility to
+		//			use this with generic projects, I have to think past that
 		$this->widgetManager	=	NULL;
 		$this->widgetPath		=	NULL;
 		$this->widgetName		=	NULL;
@@ -102,14 +103,14 @@ class Amslib_MVC
 		$this->dir[$type]		=	$dir;
 	}
 
-	public function setDatabase($database)
+	static public function setDatabase($database)
 	{
-		$this->database = $database;
+		self::$database = $database;
 	}
 	
-	public function getDatabase()
+	static public function getDatabase()
 	{
-		return $this->database;
+		return self::$database;
 	}
 
 	//	FIXME: Remove dependency on widget manager
@@ -165,13 +166,11 @@ class Amslib_MVC
 		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
 	}
 
-	public function setController($id,$name)
+	public function setController($id,$value,$absolute=false)
 	{
-		if(!$id || strlen($id) == 0) $id = $name;
+		if(!$id || strlen($id) == 0) $id = $value;
 		
-		$file = $this->getComponentPath("controller",$name);
-		
-		$this->controllers[$id] = $file;
+		$this->controllers[$id] = ($absolute == false) ? $this->getComponentPath("controller",$value) : $value;
 	}
 
 	public function getController($id)
@@ -179,13 +178,11 @@ class Amslib_MVC
 		return $this->controllers[$id];
 	}
 
-	public function setLayout($id,$name)
+	public function setLayout($id,$value,$absolute=false)
 	{
-		if(!$id || strlen($id) == 0) $id = $name;
+		if(!$id || strlen($id) == 0) $id = $value;
 		
-		$file = $this->getComponentPath("layout",$name);
-
-		$this->layout[$id] = $file;
+		$this->layout[$id] = ($absolute == false) ? $this->getComponentPath("layout",$value) : $value;
 
 		if($this->layout["default"] == false) $this->layout["default"] = $this->layout[$id];
 	}
@@ -197,13 +194,11 @@ class Amslib_MVC
 		return $this->layout;
 	}
 
-	public function setObject($id,$name)
+	public function setObject($id,$value,$absolute=false)
 	{
-		if(!$id || strlen($id) == 0) $id = $name;
+		if(!$id || strlen($id) == 0) $id = $value;
 		
-		$file = $this->getComponentPath("object",$name);
-
-		$this->object[$id] = $file;
+		$this->object[$id] = ($absolute == false) ? $this->getComponentPath("object",$value) : $value;
 	}
 
 	public function getObject($id,$singleton=false)
@@ -221,13 +216,11 @@ class Amslib_MVC
 		return false;
 	}
 
-	public function setView($id,$name)
+	public function setView($id,$value,$absolute=false)
 	{
-		if(!$id || strlen($id) == 0) $id = $name;
+		if(!$id || strlen($id) == 0) $id = $value;
 		
-		$file = $this->getComponentPath("view",$name);
-		
-		$this->view[$id] = $file;
+		$this->view[$id] = ($absolute == false) ? $this->getComponentPath("view",$value) : $value;
 	}
 	
 	//	TODO: investigate: this method is very similar to render, can refactor??
@@ -449,7 +442,7 @@ class Amslib_MVC
 			Amslib::requireFile($file,$parameters);
 			return ob_get_clean();
 		}
-		
+
 		return "";
 	}
 
