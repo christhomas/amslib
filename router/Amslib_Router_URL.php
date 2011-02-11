@@ -46,6 +46,6 @@ class Amslib_Router_URL
 	
 	public static function getRoute($route,$option="default")
 	{
-		return self::$router->getRoute($route,$option);
+		return str_replace("//","/",self::$router->getRoute($route,$option));
 	}
 }
