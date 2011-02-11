@@ -112,7 +112,8 @@ class Amslib_WidgetManager
 	{
 		$hasDependencies = false;
 
-		$deps = $this->xpath->query("//package/requires/widget");
+		$deps = $this->xpath->query("//package/requires/widget | //package/requires/plugin");
+		
 		for($a=0;$a<$deps->length;$a++){
 			$name = $deps->item($a)->nodeValue;
 
