@@ -50,6 +50,11 @@ class Amslib_Filesystem
 		self::$website = $path;
 	}
 	
+	static public function getWebsitePath($relative)
+	{
+		return ($relative) ? self::relative(self::$website) : self::$website;
+	}
+	
 	static public function website($filename,$relative=false)
 	{
 		//	If the website path is not set, return the path based on the docroot

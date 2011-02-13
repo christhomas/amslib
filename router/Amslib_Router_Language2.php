@@ -99,12 +99,14 @@ class Amslib_Router_Language2
 	 */
 	public static function detect(&$routerPath)
 	{
-		$parts = explode("/",trim($routerPath));
-
-		//	strip the first and last array elements, if they are empty strings 
-		//	(this happens when the url starts and ends with /)
-		if(strlen(current($parts)) == 0) array_shift($parts);
-		if(strlen(end($parts)) == 0) array_pop($parts);
+		//	NOTE:	we have to take care of a small issue of the routerPath including a possible subdirectory in
+		//			front of the language parameter, therefore making it impossible to find the language parameter
+		//			so here is the first attempt at trying to solve that problem.
+		//	NOTE:	This seems to work ok.
+		//	NOTE:	I wonder what happens, if you never call setWebsitePath
+		$r = str_replace(Amslib_Filesystem::getWebsitePath(true),"",$routerPath);
+		
+		$parts = explode("/",trim($r," /\t"));
 
 		if(count($parts) > 0){
 			$p0 = reset($parts);
