@@ -77,11 +77,16 @@ class Amslib_Router_Source_XML
 
 	public function load($source)
 	{
+		//	TODO:	we added this call to absolute because in some cases, it wouldn't find the file correctly
+		//			so I figured it would be the easiest way to solve the problem, but I wonder if it causes
+		//			problems of it's own?
+		$source = Amslib_Filesystem::absolute($source);
 		$source = Amslib_Filesystem::find($source,true);
 		
 		if(!file_exists($source)){
 			//	TODO: Should move to using Amslib_Keystore("error") instead
-			die("Amslib_Router_Source_XML::load(), source file does not exist [$source]");	
+			print("Amslib_Router_Source_XML::load(), source = ".Amslib::var_dump($source,true));
+			die("Amslib_Router_Source_XML::load(), source file does not exist");	
 		}
 		
 		$this->document = new DOMDocument('1.0', 'UTF-8');
