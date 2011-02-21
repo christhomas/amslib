@@ -61,7 +61,9 @@ class Amslib
 
 	static public function lchop($str,$search)
 	{
-		return ($p = strpos($str,$search)) !== false ? substr($str,$p+strlen($search)) : $str;
+		return ($p = strpos($str,$search)) !== false ? 
+			substr($str,$p+strlen($search)) : 
+			$str;
 	}
 
 	static public function rchop($str,$search)
@@ -197,6 +199,11 @@ class Amslib
 			//	Redirect to include the correct path for the xml system
 			if(strpos($class_name,"Amslib_XML") !== false){
 				$class_name =	"xml/$class_name";
+			}
+			
+			//	Redirect to include the correct path for the plugin system
+			if(strpos($class_name,"Amslib_Plugin") !== false){
+				$class_name	=	"plugin/$class_name";
 			}
 			
 			$filename = str_replace("//","/","$class_name.php");

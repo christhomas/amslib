@@ -32,14 +32,9 @@ class Amslib_Router2
 	protected $source;
 	protected $webdir;
 
-	protected function relativePath($path)
-	{
-		return Amslib_Filesystem::relative($path);
-	}
-
 	public function __construct()
 	{
-		$this->webdir = "";
+		$this->webdir = Amslib::getParam("router_path");
 		
 		Amslib_Router_URL::setRouter($this);
 	}
@@ -75,7 +70,7 @@ class Amslib_Router2
 		$this->routerPath = Amslib::getParam("router_path");
 
 		if($this->routerPath !== NULL){
-			$this->routerPath = $this->relativePath($this->routerPath);
+			$this->routerPath = Amslib_Filesystem::relative($this->routerPath);
 
 			Amslib_Router_Language2::setRouter($this);
 			Amslib_Router_Language2::detect($this->routerPath);
@@ -83,6 +78,8 @@ class Amslib_Router2
 			//	FIXME:	What happens if someone sets up a system
 			//			which uses a php file as a router path?
 			//			this might not work anymore
+			//	NOTE:	tough, they can't, we have to have rules to make the code
+			//			work and if you have to put a limitation, then so be it.
 
 			//	Append a / to the string and then replace any // with / (removing any duplicates basically)
 			$this->routerPath	=	str_replace("//","/",$this->routerPath."/");
@@ -146,7 +143,7 @@ class Amslib_Router2
 	{
 		static $instance = NULL;
 
-		if($instance === NULL) $instance = new Amslib_Router2();
+		if($instance === NULL) $instance = new self();
 
 		return $instance;
 	}

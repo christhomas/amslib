@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<router requires="Amslib_Router2">
+<router requires="Amslib_Router3">
 	<path name="home">
 		<src>/</src>
 		<resource>home.php</resource>

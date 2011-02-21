@@ -1,9 +1,6 @@
 <?php
 class Amslib_Filesystem
 {
-	//	The path of the website, this value is set by the website
-	static protected $website = false;
-	
 	static public function documentRoot()
 	{
 		if(isset($_SERVER["DOCUMENT_ROOT"])) return $_SERVER["DOCUMENT_ROOT"];
@@ -20,14 +17,11 @@ class Amslib_Filesystem
 
 	static public function removeWindowsDrive($location)
 	{
-		//	explode on the windows path separator,
-		//	shift off the first element (the drive symbols)
-		//	then re-implode it on the unix path separator
-		$location		=	explode(DIRECTORY_SEPARATOR,$location);
-		array_shift($location);
-		$location = "/".implode("/",$location);
-		//	we should now have the root
-		return $location;
+		//	exlode on the windows directory separator, then slice off the first parameter
+		$location = array_slice(explode(DIRECTORY_SEPARATOR,$location),1);
+		
+		//	we should now have the root (add the / to the beginning to make the path absolute);
+		return "/".implode("/",$location);
 	}
 
 	static public function dirname($location)
@@ -44,29 +38,12 @@ class Amslib_Filesystem
 
 		return str_replace("//","/","$root/$filename");
 	}
-	
-	static public function setWebsitePath($path)
-	{
-		self::$website = $path;
-	}
-	
-	static public function website($filename,$relative=false)
-	{
-		//	If the website path is not set, return the path based on the docroot
-		if(self::$website === false) return self::absolute($filename);
-		
-		$root		=	self::$website;
-		$filename	=	Amslib::lchop($filename,$root);
-		$filename	=	str_replace("//","/","$root/$filename");
-		
-		return ($relative) ? self::relative($filename) : $filename; 
-	}
 
 	static public function relative($filename)
 	{
 		$root		=	self::documentRoot();
 		$filename	=	Amslib::lchop($filename,$root);
-
+		
 		return str_replace("//","/",$filename);
 	}
 	
