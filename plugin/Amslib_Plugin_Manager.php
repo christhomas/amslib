@@ -39,7 +39,7 @@ class Amslib_Plugin_Manager
 	
 	static public function import($name,$plugin)
 	{
-		if($plugin){
+		if($name && $plugin){
 			$api = $plugin->getAPI();
 
 			if($api){
