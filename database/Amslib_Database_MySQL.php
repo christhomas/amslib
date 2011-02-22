@@ -309,14 +309,15 @@ HAS_TABLE;
 	{
 		return mysql_error();
 	}
-
-	public function &getInstance($connect=true)
+	
+	//	NOTE: I think this method is a bad idea, so I'm commenting it out to see what happens
+	/*public function &getInstance($connect=true)
 	{
 		static $instance = NULL;
 
-		if($instance === NULL) $instance = new Amslib_Database_MySQL($connect);
+		if($instance === NULL) $instance = new self($connect);
 
 		return $instance;
-	}
+	}*/
 }
 ?>
