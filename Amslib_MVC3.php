@@ -256,7 +256,10 @@ class Amslib_MVC3
 	
 	public function addStylesheet($id)
 	{
-		Amslib_Resource_Compiler::addStylesheet($id,$this->stylesheet[$id]["file"],$this->stylesheet[$id]["conditional"]);
+		if(isset($this->stylesheet[$id])){
+			$s = $this->stylesheet[$id];
+			Amslib_Resource_Compiler::addStylesheet($id,$s["file"],$s["conditional"]);
+		}
 	}
 	
 	public function removeStylesheet($id)
@@ -271,7 +274,10 @@ class Amslib_MVC3
 	
 	public function addJavascript($id)
 	{
-		Amslib_Resource_Compiler::addJavascript($id,$this->javascript[$id]["file"],$this->javascript[$id]["conditional"]);
+		if(isset($this->javascript[$id])){
+			$j = $this->javascript[$id];
+			Amslib_Resource_Compiler::addJavascript($id,$j["file"],$j["conditional"]);
+		}
 	}
 	
 	public function removeJavascript($id)
