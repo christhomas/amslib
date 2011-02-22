@@ -6,6 +6,7 @@ class Amslib_Plugin
 	protected $packageLocation;
 	protected $packageXML;
 	protected $api;
+	protected $model;
 	protected $routes;
 	
 	protected function createAPI()
@@ -44,14 +45,47 @@ class Amslib_Plugin
 		//	An API Object was not created, so create a default Amslib_MVC3 object instead
 		if($api == false) $api = new Amslib_MVC3();
 		
-		//	Set the MVC base location
+		//	Setup the api with basic name and filesystem location
 		$api->setLocation($this->getLocation());
 		$api->setName($this->getName());
+		
+		//	Create any database model requested by the plugin
+		$model = $this->createModel();
+		$api->setModel($model);
 		
 		//	Load all the routes from the router system into the mvc layout
 		foreach($this->routes as $name=>$route) $api->setRoute($name,$route);
 		
 		return $api;
+	}
+	
+	protected function createModel()
+	{
+		$list = $this->xpath->query("//package/object/model");
+		
+		$model = false;
+
+		if($list->length == 1){
+			$node = $list->item(0);
+			if($node){
+				$object = $node->nodeValue;
+				$import = $node->getAttribute("import");
+				
+				if($import){
+					//	We can import a database/model from another plugin if requested
+					$api = Amslib_Plugin_Manager::getAPI($import);
+					
+					if($api) $model = $api->getModel();
+				}else{
+					//	Or we can create the object directly from this plugin and use that
+					Amslib::requireFile("$this->packageLocation/objects/{$object}.php");
+				
+					$model = call_user_func(array($object,"getInstance"));
+				}
+			}
+		}
+		
+		return $model;
 	}
 	
 	protected function findResource($plugin,$node)
@@ -107,71 +141,71 @@ class Amslib_Plugin
 		//	If the API is not valid, return false to trigger an error.
 		if(!$this->api) return false;
 
-		$controllers = $this->xpath->query("//package/controllers/name");
-		for($a=0;$a<$controllers->length;$a++){
-			$c		=	$controllers->item($a);
-			$id		=	$c->getAttribute("id");
-			$name	=	$c->nodeValue;
+		$nodes = $this->xpath->query("//package/controllers/name");
+		for($a=0;$a<$nodes->length;$a++){
+			$n		=	$nodes->item($a);
+			$id		=	$n->getAttribute("id");
+			$name	=	$n->nodeValue;
 			$this->api->setController($id,$name);
 		}
 
-		$layouts = $this->xpath->query("//package/layout/name");
-		for($a=0;$a<$layouts->length;$a++){
-			$l		=	$layouts->item($a);
-			$id		=	$l->getAttribute("id");
-			$name	=	$l->nodeValue;
+		$nodes = $this->xpath->query("//package/layout/name");
+		for($a=0;$a<$nodes->length;$a++){
+			$n		=	$nodes->item($a);
+			$id		=	$n->getAttribute("id");
+			$name	=	$n->nodeValue;
 			$this->api->setLayout($id,$name);
 		}
 
-		$views = $this->xpath->query("//package/view/name");
-		for($a=0;$a<$views->length;$a++){
-			$v		=	$views->item($a);
-			$id		=	$v->getAttribute("id");
-			$name	=	$v->nodeValue;
+		$nodes = $this->xpath->query("//package/view/name");
+		for($a=0;$a<$nodes->length;$a++){
+			$n		=	$nodes->item($a);
+			$id		=	$n->getAttribute("id");
+			$name	=	$n->nodeValue;
 			$this->api->setView($id,$name);
 		}
 
-		$objects = $this->xpath->query("//package/object/name");
-		for($a=0;$a<$objects->length;$a++){
-			$o		=	$objects->item($a);
-			$id		=	$o->getAttribute("id");
-			$name	=	$o->nodeValue;
+		$nodes = $this->xpath->query("//package/object/name");
+		for($a=0;$a<$nodes->length;$a++){
+			$n		=	$nodes->item($a);
+			$id		=	$n->getAttribute("id");
+			$name	=	$n->nodeValue;
 			$this->api->setObject($id,$name);
 		}
 
 		//	FIXME: why are services treated differently then other parts of the MVC system?
 		//	FIXME: suggestion: Sv_Service_Name
-		$services = $this->xpath->query("//package/service/file");
-		for($a=0;$a<$services->length;$a++){
-			$s		=	$services->item($a);
-			$id		=	$s->getAttribute("id");
-			$file	=	$s->nodeValue;
+		$nodes = $this->xpath->query("//package/service/file");
+		for($a=0;$a<$nodes->length;$a++){
+			$n		=	$nodes->item($a);
+			$id		=	$n->getAttribute("id");
+			$file	=	$n->nodeValue;
 			$this->api->setService($id,$file);
 		}
 
-		$images = $this->xpath->query("//package/image/file");
-		for($a=0;$a<$images->length;$a++){
-			$i		=	$images->item($a);
-			$id 	=	$i->getAttribute("id");
-			$file	=	$this->findResource($this->name,$i);
+		$nodes = $this->xpath->query("//package/image/file");
+		for($a=0;$a<$nodes->length;$a++){
+			$n		=	$nodes->item($a);
+			$id 	=	$n->getAttribute("id");
+			$file	=	$this->findResource($this->name,$n);
 			$this->api->setImage($id,$file);
 		}
 
-		$javascript = $this->xpath->query("//package/javascript/file");
-		for($a=0;$a<$javascript->length;$a++){
-			$j		=	$javascript->item($a);
-			$id		=	$j->getAttribute("id");
-			$cond	=	$j->getAttribute("cond");
-			$file	=	$this->findResource($this->name,$j);
+		$nodes = $this->xpath->query("//package/javascript/file");
+		for($a=0;$a<$nodes->length;$a++){
+			$n		=	$nodes->item($a);
+			$id		=	$n->getAttribute("id");
+			$cond	=	$n->getAttribute("cond");
+			$file	=	$this->findResource($this->name,$n);
 			$this->api->setJavascript($id,$file,$cond);
 		}
 
-		$stylesheet = $this->xpath->query("//package/stylesheet/file");
-		for($a=0;$a<$stylesheet->length;$a++){
-			$s		=	$stylesheet->item($a);
-			$id		=	$s->getAttribute("id");
-			$cond	=	$s->getAttribute("cond");
-			$file	=	$this->findResource($this->name,$s);
+		$nodes = $this->xpath->query("//package/stylesheet/file");
+		for($a=0;$a<$nodes->length;$a++){
+			$n		=	$nodes->item($a);
+			$id		=	$n->getAttribute("id");
+			$cond	=	$n->getAttribute("cond");
+			$file	=	$this->findResource($this->name,$n);
 			$this->api->setStylesheet($id,$file,$cond);
 		}
 
@@ -221,6 +255,16 @@ class Amslib_Plugin
 	public function setAPI($api)
 	{
 		$this->api = $api;
+	}
+	
+	public function getModel()
+	{
+		return $this->api->getModel();
+	}
+	
+	public function setModel($model)
+	{
+		$this->api->setModel($model);
 	}
 	
 	public function &getInstance()
