@@ -19,7 +19,7 @@
  * title: Antimatter Database: Base layer
  * description: A low level object to collect shared data and methods that are common
  * 				to all database layers
- * version: 1.0
+ * version: 1.1
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com

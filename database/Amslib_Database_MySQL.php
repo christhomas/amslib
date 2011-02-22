@@ -20,7 +20,7 @@
  * description: A database object to centralise all interaction with a mysql databse
  * 		into a single object which nicely hides some of the annoying repetitive
  * 		aspects of a database, whilst giving you a nice candy layer to deal with instead
- * version: 2.6
+ * version: 2.7
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com

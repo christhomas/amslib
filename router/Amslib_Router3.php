@@ -17,7 +17,7 @@
  *
  * File: Amslib_Router3.php
  * Title: Version 3.0 of the Core router object
- * Version: 3.0
+ * Version: 3.1
  * Project: Amslib/Router
  *
  * Contributors/Author:
