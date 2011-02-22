@@ -109,7 +109,7 @@ class Amslib_Router_Source_XML2
 		if($document->load($source)){
 			$this->xpath = new DOMXPath($document);
 
-			$paths = $this->xpath->query("router/path");
+			$paths = $this->xpath->query("//router/path | 	router/path");
 
 			foreach($paths as $p) $this->addPath($p,$routes);	
 		}else{
