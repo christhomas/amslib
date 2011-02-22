@@ -563,22 +563,38 @@ class Amslib_Validator
 	 */
 	function __number($name,$value,$required,$options)
 	{
-		if($value == NULL && $required && !isset($options["ignorenull"])) return "VALIDATOR_NUMBER_IS_NULL";
-
-		if(strlen($value)){
-			if(is_numeric($value) == false) return "VALIDATOR_NUMBER_NAN";
-		}else{
-			if($required == false) return true;
+		$error = false;
+		
+		if($error == false && $value == NULL && !isset($options["ignorenull"])){
+			$error = "VALIDATOR_NUMBER_IS_NULL";
 		}
-
-		if(isset($options["minvalue"]) && $value < $options["minvalue"]) return "VALIDATOR_NUMBER_IS_BELOW_MINIMUM";
-		if(isset($options["maxvalue"]) && $value > $options["maxvalue"]) return "VALIDATOR_NUMBER_IS_ABOVE_MAXIMUM";
-		if(isset($options["limit-input"])){
-			if(!in_array($value,$options["limit-input"])) return "VALIDATOR_NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
+		
+		if($error == false && !is_numeric($value)){
+			$error = "VALIDATOR_NUMBER_NAN";
 		}
-
+		
+		if($error == false && isset($options["minvalue"]) && $value < $options["minvalue"]){
+			$error = "VALIDATOR_NUMBER_IS_BELOW_MINIMUM";
+		}
+		
+		if($error == false && isset($options["maxvalue"]) && $value > $options["maxvalue"]){
+			$error = "VALIDATOR_NUMBER_IS_ABOVE_MAXIMUM";
+		}
+		
+		if($error == false && isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
+			$error = "VALIDATOR_NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
+		}
+		
+		//	If there was an error
+		if($error !== false)
+		{
+			//	If you require the number to be valid, return the error
+			//	If you don't require a valid number, just return true
+			return ($required) ? $error : true;
+		}
+		
 		$this->setValid($name,$value);
-
+		
 		return true;
 	}
 
