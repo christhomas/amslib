@@ -377,7 +377,6 @@ class Amslib_MVC3
 	 */
 	public function render($id="default",$parameters=array())
 	{
-		Amslib_FirePHP::output("Amslib_MVC::render, layouts",$this->layout);
 		if(isset($this->layout[$id])){
 			//	TODO: Not sure whether I need to do this with rendering layouts as well as views
 			//if(!empty($parameters)) $this->setViewParam($parameters);
