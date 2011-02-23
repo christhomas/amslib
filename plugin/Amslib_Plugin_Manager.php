@@ -46,17 +46,20 @@ class Amslib_Plugin_Manager
 		return self::$location;
 	}
 	
-	static public function add($name)
+	static public function add($name,$location=NULL)
 	{
-		//	Location is invalid, so load the default "plugins" location
+		//	By default, set the "plugins" directory as default
 		if(!self::$location) self::setLocation("plugins");
+		
+		//	Use either the passed in location parameter, or the built in one
+		$location = ($location) ? $location : self::getLocation();
 		
 		//	Plugin was already loaded, so return it's API directly
 		if(self::isLoaded($name)) return self::getAPI($name);
 		
 		//	Plugin was not present, so create it, load everything required and return it's API
 		$plugin = new Amslib_Plugin();
-		$plugin->load($name,self::$location);
+		$plugin->load($name,$location);
 		
 		self::import($name,$plugin);
 		
