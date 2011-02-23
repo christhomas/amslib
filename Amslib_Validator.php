@@ -127,6 +127,7 @@ class Amslib_Validator
 		$this->register("phone",			array("Amslib_Validator","__phone"));
 		$this->register("date",				array("Amslib_Validator","__date"));
 		$this->register("file",				array("Amslib_Validator","__file"));
+		$this->register("array",			array("Amslib_Validator","__array"));
 
 		//	Methods to validate spanish national identification document (dni)
 		$this->register("dni",				array("Amslib_Validator","__dni"));
@@ -138,6 +139,25 @@ class Amslib_Validator
 		$this->register("string",			array("Amslib_Validator","__text"));
 		$this->register("numeric",			array("Amslib_Validator","__number"));
 		$this->register("alpha-relaxed",	array("Amslib_Validator","__alpha_relaxed"));		
+	}
+	
+	function __array($name,$value,$required,$options)
+	{
+		if(!isset($options["type"])) return "VALIDATOR_ARRAY_REQUIRE_TYPE_PARAM";
+		
+		if(!is_array($value)) return "VALIDATOR_ARRAY_VALUE_NOT_ARRAY";
+		
+		$arrayValidator = new Amslib_Validator($value);
+		foreach($value as $k=>$v) $arrayValidator->add($k,$options["type"],$required);
+		
+		$data = array(
+			"success"	=>	$arrayValidator->execute(),
+			"valid"		=>	$arrayValidator->getValidData(),
+			"errors"	=>	$arrayValidator->getErrors()
+		);
+		
+		$this->setValid($name,$data);
+		return true;
 	}
 
 	/**
