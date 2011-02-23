@@ -148,14 +148,14 @@ class Amslib_Plugin
 		return false;
 	}
 	
-	protected function loadDependencies()
+	protected function loadDependencies($location)
 	{
 		$deps = $this->xpath->query("//package/requires/plugin");
 		
 		for($a=0;$a<$deps->length;$a++){
 			$name = $deps->item($a)->nodeValue;
 			
-			Amslib_Plugin_Manager::add($name);
+			Amslib_Plugin_Manager::add($name,$location);
 		}
 	}
 	
@@ -252,7 +252,7 @@ class Amslib_Plugin
 		$this->packageXML		=	$location.$name."/package.xml";
 		
 		if($this->openPackage()){
-			$this->loadDependencies();
+			$this->loadDependencies($location);
 			$this->loadRouter();
 			$this->loadConfiguration();
 
