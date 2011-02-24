@@ -1,0 +1,16 @@
+@CHARSET "UTF-8";
+
+.amslib_simple_fader_slideshow{
+	position: relative;
+}
+
+.amslib_simple_fader_slideshow img{
+	position: absolute;
+	left: 0;
+	top: 0;
+	display: none;
+}
+
+.amslib_simple_fader_slideshow img.active{
+	display: block;
+}
