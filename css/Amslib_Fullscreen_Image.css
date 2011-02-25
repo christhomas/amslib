@@ -1,0 +1,37 @@
+@CHARSET "UTF-8";
+
+.amslib_fullscreen_image{
+	position: absolute;
+}
+
+.amslib_fullscreen_image_container{
+	overflow: hidden;
+}
+
+.amslib_fullscreen_image.horizontal{
+	width: 100%;
+}
+
+.amslib_fullscreen_image.vertical{
+	height: 100%;
+}
+
+.amslib_fullscreen_image.tl{
+	top: 0;
+	left: 0;
+}
+
+.amslib_fullscreen_image.tr{
+	top: 0;
+	right: 0;
+}
+
+.amslib_fullscreen_image.bl{
+	bottom: 0;
+	left: 0;
+}
+
+.amslib_fullscreen_image.br{
+	bottom: 0;
+	right: 0;
+}

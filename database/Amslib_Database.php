@@ -19,7 +19,7 @@
  * title: Antimatter Database: Base layer
  * description: A low level object to collect shared data and methods that are common
  * 				to all database layers
- * version: 1.0
+ * version: 1.1
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -86,7 +86,7 @@ class Amslib_Database
 
 	protected function getDatabaseLogin()
 	{
-		die("Your database layer need to implement this method: getDatabaseLogin");
+		die(get_class($this)."::getDatabaseLogin() => Your database layer need to implement this method");
 	}
 
 	protected function getLastTransactionId()

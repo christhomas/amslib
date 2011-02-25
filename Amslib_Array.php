@@ -35,4 +35,47 @@ class Amslib_Array
 		
 		return $matches;
 	}
+	
+	static public function stripSlashesMulti($array,$key)
+	{
+		if(!is_array($key)){
+			foreach($array as &$element){
+				$element[$key] = stripslashes($element[$key]);
+			}
+		}else{
+			foreach($array as &$element){
+				foreach($key as $index){
+					$element[$index] = stripslashes($element[$index]);
+				}
+			}
+		}
+		
+		return $array;
+	}
+	
+	static public function stripSlashesSingle($array,$key)
+	{
+		if(!is_array($key)){
+			$array[$key] = stripslashes($array[$key]);
+		}else{
+			foreach($key as $index){
+				$array[$index] = stripslashes($array[$index]);
+			}
+		}
+		return $array;
+	}
+	
+	static public function stripSlashes($array,$key)
+	{
+		if(!is_array($array) || empty($array)) return $array;
+		
+		return (self::isMulti($array)) ? 
+					self::stripSlashesMulti($array,$key) : 
+					self::stripSlashesSingle($array,$key);
+	}
+	
+	static public function isMulti($array)
+	{
+		return count($array)!==count($array, COUNT_RECURSIVE); 
+	}
 }
