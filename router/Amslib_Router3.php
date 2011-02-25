@@ -169,9 +169,14 @@ class Amslib_Router3
 		return $r["resource"];
 	}
 	
-	static public function getParameters()
+	//	DEPRECATED USE getParameter instead (so I can return one parameter, or all of them at once)
+	static public function getParameters(){ return self::getParameter(); }
+	
+	static public function getParameter($name=NULL)
 	{
-		return self::$route["parameters"];
+		return $name && isset(self::$route["parameters"][$name]) 
+			? self::$route["parameters"][$name] 
+			: self::$route["parameters"];
 	}
 	
 	static public function hasParameter($name)
