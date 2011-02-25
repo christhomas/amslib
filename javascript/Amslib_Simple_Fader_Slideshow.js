@@ -8,6 +8,10 @@ Amslib_Simple_Fader_Slideshow = Class.create(
 		var timeout	=	parent.down("input['amslib_simple_fader_slideshow_timeout']");
 		timeout = timeout ? timeout.value : 5;
 		
+		//	Make sure one of the images is set to active, if not, set it to the first image
+		var active = parent.down("img.active");
+		if(!active) parent.down("img").addClassName("active");
+		
 		if(images.length > 1)
 		{
 			new PeriodicalExecuter(function(){
