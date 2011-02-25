@@ -239,7 +239,7 @@ class Amslib_Plugin
 	
 	protected function loadRouter()
 	{
-		$source = Amslib_Router3::getObject("xml");
+		$source = Amslib_Router3::getObject("source:xml");
 		$this->routes = $source->load($this->packageXML);
 	}
 	

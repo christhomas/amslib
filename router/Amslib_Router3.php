@@ -17,7 +17,7 @@
  *
  * File: Amslib_Router3.php
  * Title: Version 3.0 of the Core router object
- * Version: 3.1
+ * Version: 3.2
  * Project: Amslib/Router
  *
  * Contributors/Author:
@@ -91,11 +91,11 @@ class Amslib_Router3
 	static public function getObject($type,$file=NULL)
 	{
 		switch($type){
-			case "xml":{	
+			case "source:xml":{	
 				return Amslib_Router_Source_XML2::getInstance();	
 			}break;
 			
-			case "database":{		
+			case "source:database":{		
 				return Amslib_Router_Source_Database::getInstance();	
 			}break;
 			

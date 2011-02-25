@@ -11,7 +11,7 @@ Amslib_Router_Language2::add("es_ES","es");
 Amslib_Router_Language2::initialise("en");
 
 //	Here we create a normal router object
-$xml = Amslib_Router3::getObject("xml");
+$xml = Amslib_Router3::getObject("source:xml");
 $xml->load("amslib_router.xml");
 Amslib_Router3::setSource($xml);
 Amslib_Router3::execute();
