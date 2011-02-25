@@ -87,7 +87,8 @@ class Amslib_Router_Language3
 			if($lang == $first){
 				self::set($lang);
 				
-				return implode("/",$parts);
+				//	Make sure there are only single slashes and make sure the path starts and ends with a slash
+				return str_replace("//","/","/".implode("/",$parts)."/");
 			}
 		}
 		
