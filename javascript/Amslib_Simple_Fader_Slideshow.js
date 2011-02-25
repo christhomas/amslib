@@ -4,7 +4,9 @@ Amslib_Simple_Fader_Slideshow = Class.create(
 	
 	initialize: function(parent)
 	{
-		var images = parent.select("img");
+		var images	=	parent.select("img");
+		var timeout	=	parent.down("input['amslib_simple_fader_slideshow_timeout']");
+		timeout = timeout ? timeout.value : 5;
 		
 		if(images.length > 1)
 		{
@@ -16,14 +18,14 @@ Amslib_Simple_Fader_Slideshow = Class.create(
 					inactive = parent.down("img");
 				}
 				
-				active.fade();
 				inactive.appear({
 					afterFinish: function(){
 						inactive.addClassName("active");
 						active.removeClassName("active");
 					}
-				});	
-			},5);
+				});
+				active.fade();
+			},timeout);
 		}
 	}
 });
