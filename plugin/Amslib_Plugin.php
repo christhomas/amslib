@@ -75,43 +75,13 @@ class Amslib_Plugin
 		$api->setLocation($this->getLocation());
 		$api->setName($this->getName());
 
-		//	Create any database model requested by the plugin
-		$model = $this->createModel();
-		$api->setModel($model);
+		//	Assign the model to the plugin
+		$api->setModel($this->model);
 
 		//	Load all the routes from the router system into the mvc layout
 		foreach($this->routes as $name=>$route) $api->setRoute($name,$route);
 
 		return $api;
-	}
-
-	protected function createModel()
-	{
-		$list = $this->xpath->query("//package/object/model");
-
-		$model = false;
-
-		if($list->length == 1){
-			$node = $list->item(0);
-			if($node){
-				$object = $node->nodeValue;
-				$import = $node->getAttribute("import");
-
-				if($import){
-					//	We can import a database/model from another plugin if requested
-					$api = Amslib_Plugin_Manager::getAPI($import);
-
-					if($api) $model = $api->getModel();
-				}else{
-					//	Or we can create the object directly from this plugin and use that
-					Amslib::requireFile("$this->location/objects/{$object}.php");
-
-					$model = call_user_func(array($object,"getInstance"));
-				}
-			}
-		}
-
-		return $model;
 	}
 
 	protected function findResource($plugin,$node)
@@ -208,6 +178,44 @@ class Amslib_Plugin
 		$this->routes = $source->load($this->packageXML);
 	}
 
+	protected function initialiseModel()
+	{
+		$list = $this->xpath->query("//package/object/model");
+
+		$this->model = false;
+
+		if($list->length == 1){
+			$node = $list->item(0);
+			if($node){
+				$object	=	$node->nodeValue;
+
+				//	ATTEMPT 1: Is the object the model from the current plugin
+				if($this->model == false){
+					$file = "$this->location/objects/{$object}.php";
+
+					if(file_exists($file)){
+						Amslib::requireFile("$this->location/objects/{$object}.php");
+
+						if(class_exists($object)){
+							$this->model = call_user_func(array($object,"getInstance"));
+						}
+					}
+				}
+
+				//	ATTEMPT 2: Is the object already existing in the system
+				if($this->model == false){
+					try{
+						$this->model = call_user_func(array($object,"getInstance"));
+					}catch(Exception $e){}
+				}
+			}
+		}
+
+		if($this->model){
+			Admin_Panel_Model::setConnection($this->model);
+		}
+	}
+
 	protected function initialisePlugin(){	/*	By default, do nothing	*/	}
 	protected function finalisePlugin(){	/*	By default, do nothing	*/	}
 
@@ -226,6 +234,7 @@ class Amslib_Plugin
 
 		if($this->openPackage()){
 			$this->initialisePlugin();
+			$this->initialiseModel();
 			$this->loadDependencies();
 			$this->loadRouter();
 			$this->loadConfiguration();
