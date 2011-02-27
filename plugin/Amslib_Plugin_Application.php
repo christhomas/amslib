@@ -150,8 +150,10 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			if($name){
 				$api = Amslib_Plugin_Manager::getAPI($name);
 
-				foreach($plugin->childNodes as $item){
-					$api->setValue($item->nodeName,$item->nodeValue);
+				if($api){
+					foreach($plugin->childNodes as $item){
+						$api->setValue($item->nodeName,$item->nodeValue);
+					}
 				}
 			}
 		}
