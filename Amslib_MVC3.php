@@ -34,29 +34,29 @@ class Amslib_MVC3
 	protected $service;
 	protected $stylesheet;
 	protected $javascript;
-	
+
 	//	The model object to allow access to the application logic
 	protected $model;
-	
+
 	protected $value;
 	protected $viewParams;
 	protected $routes;
-	
+
 	//	To allow views/html segments to be slotted into an existing layout
 	//	extending their capabilities with customised functionality
 	protected $slots;
-	
+
 	//	MVC Configuration
 	protected $prefix;
-	
+
 	protected $name;
 	protected $location;
-	
+
 	protected function getComponentPath($component,$name)
 	{
 		return $this->location.$this->prefix[$component]."$name.php";
 	}
-	
+
 	public function __construct()
 	{
 		$this->controller	=	array();
@@ -66,30 +66,35 @@ class Amslib_MVC3
 		$this->service		=	array();
 		$this->stylesheet	=	array();
 		$this->javascript	=	array();
-		
+
 		$this->value		=	array();
 		$this->viewParams	=	array();
-		
+
 		//	This stores where all the types components are stored as part of the application
-		$this->prefix		=	array();
-		
+		$this->prefix = array();
+
 		$this->setComponent("controller",	"controllers",	"Ct_");
 		$this->setComponent("layout",		"layouts",		"La_");
 		$this->setComponent("view",			"views",		"Vi_");
 		$this->setComponent("object",		"objects",		"");
 		$this->setComponent("service",		"services",		"");
 	}
-	
+
 	public function setName($name)
 	{
 		$this->name = $name;
 	}
-	
+
+	public function getName()
+	{
+		return $this->name;
+	}
+
 	public function setLocation($location)
 	{
 		$this->location = $location;
 	}
-	
+
 	public function initialise()
 	{
 		return $this;
@@ -99,36 +104,36 @@ class Amslib_MVC3
 	{
 		$this->prefix[$component] = "/$directory/$prefix";
 	}
-	
+
 	public function setModel($model)
 	{
 		$this->model = $model;
 	}
-	
+
 	public function getModel()
 	{
 		return $this->model;
 	}
-	
+
 	public function setRoute($name,$route)
 	{
 		$this->routes[$name] = $route;
 	}
-	
+
 	public function getRoute($name=NULL)
 	{
-		//	NOTE:	If name was not passed/NULL return entire routes array, 
+		//	NOTE:	If name was not passed/NULL return entire routes array,
 		//			otherwise return the route, but if it doesnt exist, return false
-		return ($name === NULL) ? 
-			$this->routes : (isset($this->routes[$name])) ? 
+		return ($name === NULL) ?
+			$this->routes : (isset($this->routes[$name])) ?
 				$this->route[$name] : false;
 	}
-	
+
 	public function hasRoute($name)
 	{
 		return (isset($this->routes[$name])) ? true : false;
 	}
-	
+
 	public function setValue($name,$value)
 	{
 		$this->value[$name] = $value;
@@ -138,13 +143,13 @@ class Amslib_MVC3
 	{
 		return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name);
 	}
-	
+
 	//	TODO: need to explain the difference between a value and a view param
 	public function setViewParam($parameters)
 	{
 		$this->viewParams = $parameters;
 	}
-	
+
 	public function getViewParam($name)
 	{
 		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
@@ -153,7 +158,7 @@ class Amslib_MVC3
 	public function setController($id,$name,$absolute=false)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
-		
+
 		$this->controllers[$id] = ($absolute == false) ? $this->getComponentPath("controller",$name) : $name;
 	}
 
@@ -165,7 +170,7 @@ class Amslib_MVC3
 	public function setLayout($id,$name,$absolute=false)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
-		
+
 		$this->layout[$id] = ($absolute == false) ? $this->getComponentPath("layout",$name) : $name;
 
 		if($this->layout["default"] == false) $this->layout["default"] = $this->layout[$id];
@@ -181,19 +186,19 @@ class Amslib_MVC3
 	public function setObject($id,$name,$absolute=false)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
-		
+
 		$this->object[$id] = ($absolute == false) ? $this->getComponentPath("object",$name) : $name;
 	}
 
 	public function getObject($id,$singleton=false)
 	{
-		if(!isset($this->object[$id])) return false;	
-		
+		if(!isset($this->object[$id])) return false;
+
 		$status = Amslib::requireFile($this->object[$id],array("require_once"=>true));
 
 		if(class_exists($id)){
 			if($singleton) return call_user_func(array($id,"getInstance"));
-				
+
 			return new $id;
 		}
 
@@ -203,31 +208,31 @@ class Amslib_MVC3
 	public function setView($id,$name,$absolute=false)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
-		
+
 		$this->view[$id] = ($absolute == false) ? $this->getComponentPath("view",$name) : $name;
 	}
-	
+
 	//	TODO: investigate: this method is very similar to render, can refactor??
 	public function getView($id,$parameters=array())
 	{
 		if(isset($this->view[$id]))
 		{
 			if(!empty($parameters)) $this->setViewParam($parameters);
-			
+
 			$parameters["api"] = $this;
-			
+
 			ob_start();
 			Amslib::requireFile($this->view[$id],$parameters);
 			return ob_get_clean();
 		}
-		
+
 		return "";
 	}
-	
+
 	public function setService($id,$name)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
-		
+
 		$this->service[$id] = Amslib_Website::rel($this->getComponentPath("service", $name));
 
 		//	Set this as a service url for the javascript to acquire
@@ -238,22 +243,24 @@ class Amslib_MVC3
 	{
 		return (isset($this->service[$id])) ? $this->service[$id] : NULL;
 	}
-	
+
 	public function callService($id)
 	{
 		$service = $this->getService($id);
 		$service = Amslib_Filesystem::absolute($service);
-		
+
 		$parameters["api"] = $this;
-		
+
 		return Amslib::requireFile($service,$parameters);
 	}
-	
-	public function setStylesheet($id,$file,$conditional=NULL)
+
+	public function setStylesheet($id,$file,$conditional=NULL,$autoload=NULL)
 	{
 		$this->stylesheet[$id] = array("file"=>$file,"conditional"=>$conditional);
+
+		if($autoload) $this->addStylesheet($id);
 	}
-	
+
 	public function addStylesheet($id)
 	{
 		if(isset($this->stylesheet[$id])){
@@ -261,17 +268,19 @@ class Amslib_MVC3
 			Amslib_Resource_Compiler::addStylesheet($id,$s["file"],$s["conditional"]);
 		}
 	}
-	
+
 	public function removeStylesheet($id)
 	{
 		Amslib_Resource_Compiler::removeStylesheet($id);
 	}
-	
-	public function setJavascript($id,$file,$conditional=NULL)
+
+	public function setJavascript($id,$file,$conditional=NULL,$autoload=NULL)
 	{
 		$this->javascript[$id] = array("file"=>$file,"conditional"=>$conditional);
+
+		if($autoload) $this->addJavascript($id);
 	}
-	
+
 	public function addJavascript($id)
 	{
 		if(isset($this->javascript[$id])){
@@ -279,7 +288,7 @@ class Amslib_MVC3
 			Amslib_Resource_Compiler::addJavascript($id,$j["file"],$j["conditional"]);
 		}
 	}
-	
+
 	public function removeJavascript($id)
 	{
 		Amslib_Resource_Compiler::removeJavascript($id);
@@ -332,7 +341,7 @@ class Amslib_MVC3
 	public function setImage($id,$file)
 	{
 		$this->images[$id] = $file;
-		
+
 		$this->setValue("image:$id", $file);
 	}
 
@@ -340,7 +349,7 @@ class Amslib_MVC3
 	{
 		return (isset($this->images[$id])) ? $this->images[$id] : false;
 	}
-	
+
 	public function setSlot($name,$content,$index=NULL)
 	{
 		if($index){
@@ -349,17 +358,17 @@ class Amslib_MVC3
 			$this->slots[$name] = $content;
 		}
 	}
-	
+
 	public function getSlot($name,$index=NULL)
 	{
 		if(isset($this->slots[$name])){
 			if(is_array($this->slots[$name])){
 				return ($index) ? $this->slots[$name][$index] : current($this->slots[$name]);
 			}
-			
+
 			return $this->slots[$name];
 		}
-		
+
 		return "";
 	}
 
@@ -380,14 +389,14 @@ class Amslib_MVC3
 		if(isset($this->layout[$id])){
 			//	TODO: Not sure whether I need to do this with rendering layouts as well as views
 			//if(!empty($parameters)) $this->setViewParam($parameters);
-			
+
 			$parameters["api"] = $this;
 
 			ob_start();
 			Amslib::requireFile($this->layout[$id],$parameters);
 			return ob_get_clean();
 		}
-		
+
 		return "";
 	}
 }

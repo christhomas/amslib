@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*******************************************************************************
  * Copyright (c) {15/03/2008} {Christopher Thomas}
  * This library is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
  * title: Antimatter Plugin: Plugin Manager object
  * description: An object to store all the plugins and provide a central method
  * 				to access them all
- * version: 1.0
+ * version: 1.2
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -29,43 +29,54 @@ class Amslib_Plugin_Manager
 {
 	static protected $plugins	=	array();
 	static protected $api		=	array();
-	static protected $location	=	false;
-	
+	static protected $location	=	array();
+
+	static protected function findPlugin($name,$location=NULL)
+	{
+		$search = array_merge(array($location),self::$location);
+
+		foreach($search as $location)
+		{
+			if(file_exists("$location/$name/package.xml")) return $location;
+		}
+
+		return false;
+	}
+
 	static public function isLoaded($name)
 	{
 		return isset(self::$plugins[$name]) ? true : false;
 	}
-	
-	static public function setLocation($location)
+
+	static public function addLocation($location)
 	{
-		self::$location = Amslib_Website::abs($location);
+		self::$location[] = Amslib_Website::abs($location);
 	}
-	
+
 	static public function getLocation()
 	{
 		return self::$location;
 	}
-	
+
 	static public function add($name,$location=NULL)
 	{
-		//	By default, set the "plugins" directory as default
-		if(!self::$location) self::setLocation("plugins");
-		
-		//	Use either the passed in location parameter, or the built in one
-		$location = ($location) ? $location : self::getLocation();
-		
+		$location = self::findPlugin($name,$location);
+
+		//	Protect against missing plugins
+		if(!$location) return false;
+
 		//	Plugin was already loaded, so return it's API directly
 		if(self::isLoaded($name)) return self::getAPI($name);
-		
+
 		//	Plugin was not present, so create it, load everything required and return it's API
 		$plugin = new Amslib_Plugin();
-		$plugin->load($name,$location);
-		
+		$plugin->load($name,$location.$name);
+
 		self::import($name,$plugin);
-		
+
 		return $plugin->getAPI();
 	}
-	
+
 	static public function import($name,$plugin)
 	{
 		if($name && $plugin){
@@ -77,16 +88,16 @@ class Amslib_Plugin_Manager
 			}
 		}
 	}
-	
+
 	static public function remove($name)
 	{
 		$r = self::$plugins[$name];
-		
+
 		unset(self::$plugins[$name],self::$api[$name]);
-		
+
 		return $r;
 	}
-		
+
 	/**
 	 * method: setAPI
 	 *
@@ -113,18 +124,29 @@ class Amslib_Plugin_Manager
 			self::$api[$name] = self::$plugins[$name]->getAPI();
 		}
 	}
-	
+
 	static public function getAPI($name)
 	{
 		return (isset(self::$api[$name])) ? self::$api[$name] : false;
-	}	
-	
+	}
+
+	static public function getPluginNameByRouteName($routeName)
+	{
+		foreach(self::$api as $pluginName=>$api)
+		{
+			if($api->hasRoute($routeName)) return $pluginName;
+		}
+
+		return false;
+
+	}
+
 	/*******************************************************************
 	 	HELPER FUNCTIONS
-	 	
-	 	Below are methods that allow you to plugin functionality 
-	 	by just knowing the name of the plugin and the manager 
-	 	will find out which appropriate plugin to call to execute 
+
+	 	Below are methods that allow you to plugin functionality
+	 	by just knowing the name of the plugin and the manager
+	 	will find out which appropriate plugin to call to execute
 	 	the functionality
 	********************************************************************/
 	static public function getView($plugin,$view,$parameters=array())
