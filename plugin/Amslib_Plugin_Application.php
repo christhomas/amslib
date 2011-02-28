@@ -1,7 +1,7 @@
 <?php
 class Amslib_Plugin_Application extends Amslib_Plugin
 {
-	protected $version;
+	static protected $version;
 	protected $path;
 	protected $translator;
 
@@ -31,7 +31,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	protected function setVersion()
 	{
-		$this->version = array(
+		self::$version = array(
 			"date"		=>	$this->readValue("//package/version/date"),
 			"number"	=>	$this->readValue("//package/version/number"),
 			"name"		=>	$this->readValue("//package/version/name"),
@@ -191,9 +191,9 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		parent::setModel($model);
 	}
 
-	public function getVersion($element=NULL)
+	static public function getVersion($element=NULL)
 	{
-		return (!isset($this->version[$element])) ? $this->version : $this->version[$element];
+		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
 	}
 
 	public function getAdminTranslator()
