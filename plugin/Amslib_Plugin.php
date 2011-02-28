@@ -189,7 +189,13 @@ class Amslib_Plugin
 			if($node){
 				$object	=	$node->nodeValue;
 
-				//	ATTEMPT 1: Is the object the model from the current plugin
+				//	ATTEMPT 1: Import the database model from another plugin
+				if($this->model == false && $node->getAttribute("import")){
+					$model = Admin_Panel_Model::getModel($object);
+					if($model) $this->model = $model;
+				}
+
+				//	ATTEMPT 2: Is the object the model from the current plugin
 				if($this->model == false){
 					$file = "$this->location/objects/{$object}.php";
 
@@ -202,7 +208,7 @@ class Amslib_Plugin
 					}
 				}
 
-				//	ATTEMPT 2: Is the object already existing in the system
+				//	ATTEMPT 3: Is the object already existing in the system
 				if($this->model == false){
 					try{
 						$this->model = call_user_func(array($object,"getInstance"));
