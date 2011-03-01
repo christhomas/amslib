@@ -215,7 +215,7 @@ class Amslib_MVC3
 	//	TODO: investigate: this method is very similar to render, can refactor??
 	public function getView($id,$parameters=array())
 	{
-		if(isset($this->view[$id]))
+		if(is_string($id) && isset($this->view[$id]))
 		{
 			if(!empty($parameters)) $this->setViewParam($parameters);
 
@@ -386,7 +386,7 @@ class Amslib_MVC3
 	 */
 	public function render($id="default",$parameters=array())
 	{
-		if(isset($this->layout[$id])){
+		if(is_string($id) && isset($this->layout[$id])){
 			//	TODO: Not sure whether I need to do this with rendering layouts as well as views
 			//if(!empty($parameters)) $this->setViewParam($parameters);
 

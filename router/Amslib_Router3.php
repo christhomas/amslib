@@ -172,11 +172,13 @@ class Amslib_Router3
 	//	DEPRECATED USE getParameter instead (so I can return one parameter, or all of them at once)
 	static public function getParameters(){ return self::getParameter(); }
 
-	static public function getParameter($name=NULL)
+	static public function getParameter($name=NULL,$default="")
 	{
+		if($default = "") $default = self::$route["parameters"];
+
 		return $name && isset(self::$route["parameters"][$name])
 			? self::$route["parameters"][$name]
-			: self::$route["parameters"];
+			: $default;
 	}
 
 	static public function hasParameter($name)
