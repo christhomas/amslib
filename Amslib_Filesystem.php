@@ -9,7 +9,7 @@ class Amslib_Filesystem
 			//	the base root dir for dirname(__FILE__) and docroot are different, here we fix that situation
 			$missing = Amslib::rchop(dirname(__FILE__),$_SERVER["DOCUMENT_ROOT"]);
 			//	good hosting will have empty string missing, bad hosting will have a prepend string
-			return str_replace("//","/","$missing/{$_SERVER["DOCUMENT_ROOT"]}");
+			return self::reduceSlashes("$missing/{$_SERVER["DOCUMENT_ROOT"]}");
 		}
 
 		//	on IIS, there is no parameter DOCUMENT_ROOT, have to construct it yourself.
@@ -43,7 +43,7 @@ class Amslib_Filesystem
 		$root		=	self::documentRoot();
 		$filename	=	Amslib::lchop($filename,$root);
 
-		return str_replace("//","/","$root/$filename");
+		return self::reduceSlashes("$root/$filename");
 	}
 
 	static public function relative($filename)
@@ -51,7 +51,7 @@ class Amslib_Filesystem
 		$root		=	self::documentRoot();
 		$filename	=	Amslib::lchop($filename,$root);
 
-		return str_replace("//","/",$filename);
+		return self::reduceSlashes($filename);
 	}
 
 	static public function find($filename,$includeFilename=false)
@@ -80,6 +80,11 @@ class Amslib_Filesystem
 		$path = str_replace("__END__","",$path);
 
 		return $path;
+	}
+
+	static public function reduceSlashes($string)
+	{
+		return preg_replace('#//+#','/',$string);
 	}
 
 	static public function getList($dir,$recurse=false)
