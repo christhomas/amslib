@@ -174,6 +174,7 @@ class Amslib_Plugin
 
 	protected function loadRouter()
 	{
+		//	This loads the routes from the plugin into the central router system
 		$source = Amslib_Router3::getObject("source:xml");
 		$this->routes = $source->load($this->packageXML);
 	}
