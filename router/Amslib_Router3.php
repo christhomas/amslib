@@ -170,7 +170,7 @@ class Amslib_Router3
 
 	static public function getParameter($name=NULL,$default="")
 	{
-		if($default = "") $default = self::$route["parameters"];
+		if($default == "") $default = self::$route["parameters"];
 
 		return $name && isset(self::$route["parameters"][$name])
 			? self::$route["parameters"][$name]
@@ -182,9 +182,13 @@ class Amslib_Router3
 		return in_array($name,self::$route["parameters"]) ? true : false;
 	}
 
-	static public function getURLOptions()
+	static public function getURLOptions($index=NULL,$default="")
 	{
-		return self::$route["options"];
+		if($default == "") $default = self::$route["parameters"];
+
+		return ($index && isset(self::$route["options"][$index]))
+				? self::$route["options"][$index]
+				: $default;
 	}
 
 	/**
