@@ -34,6 +34,8 @@ Amslib.UI.ScrollBar = Class.create(Amslib.UI,
 	
 	hide: function()
 	{
+		if(!this.handle) return;
+		
 		//	Reset the view to the top
 		this.handle.setStyle({top: "0px"});
 		this.position = 0;
