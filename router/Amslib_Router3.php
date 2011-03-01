@@ -65,14 +65,10 @@ class Amslib_Router3
 		self::$path		=	NULL;
 
 		if($router_path){
-			//	This is so ugly but I can't think of another way to do it.
-			//	First strip all the // -> /, then strip self::$location, then strip // -> from /self::$location/
-			//	We need to do this because we need to handle silly situations where a forward slash is missing
-			//	or a double slash is encountered because of the user configuration being bad, or bad input data, etc
-			self::$path = str_replace("//","/",$router_path);
-			self::$path = str_replace(self::$location,"",self::$path);
-			self::$path = str_replace("//","/","/".self::$path."/");
+			self::$path = str_replace(self::$location,"",$router_path);
+			self::$path = Amslib_Filesystem::reduceSlashes("/".self::$path."/");
 		}
+
 	}
 
 	static public function setSource($source)
@@ -159,7 +155,7 @@ class Amslib_Router3
 
 	static public function isRouted()
 	{
-		return self::path !== NULL ? true : false;
+		return self::$path !== NULL ? true : false;
 	}
 
 	static public function getResource($name=NULL)

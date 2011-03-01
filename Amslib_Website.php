@@ -29,6 +29,12 @@ class Amslib_Website
 			self::$location = Amslib_Filesystem::reduceSlashes("/".self::$location."/");
 		}
 
+		//	NOTE:	Special case having a single slash as the location to being a blank string
+		//			the single slash causes lots of bugs and means you have to check everywhere
+		//			for it's presence, whilst it doesnt really do anything, so better if you
+		//			just eliminate it and put a blank string
+		if(self::$location == "/") self::$location = "";
+
 		return self::$location;
 	}
 
