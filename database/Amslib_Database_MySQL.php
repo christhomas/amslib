@@ -231,7 +231,7 @@ HAS_TABLE;
 	public function select($query,$numResults=0,$optimise=false)
 	{
 		$this->seq++;
-		
+
 		if($this->getConnectionStatus() == false) return false;
 
 		$this->setLastQuery("select $query");
@@ -254,7 +254,7 @@ HAS_TABLE;
 	public function insert($query)
 	{
 		$this->seq++;
-		
+
 		if($this->getConnectionStatus() == false) return false;
 
 		$this->setLastQuery("insert into $query");
@@ -274,7 +274,7 @@ HAS_TABLE;
 	public function update($query)
 	{
 		$this->seq++;
-		
+
 		if($this->getConnectionStatus() == false) return false;
 
 		$this->setLastQuery("update $query");
@@ -291,7 +291,7 @@ HAS_TABLE;
 	public function delete($query)
 	{
 		$this->seq++;
-		
+
 		if($this->getConnectionStatus() == false) return false;
 
 		$this->setLastQuery("delete from $query");
@@ -309,7 +309,7 @@ HAS_TABLE;
 	{
 		return mysql_error();
 	}
-	
+
 	//	NOTE: I think this method is a bad idea, so I'm commenting it out to see what happens
 	/*public function &getInstance($connect=true)
 	{
