@@ -37,7 +37,12 @@ class Amslib_Plugin_Manager
 
 		foreach($search as $location)
 		{
-			if(file_exists("$location/$name/package.xml")) return $location;
+			if(file_exists("$location/$name/package.xml")){
+				//	double check that the location starts and ends with a slash
+				//	something this isn't the case and the programmer forgets
+				//	then the plugin doesnt load, all because of a simple missing slash
+				return Amslib_Filesystem::reduceSlashes("/$location/");
+			}
 		}
 
 		return false;
