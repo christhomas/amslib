@@ -184,6 +184,30 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return $instance;
 	}
 
+	/**
+	 * method: runPackage
+	 *
+	 * Run all the sequence of events that need to happen for the plugin to be opened correctly
+	 *
+	 * NOTE:	we overload this method with a customised version
+	 * 			because the application plugin needs the model initialised
+	 * 			before any plugins load
+	 *
+	 * NOTE:	plugins need that their dependencies are loaded BEFORE they
+	 * 			load their stuff, for example, if models are inherited from
+	 * 			one another, the plugin will break because it's model is
+	 * 			initialised before it's dependency is made available.
+	 */
+	protected function runPackage()
+	{
+		$this->initialisePlugin();
+		$this->initialiseModel();
+		$this->loadDependencies();
+		$this->loadRouter();
+		$this->loadConfiguration();
+		$this->finalisePlugin();
+	}
+
 	public function setModel($model)
 	{
 		Admin_Panel_Model::setConnection($model);

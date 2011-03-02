@@ -84,6 +84,50 @@ class Amslib_Plugin
 		return $api;
 	}
 
+	protected function initialiseModel()
+	{
+		$list = $this->xpath->query("//package/object/model");
+
+		$this->model = false;
+
+		if($list->length == 1){
+			$node = $list->item(0);
+			if($node){
+				$object	=	$node->nodeValue;
+
+				//	ATTEMPT 1: Import the database model from another plugin
+				if($this->model == false && $node->getAttribute("import")){
+					$model = Admin_Panel_Model::getModel($object);
+					if($model) $this->model = $model;
+				}
+
+				//	ATTEMPT 2: Is the object the model from the current plugin
+				if($this->model == false){
+					$file = "$this->location/objects/{$object}.php";
+
+					if(file_exists($file)){
+						Amslib::requireFile("$this->location/objects/{$object}.php");
+
+						if(class_exists($object)){
+							$this->model = call_user_func(array($object,"getInstance"));
+						}
+					}
+				}
+
+				//	ATTEMPT 3: Is the object already existing in the system
+				if($this->model == false){
+					try{
+						$this->model = call_user_func(array($object,"getInstance"));
+					}catch(Exception $e){}
+				}
+			}
+		}
+
+		if($this->model){
+			Admin_Panel_Model::setConnection($this->model);
+		}
+	}
+
 	protected function findResource($plugin,$node)
 	{
 		$resource = $node->nodeValue;
@@ -117,6 +161,16 @@ class Amslib_Plugin
 		print("Amslib_Plugin::openPackage(): PACKAGE FAILED TO OPEN: file[$this->packageXML]<br/>");
 
 		return false;
+	}
+
+	protected function runPackage()
+	{
+		$this->initialisePlugin();
+		$this->loadDependencies();
+		$this->loadRouter();
+		$this->initialiseModel();
+		$this->loadConfiguration();
+		$this->finalisePlugin();
 	}
 
 	protected function loadDependencies()
@@ -179,50 +233,6 @@ class Amslib_Plugin
 		$this->routes = $source->load($this->packageXML);
 	}
 
-	protected function initialiseModel()
-	{
-		$list = $this->xpath->query("//package/object/model");
-
-		$this->model = false;
-
-		if($list->length == 1){
-			$node = $list->item(0);
-			if($node){
-				$object	=	$node->nodeValue;
-
-				//	ATTEMPT 1: Import the database model from another plugin
-				if($this->model == false && $node->getAttribute("import")){
-					$model = Admin_Panel_Model::getModel($object);
-					if($model) $this->model = $model;
-				}
-
-				//	ATTEMPT 2: Is the object the model from the current plugin
-				if($this->model == false){
-					$file = "$this->location/objects/{$object}.php";
-
-					if(file_exists($file)){
-						Amslib::requireFile("$this->location/objects/{$object}.php");
-
-						if(class_exists($object)){
-							$this->model = call_user_func(array($object,"getInstance"));
-						}
-					}
-				}
-
-				//	ATTEMPT 3: Is the object already existing in the system
-				if($this->model == false){
-					try{
-						$this->model = call_user_func(array($object,"getInstance"));
-					}catch(Exception $e){}
-				}
-			}
-		}
-
-		if($this->model){
-			Admin_Panel_Model::setConnection($this->model);
-		}
-	}
-
 	protected function initialisePlugin(){	/*	By default, do nothing	*/	}
 	protected function finalisePlugin(){	/*	By default, do nothing	*/	}
 
@@ -240,12 +250,7 @@ class Amslib_Plugin
 		$this->packageXML	=	$location."/package.xml";
 
 		if($this->openPackage()){
-			$this->initialisePlugin();
-			$this->initialiseModel();
-			$this->loadDependencies();
-			$this->loadRouter();
-			$this->loadConfiguration();
-			$this->finalisePlugin();
+			$this->runPackage();
 
 			return $this->api;
 		}
