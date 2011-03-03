@@ -29,13 +29,18 @@ class Amslib_Form
 
 		for($a=$start;$a<=$stop;$a++){
 			$enabled = ($a == $selected) ? "selected='selected'" : "";
-			
+
 			if($pad !== NULL && is_string($pad)) $a = str_pad($a,strlen($pad),$pad[0],STR_PAD_LEFT); 
 
 			$options .= "<option $enabled value='$a'>$a</option>";
 		}
 
 		return $options;
+	}
+
+	static public function selectRadioButton($value,$compare)
+	{
+		return ($value == $compare) ? "checked='checked'" : "";
 	}
 
 	static public function getFilename($name)
