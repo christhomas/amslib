@@ -1,4 +1,4 @@
-if(Amslib.UI == "undefined")
+if(typeof(Amslib) == "undefined" || typeof(Amslib.UI) == "undefined")
 	throw "Amslib.UI.ScrollBar requires Amslib.UI to be loaded.";
 
 Amslib.UI.ScrollBar = Class.create(Amslib.UI,

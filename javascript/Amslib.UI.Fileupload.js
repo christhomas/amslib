@@ -8,7 +8,7 @@
  * 
  * update: rewritten to take advantage of prototype library
  */
-if(Amslib.UI == "undefined")
+if(typeof(Amslib) == "undefined" || typeof(Amslib.UI) == "undefined")
 	throw "Amslib.UI.Fileupload requires Amslib.UI to be loaded.";
 
 Amslib.UI.Fileupload = Class.create(Amslib.UI,

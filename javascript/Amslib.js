@@ -1,4 +1,4 @@
-if(Prototype == "undefined")
+if(typeof(Prototype) == "undefined")
 	throw "Amslib requires Prototype to be loaded.";
 
 //	This class provides some simple common routines used all over the place
