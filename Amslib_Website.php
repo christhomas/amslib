@@ -43,19 +43,26 @@ class Amslib_Website
 		return self::$location;
 	}
 
-	//	Return a relative url for the file
+	//	Return a relative url for the file to the document root
 	static public function rel($file)
 	{
 		return Amslib_Filesystem::relative(self::$location.$file);
 	}
 
-	//	Return an absolute url for the file
+	//	Return an absolute url for the file to the root directory
 	static public function abs($file)
 	{
 		return Amslib_Filesystem::absolute(self::$location.$file);
 	}
+	
+	//	Return a relative url for the file to the website location
+	static public function web($file)
+	{
+		return Amslib_Filesystem::reduceSlashes("/".str_replace(self::$location,"",self::abs($file))."/");
+	}
 
 	//	NOTE: I don't like this method anymore.
+	//	NOTE: we should delete this method
 	static public function url($file,$relative=false)
 	{
 		//	If the website path is not set, return the path based on the docroot
