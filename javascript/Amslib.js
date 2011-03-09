@@ -33,6 +33,7 @@ var Amslib = Class.create(
 		this.setupAmslib();
 		
 		//	NOTE: This should be eventually removed in favour of using parent all the time
+		//	NOTE: This is just for backwards compatibility when at one point, it was called mainWidget and not parent
 		this.mainWidget		=	this.parent;
 		
 		return this;
@@ -71,7 +72,7 @@ var Amslib = Class.create(
 	
 	callObserver: function(eventName)
 	{
-		var handle = this.callback.get(eventName);
+		var handle = this.getObserver(eventName);
 		
 		//	We slice off the first parameter because it's eventName and we 
 		//	dont want that passed along to the function
