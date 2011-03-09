@@ -256,6 +256,8 @@ class Amslib_MVC3
 
 	public function setStylesheet($id,$file,$conditional=NULL,$autoload=NULL)
 	{
+		if(!is_string($id) && $file) return;
+		
 		$this->stylesheet[$id] = array("file"=>$file,"conditional"=>$conditional);
 
 		if($autoload) $this->addStylesheet($id);
@@ -276,6 +278,8 @@ class Amslib_MVC3
 
 	public function setJavascript($id,$file,$conditional=NULL,$autoload=NULL)
 	{
+		if(!is_string($id) && $file) return;
+		
 		$this->javascript[$id] = array("file"=>$file,"conditional"=>$conditional);
 
 		if($autoload) $this->addJavascript($id);
