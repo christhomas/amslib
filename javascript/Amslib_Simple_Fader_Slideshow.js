@@ -6,6 +6,8 @@ Amslib_Simple_Fader_Slideshow = Class.create(
 	{
 		var images	=	parent.select("img");
 		var timeout	=	parent.down("input['amslib_simple_fader_slideshow_timeout']");
+
+		//	Default a missing timeout to 5 seconds
 		timeout = timeout ? timeout.value : 5;
 		
 		//	Make sure one of the images is set to active, if not, set it to the first image
