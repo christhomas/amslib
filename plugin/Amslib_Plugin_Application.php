@@ -57,13 +57,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				Amslib::addIncludePath(Amslib_Filesystem::absolute($value));
 			}else{
 				$this->path[$name] = $value;
-
+				
 				if($name == "plugin"){
 					Amslib_Plugin_Manager::addLocation(Amslib_Filesystem::absolute($this->path["plugin"]));
 				}
 			}
 		}
-
 
 		//	Die with an error, all of these parameters must be a valid string
 		//	or the whole system doesnt work
@@ -88,6 +87,16 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	protected function getTranslator($name)
 	{
 		//	TODO:	how to return the translators based on requirements
+	}
+	
+	protected function initialiseModel()
+	{
+		parent::initialiseModel();
+		
+		if(class_exists("Admin_Panel_Model",true)){
+			//	NOTE: You can't use the method getModel here, because the api object doesnt exist yet
+			Admin_Panel_Model::setConnection($this->model);
+		}
 	}
 
 	protected function initialisePlugin()
@@ -220,11 +229,13 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
 	}
 
+	//	NOTE: I am sure this method is not supposed to be here
 	public function getAdminTranslator()
 	{
 		return $this->translator["admin"];
 	}
 
+	//	NOTE: I am sure this method is not supposed to be here
 	public function getContentTranslator()
 	{
 		return $this->translator["content"];

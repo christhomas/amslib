@@ -84,6 +84,12 @@ class Amslib_Plugin
 		return $api;
 	}
 
+	/**
+	 * method: initialiseModel
+	 * 
+	 * notes:
+	 * 	-	You can't use the method getModel here, because the api object doesnt exist yet
+	 */
 	protected function initialiseModel()
 	{
 		$list = $this->xpath->query("//package/object/model");
@@ -114,17 +120,13 @@ class Amslib_Plugin
 					}
 				}
 
-				//	ATTEMPT 3: Is the object already existing in the system
+				//	ATTEMPT 3: Is it a plain, ordinary object that exists in the system?
 				if($this->model == false){
 					try{
 						$this->model = call_user_func(array($object,"getInstance"));
 					}catch(Exception $e){}
 				}
 			}
-		}
-
-		if($this->model){
-			Admin_Panel_Model::setConnection($this->model);
 		}
 	}
 
@@ -136,7 +138,7 @@ class Amslib_Plugin
 		if($node->getAttribute("absolute")) return $resource;
 
 		//	TEST 2:	look in the package directory for the file
-		$path1 = str_replace("//","/","$this->location/$resource");
+		$path1 = Amslib_Filesystem::reduceSlashes("$this->location/$resource");
 		if(file_exists($path1)) return Amslib_Website::rel($path1);
 
 		//	TEST 3:	search the include path for the file
