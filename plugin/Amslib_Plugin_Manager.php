@@ -210,10 +210,10 @@ class Amslib_Plugin_Manager
 		return $api ? $api->addJavascript($javascript) : false;
 	}
 
-	static public function render($plugin,$parameters=array())
+	static public function render($plugin,$layout="default",$parameters=array())
 	{
 		$api = self::getAPI($plugin);
-
-		return $api ? $api->render("default",$parameters) : false;
+		
+		return $api ? $api->render($layout,$parameters) : false;
 	}
 }
