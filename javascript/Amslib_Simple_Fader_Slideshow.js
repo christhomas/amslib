@@ -1,37 +1,40 @@
-Amslib_Simple_Fader_Slideshow = Class.create(
+Amslib_Simple_Fader_Slideshow = Class.create(Amslib,
 {
 	images: false,
 	
-	initialize: function(parent)
+	initialize: function($super,parent)
 	{
-		var images	=	parent.select("img");
-		var timeout	=	parent.down("input['amslib_simple_fader_slideshow_timeout']");
+		$super(parent);
+		
+		var images	=	this.parent.select("img");
+		var timeout	=	this.parent.down("input['amslib_simple_fader_slideshow_timeout']");
 
 		//	Default a missing timeout to 5 seconds
 		timeout = timeout ? timeout.value : 5;
 		
 		//	Make sure one of the images is set to active, if not, set it to the first image
-		var active = parent.down("img.active");
-		if(!active) parent.down("img").addClassName("active");
+		var active = this.parent.down("img.active");
+		if(!active) this.parent.down("img").addClassName("active");
 		
 		if(images.length > 1)
 		{
 			new PeriodicalExecuter(function(){
-				var active		=	parent.down("img.active");
+				var active		=	this.parent.down("img.active");
 				var inactive	=	active.next("img");
 				
 				if(!inactive){
-					inactive = parent.down("img");
+					inactive = this.parent.down("img");
 				}
 				
 				inactive.appear({
 					afterFinish: function(){
 						inactive.addClassName("active");
 						active.removeClassName("active");
-					}
+						this.callObserver("change_image",active);
+					}.bind(this)
 				});
 				active.fade();
-			},timeout);
+			}.bind(this),timeout);
 		}
 	}
 });
