@@ -22,15 +22,16 @@ Amslib_Simple_Fader_Slideshow = Class.create(Amslib,
 				var active		=	this.parent.down("img.active");
 				var inactive	=	active.next("img");
 				
-				if(!inactive){
-					inactive = this.parent.down("img");
-				}
+				if(!inactive) inactive = this.parent.down("img");
+				
+				this.callObserver("start_change",inactive);
 				
 				inactive.appear({
 					afterFinish: function(){
 						inactive.addClassName("active");
 						active.removeClassName("active");
-						this.callObserver("change_image",active);
+						
+						this.callObserver("finish_change",inactive);
 					}.bind(this)
 				});
 				active.fade();
