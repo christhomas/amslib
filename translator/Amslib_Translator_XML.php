@@ -37,6 +37,8 @@ class Amslib_Translator_XML extends Amslib_Translator
 	
 	function loadFromRouter()
 	{
+		//	FIXME:	it's wrong that we should depend on Amslib_Router_Language2 
+		//			here, the value should be passed in and eliminate the dependency
 		$this->load("translations/".Amslib_Router_Language2::getCode().".xml",true);
 	}
 
@@ -51,12 +53,12 @@ class Amslib_Translator_XML extends Amslib_Translator
 	}
 
 	//	TODO: This method has no way to translate from other languages
-	function translate($expression,$language=NULL)
+	function translate($key,$language=NULL)
 	{
-		$t = parent::translate($expression);
+		$t = parent::translate($key);
 		
-		if($t == $expression){
-			$node = $this->__xpath->query("//database/translation[@name='$expression'][1]");
+		if($t == $key){
+			$node = $this->__xpath->query("//database/translation[@name='$key'][1]");
 
 			if($node->length > 0){
 				$t = "";
@@ -66,8 +68,8 @@ class Amslib_Translator_XML extends Amslib_Translator
 				foreach($node->childNodes as $n) $t .= $this->__xdoc->saveXML($n);
 				$t = trim($t);
 
-				if(strlen($t)) $this->l($expression,$t);
-				else $t = $expression;
+				if(strlen($t)) $this->l($key,$t);
+				else $t = $key;
 			}
 		}
 		
@@ -75,9 +77,9 @@ class Amslib_Translator_XML extends Amslib_Translator
 	}
 	
 	//	TODO: This method just stores new translations in memory, doesnt write them to xml
-	function learn($expression,$string,$language=NULL)
+	function learn($key,$string,$language=NULL)
 	{
-		return parent::learn($expression,$string,$language);
+		return parent::learn($key,$string,$language);
 	}
 	
 	public function &getInstance()
