@@ -249,7 +249,7 @@ class Amslib_WidgetManager
 		$this->setup(Amslib_Filesystem::absolute("/widgets"),Amslib_Filesystem::documentRoot());
 	}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 

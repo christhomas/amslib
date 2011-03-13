@@ -25,7 +25,7 @@
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-class Amslib_Database
+abstract class Amslib_Database
 {
 /******************************************************************************
  *	PRIVATE MEMBERS
@@ -77,16 +77,13 @@ class Amslib_Database
 	 * 	FIXME: The description of this member is incorrect
 	 */
 	protected $connection = false;
+	
+	abstract protected function getDatabaseLogin();
 
 	protected function setLastQuery($query)
 	{
 		$this->lastQuery[] = $query;
 		if(count($this->lastQuery) > 100) array_shift($this->lastQuery);
-	}
-
-	protected function getDatabaseLogin()
-	{
-		die(get_class($this)."::getDatabaseLogin() => Your database layer need to implement this method");
 	}
 
 	protected function getLastTransactionId()

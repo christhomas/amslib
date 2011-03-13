@@ -258,7 +258,7 @@ class Amslib_Router_Source_XML2
 		return $route;
 	}
 
-	public function &getInstance($source=NULL)
+	static public function &getInstance($source=NULL)
 	{
 		static $instance = NULL;
 

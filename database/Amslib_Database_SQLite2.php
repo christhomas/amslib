@@ -210,7 +210,7 @@ class Amslib_Database_SQLite2 extends Amslib_Database
 		return sqlite_error_string(sqlite_last_error());
 	}
 	
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 		

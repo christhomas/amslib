@@ -29,7 +29,8 @@ class Amslib
 {
 	const VERSION = 3.2;
 
-	static protected $showErrorTrigger = false;
+	static protected $showErrorTrigger		=	false;
+	static protected $originalErrorHandler	=	false;
 
 	//	DEPRECATED: should use findPath instead, makes more sense
 	static protected function findFile($filename){ return self::findPath($filename); }
@@ -57,6 +58,18 @@ class Amslib
 		ini_set("display_errors", "On");
 		error_reporting(E_ALL);
 		self::$showErrorTrigger = true;
+	}
+	
+	static public function setErrorHandler($handler)
+	{
+		self::$originalErrorHandler = set_error_handler($handler);
+	}
+	
+	static public function restoreErrorHandler()
+	{
+		if(self::$originalErrorHandler){
+			set_error_handler(self::$originalErrorHandler);
+		}
 	}
 
 	static public function lchop($str,$search)

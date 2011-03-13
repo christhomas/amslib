@@ -225,7 +225,7 @@ DATABASE_ERROR;
 		return "Amslib_Database::error(): Unknown PDO:sqlite3 database error occured";
 	}
 	
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 		

@@ -233,7 +233,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		Amslib_Plugin_Manager::import($name,$this);
 	}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 

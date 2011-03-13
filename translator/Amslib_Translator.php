@@ -112,7 +112,7 @@ class Amslib_Translator
 	//	TODO: missing in the memory interface
 	public function updateKey($old,$new,$deleteOld=true){}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 

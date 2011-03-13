@@ -48,7 +48,7 @@ class Amslib_Translator2 extends Amslib_Translator2_Source
 		}
 	}
 	
-	public function &getInstance($type)
+	static public function &getInstance($type)
 	{
 		static $instance = NULL;
 		
