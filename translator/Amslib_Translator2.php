@@ -40,7 +40,6 @@ class Amslib_Translator2 extends Amslib_Translator2_Source
 
 	public function __construct($type)
 	{
-		print(Amslib::var_dump("Amslib_Translator2::__construct",$type));
 		switch($type){
 			case "xml":{		$this->source = new Amslib_Translator2_XML();		}break;
 			case "database":{	$this->source = new Amslib_Translator2_Database();	}break;
