@@ -25,7 +25,7 @@
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-abstract class Amslib_Database
+class Amslib_Database
 {
 /******************************************************************************
  *	PRIVATE MEMBERS
@@ -78,7 +78,10 @@ abstract class Amslib_Database
 	 */
 	protected $connection = false;
 	
-	abstract protected function getDatabaseLogin();
+	protected function getDatabaseLogin()
+	{
+		die(get_class($this)."::getDatabaseLogin(), this method is required");
+	}
 
 	protected function setLastQuery($query)
 	{
