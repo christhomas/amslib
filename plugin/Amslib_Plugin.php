@@ -107,8 +107,15 @@ class Amslib_Plugin
 					$model = Admin_Panel_Model::getModel($object);
 					if($model) $this->model = $model;
 				}
+				
+				//	ATTEMPT 2: Is it a plain, ordinary object that exists in the system?
+				if($this->model == false){
+					try{
+						$this->model = call_user_func(array($object,"getInstance"));
+					}catch(Exception $e){}
+				}
 
-				//	ATTEMPT 2: Is the object the model from the current plugin
+				//	ATTEMPT 3: Is the object the model from the current plugin
 				if($this->model == false){
 					$file = "$this->location/objects/{$object}.php";
 
@@ -119,13 +126,6 @@ class Amslib_Plugin
 							$this->model = call_user_func(array($object,"getInstance"));
 						}
 					}
-				}
-
-				//	ATTEMPT 3: Is it a plain, ordinary object that exists in the system?
-				if($this->model == false){
-					try{
-						$this->model = call_user_func(array($object,"getInstance"));
-					}catch(Exception $e){}
 				}
 			}
 		}
