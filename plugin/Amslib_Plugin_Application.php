@@ -21,6 +21,13 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		return ($node && $node->length) ? $node->item(0)->nodeValue : $default;
 	}
+	
+	protected function readSingleNode($query,$default=NULL)
+	{
+		$node = $this->xpath->query($query);
+		
+		return ($node && $node->length) ? $node->item(0) : $default;
+	}
 
 	protected function findResource($plugin,$node)
 	{
@@ -40,61 +47,75 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	protected function setPaths()
 	{
-		$node = $this->xpath->query("//package/path");
-		if($node->length == 0) return;
-
-		$path = $node->item(0);
-
-		foreach($path->childNodes as $p)
+		$path = $this->readSingleNode("//package/path");
+		if($path)
 		{
-			$name	=	$p->nodeName;
-			$value	=	$this->expandTemplates($p->nodeValue);
-
-			//	Ignore this type of node
-			if($name[0] == "#") continue;
-
-			if($name == "include"){
-				Amslib::addIncludePath(Amslib_Filesystem::absolute($value));
-			}else{
-				$this->path[$name] = $value;
-				
-				if($name == "plugin"){
-					Amslib_Plugin_Manager::addLocation(Amslib_Filesystem::absolute($this->path["plugin"]));
+			foreach($path->childNodes as $p)
+			{
+				$name	=	$p->nodeName;
+				$value	=	$this->expandTemplates($p->nodeValue);
+	
+				//	Ignore this type of node
+				if($name[0] == "#") continue;
+	
+				if($name == "include"){
+					Amslib::addIncludePath(Amslib_Filesystem::absolute($value));
+				}else{
+					$this->path[$name] = $value;
+					
+					if($name == "plugin"){
+						Amslib_Plugin_Manager::addLocation(Amslib_Filesystem::absolute($this->path["plugin"]));
+					}
 				}
 			}
+	
+			//	Die with an error, all of these parameters must be a valid string
+			//	or the whole system doesnt work
+			//	NOTE:	Is this true? will the whole system fail without this info?
+			//	NOTE:	Perhaps I should gracefully fail with a nice error instead of dying horribly
+			//	NOTE:	I think if the system is the admin yes, but if it is the normal website no
+			if(	strlen($this->path["website"] != "__WEBSITE__") == 0 ||
+				strlen($this->path["admin"] != "__ADMIN__") == 0 ||
+				strlen($this->path["plugin"] != "__PLUGIN__") == 0){
+					print("<pre>");
+					var_dump($this->path);
+					print("</pre>");
+				}
 		}
-
-		//	Die with an error, all of these parameters must be a valid string
-		//	or the whole system doesnt work
-		//	NOTE:	Is this true? will the whole system fail without this info?
-		//	NOTE:	Perhaps I should gracefully fail with a nice error instead of dying horribly
-		//	NOTE:	I think if the system is the admin yes, but if it is the normal website no
-		if(	strlen($this->path["website"] != "__WEBSITE__") == 0 ||
-			strlen($this->path["admin"] != "__ADMIN__") == 0 ||
-			strlen($this->path["plugin"] != "__PLUGIN__") == 0){
-				print("<pre>");
-				var_dump($this->path);
-				print("</pre>");
-			}
 	}
 
 	protected function loadTranslators()
 	{
-		//	TODO:	how to configure the language xml section to obtain information
-		//			relevant to the requirements
+		$translators = $this->xpath->query("//package/translator");
+		
+		foreach($translators as $t){
+			if($t->childNodes->length){
+				$data = array();
+				
+				foreach($t->childNodes as $node){
+					if($node->nodeType == 3) continue;
+
+					if($node->nodeName == "language"){
+						$data[$node->nodeName][] = $node->nodeValue;
+					}else{
+						$data[$node->nodeName] = $node->nodeValue;	
+					}
+				}
+				
+				$this->translator[$data["name"]] = new Amslib_Translator2($data["type"]);
+				$this->translator[$data["name"]]->addLanguage($data["language"]);
+				$this->translator[$data["name"]]->setLanguage($this->getLanguage($data["name"]));
+				$this->translator[$data["name"]]->load($data["location"]);
+			}
+		}
 	}
 
-	protected function getTranslator($name)
-	{
-		//	TODO:	how to return the translators based on requirements
-	}
-	
 	protected function initialiseModel()
 	{
 		parent::initialiseModel();
 		
 		if(class_exists("Admin_Panel_Model",true)){
-			//	NOTE: You can't use the method getModel here, because the api object doesnt exist yet
+			//	NOTE: You can't use the method getModel() here, because the api object doesnt exist yet
 			Admin_Panel_Model::setConnection($this->model);
 		}
 	}
@@ -179,7 +200,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			"plugin"	=>	"__PLUGIN__",
 			"docroot"	=>	Amslib_Filesystem::documentRoot()
 		);
-
+		
 		$api = $this->load($name,$location);
 		Amslib_Plugin_Manager::import($name,$this);
 	}
@@ -229,16 +250,19 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
 	}
 
-	//	NOTE: I am sure this method is not supposed to be here
-	public function getAdminTranslator()
+	public function getTranslator($name)
 	{
-		return $this->translator["admin"];
+		return isset($this->translator[$name]) ? $this->translator[$name] : false;
 	}
-
-	//	NOTE: I am sure this method is not supposed to be here
-	public function getContentTranslator()
+	
+	public function setLanguage($name,$langCode)
 	{
-		return $this->translator["content"];
+		Amslib::insertSessionParam(get_class($this)."_".$name,$langCode);
+	}
+	
+	public function getLanguage($name)
+	{
+		return Amslib::sessionParam(get_class($this)."_".$name);
 	}
 
 	//	NOTE:	This method looks like it's out of date and needs
