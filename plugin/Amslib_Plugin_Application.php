@@ -1,4 +1,32 @@
 <?php
+/*******************************************************************************
+ * Copyright (c) {15/03/2008} {Christopher Thomas}
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * file: Amslib_Plugin_Application.php
+ * title: Antimatter Plugin, Plugin Application object
+ * description: An object to handle a plugin, which is actually an application
+ * 				which represents a website, the application can have extra configuration
+ * 				options which a normal plugin doesn't have.  To setup the "website".
+ * 
+ * version: 1.0
+ *
+ * Contributors/Author:
+ *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *******************************************************************************/
+
 class Amslib_Plugin_Application extends Amslib_Plugin
 {
 	static protected $version;
