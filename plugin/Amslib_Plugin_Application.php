@@ -320,4 +320,10 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		return $activePlugin;
 	}
+	
+	public function render()
+	{
+		//	Request the website render itself now
+		print($this->api->render());
+	}
 }
