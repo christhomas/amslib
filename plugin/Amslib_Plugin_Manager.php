@@ -19,7 +19,7 @@
  * title: Antimatter Plugin: Plugin Manager object
  * description: An object to store all the plugins and provide a central method
  * 				to access them all
- * version: 1.2
+ * version: 1.3
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -133,6 +133,11 @@ class Amslib_Plugin_Manager
 	static public function getAPI($name)
 	{
 		return (isset(self::$api[$name])) ? self::$api[$name] : false;
+	}
+	
+	static public function getPlugin($name)
+	{
+		return isset(self::$plugins[$name]) ? self::$plugins[$name] : false;
 	}
 
 	static public function getPluginNameByRouteName($routeName)
