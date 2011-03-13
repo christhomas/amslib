@@ -74,6 +74,7 @@ class Amslib_Plugin
 		//	Setup the api with basic name and filesystem location
 		$api->setLocation($this->getLocation());
 		$api->setName($this->getName());
+		$api->setPlugin($this);
 
 		//	Assign the model to the plugin
 		$api->setModel($this->model);
@@ -224,6 +225,7 @@ class Amslib_Plugin
 		$this->processBlock("image",		"file",	"setImage");
 		$this->processBlock("javascript",	"file",	"setJavascript");
 		$this->processBlock("stylesheet",	"file",	"setStylesheet");
+		$this->processBlock("google_font",	"file",	"setGoogleFont");
 
 		$this->api->initialise();
 	}
