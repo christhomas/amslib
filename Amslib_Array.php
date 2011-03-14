@@ -1,6 +1,19 @@
 <?php
 class Amslib_Array
 {
+	static public function pluck($array,$key)
+	{
+		if(!is_array($array) || !self::isMulti($array)) return false;
+		
+		$values = array();
+		
+		foreach($array as $item){
+			if(isset($item[$key])) $values[] = $item[$key];
+		}
+		
+		return $values;
+	}
+	
 	static public function filter($array,$key,$value,$returnFiltered=false)
 	{
 		$filter = array();
