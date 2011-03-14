@@ -32,11 +32,13 @@ class Amslib_Translator2_Keystore extends Amslib_Translator2_Source
 	public function addLanguage($langCode)
 	{
 		if(is_string($langCode)){
-			$this->permittedLanguage[] = $langCode;	
+			$this->permittedLanguage[] = $langCode;
+			$this->store[$langCode] = array();	
 		}
 		
 		if(is_array($langCode)){
-			$this->permittedLanguage = array_merge($this->permittedLanguage,$langCode);	
+			$this->permittedLanguage = array_merge($this->permittedLanguage,$langCode);
+			foreach($langCode as $l) $this->store[$l] = array();	
 		}
 	}
 	
@@ -62,17 +64,17 @@ class Amslib_Translator2_Keystore extends Amslib_Translator2_Source
 	
 	public function translate($k)
 	{
-		return (is_string($k) && isset($this->store[$k])) ? $this->store[$k] : $k;	
+		return (is_string($k) && isset($this->store[$this->language][$k])) ? $this->store[$this->language][$k] : $k;	
 	}
 	
 	public function learn($k,$v)
 	{
-		$this->store[$k] = $v;
+		$this->store[$this->language][$k] = $v;
 	}
 	
 	public function forget($k)
 	{
-		unset($this->store[$k]);
+		unset($this->store[$this->language][$k]);
 	}
 	
 	public function updateKey($k,$nk)
@@ -83,11 +85,11 @@ class Amslib_Translator2_Keystore extends Amslib_Translator2_Source
 	
 	public function getKeyList()
 	{
-		return array_keys($this->store);
+		return array_keys($this->store[$this->language]);
 	}
 	
 	public function getValueList()
 	{
-		return array_values($this->store);
+		return array_values($this->store[$this->language]);
 	}
 }
