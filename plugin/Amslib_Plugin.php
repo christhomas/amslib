@@ -111,7 +111,7 @@ class Amslib_Plugin
 				//	ATTEMPT 2: Is it a plain, ordinary object that exists in the system?
 				if($this->model == false){
 					try{
-						$this->model = call_user_func(array($object,"getInstance"));
+						$this->model = @call_user_func(array($object,"getInstance"));
 					}catch(Exception $e){}
 				}
 
