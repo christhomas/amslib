@@ -20,11 +20,11 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 			$this->table	=	NULL;
 		
 			list($database,$table) = explode("/",$location);
-			
+				
 			if($database && $table && class_exists($database) && method_exists($database,"getInstance")){
 				$this->database	=	call_user_func(array($database,"getInstance"));
 				$this->table	=	$this->database->escape($table);
-				print("DATABASE CREATED");
+				
 				return true;
 			}
 			
