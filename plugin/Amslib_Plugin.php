@@ -203,12 +203,7 @@ class Amslib_Plugin
 			}else{
 				$cond	=	$n->getAttribute("condition");
 				$auto	=	$n->getAttribute("autoload");
-				
-				if($name == "google_font"){
-					$item	=	$this->
-				}else{
-					$item	=	$this->findResource($this->name,$n);
-				}
+				$item	=	($name == "google_font") ? $n->nodeValue : $this->findResource($this->name,$n);
 				$params	=	array($id,$item,$cond,$auto);
 			}
 
