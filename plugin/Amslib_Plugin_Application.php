@@ -132,8 +132,13 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				
 				$this->translator[$data["name"]] = new Amslib_Translator2($data["type"]);
 				$this->translator[$data["name"]]->addLanguage($data["language"]);
-				$this->translator[$data["name"]]->setLanguage($this->getLanguage($data["name"]));
-				$this->translator[$data["name"]]->load($data["location"]);
+				$this->translator[$data["name"]]->setLocation($data["location"]);
+				
+				if(isset($data["router"])){
+					foreach($data["language"] as $langCode){
+						Amslib_Router_Language3::add($langCode,str_replace("_","-",$langCode));
+					}
+				}
 			}
 		}
 	}
@@ -196,6 +201,19 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		Amslib_Router3::setSource($xml);
 		Amslib_Router3::execute();
+		
+		//	FIXME:	I am only applying the language code to the "content" translator
+		//			this is a hardcoded bug, because who says all the appropriate translators
+		//			will be called "content" ??
+		$langCode = Amslib_Router_Language3::getCode();
+		if($langCode) $this->setLanguage("content", $langCode);
+		
+		//	Take the name of the translator and set it's 
+		//	language to the current language setup in the system
+		foreach($this->translator as $name=>$t){
+			$t->setLanguage($this->getLanguage($name));
+			$t->load();
+		}
 	}
 
 	protected function configurePlugins()

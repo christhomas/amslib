@@ -314,7 +314,7 @@ class Amslib_MVC3
 		if(!is_string($id) && $file) return;
 		
 		$this->googleFont[$id] = array("file"=>$file,"conditional"=>$conditional);
-		
+
 		if($autoload) $this->addGoogleFont($id);
 	}
 	
