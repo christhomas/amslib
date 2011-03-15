@@ -30,8 +30,9 @@
 class Amslib_Plugin_Application extends Amslib_Plugin
 {
 	static protected $version;
+	static protected $translator;
+	
 	protected $path;
-	protected $translator;
 
 	protected function expandTemplates($string)
 	{
@@ -130,9 +131,9 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 					}
 				}
 				
-				$this->translator[$data["name"]] = new Amslib_Translator2($data["type"]);
-				$this->translator[$data["name"]]->addLanguage($data["language"]);
-				$this->translator[$data["name"]]->setLocation($data["location"]);
+				self::$translator[$data["name"]] = new Amslib_Translator2($data["type"]);
+				self::$translator[$data["name"]]->addLanguage($data["language"]);
+				self::$translator[$data["name"]]->setLocation($data["location"]);
 				
 				if(isset($data["router"])){
 					foreach($data["language"] as $langCode){
@@ -210,7 +211,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		
 		//	Take the name of the translator and set it's 
 		//	language to the current language setup in the system
-		foreach($this->translator as $name=>$t){
+		foreach(self::$translator as $name=>$t){
 			$t->setLanguage($this->getLanguage($name));
 			$t->load();
 		}
@@ -296,9 +297,9 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
 	}
 
-	public function getTranslator($name)
+	public static function getTranslator($name)
 	{
-		return isset($this->translator[$name]) ? $this->translator[$name] : false;
+		return isset(self::$translator[$name]) ? self::$translator[$name] : false;
 	}
 	
 	public function setLanguage($name,$langCode)
