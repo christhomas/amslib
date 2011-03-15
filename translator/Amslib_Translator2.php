@@ -86,7 +86,8 @@ class Amslib_Translator2 extends Amslib_Translator2_Source
 	/********************************************************************************
 	 *	TRANSLATOR METHODS
 	********************************************************************************/
-	public function load($location){			return $this->source->load($location);			}
+	public function setLocation($location){		return $this->source->setLocation($location);	}
+	public function load(){						return $this->source->load();					}
 	public function translate($k){				return $this->source->translate($k);			}
 	public function learn($k,$v){				return $this->source->learn($k,$v);				}
 	public function forget($k){					return $this->source->forget($k);				}

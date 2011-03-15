@@ -1,6 +1,7 @@
 <?php 
 class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 {
+	protected $location;
 	protected $database;
 	protected $table;
 	
@@ -11,15 +12,20 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 		$this->database	=	NULL;
 		$this->table	=	NULL;
 	}
+	
+	public function setLocation($location)
+	{
+		$this->location = $location;
+	}
 		
-	public function load($location)
+	public function load()
 	{	
 		if($this->language)
 		{
 			$this->database	=	NULL;
 			$this->table	=	NULL;
 		
-			list($database,$table) = explode("/",$location);
+			list($database,$table) = explode("/",$this->location);
 				
 			if($database && $table && class_exists($database) && method_exists($database,"getInstance")){
 				$this->database	=	call_user_func(array($database,"getInstance"));

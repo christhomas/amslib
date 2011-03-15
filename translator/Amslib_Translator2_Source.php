@@ -8,7 +8,8 @@ abstract class Amslib_Translator2_Source
 	abstract public function getLanguage		();
 	abstract public function getAllLanguages	();	
 	abstract public function isLanguage			($langCode);
-	abstract public function load				($location);
+	abstract public function setLocation		($location);
+	abstract public function load				();
 	abstract public function translate			($k);
 	abstract public function learn				($k,$v);
 	abstract public function forget				($k);
