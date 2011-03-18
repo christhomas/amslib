@@ -17,7 +17,7 @@
  *
  * File: Amslib.php
  * Title: Amslib core utility object
- * Version: 3.2
+ * Version: 4.5
  * Project: Amslib (antimatter studios library)
  *
  * Contributors/Author:
@@ -27,7 +27,7 @@
 //	Amslib helper class
 class Amslib
 {
-	const VERSION = 3.2;
+	const VERSION = 4.5;
 
 	static protected $showErrorTrigger		=	false;
 	static protected $originalErrorHandler	=	false;
