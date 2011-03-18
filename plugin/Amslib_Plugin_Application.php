@@ -284,6 +284,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->loadConfiguration();
 		$this->finalisePlugin();
 	}
+	
+	public function getPath($name)
+	{
+		return (isset($this->path[$name])) ? $this->path[$name] : false;
+	}
 
 	public function setModel($model)
 	{
