@@ -7,20 +7,28 @@ class Amslib_Array
 		
 		$values = array();
 		
-		foreach($array as $item){
+		if(!empty($array)) foreach($array as $item){
 			if(isset($item[$key])) $values[] = $item[$key];
 		}
 		
 		return $values;
 	}
 	
-	static public function filter($array,$key,$value,$returnFiltered=false)
+	static public function filter($array,$key,$value,$returnFiltered=false,$similar=false)
 	{
 		$filter = array();
 
-		foreach($array as $k=>$v)
+		if(!empty($array)) foreach($array as $k=>$v)
 		{
-			if((is_array($value) && in_array($v[$key],$value)) || ($v[$key] == $value)){
+			$found = false;
+			
+			//	TODO: I'm sure that there are more situations I could take into account here
+			
+			if(is_array($value) && in_array($v[$key],$value)) $found = true;
+			if($v[$key] == $value) $found = true;
+			if($similar == true && strpos($v[$key],$value) !== false) $found = true;
+			
+			if($found){
 				$filter[$k] = $v;
 				unset($array[$k]);
 			}
