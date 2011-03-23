@@ -198,19 +198,42 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		Amslib_Router3::execute();
 	}
 
+	//	TODO:	This method, combined with loadValues from 
+	//			Amslib_Plugin are in need for some SERIOUS refactoring
 	protected function configurePlugins()
 	{
 		$config = $this->xpath->query("//package/plugin");
 
-		foreach($config as $plugin){
-			$name = $plugin->getAttribute("name");
+		foreach($config as $block){
+			$name = $block->getAttribute("name");
 
 			if($name){
 				$api = Amslib_Plugin_Manager::getAPI($name);
 
 				if($api){
-					foreach($plugin->childNodes as $item){
-						$api->setValue($item->nodeName,$item->nodeValue);
+					if(!empty($block->childNodes)) foreach($block->childNodes as $item){
+						if($item->nodeName == "plugin_override"){
+							if(!empty($item->childNodes)) foreach($item->childNodes as $override){
+								if($override->nodeType == 3) continue;
+								$name = $override->getAttribute("name");
+								list($p,$v) = explode("/",$override->nodeValue);
+								
+								if($p) $p = Amslib_Plugin_Manager::getAPI($p);
+								
+								if($name && $p && $v){
+									switch($override->nodeName){
+										case "layout":{			$p->setLayout($name,$v);		}break;
+										case "view":{			$p->setView($name,$v);			}break;
+										case "service":{		$p->setService($name,$v);		}break;
+										case "object":{			$p->setObject($name,$v);		}break;
+										case "stylesheet":{		$p->setStylesheet($name,$v);	}break;
+										case "javascript":{		$p->setJavascript($name,$v);	}break;
+									}
+								}
+							}
+						}else{
+							$api->setValue($item->nodeName,$item->nodeValue);	
+						}
 					}
 				}
 			}
