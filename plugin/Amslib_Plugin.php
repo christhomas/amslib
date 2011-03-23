@@ -206,7 +206,9 @@ class Amslib_Plugin
 				$params	=	array($id,$item,$cond,$auto);
 			}
 
-			call_user_func_array(array($this->api,$callback),$params);
+			if(method_exists($this->api,$callback)){
+				call_user_func_array(array($this->api,$callback),$params);
+			}
 		}
 	}
 
@@ -222,6 +224,7 @@ class Amslib_Plugin
 		$this->processBlock("view",			"name",	"setView");
 		$this->processBlock("object",		"name",	"setObject");
 		$this->processBlock("service",		"file",	"setService");
+		$this->processBlock("service",		"name",	"setService2");
 		$this->processBlock("image",		"file",	"setImage");
 		$this->processBlock("javascript",	"file",	"setJavascript");
 		$this->processBlock("stylesheet",	"file",	"setStylesheet");

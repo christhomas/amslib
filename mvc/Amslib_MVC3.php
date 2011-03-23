@@ -79,6 +79,7 @@ class Amslib_MVC3
 		$this->setComponent("view",			"views",		"Vi_");
 		$this->setComponent("object",		"objects",		"");
 		$this->setComponent("service",		"services",		"");
+		$this->setComponent("service2",		"services",		"Sv_");
 	}
 
 	public function setName($name)
@@ -245,6 +246,16 @@ class Amslib_MVC3
 		if(!$id || strlen($id) == 0) $id = $name;
 
 		$this->service[$id] = Amslib_Website::rel($this->getComponentPath("service", $name));
+
+		//	Set this as a service url for the javascript to acquire
+		$this->setValue("service:$id", $this->service[$id]);
+	}
+	
+	public function setService2($id,$name)
+	{
+		if(!$id || strlen($id) == 0) $id = $name;
+
+		$this->service[$id] = Amslib_Website::rel($this->getComponentPath("service2", $name));
 
 		//	Set this as a service url for the javascript to acquire
 		$this->setValue("service:$id", $this->service[$id]);
