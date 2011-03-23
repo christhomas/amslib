@@ -226,6 +226,9 @@ class Amslib_Plugin
 		$this->processBlock("javascript",	"file",	"setJavascript");
 		$this->processBlock("stylesheet",	"file",	"setStylesheet");
 		$this->processBlock("google_font",	"file",	"setGoogleFont");
+		
+		//	Now load all the plugin values
+		$this->loadValues();
 
 		$this->api->initialise();
 	}
@@ -239,6 +242,17 @@ class Amslib_Plugin
 
 	protected function initialisePlugin(){	/*	By default, do nothing	*/	}
 	protected function finalisePlugin(){	/*	By default, do nothing	*/	}
+	
+	public function loadValues()
+	{
+		$config = $this->xpath->query("//package/value");
+
+		foreach($config as $block){
+			foreach($block->childNodes as $item){
+				if($item->nodeType == 1) $this->api->setValue($item->nodeName,$item->nodeValue);
+			}
+		}
+	}
 
 	public function __construct($name=NULL,$location=NULL)
 	{
