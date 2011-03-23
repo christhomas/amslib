@@ -1,5 +1,5 @@
-<?php
-class Amslib_Filesystem
+<?php 
+class Amslib_File
 {
 	static public function documentRoot()
 	{

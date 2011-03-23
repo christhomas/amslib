@@ -227,6 +227,11 @@ class Amslib
 				$class_name	=	"mvc/$class_name";
 			}
 			
+			//	Redirect to include the correct path for the File system classes
+			if(strpos($class_name,"Amslib_File") !== false){
+				$class_name	=	"file/$class_name";
+			}
+			
 			$filename = str_replace("//","/","$class_name.php");
 			
 			return Amslib::requireFile($filename);
