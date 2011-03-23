@@ -131,6 +131,7 @@ class Amslib_Plugin
 		}
 	}
 
+	//	NOTE: why am I passing in the $plugin parameter here, then never using it??
 	protected function findResource($plugin,$node)
 	{
 		$resource = $node->nodeValue;
@@ -202,7 +203,7 @@ class Amslib_Plugin
 			}else{
 				$cond	=	$n->getAttribute("condition");
 				$auto	=	$n->getAttribute("autoload");
-				$item	=	$this->findResource($this->name,$n);
+				$item	=	($name == "google_font") ? $n->nodeValue : $this->findResource($this->name,$n);
 				$params	=	array($id,$item,$cond,$auto);
 			}
 

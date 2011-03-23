@@ -30,8 +30,9 @@
 class Amslib_Plugin_Application extends Amslib_Plugin
 {
 	static protected $version;
+	static protected $translator;
+	
 	protected $path;
-	protected $translator;
 
 	protected function expandTemplates($string)
 	{
@@ -130,10 +131,15 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 					}
 				}
 				
-				$this->translator[$data["name"]] = new Amslib_Translator2($data["type"]);
-				$this->translator[$data["name"]]->addLanguage($data["language"]);
-				$this->translator[$data["name"]]->setLanguage($this->getLanguage($data["name"]));
-				$this->translator[$data["name"]]->load($data["location"]);
+				self::$translator[$data["name"]] = new Amslib_Translator2($data["type"]);
+				self::$translator[$data["name"]]->addLanguage($data["language"]);
+				self::$translator[$data["name"]]->setLocation($data["location"]);
+				
+				if(isset($data["router"])){
+					foreach($data["language"] as $langCode){
+						Amslib_Router_Language3::add($langCode,str_replace("_","-",$langCode));
+					}
+				}
 			}
 		}
 	}
@@ -196,6 +202,19 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		Amslib_Router3::setSource($xml);
 		Amslib_Router3::execute();
+		
+		//	FIXME:	I am only applying the language code to the "content" translator
+		//			this is a hardcoded bug, because who says all the appropriate translators
+		//			will be called "content" ??
+		$langCode = Amslib_Router_Language3::getCode();
+		if($langCode) $this->setLanguage("content", $langCode);
+		
+		//	Take the name of the translator and set it's 
+		//	language to the current language setup in the system
+		foreach(self::$translator as $name=>$t){
+			$t->setLanguage($this->getLanguage($name));
+			$t->load();
+		}
 	}
 
 	//	TODO:	This method, combined with loadValues from 
@@ -288,6 +307,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->loadConfiguration();
 		$this->finalisePlugin();
 	}
+	
+	public function getPath($name)
+	{
+		return (isset($this->path[$name])) ? $this->path[$name] : false;
+	}
 
 	public function setModel($model)
 	{
@@ -301,9 +325,9 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
 	}
 
-	public function getTranslator($name)
+	public static function getTranslator($name)
 	{
-		return isset($this->translator[$name]) ? $this->translator[$name] : false;
+		return isset(self::$translator[$name]) ? self::$translator[$name] : false;
 	}
 	
 	public function setLanguage($name,$langCode)

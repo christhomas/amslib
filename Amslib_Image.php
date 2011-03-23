@@ -402,7 +402,7 @@ class Amslib_Image
 
 			//	If cache is enabled, you have to output a copy now to the browser
 			if($this->cache){
-				chmod($destination,0777);
+				chmod($destination,0755);
 				readfile($destination);
 			}
 
@@ -427,7 +427,7 @@ class Amslib_Image
 		//	Image is cached, just copy it to the new location
 		if($image["cache"]){
 			copy($filename,$destination);
-			chmod($destination,0777);
+			chmod($destination,0755);
 
 			//	FIXME: Should I return filename or destination here??
 			return $filename;
@@ -445,13 +445,13 @@ class Amslib_Image
 
 			//	Write the file to a new destination, or to the browser
 			if(file_exists($destination)){
-				chmod($destination,0777);
+				chmod($destination,0755);
 
 				//	Write a copy of this file into the cache
 				if($this->cache){
 					$cacheName = $this->getCacheFilename($filename,$extension);
 					copy($destination,$cacheName);
-					chmod($cacheName,0777);
+					chmod($cacheName,0755);
 				}
 
 				return $destination;

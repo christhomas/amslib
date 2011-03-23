@@ -188,6 +188,23 @@ class Amslib_Router_Source_XML2
 
 		return $this->routes[$name];
 	}
+	
+	public function createPath($path,&$routes=NULL)
+	{
+		$name = $path["name"];
+		
+		$this->routes[$name] = $path;
+		
+		$this->addInversePath($name);
+		
+				//	NOTE:	This is so the route can be captured and returned
+		//			We need to do this so plugins can know whether a route belongs to them
+		//			or someone else, this is needed because sometimes we need to identify
+		//			which route is active, based on the url open
+		if(is_array($routes)) $routes[$name] = $this->routes[$name];
+
+		return $this->routes[$name];
+	}
 
 	//	NOTE: What does versions do again?
 	public function getURL($name,$version="default",$lang="all")

@@ -88,16 +88,19 @@ class Amslib_Router_Language3
 				self::set($lang);
 				
 				//	Make sure there are only single slashes and make sure the path starts and ends with a slash
-				return str_replace("//","/","/".implode("/",$parts)."/");
+				return Amslib_Filesystem::reduceSlashes("/".implode("/",$parts)."/");
 			}
 		}
 		
 		return $path;
 	}
 	
-	public static function execute($langName)
+	public static function execute($langName=NULL)
 	{
 		//	NOTE: You should only enable the system if there are languages added to it.
+		
+		//	If there was no language passed, use the default language
+		if($langName == NULL && self::$default) $langName = self::$supported[self::$default];
 		
 		//	Enable the language system
 		self::enable();

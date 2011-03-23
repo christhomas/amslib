@@ -75,6 +75,11 @@ class Amslib_Router3
 	{
 		self::$source = $source;
 	}
+	
+	static public function getSource()
+	{
+		return self::$source;
+	}
 
 	/**
 	 * method:	getObject

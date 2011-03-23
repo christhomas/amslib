@@ -9,6 +9,11 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 	{
 		parent::__construct();
 	}
+	
+	public function setLocation($location)
+	{
+		$this->location = $location;
+	}
 		
 	/**
 	 * method: load
@@ -24,16 +29,16 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 	 * 	-	if language is false, you need to call setLanguage before you 
 	 * 		call load otherwise the source can't load the correct file
 	 */
-	public function load($location)
+	public function load()
 	{	
 		if($this->language)
 		{
-			$database = Amslib_Website::abs("$location/{$this->language}.xml");
+			$database = Amslib_Website::abs("$this->location/{$this->language}.xml");
 			
 			if(!file_exists($database)) $database = Amslib_Filesystem::find($database,true);
 			
 			if(!file_exists($database)){
-				die(get_class($this)."::load(), LOCATION: '$location', DATABASE '$database' DOES NOT EXIST<br/>");
+				die(get_class($this)."::load(), LOCATION: '$this->location', DATABASE '$database' DOES NOT EXIST<br/>");
 			}
 			
 			$this->xdoc = new DOMDocument("1.0","UTF-8");
@@ -43,7 +48,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 				
 				return true;
 			}else{
-				die(get_class(this)."::load() LOCATION: '$location', DATABASE: '$database' FAILED TO OPEN<br/>");
+				die(get_class(this)."::load() LOCATION: '$this->location', DATABASE: '$database' FAILED TO OPEN<br/>");
 			}
 		}
 		
