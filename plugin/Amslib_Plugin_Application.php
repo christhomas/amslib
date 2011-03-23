@@ -211,7 +211,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		
 		//	Take the name of the translator and set it's 
 		//	language to the current language setup in the system
-		foreach(self::$translator as $name=>$t){
+		if(!empty(self::$translator)) foreach(self::$translator as $name=>$t){
 			$t->setLanguage($this->getLanguage($name));
 			$t->load();
 		}
