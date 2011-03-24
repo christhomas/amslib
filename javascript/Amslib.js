@@ -113,8 +113,8 @@ var Amslib = Class.create(
 		}.bind(this);
 
 		//	Should remove the widget parameters call, because it's out of date
-		parent.select(".widget_parameters input[type='hidden']").each(processBlock);		
-		parent.select(".plugin_parameters input[type='hidden']").each(processBlock);
+		parent.select(".widget_parameters:first input[type='hidden']").each(processBlock);		
+		parent.select(".plugin_parameters:first input[type='hidden']").each(processBlock);
 	},
 	
 	//	Getter/Setter for the object values
