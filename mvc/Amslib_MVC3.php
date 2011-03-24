@@ -241,24 +241,34 @@ class Amslib_MVC3
 		return "";
 	}
 
-	public function setService($id,$name)
+	public function setService($id,$name,$absolute=false)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
 
-		$this->service[$id] = Amslib_Website::rel($this->getComponentPath("service", $name));
+		$this->service[$id] = ($absolute == false) ? Amslib_Website::rel($this->getComponentPath("service", $name)) : $name;
 
 		//	Set this as a service url for the javascript to acquire
 		$this->setValue("service:$id", $this->service[$id]);
 	}
 	
-	public function setService2($id,$name)
+	public function setService2($id,$name,$absolute=false)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
 
-		$this->service[$id] = Amslib_Website::rel($this->getComponentPath("service2", $name));
+		if($absolute){
+			$this->service[$id] = $name;
+			$this->setValue("service:$id",$name);
+		}else{
+			$this->service[$id] = Amslib_Website::rel($this->getComponentPath("service2", $name));
+			
+			//	NOTE: I should recognise that now Amslib_MVC3 is dependant on Amslib_Router3's existence
+			//	Attempt to find a routed url for this service
+			$url = Amslib_Router3::getUrl("Service:$id");
+			if(!$url) $url = $this->service[$id];
 
-		//	Set this as a service url for the javascript to acquire
-		$this->setValue("service:$id", $this->service[$id]);
+			//	Set this as a service url for the javascript to acquire
+			$this->setValue("service:$id",$url); 
+		}
 	}
 
 	public function getService($id)
