@@ -36,7 +36,7 @@ class Amslib_Database
  *	NOTE: they are not converted to private yet because they are being
  *	explored for possible problems
  *****************************************************************************/
-	private $sharedConnection = false;
+	private static $sharedConnection = false;
 	
 	protected $lastResult = array();
 
@@ -175,7 +175,11 @@ class Amslib_Database
 
 	public function copy($database)
 	{
-		$this->connection = $database->getConnection();
+		if($database && method_exists($database,"getConnection")){
+			$c = $database->getConnection();
+			
+			if($c) $this->connection = $c;
+		}
 	}
 	
 	/**
