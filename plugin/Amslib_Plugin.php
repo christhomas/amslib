@@ -104,8 +104,11 @@ class Amslib_Plugin
 
 				//	ATTEMPT 1: Import the database model from another plugin
 				if($this->model == false && $node->getAttribute("import")){
-					$model = Admin_Panel_Model::getModel($object);
-					if($model) $this->model = $model;
+					$model = false;
+					
+					$api = Amslib_Plugin_Manager::getAPI($object);
+					if($api)	$model = $api->getModel();
+					if($model)	$this->model = $model;
 				}
 				
 				//	ATTEMPT 2: Is it a plain, ordinary object that exists in the system?

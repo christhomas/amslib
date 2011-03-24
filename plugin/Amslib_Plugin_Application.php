@@ -148,10 +148,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		parent::initialiseModel();
 		
-		if(class_exists("Admin_Panel_Model",true)){
-			//	NOTE: You can't use the method getModel() here, because the api object doesnt exist yet
-			Admin_Panel_Model::setConnection($this->model);
-		}
+		Amslib_Database::setSharedConnection($this->model);
 	}
 
 	protected function initialisePlugin()
@@ -315,7 +312,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	public function setModel($model)
 	{
-		Admin_Panel_Model::setConnection($model);
+		Amslib_Database::setSharedConnection($model);
 
 		parent::setModel($model);
 	}
