@@ -82,7 +82,7 @@ class Amslib_Website
 		if(is_string($location) && strlen($location)){
 			header("Location: $location");
 		}else{
-			$message = "Amslib_Website::redirect-> The \$location parameter was an invalid string";
+			$message = get_class($this)."::redirect-> The \$location parameter was an invalid string";
 		}
 
 		if($block) die($message);
