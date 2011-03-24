@@ -177,6 +177,7 @@ class Amslib_Plugin
 		$this->loadRouter();
 		$this->initialiseModel();
 		$this->loadConfiguration();
+		$this->configurePlugins();
 		$this->finalisePlugin();
 	}
 
@@ -233,9 +234,6 @@ class Amslib_Plugin
 		$this->processBlock("javascript",	"file",	"setJavascript");
 		$this->processBlock("stylesheet",	"file",	"setStylesheet");
 		$this->processBlock("google_font",	"file",	"setGoogleFont");
-		
-		//	Now load all the plugin values
-		$this->loadValues();
 
 		$this->api->initialise();
 	}
@@ -250,13 +248,43 @@ class Amslib_Plugin
 	protected function initialisePlugin(){	/*	By default, do nothing	*/	}
 	protected function finalisePlugin(){	/*	By default, do nothing	*/	}
 	
-	public function loadValues()
+	protected function configurePlugins()
 	{
-		$config = $this->xpath->query("//package/value");
+		$config = $this->xpath->query("//package/plugin_config");
 
 		foreach($config as $block){
+			$name	=	$block->getAttribute("name");
+			$api	=	($name == $this->name) ? $this->api : Amslib_Plugin_Manager::getAPI($name);
+
+			if(!$api || empty($block->childNodes)) return;
+			
 			foreach($block->childNodes as $item){
-				if($item->nodeType == 1) $this->api->setValue($item->nodeName,$item->nodeValue);
+				if($item->nodeType == 3) continue;
+
+				if($item->nodeName == "package"){
+					if(!empty($item->childNodes)) foreach($item->childNodes as $override){
+						if($override->nodeType == 3) continue;
+						$n	=	$override->getAttribute("name");
+						$p	=	$override->getAttribute("plugin");
+						$r	=	$override->getAttribute("replace");
+						
+						$p = ($p == $this->name) ? $this->api : Amslib_Plugin_Manager::getAPI($p);
+						
+						//	If the name, plugin or value are not valid, don't process it
+						if(!$n || !$p || !$r) continue;
+
+						switch($override->nodeName){
+							case "layout":{			$api->setLayout($n,$p->getLayout($r),true);			}break;
+							case "view":{			$api->setView($n,$p->getView($r),true);				}break;
+							case "service":{		$api->setService2($n,$p->getService($r),true);		}break;
+							case "object":{			$api->setObject($n,$p->getObject($r),true);			}break;
+							case "stylesheet":{		$api->setStylesheet($n,$p->getStylesheet($r),true);	}break;
+							case "javascript":{		$api->setJavascript($n,$p->getJavascript($r),true);	}break;
+						}
+					}
+				}else{
+					$api->setValue($item->nodeName,$item->nodeValue);	
+				}
 			}
 		}
 	}
