@@ -92,9 +92,9 @@ class Amslib_Website
 	{
 		header("Content-Type: application/json");
 
-		$json = json_encode($response);
+		$json = json_encode($array);
 
-		if($block) die(json);
+		if($block) die($json);
 
 		print($json);
 	}
