@@ -92,7 +92,7 @@ class Amslib_Website
 	{
 		header("Content-Type: application/json");
 
-		$json = son_encode($response);
+		$json = json_encode($response);
 
 		if($block) die(json);
 
