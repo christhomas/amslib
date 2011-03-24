@@ -178,8 +178,14 @@ class Amslib_Database
 		if($database && method_exists($database,"getConnection")){
 			$c = $database->getConnection();
 			
-			if($c) $this->connection = $c;
+			if($c){
+				$this->connection = $c;
+
+				return true;
+			}
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -191,7 +197,9 @@ class Amslib_Database
 	 */
 	public static function setSharedConnection($databaseObject)
 	{
-		self::$sharedConnection = $databaseObject->getConnection();
+		if(method_exists($databaseObject,"getConnection")){
+			self::$sharedConnection = $databaseObject;
+		}
 	}
 	
 	/**
