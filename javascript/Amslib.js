@@ -4,9 +4,6 @@ if(typeof(Prototype) == "undefined")
 //	This class provides some simple common routines used all over the place
 var Amslib = Class.create(
 {
-	//	NOTE: mainWidget should be removed because it was replaced by this.parent
-	mainWidget: 	false,
-	
 	parent:			false,
 	value:			false,
 	services:		false,
@@ -14,7 +11,7 @@ var Amslib = Class.create(
 	callback:		false,
 	images:			false,
 
-	initialize: function(parent)
+	initialize: function(parent,name)
 	{
 		//	Try first to just pass it through prototype, then if fails, use as a selector
 		this.parent = $(parent);
@@ -30,28 +27,25 @@ var Amslib = Class.create(
 				
 		this.readParameters();
 		this.setupDefaultObservers();
-		this.setupAmslib();
-		
-		//	NOTE: This should be eventually removed in favour of using parent all the time
-		//	NOTE: This is just for backwards compatibility when at one point, it was called mainWidget and not parent
-		this.mainWidget		=	this.parent;
+		this.setupAmslib(name || "amslib_controller"); // amslib_controller == status quo
 		
 		return this;
 	},
 	
 	setupDefaultObservers: function()
-	{
-		//	Do nothing, overload in your child class and put the default observers you want
+	{ 
+		//	NOTE: override this in your child class to set the default observers
+		//	NOTE: if you don't do this, they might not get called in any amslib_init_callback
 	},
 	
-	setupAmslib: function()
+	setupAmslib: function(name)
 	{
 		//	Setup the amslib_controller to make this object available on the node it was associated with
-		this.parent.store("amslib_controller",this);
+		this.parent.store(name,this);
 		
 		//	If there is an init callback, it means someone tried to execute something but the object
 		//	was not available yet, so this way we get to "pick up our messages" and act upon them
-		var initcb = this.parent.retrieve("amslib_init_callback");
+		var initcb = this.parent.retrieve(name+"_init_callback");
 		if(initcb) initcb(this);
 	},
 	
@@ -81,7 +75,7 @@ var Amslib = Class.create(
 	
 	getObserver: function(eventName)
 	{
-		var cb = this.callback.get(type);
+		var cb = this.callback.get(eventName);
 		
 		return (cb) ? cb : this.defaultObserver;
 	},
