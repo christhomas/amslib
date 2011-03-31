@@ -10,9 +10,11 @@ var Amslib = Class.create(
 	translation:	false,
 	callback:		false,
 	images:			false,
+	canDebug:		false,
 
 	initialize: function(parent,name)
 	{
+		//	NOTE: I am not sure this will work with every situation
 		//	Try first to just pass it through prototype, then if fails, use as a selector
 		this.parent = $(parent);
 		if(!this.parent) this.parent = $(document.body).down(parent);
@@ -77,11 +79,21 @@ var Amslib = Class.create(
 	{
 		var cb = this.callback.get(eventName);
 		
-		return (cb) ? cb : this.defaultObserver;
+		return (cb) ? cb : this.defaultObserver.bind(this);
 	},
 	
 	defaultObserver: function(){
-		if(console && console.log) console.log("DEFAULT CALLBACK CALLED");
+		this.debug("DEFAULT CALLBACK CALLED");
+	},
+	
+	debug: function(string)
+	{
+		if(this.canDebug && console && console.log) console.log(string);
+	},
+	
+	setDebug: function(state)
+	{
+		this.canDebug = state;
 	},
 	
 	//	DEPRECATED METHODS: leave them here for a while and then remove them
