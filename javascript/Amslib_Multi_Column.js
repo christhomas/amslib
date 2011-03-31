@@ -90,17 +90,20 @@ Amslib_Multi_Column = Class.create(Amslib,
 			var nextColumn = this.getNextColumn(column);
 			
 			if(nextColumn){
-				var list = column.childElements().partition(function(element){
+				var split = column.childElements().partition(function(element){
 					var l = new Element.Layout(element);
 					var t = l.get("top");
 					var h = l.get("height");
 					
 					return (t+h >= maxHeight) ? true : false;
-				}.bind(this)).first();
+				}.bind(this));
 				
-				list.reverse().each(function(element){
-					nextColumn.insert({top:element.remove()});
-				}.bind(this));	
+				//	Prevent a single element from being pushed to the next column infinitly
+				if(split.last().length){
+					split.first().reverse().each(function(element){
+						nextColumn.insert({top:element.remove()});
+					}.bind(this));
+				}
 			}else{
 				//	TODO:	I think the idea here was to store content which doesnt fit
 				//			into the last column in a variable which is kept in case we need it
