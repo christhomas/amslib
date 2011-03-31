@@ -47,6 +47,8 @@ Amslib_Multi_Column = Class.create(Amslib,
 	
 	resize: function()
 	{
+		this.callObserver("resize-start");
+		
 		this.disableResizeEvent();
 		
 		var maxLayout	=	this.container.getLayout();
@@ -55,14 +57,17 @@ Amslib_Multi_Column = Class.create(Amslib,
 		this.container.cleanWhitespace();
 		
 		var column = this.columns.first();
-		
-		do{
-			this.resizeColumn(column,maxHeight);
-		}while(column = column.retrieve("link_column"));
-		
-		this.deleteEmptyColumn();
+		if(column){
+			do{
+				this.resizeColumn(column,maxHeight);
+			}while(column = column.retrieve("link_column"));
+			
+			this.deleteEmptyColumn();
+		}
 		
 		this.enableResizeEvent();
+		
+		this.callObserver("resize-complete");
 	},
 	
 	getElementBottom: function(element)
@@ -100,6 +105,16 @@ Amslib_Multi_Column = Class.create(Amslib,
 				
 				//	Prevent a single element from being pushed to the next column infinitly
 				if(split.last().length){
+					/*	NOTE: 	we have a REALLY BIG performance issue here, if you need to 
+					 * 			split a column which has 1000 nodes in it, but only room for 
+					 * 			5 nodes (consider an equal height on all nodes), it'll 
+					 * 			shift 995->next, then 990->next, then 985->next, 
+					 * 			then 980->next, etc until it has finally reached no more 
+					 * 			nodes to shift across and because the system runs as a 
+					 * 			"linked list" of columns, it'll do 99500 node shifts in order 
+					 * 			to exhaust the nodes available, which is a staggering amount
+					 * 			(5000 nodes does a staggering 2,497,500 shifts)
+					 */
 					split.first().reverse().each(function(element){
 						nextColumn.insert({top:element.remove()});
 					}.bind(this));
@@ -139,6 +154,7 @@ Amslib_Multi_Column = Class.create(Amslib,
 			this.linkColumns();
 			
 			this.callObserver("change-columns");
+			this.setColumnNumber();
 		}
 	},
 	
@@ -157,15 +173,21 @@ Amslib_Multi_Column = Class.create(Amslib,
 			this.container.insert(next);
 			
 			this.callObserver("change-columns");
+			this.setColumnNumber();
 		}
 		
 		return next;
+	},
+	
+	setColumnNumber: function()
+	{
+		this.callObserver("number-columns",this.columns.length);
 	}
 });
 
 Amslib_Multi_Column.autoload = function()
 {
-	$$(".amslib_multi_column").each(function(m){
+	$$(".amslib_multi_column.amslib_autoload").each(function(m){
 		new Amslib_Multi_Column(m);
 	});
 }
