@@ -25,41 +25,4 @@
 	position: relative;
 	white-space: normal;
 	vertical-align: top;
-}
-
-.amslib_column_slider .button{
-	z-index: 2;
-}
-
-.amslib_column_slider .plus{
-	position: absolute;
-	right: 0;
-	bottom: 0;	
-}
-
-.amslib_column_slider .minus{
-	position: absolute;
-	left: 0;
-	bottom: 0;
-	display: none;
-}
-
-.amslib_column_slider .page_display{
-	position: absolute;
-	left: 0;
-	bottom: 0;
-	width: 100%;
-	height: 20px;
-	text-align: center;
-	font-size: 0.75em;	
-	z-index: 1
-}
-
-.amslib_column_slider .page_display *{
-	vertical-align: middle;
-}
-
-.amslib_column_slider .page_display .loading{
-	display: none;
-}
-	
+}	
