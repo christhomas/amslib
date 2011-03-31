@@ -28,28 +28,27 @@ var Amslib = Class.create(
 		this.images			=	new Hash();
 				
 		this.observe("default-observer",this.defaultObserver.bind(this));
+		
 		this.readParameters();
-		this.setupDefaultObservers();
-		this.setupAmslib(name || "amslib_controller"); // amslib_controller == status quo
+		this.runBefore();
+		
+		//	Setup the amslib_controller to make this object available on the node it was associated with
+		this.parent.store(name || "amslib_controller",this);
+		
+		//	If there is an init callback, it means someone tried to execute something but the object
+		//	was not available yet, so this way we get to "pick up our messages" and act upon them
+		Amslib.runInitCallback(this.parent,name,this);
 		
 		return this;
 	},
 	
-	setupDefaultObservers: function()
-	{ 
-		//	NOTE: override this in your child class to set the default observers
-		//	NOTE: if you don't do this, they might not get called in any amslib_init_callback
-	},
-	
-	setupAmslib: function(name)
+	runBefore: function()
 	{
-		//	Setup the amslib_controller to make this object available on the node it was associated with
-		this.parent.store(name,this);
+		//	NOTE:	Override this in your child class if you need something to happen BEFORE
+		//			The init callbacks are executed
 		
-		//	If there is an init callback, it means someone tried to execute something but the object
-		//	was not available yet, so this way we get to "pick up our messages" and act upon them
-		var initcb = this.parent.retrieve(name+"_init_callback");
-		if(initcb) initcb(this);
+		//	NOTE:	override this in your child class to set the default observers
+		//	NOTE:	if you don't do this, they might not get called in any amslib_init_callback
 	},
 	
 	getNode: function()
@@ -95,9 +94,7 @@ var Amslib = Class.create(
 		return (cb) ? cb : this.callback.get("default-observer");
 	},
 	
-	defaultObserver: function(){
-		this.debug("DEFAULT CALLBACK CALLED");
-	},
+	defaultObserver: function(){},
 	
 	debug: function(string)
 	{
@@ -148,3 +145,75 @@ var Amslib = Class.create(
 	setImage: function(name,value){			this.images.set(name,value);		},
 	getImage: function(name){				return this.images.get(name);		}
 });
+
+/*****************************************************************
+ * 	STATIC METHODS THAT DO GENERAL HOUSEKEEPING
+*****************************************************************/
+Amslib.setInitCallback = function(node,name,callback)
+{
+	var cb = node.retrieve(name+"_init_callback");
+	
+	if(!cb) cb = new Array();
+	
+	cb.push(callback);
+	
+	node.store(name+"_init_callback",cb);
+}
+
+Amslib.getInitCallback = function(node,name)
+{
+	return node.retrieve(name+"_init_callback");
+}
+
+Amslib.runInitCallback = function(node,name,context)
+{
+	var cb = Amslib.getInitCallback(node,name);
+	
+	if(cb) cb.each(function(callback){
+		callback(context);
+	});
+}
+
+/**
+ * This is a way to call a function (the callback) in the presence of
+ * two objects that must exist in order for the callback to be executable
+ * 
+ * This is normally used when you want to "tie" two objects together,
+ * but are not 100% sure both objects exist at the time you requested it
+ * 
+ * NOTE:	There is no way to cancel this once it's called, perhaps we should
+ * 			find a way to do that.
+ * 
+ * NOTE:	This method is quite expensive and should only really be used
+ * 			when you really have to connect two objects to collaborate 
+ * 			together, but really don't know when the other object will arrive
+ */
+Amslib.bindObjects = function(src,dst,callback)
+{
+	if(!src.node || !dst.node) return;
+	
+	src.object = src.node.retrieve(src.name);
+	dst.object = dst.node.retrieve(dst.name);
+	
+	if(src.object && dst.object){	
+		//	Both Source and Destination object exist, execute the handlers directly
+		callback(src,dst);
+	}else if(src.object){
+		//	Source object exists, but Destination object does not
+		Amslib.setInitCallback(dst.node,dst.name,function(context){
+			dst.object = context;
+			callback(src,dst); 
+		});
+	}else if(dst.object){	
+		//	Destination object exists, but Source object does not
+		Amslib.setInitCallback(src.node,src.name,function(context){
+			src.object = context;
+			callback(src,dst); 
+		});
+	}else{
+		//	both don't exist, but when one does exist, recall this method, cause now this can't happen again
+		Amslib.setInitCallback(src.node,src.name,function(){
+			Amslib.bindObjects(src,dst,callback);
+		});
+	}
+}
