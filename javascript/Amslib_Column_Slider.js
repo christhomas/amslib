@@ -31,12 +31,11 @@ Amslib_Column_Slider = new Class.create(Amslib,
 	 */
 	animate: function(event)
 	{
-		var width		=	this.slider.getDimensions().width / this.parent.select(".column").length;
-		var movement	=	width * (event.element() == this.buttonNext ? -1 : 1);
-		var newPos		=	this.slider.positionedOffset().left + movement;
+		var movement = this.columnWidth * (event.element() == this.buttonNext ? -1 : 1);
+		var position = this.slider.positionedOffset().left + movement;
 
-		if(this.correctPosition(newPos) === false){
-			this.updateButtons(newPos);
+		if(this.correctPosition(position) === false){
+			this.updateButtons(position);
 			
 			if(this.mutex) return;
 			this.mutex = true;
@@ -67,6 +66,10 @@ Amslib_Column_Slider = new Class.create(Amslib,
 		
 		if(left > this.minSlide)	corrected = this.minSlide;
 		if(left < this.maxSlide)	corrected = this.maxSlide;
+		
+		//	NOTE:	Special case if the maxSlide value is positive, it means the slider is 
+		//			less wide than the parent which means we have to just reset it's position to left:0
+		if(corrected !== false && this.maxSlide > 0) corrected = 0;
 		
 		return corrected;
 	},
