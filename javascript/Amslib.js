@@ -27,6 +27,7 @@ var Amslib = Class.create(
 		this.translation	=	new Hash();
 		this.images			=	new Hash();
 				
+		this.observe("default-observer",this.defaultObserver.bind(this));
 		this.readParameters();
 		this.setupDefaultObservers();
 		this.setupAmslib(name || "amslib_controller"); // amslib_controller == status quo
@@ -63,7 +64,13 @@ var Amslib = Class.create(
 	
 	observe: function(eventName,callback)
 	{
-		this.callback.set(eventName,callback);
+		var cb = this.callback.get(eventName);
+		
+		if(!cb) cb = new Array();
+		
+		cb.push(callback);
+		
+		this.callback.set(eventName,cb);
 	},
 	
 	callObserver: function(eventName)
@@ -72,14 +79,20 @@ var Amslib = Class.create(
 		
 		//	We slice off the first parameter because it's eventName and we 
 		//	dont want that passed along to the function
-		return (handle) ? handle.apply(handle,$A(arguments).slice(1)) : false;
+		if(handle){
+			var args = $A(arguments).slice(1);
+			
+			handle.each(function(h){
+				h.apply(h,args);
+			});
+		}
 	},
 	
 	getObserver: function(eventName)
 	{
 		var cb = this.callback.get(eventName);
 		
-		return (cb) ? cb : this.defaultObserver.bind(this);
+		return (cb) ? cb : this.callback.get("default-observer");
 	},
 	
 	defaultObserver: function(){
