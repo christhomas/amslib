@@ -79,9 +79,11 @@ Amslib_Column_Slider = new Class.create(Amslib,
 	{
 		var left = this.correctPosition();
 		
-		this.slider.setStyle({left: left+"px"});
+		if(left !== false) this.slider.setStyle({left: left+"px"});
 		
-		this.updateButtons(left);
+		var l = new Element.Layout(this.slider);
+
+		this.updateButtons(l.get("left"));
 	},
 	
 	/**
