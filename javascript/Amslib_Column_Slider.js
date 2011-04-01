@@ -17,7 +17,7 @@ Amslib_Column_Slider = new Class.create(Amslib,
 		if(!column) return;
 		
 		var layout			=	new Element.Layout(column);
-		this.columnWidth	=	layout.get("width") + layout.get("padding-right");
+		this.columnWidth	=	layout.get("margin-box-width");
 		
 		this.setColumnNumber();
 		
