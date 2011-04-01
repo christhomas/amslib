@@ -227,16 +227,36 @@ HAS_TABLE;
 
 		return $this->lastResult;
 	}
+	
+	public function query($query)
+	{
+		$this->seq++;
+		
+		if($this->getConnectionStatus() == false) return false;
+		
+		$this->setLastQuery($query);
+		$result = mysql_query($query,$this->connection);
+		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
+		
+		if(!$result){
+			$this->fatalError("Query failed<br/>command = '$query'");
+			return false;
+		}
+		
+		return $result;
+	}
 
 	public function select($query,$numResults=0,$optimise=false)
 	{
 		$this->seq++;
 
 		if($this->getConnectionStatus() == false) return false;
+		
+		$query = "select $query";
 
-		$this->setLastQuery("select $query");
-		$this->selectResult = mysql_query("select $query",$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = 'select $query'<br/></pre>");
+		$this->setLastQuery($query);
+		$this->selectResult = mysql_query($query,$this->connection);
+		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
 
 		if($this->selectResult){
 			$rowCount = mysql_num_rows($this->selectResult);
@@ -256,10 +276,12 @@ HAS_TABLE;
 		$this->seq++;
 
 		if($this->getConnectionStatus() == false) return false;
+		
+		$query = "insert into $query";
 
-		$this->setLastQuery("insert into $query");
-		$result = mysql_query("insert into $query",$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = 'insert into $query'<br/></pre>");
+		$this->setLastQuery($query);
+		$result = mysql_query($query,$this->connection);
+		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
 
 		$this->lastInsertId = mysql_insert_id($this->connection);
 		if($result && ($this->lastInsertId !== false)) return $this->lastInsertId;
@@ -276,10 +298,12 @@ HAS_TABLE;
 		$this->seq++;
 
 		if($this->getConnectionStatus() == false) return false;
+		
+		$query = "update $query";
 
-		$this->setLastQuery("update $query");
-		$result = mysql_query("update $query",$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = 'update $query'<br/></pre>");
+		$this->setLastQuery($query);
+		$result = mysql_query($query,$this->connection);
+		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
 
 		if($result) return mysql_affected_rows() >= 0;
 
@@ -293,10 +317,12 @@ HAS_TABLE;
 		$this->seq++;
 
 		if($this->getConnectionStatus() == false) return false;
+		
+		$query = "delete from $query";
 
-		$this->setLastQuery("delete from $query");
-		$result = mysql_query("delete from $query",$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = 'delete from $query'<br/></pre>");
+		$this->setLastQuery($query);
+		$result = mysql_query($query,$this->connection);
+		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
 
 		if($result) return mysql_affected_rows() >= 0;
 
