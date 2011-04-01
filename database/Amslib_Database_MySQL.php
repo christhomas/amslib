@@ -266,7 +266,7 @@ HAS_TABLE;
 			return $this->getResults($numResults,$this->selectResult,$optimise);
 		}
 
-		$this->fatalError("Transaction failed<br/>command = 'select'<br/>query = '$query'");
+		$this->fatalError("Transaction failed<br/>query = '$query'");
 
 		return false;
 	}
@@ -288,7 +288,7 @@ HAS_TABLE;
 
 		$this->lastInsertId = false;
 
-		$this->fatalError("Transaction failed<br/>command = 'insert into'<br/>query = '$query'<br/><pre>result = '".print_r($result,true)."'</pre>lastInsertId = '$this->lastInsertId'<br/>mysql_insert_id() = '".mysql_insert_id()."'");
+		$this->fatalError("Transaction failed<br/>query = '$query'<br/><pre>result = '".print_r($result,true)."'</pre>lastInsertId = '$this->lastInsertId'<br/>mysql_insert_id() = '".mysql_insert_id()."'");
 
 		return false;
 	}
@@ -307,7 +307,7 @@ HAS_TABLE;
 
 		if($result) return mysql_affected_rows() >= 0;
 
-		$this->fatalError("Transaction failed<br/>command = 'update'<br/>query = '$query'");
+		$this->fatalError("Transaction failed<br/>query = '$query'");
 
 		return false;
 	}
@@ -326,7 +326,7 @@ HAS_TABLE;
 
 		if($result) return mysql_affected_rows() >= 0;
 
-		$this->fatalError("Transaction failed<br/>command = 'delete from'<br/>query = '$query'");
+		$this->fatalError("Transaction failed<br/>query = '$query'");
 
 		return false;
 	}
