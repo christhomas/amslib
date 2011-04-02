@@ -167,6 +167,8 @@ class Amslib_Router3
 
 	//	DEPRECATED USE getParameter instead (so I can return one parameter, or all of them at once)
 	static public function getParameters(){ return self::getParameter(); }
+	//	DEPRECATED USE getURLOption instead (so I can return one parameter, or all of them at once)
+	static public function getURLOptions($index=NULL,$default=""){ return self::getURLOption($index,$default); }
 
 	static public function getParameter($name=NULL,$default="")
 	{
@@ -181,8 +183,8 @@ class Amslib_Router3
 	{
 		return in_array($name,self::$route["parameters"]) ? true : false;
 	}
-
-	static public function getURLOptions($index=NULL,$default="")
+	
+	static public function getURLOption($index=NULL,$default="")
 	{
 		if($default === "") $default = self::$route["options"];
 
