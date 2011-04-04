@@ -80,11 +80,14 @@ Amslib_Column_Slider = new Class.create(Amslib,
 		
 		var corrected = false;
 		
+		if(this.maxSlide > 0) this.maxSlide = 0;
+		
 		if(left > this.minSlide)	corrected = this.minSlide;
 		if(left < this.maxSlide)	corrected = this.maxSlide;
 		
 		//	NOTE:	Special case if the maxSlide value is positive, it means the slider is 
 		//			less wide than the parent which means we have to just reset it's position to left:0
+		//	NOTE:	I think this is now impossible to happen
 		if(corrected !== false && this.maxSlide > 0) corrected = 0;
 		
 		return corrected;
