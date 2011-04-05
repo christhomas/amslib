@@ -37,7 +37,7 @@ Amslib_Urlname = Class.create(
 
 Amslib_Urlname.autoload = function()
 {
-	$$(".amslib_urlname_parent.autoload").each(function(urlname){
+	$$(".amslib_urlname_parent.amslib_autoload").each(function(urlname){
 		var src = urlname.down(".amslib_urlname_src");
 		var dst = urlname.down(".amslib_urlname_dst");
 		
