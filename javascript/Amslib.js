@@ -94,6 +94,20 @@ var Amslib = Class.create(
 		return (cb) ? cb : this.callback.get("default-observer");
 	},
 	
+	connectObserver: function(node,prototypeObserver,amslibObserver)
+	{
+		node.observe(prototypeObserver,this.bindObserver(amslibObserver));
+	},
+	
+	bindObserver: function()
+	{
+		var args = $A(arguments);
+		
+		return function(){
+			this.callObserver.apply(this,args);
+		}.bind(this);
+	},
+	
 	defaultObserver: function(){},
 	
 	debug: function(string)
