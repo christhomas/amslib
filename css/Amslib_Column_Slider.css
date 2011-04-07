@@ -15,7 +15,7 @@
 .amslib_column_slider .slider{
 	position: absolute;
 	top: 0;
-	bottom: 30px;
+	bottom: 0;
 	white-space: nowrap;
 	overflow-y: hidden;
 }
