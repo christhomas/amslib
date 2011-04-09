@@ -1,5 +1,5 @@
-if(typeof(Prototype) == "undefined")
-	throw "Amslib requires Prototype to be loaded.";
+if(typeof(Amslib_Event) == "undefined")
+	throw "Amslib requires Amslib_Event to be loaded.";
 
 //	This class provides some simple common routines used all over the place
 var Amslib = Class.create(Amslib_Event,

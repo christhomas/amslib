@@ -1,5 +1,5 @@
 if(typeof(Prototype) == "undefined")
-	throw "Amslib requires Prototype to be loaded.";
+	throw "Amslib_Event requires Prototype to be loaded.";
 
 //	This class provides some basic event functions so you can trigger events programatically
 //	this also lets others tie into functionality so that when something happens, you can
