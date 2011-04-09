@@ -2,32 +2,30 @@ if(typeof(Prototype) == "undefined")
 	throw "Amslib requires Prototype to be loaded.";
 
 //	This class provides some simple common routines used all over the place
-var Amslib = Class.create(
+var Amslib = Class.create(Amslib_Event,
 {
 	parent:			false,
 	value:			false,
 	services:		false,
 	translation:	false,
-	callback:		false,
 	images:			false,
 	canDebug:		false,
 
-	initialize: function(parent,name)
+	initialize: function($super,parent,name)
 	{
+		$super();
+		
 		//	NOTE: I am not sure this will work with every situation
 		//	Try first to just pass it through prototype, then if fails, use as a selector
 		this.parent = $(parent);
 		if(!this.parent) this.parent = $(document.body).down(parent);
 		if(!this.parent) return false;
 
-		this.callback		=	new Hash();
 		this.value			=	new Hash();
 		this.services		=	new Hash();
 		this.callback		=	new Hash();
 		this.translation	=	new Hash();
 		this.images			=	new Hash();
-				
-		this.observe("default-observer",this.defaultObserver.bind(this));
 		
 		this.readParameters();
 		this.runBefore();
@@ -37,7 +35,7 @@ var Amslib = Class.create(
 		
 		//	If there is an init callback, it means someone tried to execute something but the object
 		//	was not available yet, so this way we get to "pick up our messages" and act upon them
-		Amslib.runInitCallback(this.parent,name,this);
+		Amslib_Event_Init.run(this.parent,name,this);
 		
 		return this;
 	},
@@ -60,55 +58,6 @@ var Amslib = Class.create(
 	{
 		return this.parent.identify();
 	},
-	
-	observe: function(eventName,callback)
-	{
-		var cb = this.callback.get(eventName);
-		
-		if(!cb) cb = new Array();
-		
-		cb.push(callback);
-		
-		this.callback.set(eventName,cb);
-	},
-	
-	callObserver: function(eventName)
-	{
-		var handle = this.getObserver(eventName);
-		
-		//	We slice off the first parameter because it's eventName and we 
-		//	dont want that passed along to the function
-		if(handle){
-			var args = $A(arguments).slice(1);
-			
-			handle.each(function(h){
-				h.apply(h,args);
-			});
-		}
-	},
-	
-	getObserver: function(eventName)
-	{
-		var cb = this.callback.get(eventName);
-		
-		return (cb) ? cb : this.callback.get("default-observer");
-	},
-	
-	connectObserver: function(node,prototypeObserver,amslibObserver)
-	{
-		node.observe(prototypeObserver,this.bindObserver(amslibObserver));
-	},
-	
-	bindObserver: function()
-	{
-		var args = $A(arguments);
-		
-		return function(){
-			this.callObserver.apply(this,args);
-		}.bind(this);
-	},
-	
-	defaultObserver: function(){},
 	
 	debug: function(string)
 	{
@@ -160,34 +109,6 @@ var Amslib = Class.create(
 	getImage: function(name){				return this.images.get(name);		}
 });
 
-/*****************************************************************
- * 	STATIC METHODS THAT DO GENERAL HOUSEKEEPING
-*****************************************************************/
-Amslib.setInitCallback = function(node,name,callback)
-{
-	var cb = node.retrieve(name+"_init_callback");
-	
-	if(!cb) cb = new Array();
-	
-	cb.push(callback);
-	
-	node.store(name+"_init_callback",cb);
-}
-
-Amslib.getInitCallback = function(node,name)
-{
-	return node.retrieve(name+"_init_callback");
-}
-
-Amslib.runInitCallback = function(node,name,context)
-{
-	var cb = Amslib.getInitCallback(node,name);
-	
-	if(cb) cb.each(function(callback){
-		callback(context);
-	});
-}
-
 /**
  * This is a way to call a function (the callback) in the presence of
  * two objects that must exist in order for the callback to be executable
@@ -214,19 +135,19 @@ Amslib.bindObjects = function(src,dst,callback)
 		callback(src,dst);
 	}else if(src.object){
 		//	Source object exists, but Destination object does not
-		Amslib.setInitCallback(dst.node,dst.name,function(context){
+		Amslib_Event_Init.set(dst.node,dst.name,function(context){
 			dst.object = context;
 			callback(src,dst); 
 		});
 	}else if(dst.object){	
 		//	Destination object exists, but Source object does not
-		Amslib.setInitCallback(src.node,src.name,function(context){
+		Amslib_Event_Init.set(src.node,src.name,function(context){
 			src.object = context;
 			callback(src,dst); 
 		});
 	}else{
 		//	both don't exist, but when one does exist, recall this method, cause now this can't happen again
-		Amslib.setInitCallback(src.node,src.name,function(){
+		Amslib_Event_Init.set(src.node,src.name,function(){
 			Amslib.bindObjects(src,dst,callback);
 		});
 	}
