@@ -1,6 +1,7 @@
 Amslib_Simple_Fader_Slideshow = Class.create(Amslib,
 {
-	images: false,
+	images:		false,
+	animator:	false,
 	
 	initialize: function($super,parent)
 	{
@@ -16,27 +17,40 @@ Amslib_Simple_Fader_Slideshow = Class.create(Amslib,
 		var active = this.parent.down("img.active");
 		if(!active) this.parent.down("img").addClassName("active");
 		
-		if(images.length > 1)
-		{
-			new PeriodicalExecuter(function(){
-				var active		=	this.parent.down("img.active");
-				var inactive	=	active.next("img");
-				
-				if(!inactive) inactive = this.parent.down("img");
-				
-				this.callObserver("start_change",inactive);
-				
-				inactive.appear({
-					afterFinish: function(){
-						inactive.addClassName("active");
-						active.removeClassName("active");
-						
-						this.callObserver("finish_change",inactive);
-					}.bind(this)
-				});
-				active.fade();
-			}.bind(this),timeout);
-		}
+		if(images.length > 1) this.start();
+	},
+	
+	start: function()
+	{
+		this.callObserver("start");
+		
+		this.animator = new PeriodicalExecuter(function(){
+			var active		=	this.parent.down("img.active");
+			var inactive	=	active.next("img");
+			
+			if(!inactive) inactive = this.parent.down("img");
+			
+			this.callObserver("fade-start",inactive);
+			
+			inactive.appear({
+				afterFinish: function(){
+					inactive.addClassName("active");
+					active.removeClassName("active");
+					
+					this.callObserver("fade-complete",inactive);
+				}.bind(this)
+			});
+			active.fade();
+		}.bind(this),timeout);
+	},
+	
+	stop: function()
+	{
+		this.callObserver("stop");
+		
+		if(this.animator) this.animator.stop();
+		
+		this.animator = false;
 	}
 });
 
