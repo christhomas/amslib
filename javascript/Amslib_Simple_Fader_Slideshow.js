@@ -1,23 +1,24 @@
 Amslib_Simple_Fader_Slideshow = Class.create(Amslib,
 {
 	images:		false,
+	timeout:	false,
 	animator:	false,
 	
 	initialize: function($super,parent)
 	{
 		$super(parent);
-		
-		var images	=	this.parent.select("img");
-		var timeout	=	this.parent.down("input['amslib_simple_fader_slideshow_timeout']");
+			
+		this.images		=	this.parent.select("img");
+		this.timeout	=	this.parent.down("input['amslib_simple_fader_slideshow_timeout']");
 
 		//	Default a missing timeout to 5 seconds
-		timeout = timeout ? timeout.value : 5;
+		this.timeout = this.timeout ? this.timeout.value : 5;
 		
 		//	Make sure one of the images is set to active, if not, set it to the first image
 		var active = this.parent.down("img.active");
 		if(!active) this.parent.down("img").addClassName("active");
 		
-		if(images.length > 1) this.start();
+		if(this.images.length > 1) this.start();
 	},
 	
 	start: function()
@@ -41,7 +42,7 @@ Amslib_Simple_Fader_Slideshow = Class.create(Amslib,
 				}.bind(this)
 			});
 			active.fade();
-		}.bind(this),timeout);
+		}.bind(this),this.timeout);
 	},
 	
 	stop: function()
