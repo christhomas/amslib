@@ -77,7 +77,7 @@ Amslib_Multi_Column = Class.create(Amslib,
 			var layout = new Element.Layout(element);
 			
 			if(layout){
-				return layout.get("top")+layout.get("height");
+				return layout.get("top")+layout.get("margin-box-height");
 			}
 		}
 		
@@ -98,7 +98,7 @@ Amslib_Multi_Column = Class.create(Amslib,
 				var split = column.childElements().partition(function(element){
 					var l = new Element.Layout(element);
 					var t = l.get("top");
-					var h = l.get("height");
+					var h = l.get("margin-box-height");
 					
 					return (t+h >= maxHeight) ? true : false;
 				}.bind(this));
@@ -131,7 +131,7 @@ Amslib_Multi_Column = Class.create(Amslib,
 				nextColumn.childElements().each(function(c){
 					var l = new Element.Layout(c);
 					var t = l.get("top");
-					var h = l.get("height");
+					var h = l.get("margin-box-height");
 					
 					if((bottom+t+h) < maxHeight){
 						column.insert(c.remove());
