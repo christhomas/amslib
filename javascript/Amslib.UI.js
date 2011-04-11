@@ -7,4 +7,4 @@ Amslib.UI = Class.create(Amslib,
 	initialize: function($super,parent){
 		return $super(parent);
 	}
-})
+});
