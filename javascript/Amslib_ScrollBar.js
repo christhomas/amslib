@@ -1,23 +1,22 @@
-if(typeof(Amslib) == "undefined" || typeof(Amslib.UI) == "undefined")
-	throw "Amslib.UI.ScrollBar requires Amslib.UI to be loaded.";
+if(typeof(Amslib) == "undefined")
+	throw "Amslib_ScrollBar requires Amslib to be loaded.";
 
-Amslib.UI.ScrollBar = Class.create(Amslib.UI,
+Amslib_ScrollBar = Class.create(Amslib,
 {
-	parent:		false,
+	container:	false,
 	content:	false,
 	handle:		false,
 	track:		false,
 	
 	initialize: function($super,content,handle){
-		$super();
+		$super(content);
 		
-		if(content) this.attach(content,handle);
+		this.attach(handle);
 	},
 	
-	attach: function(content,handle)
+	attach: function(handle)
 	{	
-		this.content = content;
-		this.content.addClassName(Amslib.UI.ScrollBar.config.css.content);
+		this.parent.addClassName(Amslib_ScrollBar.config.css.content);
 		
 		if(handle == undefined) this.createHandle();
 
@@ -46,7 +45,7 @@ Amslib.UI.ScrollBar = Class.create(Amslib.UI,
 	
 	reset: function(event)
 	{
-		if(this.content.getDimensions().height > this.parent.getDimensions().height){
+		if(this.parent.getDimensions().height > this.container.getDimensions().height){
 			this.show();
 		}else{
 			this.hide();
@@ -58,14 +57,14 @@ Amslib.UI.ScrollBar = Class.create(Amslib.UI,
 	
 	createHandle: function()
 	{
-		this.parent = this.content.up();
-		this.parent.addClassName(Amslib.UI.ScrollBar.config.css.parent);
+		this.container = this.parent.up();
+		this.container.addClassName(Amslib_ScrollBar.config.css.parent);
 		
-		this.track	=	new Element("div",{className:Amslib.UI.ScrollBar.config.css.track});
-		this.handle	=	new Element("div",{className:Amslib.UI.ScrollBar.config.css.handle});
+		this.track	=	new Element("div",{className:Amslib_ScrollBar.config.css.track});
+		this.handle	=	new Element("div",{className:Amslib_ScrollBar.config.css.handle});
 		
 		this.track.insert(this.handle);
-		this.parent.insert(this.track);
+		this.container.insert(this.track);
 	},
 	
 	startDrag: function(event)
@@ -92,7 +91,7 @@ Amslib.UI.ScrollBar = Class.create(Amslib.UI,
 		var x = Event.pointerX(event);
 		var y = Event.pointerY(event);
 		//	Calculate the position of the handle, restricted to the track area
-		var p = this.parent.cumulativeOffset();
+		var p = this.container.cumulativeOffset();
 		var h = this.handle.getDimensions().height;
 		// FIXME: the -2 calculating 'm' is hardcoded from the margin
 		var m = this.track.getDimensions().height - h - 2; 
@@ -112,9 +111,9 @@ Amslib.UI.ScrollBar = Class.create(Amslib.UI,
 	
 	updateContent: function()
 	{
-		var scrollHeight = this.content.getDimensions().height - this.parent.getDimensions().height;
+		var scrollHeight = this.parent.getDimensions().height - this.container.getDimensions().height;
 		
-		this.content.setStyle({top:-(scrollHeight*this.position)+"px"});
+		this.parent.setStyle({top:-(scrollHeight*this.position)+"px"});
 	},
 	
 	/**
@@ -140,11 +139,11 @@ Amslib.UI.ScrollBar = Class.create(Amslib.UI,
 	}
 });
 
-Amslib.UI.ScrollBar.config = {
+Amslib_ScrollBar.config = {
 	css: {
-		parent:		"amslib_ui_scrollbar_parent", 
-		content:	"amslib_ui_scrollbar_content",
-		track:		"amslib_ui_scrollbar_track",
-		handle:		"amslib_ui_scrollbar_handle"
+		parent:		"amslib_scrollbar_parent", 
+		content:	"amslib_scrollbar_content",
+		track:		"amslib_scrollbar_track",
+		handle:		"amslib_scrollbar_handle"
 	}
 }

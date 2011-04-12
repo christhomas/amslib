@@ -5,6 +5,8 @@ if(typeof(Amslib) == "undefined")
 Amslib.UI = Class.create(Amslib,
 {
 	initialize: function($super,parent){
-		return $super(parent);
+		$super(parent);
+				
+		return this;
 	}
 });

@@ -1,15 +1,15 @@
 @CHARSET "UTF-8";
 
-.amslib_ui_scrollbar_parent{
+.amslib_scrollbar_parent{
 	position: relative;
 	overflow: hidden !important;
 }
 
-.amslib_ui_scrollbar_parent .amslib_ui_scrollbar_content{
+.amslib_scrollbar_parent .amslib_scrollbar_content{
 	position: absolute;
 }
 
-.amslib_ui_scrollbar_parent .amslib_ui_scrollbar_track{
+.amslib_scrollbar_parent .amslib_scrollbar_track{
 	position: absolute;
 	right: 0;
 	top: 0;
@@ -18,7 +18,7 @@
 	height: 100%;
 }
 
-.amslib_ui_scrollbar_parent .amslib_ui_scrollbar_track .amslib_ui_scrollbar_handle{
+.amslib_scrollbar_parent .amslib_scrollbar_track .amslib_scrollbar_handle{
 	position: absolute;
 	top: 0;
 	width: 10px;
