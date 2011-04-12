@@ -1,3 +1,5 @@
+//	NOTE: This code is deprecated in favour of Amslib_Multi_Column
+
 Amslib_Auto_Column = Class.create(
 {
 	parent:		false,

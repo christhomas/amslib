@@ -1,42 +1,57 @@
 Amslib_Simple_Fader_Slideshow = Class.create(Amslib,
 {
-	images: false,
+	images:		false,
+	timeout:	false,
+	animator:	false,
 	
 	initialize: function($super,parent)
 	{
 		$super(parent);
-		
-		var images	=	this.parent.select("img");
-		var timeout	=	this.parent.down("input['amslib_simple_fader_slideshow_timeout']");
+			
+		this.images		=	this.parent.select("img");
+		this.timeout	=	this.parent.down("input['amslib_simple_fader_slideshow_timeout']");
 
 		//	Default a missing timeout to 5 seconds
-		timeout = timeout ? timeout.value : 5;
+		this.timeout = this.timeout ? this.timeout.value : 5;
 		
 		//	Make sure one of the images is set to active, if not, set it to the first image
 		var active = this.parent.down("img.active");
 		if(!active) this.parent.down("img").addClassName("active");
 		
-		if(images.length > 1)
-		{
-			new PeriodicalExecuter(function(){
-				var active		=	this.parent.down("img.active");
-				var inactive	=	active.next("img");
-				
-				if(!inactive) inactive = this.parent.down("img");
-				
-				this.callObserver("start_change",inactive);
-				
-				inactive.appear({
-					afterFinish: function(){
-						inactive.addClassName("active");
-						active.removeClassName("active");
-						
-						this.callObserver("finish_change",inactive);
-					}.bind(this)
-				});
-				active.fade();
-			}.bind(this),timeout);
-		}
+		if(this.images.length > 1) this.start();
+	},
+	
+	start: function()
+	{
+		this.callObserver("start");
+		
+		this.animator = new PeriodicalExecuter(function(){
+			var active		=	this.parent.down("img.active");
+			var inactive	=	active.next("img");
+			
+			if(!inactive) inactive = this.parent.down("img");
+			
+			this.callObserver("fade-start",inactive);
+			
+			inactive.appear({
+				afterFinish: function(){
+					inactive.addClassName("active");
+					active.removeClassName("active");
+					
+					this.callObserver("fade-complete",inactive);
+				}.bind(this)
+			});
+			active.fade();
+		}.bind(this),this.timeout);
+	},
+	
+	stop: function()
+	{
+		this.callObserver("stop");
+		
+		if(this.animator) this.animator.stop();
+		
+		this.animator = false;
 	}
 });
 

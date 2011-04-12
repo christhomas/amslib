@@ -1,0 +1,28 @@
+@CHARSET "UTF-8";
+
+.amslib_column_slider{
+	position: relative;
+	height: 100%;
+	left: 0;
+	top: 0;	
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+}
+.amslib_column_slider.one_col{	width: 250px;		}
+.amslib_column_slider.two_col{	width: 500px;		}
+
+.amslib_column_slider .slider{
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	white-space: nowrap;
+	overflow-y: hidden;
+}
+
+.amslib_column_slider .column{
+	display: inline-block;
+	position: relative;
+	white-space: normal;
+	vertical-align: top;
+}	
