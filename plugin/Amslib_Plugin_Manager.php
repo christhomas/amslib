@@ -148,7 +148,11 @@ class Amslib_Plugin_Manager
 		}
 
 		return false;
-
+	}
+	
+	static public function listPlugins()
+	{
+		return array_keys(self::$plugins);
 	}
 
 	/*******************************************************************
