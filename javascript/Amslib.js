@@ -133,3 +133,8 @@ var Amslib = Class.create(
 	setImage: function(name,value){			this.images.set(name,value);		},
 	getImage: function(name){				return this.images.get(name);		}
 });
+
+Amslib.firebug = function(string)
+{
+	if(console && console.log) console.log(string);
+}
