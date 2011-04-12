@@ -38,7 +38,7 @@
  *	TODO:
  *		-	Implement connection pooling
  */
-class Amslib_Database_MySQL extends Amslib_Database
+abstract class Amslib_Database_MySQL extends Amslib_Database
 {
 	protected function setEncoding($encoding)
 	{
@@ -335,15 +335,5 @@ HAS_TABLE;
 	{
 		return mysql_error();
 	}
-
-	//	NOTE: I think this method is a bad idea, so I'm commenting it out to see what happens
-	/*public function &getInstance($connect=true)
-	{
-		static $instance = NULL;
-
-		if($instance === NULL) $instance = new self($connect);
-
-		return $instance;
-	}*/
 }
 ?>

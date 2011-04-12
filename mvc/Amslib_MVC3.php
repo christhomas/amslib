@@ -51,6 +51,7 @@ class Amslib_MVC3
 
 	protected $name;
 	protected $location;
+	protected $plugin;
 
 	protected function getComponentPath($component,$name)
 	{
@@ -78,6 +79,7 @@ class Amslib_MVC3
 		$this->setComponent("view",			"views",		"Vi_");
 		$this->setComponent("object",		"objects",		"");
 		$this->setComponent("service",		"services",		"");
+		$this->setComponent("service2",		"services",		"Sv_");
 	}
 
 	public function setName($name)
@@ -118,6 +120,16 @@ class Amslib_MVC3
 	public function setRoute($name,$route)
 	{
 		$this->routes[$name] = $route;
+	}
+	
+	public function setPlugin($plugin)
+	{
+		$this->plugin = $plugin;
+	}
+	
+	public function getPlugin()
+	{
+		return $this->plugin;
 	}
 
 	public function getRoute($name=NULL)
@@ -238,6 +250,16 @@ class Amslib_MVC3
 		//	Set this as a service url for the javascript to acquire
 		$this->setValue("service:$id", $this->service[$id]);
 	}
+	
+	public function setService2($id,$name)
+	{
+		if(!$id || strlen($id) == 0) $id = $name;
+
+		$this->service[$id] = Amslib_Website::rel($this->getComponentPath("service2", $name));
+
+		//	Set this as a service url for the javascript to acquire
+		$this->setValue("service:$id", $this->service[$id]);
+	}
 
 	public function getService($id)
 	{
@@ -296,6 +318,28 @@ class Amslib_MVC3
 	public function removeJavascript($id)
 	{
 		Amslib_Resource_Compiler::removeJavascript($id);
+	}
+	
+	public function setGoogleFont($id,$file,$conditional=NULL,$autoload=NULL)
+	{
+		if(!is_string($id) && $file) return;
+		
+		$this->googleFont[$id] = array("file"=>$file,"conditional"=>$conditional);
+
+		if($autoload) $this->addGoogleFont($id);
+	}
+	
+	public function addGoogleFont($id)
+	{
+		if(isset($this->googleFont[$id])){
+			$f = $this->googleFont[$id];
+			Amslib_Resource_Compiler::addGoogleFont($id,$f["file"],$f["conditional"]);
+		}
+	}
+	
+	public function removeGoogleFont($id)
+	{
+		Amslib_Resource_Compiler::removeGoogleFont($id);
 	}
 
 	/**

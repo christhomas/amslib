@@ -1,4 +1,7 @@
-<?php 
+<?php
+/**
+ * This still hasn't been thought of properly yet and still needs a lot of work
+ */ 
 class Admin_MVC_Model extends Amslib_Database_MySQL
 {
 	static protected $connection	=	NULL;

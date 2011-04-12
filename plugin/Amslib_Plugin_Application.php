@@ -1,9 +1,38 @@
 <?php
+/*******************************************************************************
+ * Copyright (c) {15/03/2008} {Christopher Thomas}
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * file: Amslib_Plugin_Application.php
+ * title: Antimatter Plugin, Plugin Application object
+ * description: An object to handle a plugin, which is actually an application
+ * 				which represents a website, the application can have extra configuration
+ * 				options which a normal plugin doesn't have.  To setup the "website".
+ * 
+ * version: 1.0
+ *
+ * Contributors/Author:
+ *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *******************************************************************************/
+
 class Amslib_Plugin_Application extends Amslib_Plugin
 {
 	static protected $version;
+	static protected $translator;
+	
 	protected $path;
-	protected $translator;
 
 	protected function expandTemplates($string)
 	{
@@ -20,6 +49,13 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$node = $this->xpath->query($query);
 
 		return ($node && $node->length) ? $node->item(0)->nodeValue : $default;
+	}
+	
+	protected function readSingleNode($query,$default=NULL)
+	{
+		$node = $this->xpath->query($query);
+		
+		return ($node && $node->length) ? $node->item(0) : $default;
 	}
 
 	protected function findResource($plugin,$node)
@@ -40,61 +76,80 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	protected function setPaths()
 	{
-		$node = $this->xpath->query("//package/path");
-		if($node->length == 0) return;
-
-		$path = $node->item(0);
-
-		foreach($path->childNodes as $p)
+		$path = $this->readSingleNode("//package/path");
+		if($path)
 		{
-			$name	=	$p->nodeName;
-			$value	=	$this->expandTemplates($p->nodeValue);
-
-			//	Ignore this type of node
-			if($name[0] == "#") continue;
-
-			if($name == "include"){
-				Amslib::addIncludePath(Amslib_Filesystem::absolute($value));
-			}else{
-				$this->path[$name] = $value;
-				
-				if($name == "plugin"){
-					Amslib_Plugin_Manager::addLocation(Amslib_Filesystem::absolute($this->path["plugin"]));
+			foreach($path->childNodes as $p)
+			{
+				$name	=	$p->nodeName;
+				$value	=	$this->expandTemplates($p->nodeValue);
+	
+				//	Ignore this type of node
+				if($name[0] == "#") continue;
+	
+				if($name == "include"){
+					Amslib::addIncludePath(Amslib_Filesystem::absolute($value));
+				}else{
+					$this->path[$name] = $value;
+					
+					if($name == "plugin"){
+						Amslib_Plugin_Manager::addLocation(Amslib_Filesystem::absolute($this->path["plugin"]));
+					}
 				}
 			}
+	
+			//	Die with an error, all of these parameters must be a valid string
+			//	or the whole system doesnt work
+			//	NOTE:	Is this true? will the whole system fail without this info?
+			//	NOTE:	Perhaps I should gracefully fail with a nice error instead of dying horribly
+			//	NOTE:	I think if the system is the admin yes, but if it is the normal website no
+			if(	strlen($this->path["website"] != "__WEBSITE__") == 0 ||
+				strlen($this->path["admin"] != "__ADMIN__") == 0 ||
+				strlen($this->path["plugin"] != "__PLUGIN__") == 0){
+					print("<pre>");
+					var_dump($this->path);
+					print("</pre>");
+				}
 		}
-
-		//	Die with an error, all of these parameters must be a valid string
-		//	or the whole system doesnt work
-		//	NOTE:	Is this true? will the whole system fail without this info?
-		//	NOTE:	Perhaps I should gracefully fail with a nice error instead of dying horribly
-		//	NOTE:	I think if the system is the admin yes, but if it is the normal website no
-		if(	strlen($this->path["website"] != "__WEBSITE__") == 0 ||
-			strlen($this->path["admin"] != "__ADMIN__") == 0 ||
-			strlen($this->path["plugin"] != "__PLUGIN__") == 0){
-				print("<pre>");
-				var_dump($this->path);
-				print("</pre>");
-			}
 	}
 
 	protected function loadTranslators()
 	{
-		//	TODO:	how to configure the language xml section to obtain information
-		//			relevant to the requirements
+		$translators = $this->xpath->query("//package/translator");
+		
+		foreach($translators as $t){
+			if($t->childNodes->length){
+				$data = array();
+				
+				foreach($t->childNodes as $node){
+					if($node->nodeType == 3) continue;
+
+					if($node->nodeName == "language"){
+						$data[$node->nodeName][] = $node->nodeValue;
+					}else{
+						$data[$node->nodeName] = $node->nodeValue;	
+					}
+				}
+				
+				self::$translator[$data["name"]] = new Amslib_Translator2($data["type"]);
+				self::$translator[$data["name"]]->addLanguage($data["language"]);
+				self::$translator[$data["name"]]->setLocation($data["location"]);
+				
+				if(isset($data["router"])){
+					foreach($data["language"] as $langCode){
+						Amslib_Router_Language3::add($langCode,str_replace("_","-",$langCode));
+					}
+				}
+			}
+		}
 	}
 
-	protected function getTranslator($name)
-	{
-		//	TODO:	how to return the translators based on requirements
-	}
-	
 	protected function initialiseModel()
 	{
 		parent::initialiseModel();
 		
 		if(class_exists("Admin_Panel_Model",true)){
-			//	NOTE: You can't use the method getModel here, because the api object doesnt exist yet
+			//	NOTE: You can't use the method getModel() here, because the api object doesnt exist yet
 			Admin_Panel_Model::setConnection($this->model);
 		}
 	}
@@ -147,21 +202,57 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		Amslib_Router3::setSource($xml);
 		Amslib_Router3::execute();
+		
+		//	FIXME:	I am only applying the language code to the "content" translator
+		//			this is a hardcoded bug, because who says all the appropriate translators
+		//			will be called "content" ??
+		$langCode = Amslib_Router_Language3::getCode();
+		if($langCode) $this->setLanguage("content", $langCode);
+		
+		//	Take the name of the translator and set it's 
+		//	language to the current language setup in the system
+		foreach(self::$translator as $name=>$t){
+			$t->setLanguage($this->getLanguage($name));
+			$t->load();
+		}
 	}
 
+	//	TODO:	This method, combined with loadValues from 
+	//			Amslib_Plugin are in need for some SERIOUS refactoring
 	protected function configurePlugins()
 	{
 		$config = $this->xpath->query("//package/plugin");
 
-		foreach($config as $plugin){
-			$name = $plugin->getAttribute("name");
+		foreach($config as $block){
+			$name = $block->getAttribute("name");
 
 			if($name){
 				$api = Amslib_Plugin_Manager::getAPI($name);
 
 				if($api){
-					foreach($plugin->childNodes as $item){
-						$api->setValue($item->nodeName,$item->nodeValue);
+					if(!empty($block->childNodes)) foreach($block->childNodes as $item){
+						if($item->nodeName == "plugin_override"){
+							if(!empty($item->childNodes)) foreach($item->childNodes as $override){
+								if($override->nodeType == 3) continue;
+								$name = $override->getAttribute("name");
+								list($p,$v) = explode("/",$override->nodeValue);
+								
+								if($p) $p = Amslib_Plugin_Manager::getAPI($p);
+								
+								if($name && $p && $v){
+									switch($override->nodeName){
+										case "layout":{			$p->setLayout($name,$v);		}break;
+										case "view":{			$p->setView($name,$v);			}break;
+										case "service":{		$p->setService($name,$v);		}break;
+										case "object":{			$p->setObject($name,$v);		}break;
+										case "stylesheet":{		$p->setStylesheet($name,$v);	}break;
+										case "javascript":{		$p->setJavascript($name,$v);	}break;
+									}
+								}
+							}
+						}else{
+							$api->setValue($item->nodeName,$item->nodeValue);	
+						}
 					}
 				}
 			}
@@ -179,12 +270,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			"plugin"	=>	"__PLUGIN__",
 			"docroot"	=>	Amslib_Filesystem::documentRoot()
 		);
-
+		
 		$api = $this->load($name,$location);
 		Amslib_Plugin_Manager::import($name,$this);
 	}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 
@@ -216,6 +307,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->loadConfiguration();
 		$this->finalisePlugin();
 	}
+	
+	public function getPath($name)
+	{
+		return (isset($this->path[$name])) ? $this->path[$name] : false;
+	}
 
 	public function setModel($model)
 	{
@@ -229,16 +325,19 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
 	}
 
-	//	NOTE: I am sure this method is not supposed to be here
-	public function getAdminTranslator()
+	public static function getTranslator($name)
 	{
-		return $this->translator["admin"];
+		return isset(self::$translator[$name]) ? self::$translator[$name] : false;
 	}
-
-	//	NOTE: I am sure this method is not supposed to be here
-	public function getContentTranslator()
+	
+	public function setLanguage($name,$langCode)
 	{
-		return $this->translator["content"];
+		Amslib::insertSessionParam(get_class($this)."_".$name,$langCode);
+	}
+	
+	public function getLanguage($name)
+	{
+		return Amslib::sessionParam(get_class($this)."_".$name);
 	}
 
 	//	NOTE:	This method looks like it's out of date and needs
@@ -267,5 +366,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		}
 
 		return $activePlugin;
+	}
+	
+	public function render()
+	{
+		//	Request the website render itself now
+		print($this->api->render());
 	}
 }

@@ -74,6 +74,7 @@ class Amslib_Plugin
 		//	Setup the api with basic name and filesystem location
 		$api->setLocation($this->getLocation());
 		$api->setName($this->getName());
+		$api->setPlugin($this);
 
 		//	Assign the model to the plugin
 		$api->setModel($this->model);
@@ -106,8 +107,15 @@ class Amslib_Plugin
 					$model = Admin_Panel_Model::getModel($object);
 					if($model) $this->model = $model;
 				}
+				
+				//	ATTEMPT 2: Is it a plain, ordinary object that exists in the system?
+				if($this->model == false){
+					try{
+						$this->model = @call_user_func(array($object,"getInstance"));
+					}catch(Exception $e){}
+				}
 
-				//	ATTEMPT 2: Is the object the model from the current plugin
+				//	ATTEMPT 3: Is the object the model from the current plugin
 				if($this->model == false){
 					$file = "$this->location/objects/{$object}.php";
 
@@ -119,17 +127,11 @@ class Amslib_Plugin
 						}
 					}
 				}
-
-				//	ATTEMPT 3: Is it a plain, ordinary object that exists in the system?
-				if($this->model == false){
-					try{
-						$this->model = call_user_func(array($object,"getInstance"));
-					}catch(Exception $e){}
-				}
 			}
 		}
 	}
 
+	//	NOTE: why am I passing in the $plugin parameter here, then never using it??
 	protected function findResource($plugin,$node)
 	{
 		$resource = $node->nodeValue;
@@ -201,11 +203,13 @@ class Amslib_Plugin
 			}else{
 				$cond	=	$n->getAttribute("condition");
 				$auto	=	$n->getAttribute("autoload");
-				$item	=	$this->findResource($this->name,$n);
+				$item	=	($name == "google_font") ? $n->nodeValue : $this->findResource($this->name,$n);
 				$params	=	array($id,$item,$cond,$auto);
 			}
 
-			call_user_func_array(array($this->api,$callback),$params);
+			if(method_exists($this->api,$callback)){
+				call_user_func_array(array($this->api,$callback),$params);
+			}
 		}
 	}
 
@@ -221,9 +225,14 @@ class Amslib_Plugin
 		$this->processBlock("view",			"name",	"setView");
 		$this->processBlock("object",		"name",	"setObject");
 		$this->processBlock("service",		"file",	"setService");
+		$this->processBlock("service",		"name",	"setService2");
 		$this->processBlock("image",		"file",	"setImage");
 		$this->processBlock("javascript",	"file",	"setJavascript");
 		$this->processBlock("stylesheet",	"file",	"setStylesheet");
+		$this->processBlock("google_font",	"file",	"setGoogleFont");
+		
+		//	Now load all the plugin values
+		$this->loadValues();
 
 		$this->api->initialise();
 	}
@@ -237,6 +246,17 @@ class Amslib_Plugin
 
 	protected function initialisePlugin(){	/*	By default, do nothing	*/	}
 	protected function finalisePlugin(){	/*	By default, do nothing	*/	}
+	
+	public function loadValues()
+	{
+		$config = $this->xpath->query("//package/value");
+
+		foreach($config as $block){
+			foreach($block->childNodes as $item){
+				if($item->nodeType == 1) $this->api->setValue($item->nodeName,$item->nodeValue);
+			}
+		}
+	}
 
 	public function __construct($name=NULL,$location=NULL)
 	{
@@ -290,7 +310,7 @@ class Amslib_Plugin
 		$this->api->setModel($model);
 	}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 

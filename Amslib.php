@@ -17,7 +17,7 @@
  *
  * File: Amslib.php
  * Title: Amslib core utility object
- * Version: 3.2
+ * Version: 4.5
  * Project: Amslib (antimatter studios library)
  *
  * Contributors/Author:
@@ -27,9 +27,10 @@
 //	Amslib helper class
 class Amslib
 {
-	const VERSION = 3.2;
+	const VERSION = 4.5;
 
-	static protected $showErrorTrigger = false;
+	static protected $showErrorTrigger		=	false;
+	static protected $originalErrorHandler	=	false;
 
 	//	DEPRECATED: should use findPath instead, makes more sense
 	static protected function findFile($filename){ return self::findPath($filename); }
@@ -39,7 +40,8 @@ class Amslib
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
 
 		foreach($includePath as $path){
-			$test = (strpos($filename,"/") !== 0) ? "$path/$filename" : "{$path}{$filename}";
+			//	NOTE: Cannot use Amslib_Filesystem::reduceSlashes here, chicken/egg type problem
+			$test = preg_replace('#//+#','/',"$path/$filename");
 			if(@file_exists($test)) return $path;
 		}
 
@@ -57,6 +59,18 @@ class Amslib
 		ini_set("display_errors", "On");
 		error_reporting(E_ALL);
 		self::$showErrorTrigger = true;
+	}
+	
+	static public function setErrorHandler($handler)
+	{
+		self::$originalErrorHandler = set_error_handler($handler);
+	}
+	
+	static public function restoreErrorHandler()
+	{
+		if(self::$originalErrorHandler){
+			set_error_handler(self::$originalErrorHandler);
+		}
 	}
 
 	static public function lchop($str,$search)
@@ -125,7 +139,8 @@ class Amslib
 			if($path !== false && strlen($path)) $path = "$path/";
 		}
 
-		$file = "{$path}$file";
+		//	NOTE: Cannot use Amslib_Filesystem::reduceSlashes here, chicken/egg type problem
+		$file = preg_replace('#//+#','/',"{$path}$file");
 
 		if(is_file($file) && file_exists($file)){
 			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
@@ -147,7 +162,8 @@ class Amslib
 			if($path !== false && strlen($path)) $path = "$path/";
 		}
 
-		$file = "{$path}$file";
+		//	NOTE: Cannot use Amslib_Filesystem::reduceSlashes here, chicken/egg type problem
+		$file = preg_replace('#//+#','/',"{$path}$file");		
 
 		if(is_file($file) && file_exists($file)){
 			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
@@ -211,8 +227,13 @@ class Amslib
 				$class_name	=	"mvc/$class_name";
 			}
 			
+			//	Redirect to include the correct path for the File system classes
+			if(strpos($class_name,"Amslib_File") !== false){
+				$class_name	=	"file/$class_name";
+			}
+			
 			$filename = str_replace("//","/","$class_name.php");
-
+			
 			return Amslib::requireFile($filename);
 		}
 

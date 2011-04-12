@@ -100,6 +100,7 @@ class Amslib_Translator
 	}
 
 	//	TODO: This language has no concept of languages, so the parameter is not used
+	//	NOTE: WTF??? was I drunk when I wrote this???
 	public function forget($key,$language=NULL)
 	{
 		unset($this->keyStore[$key]);
@@ -111,7 +112,7 @@ class Amslib_Translator
 	//	TODO: missing in the memory interface
 	public function updateKey($old,$new,$deleteOld=true){}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 

@@ -75,6 +75,11 @@ class Amslib_Router3
 	{
 		self::$source = $source;
 	}
+	
+	static public function getSource()
+	{
+		return self::$source;
+	}
 
 	/**
 	 * method:	getObject
@@ -212,7 +217,7 @@ class Amslib_Router3
 		return $u;
 	}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 

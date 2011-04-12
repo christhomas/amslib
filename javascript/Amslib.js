@@ -79,7 +79,7 @@ var Amslib = Class.create(Amslib_Event,
 		
 		var parent = override || this.parent;
 		
-		parent.select(".widget_parameters input[type='hidden']").each(function(p){
+		var processBlock = function(p){
 			if(p.name.indexOf("service:") >= 0){
 				this.setService(p.name.replace("service:",""),p.value);
 			}else if(p.name.indexOf("translation:") >= 0){
@@ -89,7 +89,11 @@ var Amslib = Class.create(Amslib_Event,
 			}else{
 				this.setValue(p.name,p.value);
 			}
-		}.bind(this));
+		}.bind(this);
+
+		//	Should remove the widget parameters call, because it's out of date
+		parent.select(".widget_parameters input[type='hidden']").each(processBlock);		
+		parent.select(".plugin_parameters input[type='hidden']").each(processBlock);
 	},
 	
 	//	Getter/Setter for the object values

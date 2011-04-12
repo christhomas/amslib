@@ -77,16 +77,16 @@ class Amslib_Database
 	 * 	FIXME: The description of this member is incorrect
 	 */
 	protected $connection = false;
+	
+	protected function getDatabaseLogin()
+	{
+		die(get_class($this)."::getDatabaseLogin(), this method is required");
+	}
 
 	protected function setLastQuery($query)
 	{
 		$this->lastQuery[] = $query;
 		if(count($this->lastQuery) > 100) array_shift($this->lastQuery);
-	}
-
-	protected function getDatabaseLogin()
-	{
-		die(get_class($this)."::getDatabaseLogin() => Your database layer need to implement this method");
 	}
 
 	protected function getLastTransactionId()

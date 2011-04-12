@@ -139,7 +139,7 @@ class Amslib_Router2
 		return $this->activeRoute;
 	}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 
