@@ -115,6 +115,7 @@ class Amslib_Plugin_Manager
 	 * 	$api	-	An object which is to be used to override the default widget api
 	 *
 	 * example:
+	 * 		NOTE: This example is out of date and needs rewriting
 	 *		require_once("CustomApp_Amstudios_Message_Thread_List.php");
 	 *		class CustomApp_Amstudios_Message_Thread_List extends Amstudios_Message_Thread_List{}
 	 *		$api = CustomApp_Amstudios_Message_Thread_List::getInstance();

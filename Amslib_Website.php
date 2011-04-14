@@ -56,6 +56,7 @@ class Amslib_Website
 	}
 	
 	//	Return a relative url for the file to the website location
+	//	NOTE: what??? does this function even work correctly?
 	static public function web($file)
 	{
 		return Amslib_Filesystem::reduceSlashes("/".str_replace(self::$location,"",self::abs($file))."/");
