@@ -184,6 +184,13 @@ class Amslib_Plugin_Manager
 
 		return $api ? $api->getService($service) : false;
 	}
+	
+	static public function getServiceURL($plugin,$service)
+	{
+		$api = self::getAPI($plugin);
+
+		return $api ? $api->getServiceURL($service) : false;
+	}
 
 	static public function callService($plugin,$service)
 	{
