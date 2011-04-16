@@ -271,11 +271,16 @@ class Amslib_MVC3
 		}
 	}
 
-	public function getService($id,$url=false)
+	public function getServiceURL($id,$url=false)
 	{
 		if($url) return $this->getValue("service:$id");	
 		
 		return (isset($this->service[$id])) ? $this->service[$id] : NULL;
+	}
+	
+	public function getService($id)
+	{
+		return $this->getValue("service:$id");	
 	}
 
 	public function callService($id)
