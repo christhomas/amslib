@@ -44,7 +44,7 @@ class Amslib_Router_Source_XML2
 
 	protected function decodeOptions($url,$route)
 	{
-		$params = Amslib::lchop($url,$route);
+		$params = trim(Amslib::lchop($url,$route),"/");
 
 		return (!empty($params)) ? explode("/",$params) : array();
 	}
@@ -170,23 +170,14 @@ class Amslib_Router_Source_XML2
 	 */
 	public function addPath($path,&$routes=NULL)
 	{
-		$name = $path->getAttribute("name");
-
-		$this->routes[$name] = array(
+		$path = array(
+			"name"			=>	$this->getAttribute("name"),
 			"src"			=>	$this->decodeSources($path),
 			"resource"		=>	$this->decodeResource($path),
 			"parameters"	=>	$this->decodeParameters($path)
 		);
 
-		$this->addInversePath($name);
-
-		//	NOTE:	This is so the route can be captured and returned
-		//			We need to do this so plugins can know whether a route belongs to them
-		//			or someone else, this is needed because sometimes we need to identify
-		//			which route is active, based on the url open
-		if(is_array($routes)) $routes[$name] = $this->routes[$name];
-
-		return $this->routes[$name];
+		return $this->createPath($path,$routes);
 	}
 	
 	public function createPath($path,&$routes=NULL)
