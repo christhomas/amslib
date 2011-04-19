@@ -19,21 +19,56 @@
  * title: Antimatter Plugin: Core plugin object
  * description: An object to manage how a plugin it loaded through to
  * 				how the MVC object is created and configured
- * version: 1.0
+ * version: 1.4
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 class Amslib_Plugin
 {
+	//	NOTE:	The paths registered in the application which are ways to replace 
+	//			templated strings with their dynamically valid replacements
+	static protected $path;
+	
+	//	The XPATH object used to query the plugin package xml
 	protected $xpath;
+	
+	//	The name of the plugin
 	protected $name;
+	
+	//	The location of the plugin on the filesystem
 	protected $location;
+	
+	//	The packageXML file being processed
 	protected $packageXML;
+	
+	//	The API object created by the plugin
 	protected $api;
+	
+	//	The Model object for the plugin to access the database
 	protected $model;
+	
+	//	The routes configured for this plugin
 	protected $routes;
+	
+	//	The plugin dependencies for this plugin
+	//	The plugin dependencies for this plugin
 	protected $dependencies;
+	
+	static protected function setPath($name,$path)
+	{
+		self::$path[$name] = $path;
+	} 
+	
+	static public function expandPath($path)
+	{
+		$path	=	str_replace("__WEBSITE__",	self::$path["website"],	$path);
+		$path	=	str_replace("__ADMIN__",	self::$path["admin"],	$path);
+		$path	=	str_replace("__AMSLIB__",	self::$path["amslib"],	$path);
+		$path	=	str_replace("__DOCROOT__",	self::$path["docroot"],	$path);
+
+		return Amslib_File::reduceSlashes($path);
+	}
 
 	protected function createAPI()
 	{
@@ -141,14 +176,18 @@ class Amslib_Plugin
 
 		//	TEST 1: If the resource has an attribute "absolute" don't process it, return it directly
 		if($node->getAttribute("absolute")) return $resource;
-
-		//	TEST 2:	look in the package directory for the file
-		$path1 = Amslib_Filesystem::reduceSlashes("$this->location/$resource");
+		
+		//	TEST 2: Does the file exists relative to the document root?
+		$path1 = Amslib_File::documentRoot().$resource;
 		if(file_exists($path1)) return Amslib_Website::rel($path1);
 
-		//	TEST 3:	search the include path for the file
-		$path2 = Amslib_Filesystem::find($resource,true);
+		//	TEST 3:	look in the package directory for the file
+		$path2 = Amslib_File::reduceSlashes("$this->location/$resource");
 		if(file_exists($path2)) return Amslib_Website::rel($path2);
+
+		//	TEST 4:	search the include path for the file
+		$path3 = Amslib_File::find($resource,true);
+		if(file_exists($path3)) return Amslib_Website::rel($path3);
 
 		//	FAILED: you could not find the file
 		return false;
@@ -254,7 +293,7 @@ class Amslib_Plugin
 
 		foreach($config as $block){
 			$name	=	$block->getAttribute("name");
-			$api	=	($name == $this->name) ? $this->api : Amslib_Plugin_Manager::getAPI($name);
+			$api	=	($name) ? Amslib_Plugin_Manager::getAPI($name) : $this->api;
 
 			if(!$api || empty($block->childNodes)) return;
 			

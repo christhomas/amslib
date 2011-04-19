@@ -57,6 +57,7 @@ class Amslib_Website
 	
 	//	Return a relative url for the file to the website location
 	//	NOTE: what??? does this function even work correctly?
+	//	NOTE: I'm 99% sure this function doesn't do what it's supposed to do
 	static public function web($file)
 	{
 		return Amslib_Filesystem::reduceSlashes("/".str_replace(self::$location,"",self::abs($file))."/");
@@ -83,7 +84,7 @@ class Amslib_Website
 		if(is_string($location) && strlen($location)){
 			header("Location: $location");
 		}else{
-			$message = get_class($this)."::redirect-> The \$location parameter was an invalid string";
+			$message = __CLASS__."::redirect-> The \$location parameter was an invalid string: '$location'";
 		}
 
 		if($block) die($message);
