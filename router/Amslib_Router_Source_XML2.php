@@ -119,9 +119,9 @@ class Amslib_Router_Source_XML2
 	{
 		//	NOTE:	Added a call to absolute to fix finding the file, because in some cases,
 		//			the file cannot be found. But I am not sure of the side-effects (if any) of doing this
-		$source = Amslib_Filesystem::find(Amslib_Filesystem::absolute($source),true);
+		$path = Amslib_Filesystem::find(Amslib_Filesystem::absolute($source),true);
 
-		if(!file_exists($source)){
+		if(!file_exists($path)){
 			//	TODO: Should move to using Amslib_Keystore("error") instead
 			print("Amslib_Router_Source_XML2::load(), source = ".Amslib::var_dump($source,true));
 			die("Amslib_Router_Source_XML2::load(), source file does not exist");
@@ -130,7 +130,7 @@ class Amslib_Router_Source_XML2
 		$routes = array();
 
 		$document = new DOMDocument('1.0', 'UTF-8');
-		if($document->load($source)){
+		if($document->load($path)){
 			$this->xpath = new DOMXPath($document);
 
 			$paths = $this->xpath->query("//router/path | router/path");

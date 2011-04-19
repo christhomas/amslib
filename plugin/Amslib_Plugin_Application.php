@@ -31,18 +31,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 {
 	static protected $version;
 	static protected $translator;
-	
-	protected $path;
-
-	protected function expandTemplates($string)
-	{
-		$string =	str_replace("__WEBSITE__",	$this->path["website"],	$string);
-		$string =	str_replace("__ADMIN__",	$this->path["admin"],	$string);
-		$string	=	str_replace("__AMSLIB__",	$this->path["amslib"],	$string);
-		$string =	str_replace("__DOCROOT__",	$this->path["docroot"],	$string);
-
-		return str_replace("//","/",$string);
-	}
 
 	protected function readValue($query,$default=NULL)
 	{
@@ -60,12 +48,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	protected function findResource($plugin,$node)
 	{
-		$node->nodeValue = $this->expandTemplates($node->nodeValue);
+		$node->nodeValue = Amslib_Plugin::expandPath($node->nodeValue);
 
 		return parent::findResource($plugin,$node);
 	}
 
-	protected function setVersion()
+	protected function readVersion()
 	{
 		self::$version = array(
 			"date"		=>	$this->readValue("//package/version/date"),
@@ -74,7 +62,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		);
 	}
 
-	protected function setPaths()
+	protected function readPaths()
 	{
 		$path = $this->readSingleNode("//package/path");
 		if($path)
@@ -82,7 +70,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			foreach($path->childNodes as $p)
 			{
 				$name	=	$p->nodeName;
-				$value	=	$this->expandTemplates($p->nodeValue);
+				$value	=	Amslib_Plugin::expandPath($p->nodeValue);
 	
 				//	Ignore this type of node
 				if($name[0] == "#") continue;
@@ -90,26 +78,15 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				if($name == "include"){
 					Amslib::addIncludePath(Amslib_Filesystem::absolute($value));
 				}else{
-					$this->path[$name] = $value;
+					Amslib_Plugin::setPath($name,$value);
 					
 					if($name == "plugin"){
-						Amslib_Plugin_Manager::addLocation(Amslib_Filesystem::absolute($this->path["plugin"]));
+						Amslib_Plugin_Manager::addLocation(Amslib_Filesystem::absolute($value));
 					}
 				}
 			}
 	
-			//	Die with an error, all of these parameters must be a valid string
-			//	or the whole system doesnt work
-			//	NOTE:	Is this true? will the whole system fail without this info?
-			//	NOTE:	Perhaps I should gracefully fail with a nice error instead of dying horribly
-			//	NOTE:	I think if the system is the admin yes, but if it is the normal website no
-			if(	strlen($this->path["website"] != "__WEBSITE__") == 0 ||
-				strlen($this->path["admin"] != "__ADMIN__") == 0 ||
-				strlen($this->path["plugin"] != "__PLUGIN__") == 0){
-					print("<pre>");
-					var_dump($this->path);
-					print("</pre>");
-				}
+			//	NOTE: What should I do if a path is missing? this could cause a crash
 		}
 	}
 
@@ -154,9 +131,9 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	protected function initialisePlugin()
 	{
 		//	Set the version of the admin this panel is running
-		$this->setVersion();
+		$this->readVersion();
 		//	Set all the important paths for the admin to run
-		$this->setPaths();
+		$this->readPaths();
 		//	Load the content translators, which will provide all the page text translations
 		$this->loadTranslators();
 		//	Load the router (need to initialise the router first, but execute it after everything is loaded from the plugins)
@@ -190,7 +167,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	protected function executeRouter()
 	{
 		$source = $this->readValue("//package/router_source");
-		$source = $this->expandTemplates($source);
+		$source = Amslib_Plugin::expandPath($source);
 
 		//	Initialise and execute the router
 		//	TODO: As noted in initRouter, why are we hardcoding an XML source?
@@ -217,14 +194,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	public function __construct($name,$location)
 	{
 		parent::__construct();
-
-		$this->path = array(
-			"amslib"	=>	Amslib::locate(),
-			"website"	=>	"__WEBSITE__",
-			"admin"		=>	"__ADMIN__",
-			"plugin"	=>	"__PLUGIN__",
-			"docroot"	=>	Amslib_Filesystem::documentRoot()
-		);
+		
+		Amslib_Plugin::setPath("amslib",	Amslib::locate());
+		Amslib_Plugin::setPath("website",	"__WEBSITE__");
+		Amslib_Plugin::setPath("admin",		"__ADMIN__");
+		Amslib_Plugin::setPath("plugin",	"__PLUGIN__");
+		Amslib_Plugin::setPath("docroot",	Amslib_Filesystem::documentRoot());
 		
 		$api = $this->load($name,$location);
 		Amslib_Plugin_Manager::import($name,$this);
@@ -264,11 +239,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->finalisePlugin();
 	}
 	
-	public function getPath($name)
-	{
-		return (isset($this->path[$name])) ? $this->path[$name] : false;
-	}
-
 	public function setModel($model)
 	{
 		Amslib_Database::setSharedConnection($model);

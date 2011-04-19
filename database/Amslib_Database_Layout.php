@@ -16,7 +16,7 @@ class Amslib_Database_Layout
 	{
 		if($field == NULL) $field = $key;
 		
-		self::$field[$name][$key] = $field;	
+		self::$field[$name][$key] = $field;
 	}
 	
 	static public function getTableName($name)

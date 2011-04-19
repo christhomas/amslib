@@ -19,21 +19,56 @@
  * title: Antimatter Plugin: Core plugin object
  * description: An object to manage how a plugin it loaded through to
  * 				how the MVC object is created and configured
- * version: 1.0
+ * version: 1.4
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 class Amslib_Plugin
 {
+	//	NOTE:	The paths registered in the application which are ways to replace 
+	//			templated strings with their dynamically valid replacements
+	static protected $path;
+	
+	//	The XPATH object used to query the plugin package xml
 	protected $xpath;
+	
+	//	The name of the plugin
 	protected $name;
+	
+	//	The location of the plugin on the filesystem
 	protected $location;
+	
+	//	The packageXML file being processed
 	protected $packageXML;
+	
+	//	The API object created by the plugin
 	protected $api;
+	
+	//	The Model object for the plugin to access the database
 	protected $model;
+	
+	//	The routes configured for this plugin
 	protected $routes;
+	
+	//	The plugin dependencies for this plugin
+	//	The plugin dependencies for this plugin
 	protected $dependencies;
+	
+	static protected function setPath($name,$path)
+	{
+		self::$path[$name] = $path;
+	} 
+	
+	static public function expandPath($path)
+	{
+		$path	=	str_replace("__WEBSITE__",	self::$path["website"],	$path);
+		$path	=	str_replace("__ADMIN__",	self::$path["admin"],	$path);
+		$path	=	str_replace("__AMSLIB__",	self::$path["amslib"],	$path);
+		$path	=	str_replace("__DOCROOT__",	self::$path["docroot"],	$path);
+
+		return Amslib_File::reduceSlashes($path);
+	}
 
 	protected function createAPI()
 	{
