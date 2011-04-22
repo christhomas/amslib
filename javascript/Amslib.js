@@ -134,7 +134,7 @@ Amslib.firebug = function(string)
  */
 Amslib.bindObjects = function(src,dst,callback)
 {
-	if(!src.node || !dst.node) return;
+	if(!src || !src.node || !dst || !dst.node || !callback) return;
 	
 	src.object = src.node.retrieve(src.name);
 	dst.object = dst.node.retrieve(dst.name);
