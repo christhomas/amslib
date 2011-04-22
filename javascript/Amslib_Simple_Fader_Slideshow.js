@@ -6,7 +6,7 @@ Amslib_Simple_Fader_Slideshow = Class.create(Amslib,
 	
 	initialize: function($super,parent)
 	{
-		$super(parent);
+		$super(parent,"Amslib_Simple_Fader_Slideshow");
 			
 		this.images		=	this.parent.select("img");
 		this.timeout	=	this.parent.down("input['amslib_simple_fader_slideshow_timeout']");
