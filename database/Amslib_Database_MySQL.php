@@ -50,7 +50,7 @@ abstract class Amslib_Database_MySQL extends Amslib_Database
 		}else{
 			die(	"FATAL ERROR: Your encoding ($encoding) is wrong, this can cause database corruption. ".
 					"I can't allow you to continue<br/>".
-					"allowed encodings = <pre>".print_r($allowedEncodings,true)."</pre>");
+					"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>");
 		}
 	}
 
