@@ -56,6 +56,17 @@ class Amslib_Array
 
 		return $matches;
 	}
+	
+	static public function hasKeys($array,$keys)
+	{
+		if(!is_array($keys)) $keys = array($keys);
+		
+		foreach($keys as $k){
+			if(!isset($array[$k])) return false;
+		}
+		
+		return true;
+	}
 
 	//	NOTE: I am not sure of the consequences of defaulting key="" will break anything
 	static public function stripSlashesMulti($array,$key="")
