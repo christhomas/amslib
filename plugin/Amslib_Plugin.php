@@ -52,7 +52,6 @@ class Amslib_Plugin
 	protected $routes;
 	
 	//	The plugin dependencies for this plugin
-	//	The plugin dependencies for this plugin
 	protected $dependencies;
 	
 	static protected function setPath($name,$path)
@@ -317,6 +316,7 @@ class Amslib_Plugin
 							case "view":{			$api->setView($n,$p->getView($r),true);				}break;
 							case "service":{		$api->setService2($n,$p->getService($r,true),true);	}break;
 							case "object":{			$api->setObject($n,$p->getObject($r),true);			}break;
+							case "image":{			$api->setImage($n,$p->getImage($r),true);			}break;
 							case "stylesheet":{		$api->setStylesheet($n,$p->getStylesheet($r),true);	}break;
 							case "javascript":{		$api->setJavascript($n,$p->getJavascript($r),true);	}break;
 						}
