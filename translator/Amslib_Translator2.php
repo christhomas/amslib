@@ -72,7 +72,7 @@ class Amslib_Translator2 extends Amslib_Translator2_Source
 			$this->source->setLanguage($langCode);
 		}
 	}
-	
+
 	//	NOTE: Then after you've done your "thing" you can swap it back out.
 	//	NOTE: should change this method to use like a stack of plates
 	public function popLanguage()
@@ -82,7 +82,7 @@ class Amslib_Translator2 extends Amslib_Translator2_Source
 			$this->stackLanguage = false;
 		}
 	}
-	
+
 	/********************************************************************************
 	 *	TRANSLATOR METHODS
 	********************************************************************************/

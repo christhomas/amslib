@@ -70,7 +70,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 				foreach($node->childNodes as $n) $v .= $this->xdoc->saveXML($n);
 				$v = trim($v);
 
-				//	Now cache the value read from the xml
+				//	Now cache the value read from the xml	
 				if(strlen($v)) parent::learn($k,$v);
 				else $v = $k;
 			}

@@ -22,7 +22,7 @@ class Amslib_Translator2_Keystore extends Amslib_Translator2_Source
 		$this->permittedLanguage	=	array();
 	}
 	
-	//	Set location in the future could mean "set a default set of information"
+	//	Set location in the future could mean "set a default set of array information"
 	public function setLocation($location){}
 
 	//	The concept of "load" doesnt make sense for a keystore array
