@@ -15,7 +15,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: Amslib_Router_Source_XML2.php
+ * File: Amslib_Router_Source2_XML.php
  * Title: The XML router source reader, version 2.0 of the api/object
  * Version: 2.0
  * Project: Amslib/Router/Source
@@ -23,7 +23,7 @@
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
-class Amslib_Router_Source_XML2
+class Amslib_Router_Source2_XML
 {
 	protected $xpath;
 	protected $routes;
@@ -123,8 +123,8 @@ class Amslib_Router_Source_XML2
 
 		if(!file_exists($path)){
 			//	TODO: Should move to using Amslib_Keystore("error") instead
-			print("Amslib_Router_Source_XML2::load(), source = ".Amslib::var_dump($source,true));
-			die("Amslib_Router_Source_XML2::load(), source file does not exist");
+			print("Amslib_Router_Source2_XML::load(), source = ".Amslib::var_dump($source,true));
+			die("Amslib_Router_Source2_XML::load(), source file does not exist");
 		}
 
 		$routes = array();
@@ -138,7 +138,7 @@ class Amslib_Router_Source_XML2
 			foreach($paths as $p) $this->addPath($p,$routes);
 		}else{
 			//	TODO: Should move to using Amslib_Keystore("error") instead
-			print("Amslib_Router_Source_XML2::load(), '$source' FAILED TO OPEN<br/>");
+			print("Amslib_Router_Source2_XML::load(), '$source' FAILED TO OPEN<br/>");
 		}
 
 		return $routes;

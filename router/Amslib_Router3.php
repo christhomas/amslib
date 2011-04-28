@@ -93,7 +93,7 @@ class Amslib_Router3
 	{
 		switch($type){
 			case "source:xml":{
-				return Amslib_Router_Source_XML2::getInstance();
+				return Amslib_Router_Source2_XML::getInstance();
 			}break;
 
 			case "source:database":{
