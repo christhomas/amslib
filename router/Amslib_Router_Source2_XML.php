@@ -171,7 +171,7 @@ class Amslib_Router_Source2_XML
 	public function addPath($path,&$routes=NULL)
 	{
 		$path = array(
-			"name"			=>	$this->getAttribute("name"),
+			"name"			=>	$path->getAttribute("name"),
 			"src"			=>	$this->decodeSources($path),
 			"resource"		=>	$this->decodeResource($path),
 			"parameters"	=>	$this->decodeParameters($path)
