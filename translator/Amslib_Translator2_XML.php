@@ -1,6 +1,7 @@
 <?php 
 class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 {
+	protected $database;
 	protected $location;
 	protected $xpath;
 	protected $xdoc;
@@ -33,22 +34,22 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 	{	
 		if($this->language)
 		{
-			$database = Amslib_Website::abs("$this->location/{$this->language}.xml");
+			$this->database = Amslib_Website::abs("$this->location/{$this->language}.xml");
 			
-			if(!file_exists($database)) $database = Amslib_Filesystem::find($database,true);
+			if(!file_exists($this->database)) $this->database = Amslib_Filesystem::find($this->database,true);
 			
-			if(!file_exists($database)){
-				die(get_class($this)."::load(), LOCATION: '$this->location', DATABASE '$database' DOES NOT EXIST<br/>");
+			if(!file_exists($this->database)){
+				die(get_class($this)."::load(), LOCATION: '$this->location', DATABASE '$this->database' DOES NOT EXIST<br/>");
 			}
 			
 			$this->xdoc = new DOMDocument("1.0","UTF-8");
-			if($this->xdoc->load($database)){
+			if($this->xdoc->load($this->database)){
 				$this->xdoc->preserveWhiteSpace = false;
 				$this->xpath = new DOMXPath($this->xdoc);
-				
+	
 				return true;
 			}else{
-				die(get_class(this)."::load() LOCATION: '$this->location', DATABASE: '$database' FAILED TO OPEN<br/>");
+				die(get_class($this)."::load() LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
 			}
 		}
 		
