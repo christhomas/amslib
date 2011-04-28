@@ -215,7 +215,6 @@ class Amslib_Plugin
 		$this->loadRouter();
 		$this->initialiseModel();
 		$this->loadConfiguration();
-		$this->loadTranslators();
 		$this->configurePlugins();
 		$this->finalisePlugin();
 	}
@@ -273,7 +272,12 @@ class Amslib_Plugin
 		$this->processBlock("javascript",	"file",	"setJavascript");
 		$this->processBlock("stylesheet",	"file",	"setStylesheet");
 		$this->processBlock("google_font",	"file",	"setGoogleFont");
-
+		
+		//	It's needed to load translators before initialise is run
+		//	because any defaults that might be required in the plugin
+		//	might require translated text
+		$this->loadTranslators();
+		
 		$this->api->initialise();
 	}
 	
@@ -296,23 +300,38 @@ class Amslib_Plugin
 				}
 				
 				if(Amslib_Array::hasKeys($data,array("name","type","language","location"))){
-					//	Attempt to expand any special keys in the string
+					//	The location parameter could contain special keys which need to be expanded
+					//	The location parameter has a specific key called __CURRENT_PLUGIN__ which 
+					//		isn't available normally, so expand this one separately
 					$location = $data["location"];
 					if(strpos($location,"__CURRENT_PLUGIN__") !== false){
 						$location = str_replace("__CURRENT_PLUGIN__",$this->location,$location);
 					}
 					$location = Amslib_Plugin::expandPath($location);
 					
+					//	Obtain the language the system should use when printing text
+					$language = Amslib_Plugin_Application::getLanguage($data["name"]);
+					if(!$language) $language = reset($data["language"]);
+					
+					//	Create the language translator object and insert it into the api
 					$translator = new Amslib_Translator2($data["type"]);
 					$translator->addLanguage($data["language"]);
 					$translator->setLocation($location);
+					$translator->setLanguage($language);
+					$translator->load();
 					
 					$this->api->setTranslator($data["name"],$translator);			
 					
+					//	If there was a "router" parameter, insert all the languages into the router system
 					if(isset($data["router"])){
 						foreach($data["language"] as $langCode){
 							Amslib_Router_Language3::add($langCode,str_replace("_","-",$langCode));
 						}
+					}
+
+					//	Now register all the languages with the application
+					foreach($data["language"] as $langCode){
+						Amslib_Plugin_Application::registerLanguage($data["name"], $langCode);
 					}
 				}
 			}

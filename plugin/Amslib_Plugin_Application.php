@@ -30,6 +30,7 @@
 class Amslib_Plugin_Application extends Amslib_Plugin
 {
 	static protected $version;
+	static protected $registeredLanguages = array();
 
 	protected function readValue($query,$default=NULL)
 	{
@@ -68,11 +69,10 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		{
 			foreach($path->childNodes as $p)
 			{
+				if($p->nodeType != 1) continue;
+				
 				$name	=	$p->nodeName;
 				$value	=	Amslib_Plugin::expandPath($p->nodeValue);
-	
-				//	Ignore this type of node
-				if($name[0] == "#") continue;
 	
 				if($name == "include"){
 					Amslib::addIncludePath(Amslib_Filesystem::absolute($value));
@@ -115,6 +115,10 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		//	Load the required router library and execute it to setup everything it needs
 		$this->executeRouter();
+		
+		//	We need a valid language for the website, make sure it's valid
+		$langCode = self::getLanguage("website");
+		if(!$langCode) self::setLanguage("website",reset(self::getLanguageList("website")));
 
 		return true;
 	}
@@ -142,19 +146,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		Amslib_Router3::setSource($xml);
 		Amslib_Router3::execute();
-		
-		//	FIXME:	I am only applying the language code to the "content" translator
-		//			this is a hardcoded bug, because who says all the appropriate translators
-		//			will be called "content" ??
-		$langCode = Amslib_Router_Language3::getCode();
-		if($langCode) $this->setLanguage("content", $langCode);
-		
-		//	Take the name of the translator and set it's 
-		//	language to the current language setup in the system
-		if(!empty(self::$translator)) foreach(self::$translator as $name=>$t){
-			$t->setLanguage($this->getLanguage($name));
-			$t->load();
-		}
 	}
 
 	public function __construct($name,$location)
@@ -217,14 +208,26 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
 	}
 	
-	public function setLanguage($name,$langCode)
+	static public function setLanguage($name,$langCode)
 	{
-		Amslib::insertSessionParam(get_class($this)."_".$name,$langCode);
+		Amslib::insertSessionParam("language_code_{$name}",$langCode);
 	}
 	
-	public function getLanguage($name)
+	static public function getLanguage($name)
 	{
-		return Amslib::sessionParam(get_class($this)."_".$name);
+		return Amslib::sessionParam("language_code_{$name}");
+	}
+	
+	static public function registerLanguage($name,$langCode)
+	{
+		self::$registeredLanguages[$name][$langCode] = true;
+	}
+	
+	static public function getLanguageList($name)
+	{
+		return isset(self::$registeredLanguages[$name]) 
+					? array_keys(self::$registeredLanguages[$name]) 
+					: array();
 	}
 
 	//	NOTE:	This method looks like it's out of date and needs
