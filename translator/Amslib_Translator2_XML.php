@@ -43,7 +43,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 			}
 			
 			$this->xdoc = new DOMDocument("1.0","UTF-8");
-			if($this->xdoc->load($this->database)){
+			if(@$this->xdoc->load($this->database)){
 				$this->xdoc->preserveWhiteSpace = false;
 				$this->xpath = new DOMXPath($this->xdoc);
 	
