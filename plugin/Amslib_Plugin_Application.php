@@ -30,7 +30,6 @@
 class Amslib_Plugin_Application extends Amslib_Plugin
 {
 	static protected $version;
-	static protected $translator;
 
 	protected function readValue($query,$default=NULL)
 	{
@@ -90,37 +89,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		}
 	}
 
-	protected function loadTranslators()
-	{
-		$translators = $this->xpath->query("//package/translator");
-		
-		foreach($translators as $t){
-			if($t->childNodes->length){
-				$data = array();
-				
-				foreach($t->childNodes as $node){
-					if($node->nodeType == 3) continue;
-
-					if($node->nodeName == "language"){
-						$data[$node->nodeName][] = $node->nodeValue;
-					}else{
-						$data[$node->nodeName] = $node->nodeValue;	
-					}
-				}
-				
-				self::$translator[$data["name"]] = new Amslib_Translator2($data["type"]);
-				self::$translator[$data["name"]]->addLanguage($data["language"]);
-				self::$translator[$data["name"]]->setLocation($data["location"]);
-				
-				if(isset($data["router"])){
-					foreach($data["language"] as $langCode){
-						Amslib_Router_Language3::add($langCode,str_replace("_","-",$langCode));
-					}
-				}
-			}
-		}
-	}
-
 	protected function initialiseModel()
 	{
 		parent::initialiseModel();
@@ -134,8 +102,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->readVersion();
 		//	Set all the important paths for the admin to run
 		$this->readPaths();
-		//	Load the content translators, which will provide all the page text translations
-		$this->loadTranslators();
 		//	Load the router (need to initialise the router first, but execute it after everything is loaded from the plugins)
 		$this->initRouter();
 
@@ -249,11 +215,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	static public function getVersion($element=NULL)
 	{
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
-	}
-
-	public static function getTranslator($name)
-	{
-		return isset(self::$translator[$name]) ? self::$translator[$name] : false;
 	}
 	
 	public function setLanguage($name,$langCode)

@@ -34,6 +34,7 @@ class Amslib_MVC3
 	protected $service;
 	protected $stylesheet;
 	protected $javascript;
+	protected $translator;
 
 	//	The model object to allow access to the application logic
 	protected $model;
@@ -67,6 +68,7 @@ class Amslib_MVC3
 		$this->service		=	array();
 		$this->stylesheet	=	array();
 		$this->javascript	=	array();
+		$this->translator	=	array();
 
 		$this->value		=	array();
 		$this->viewParams	=	array();
@@ -231,7 +233,12 @@ class Amslib_MVC3
 		{
 			if(!empty($parameters)) $this->setViewParam($parameters);
 
-			$parameters["api"] = $this;
+			//	TODO: what happens if api, _w and _c are already defined and you just overwrote them?
+			//	NOTE: this shouldn't happen, they are special so nobody should use them
+			//	NOTE: perhaps we can warn people when they do this? or perhaps move our keys to a more unique "namespace"
+			$parameters["api"]	=	$this;
+			$parameters["_w"]	=	$this->getTranslator("website");
+			$parameters["_c"]	=	$this->getTranslator("content");
 
 			ob_start();
 			Amslib::requireFile($this->view[$id],$parameters);
@@ -281,6 +288,16 @@ class Amslib_MVC3
 	public function getServiceURL($id)
 	{
 		return $this->getValue("service:$id");
+	}
+	
+	public function setTranslator($name,$translator)
+	{
+		$this->translator[$name] = $translator;
+	}
+	
+	public function getTranslator($name)
+	{
+		return (isset($this->translator[$name])) ? $this->translator[$name] : reset($this->translator);
 	}
 
 	public function callService($id)
@@ -453,9 +470,15 @@ class Amslib_MVC3
 	{
 		if(is_string($id) && isset($this->layout[$id])){
 			//	TODO: Not sure whether I need to do this with rendering layouts as well as views
+			//	NOTE: not 100% sure why I removed this, need to document it's reasoning if I remember
 			//if(!empty($parameters)) $this->setViewParam($parameters);
 
-			$parameters["api"] = $this;
+			//	TODO: what happens if api, _w and _c are already defined and you just overwrote them?
+			//	NOTE: this shouldn't happen, they are special so nobody should use them
+			//	NOTE: perhaps we can warn people when they do this? or perhaps move our keys to a more unique "namespace"
+			$parameters["api"]	=	$this;
+			$parameters["_w"]	=	$this->getTranslator("website");
+			$parameters["_c"]	=	$this->getTranslator("content");
 
 			ob_start();
 			Amslib::requireFile($this->layout[$id],$parameters);

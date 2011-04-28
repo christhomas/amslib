@@ -215,6 +215,7 @@ class Amslib_Plugin
 		$this->loadRouter();
 		$this->initialiseModel();
 		$this->loadConfiguration();
+		$this->loadTranslators();
 		$this->configurePlugins();
 		$this->finalisePlugin();
 	}
@@ -274,6 +275,48 @@ class Amslib_Plugin
 		$this->processBlock("google_font",	"file",	"setGoogleFont");
 
 		$this->api->initialise();
+	}
+	
+	protected function loadTranslators()
+	{
+		$nodes = $this->xpath->query("//package/translator");
+		
+		foreach($nodes as $t){
+			if($t->childNodes->length){
+				$data = array();
+				
+				foreach($t->childNodes as $node){
+					if($node->nodeType == 3) continue;
+
+					if($node->nodeName == "language"){
+						$data[$node->nodeName][] = $node->nodeValue;
+					}else{
+						$data[$node->nodeName] = $node->nodeValue;
+					}
+				}
+				
+				if(Amslib_Array::hasKeys($data,array("name","type","language","location"))){
+					//	Attempt to expand any special keys in the string
+					$location = $data["location"];
+					if(strpos($location,"__CURRENT_PLUGIN__") !== false){
+						$location = str_replace("__CURRENT_PLUGIN__",$this->location,$location);
+					}
+					$location = Amslib_Plugin::expandPath($location);
+					
+					$translator = new Amslib_Translator2($data["type"]);
+					$translator->addLanguage($data["language"]);
+					$translator->setLocation($location);
+					
+					$this->api->setTranslator($data["name"],$translator);			
+					
+					if(isset($data["router"])){
+						foreach($data["language"] as $langCode){
+							Amslib_Router_Language3::add($langCode,str_replace("_","-",$langCode));
+						}
+					}
+				}
+			}
+		}
 	}
 
 	protected function loadRouter()
