@@ -228,6 +228,6 @@ class Amslib_Router3
 	
 	static public function dump()
 	{
-		return array("path"=>self::$path,"routes"=>self::$route);
+		return array("path"=>self::$path,"routes"=>self::$route,"source"=>self::$source->dump());
 	}
 }

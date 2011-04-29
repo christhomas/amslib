@@ -265,6 +265,11 @@ class Amslib_Router_Source2_XML
 
 		return $route;
 	}
+	
+	public function dump()
+	{
+		return array("routes"=>$this->routes,"url"=>$this->url);
+	}
 
 	static public function &getInstance($source=NULL)
 	{
