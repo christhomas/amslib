@@ -65,7 +65,7 @@ class Amslib_Router3
 		self::$path		=	NULL;
 
 		if($router_path){
-			self::$path = str_replace(self::$location,"",$router_path);
+			self::$path = Amslib::lchop($router_path,self::$location);
 			self::$path = Amslib_Filesystem::reduceSlashes("/".self::$path."/");
 		}
 
