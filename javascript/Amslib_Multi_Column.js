@@ -41,7 +41,9 @@ Amslib_Multi_Column = Class.create(Amslib,
 		for(a=0;a<this.columns.length;a++){
 			var next = (a<this.columns.length-1) ? this.columns[a+1] : false;
 
-			this.columns[a].store("link_column",next);
+			if(this.columns[a] != next){
+				this.columns[a].store("link_column",next);
+			}
 		}
 	},
 	
@@ -104,7 +106,7 @@ Amslib_Multi_Column = Class.create(Amslib,
 				}.bind(this));
 				
 				//	Prevent a single element from being pushed to the next column infinitly
-				if(split.last().length){
+				if(split.first().length && split.last().length){
 					/*	NOTE: 	we have a REALLY BIG performance issue here, if you need to 
 					 * 			split a column which has 1000 nodes in it, but only room for 
 					 * 			5 nodes (consider an equal height on all nodes), it'll 
@@ -127,6 +129,10 @@ Amslib_Multi_Column = Class.create(Amslib,
 			nextColumn = column;
 			//	pull elements from the next column into this column
 			while(nextColumn = nextColumn.retrieve("link_column")){
+				//	Here we use this to detect infinite loops (IE has a problem here)
+				if(column == nextColumn) break;
+				column = nextColumn;
+				
 				//	loop through all the elements in the next column, seeing whether you can pull them or not
 				nextColumn.childElements().each(function(c){
 					var l = new Element.Layout(c);
@@ -162,18 +168,20 @@ Amslib_Multi_Column = Class.create(Amslib,
 	{
 		var next = prev.retrieve("link_column");
 		
-		if(!next){
-			next = prev.cloneNode(false);
+		if(!next || prev == next){
+			next = prev.clone(false);
 			//	We need to clear "id" attributes so they don't clash
 			next.id = "";
 			next.store("link_column",false);
 			prev.store("link_column",next);
 			
-			this.columns.push(next);
-			this.container.insert(next);
-			
-			this.callObserver("change-columns");
-			this.setColumnNumber();
+			if(next != next.retrieve("link_column")){
+				this.columns.push(next);
+				this.container.insert(next);
+				
+				this.callObserver("change-columns");
+				this.setColumnNumber();
+			}
 		}
 		
 		return next;
