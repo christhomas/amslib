@@ -75,9 +75,9 @@ class Amslib
 
 	static public function lchop($str,$search)
 	{
-		return ($p = strpos($str,$search)) !== false ? 
-			substr($str,$p+strlen($search)) : 
-			$str;
+		$p = (strlen($search)) ? strpos($str,$search) : false;
+		
+		return ($p) !== false ? substr($str,$p+strlen($search)) : $str;
 	}
 
 	static public function rchop($str,$search)
