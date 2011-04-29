@@ -61,6 +61,8 @@ Amslib_Column_Slider = new Class.create(Amslib,
 	
 	setColumnNumber: function()
 	{
+		if(!this.slider) return;
+		
 		this.columnNumber = this.slider
 								.select(".column")
 								.invoke("positionedOffset")
@@ -75,6 +77,8 @@ Amslib_Column_Slider = new Class.create(Amslib,
 	 */
 	correctPosition: function(newLeft)
 	{
+		if(!this.slider) return;
+		
 		var left		=	newLeft || this.slider.positionedOffset().left;
 		this.maxSlide	=	-(this.slider.getDimensions().width - this.parent.getDimensions().width);
 		
