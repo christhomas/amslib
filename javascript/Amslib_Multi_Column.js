@@ -128,11 +128,8 @@ Amslib_Multi_Column = Class.create(Amslib,
 		}else{
 			nextColumn = column;
 			//	pull elements from the next column into this column
-			while(nextColumn = nextColumn.retrieve("link_column")){
-				//	Here we use this to detect infinite loops (IE has a problem here)
-				if(column == nextColumn) break;
-				column = nextColumn;
-				
+			while(nextColumn = nextColumn.retrieve("link_column"))
+			{	
 				//	loop through all the elements in the next column, seeing whether you can pull them or not
 				nextColumn.childElements().each(function(c){
 					var l = new Element.Layout(c);
