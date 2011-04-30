@@ -121,7 +121,6 @@ class Amslib_Array
 	static public function glob($location,$relative=false)
 	{
 		$items = glob(Amslib_Website::abs($location));
-		Amslib_FirePHP::output("items",$items);
 		
 		if($relative){
 			foreach($items as &$i){
