@@ -138,7 +138,7 @@ class Amslib_Router_Source2_XML
 			foreach($paths as $p) $this->addPath($p,$routes);
 		}else{
 			//	TODO: Should move to using Amslib_Keystore("error") instead
-			print("Amslib_Router_Source2_XML::load(), '$source' FAILED TO OPEN<br/>");
+			print("Amslib_Router_Source2_XML::load(), source[$source], path[$path] FAILED TO OPEN<br/>");
 		}
 
 		return $routes;
