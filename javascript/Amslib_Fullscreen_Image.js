@@ -24,7 +24,7 @@ Amslib_Fullscreen_Image = Class.create(Amslib,
 			dimensions		=	this.parent.getDimensions();
 			this.imageRatio	=	dimensions.width / dimensions.height;
 		}
-	}
+	},
 	
 	resize: function() {
 		var dContainer	=	this.container.getDimensions();
@@ -38,12 +38,12 @@ Amslib_Fullscreen_Image = Class.create(Amslib,
 });
 
 Amslib_Fullscreen_Image.autoload = function(){
-	$$(".amslib_fullscreen_image.amslib_autoload").each(function(image))
+	$$(".amslib_fullscreen_image.amslib_autoload").each(function(image)
 	{
 		var container = image.up(".amslib_fullscreen_image_container") || $(document.body);
 		
 		new Amslib_Fullscreen_Image(image,container);
-	}
+	});
 }
 
 Event.observe(window,"load",Amslib_Fullscreen_Image.autoload);
