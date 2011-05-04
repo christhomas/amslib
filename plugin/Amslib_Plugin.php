@@ -355,9 +355,9 @@ class Amslib_Plugin
 		foreach($config as $block){
 			$name	=	$block->getAttribute("name");
 			$api	=	($name) ? Amslib_Plugin_Manager::getAPI($name) : $this->api;
-
-			if(!$api || empty($block->childNodes)) return;
 			
+			if(!$api || empty($block->childNodes)) continue;
+
 			foreach($block->childNodes as $item){
 				if($item->nodeType == 3) continue;
 
