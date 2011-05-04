@@ -192,7 +192,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->loadDependencies();
 		$this->loadRouter();
 		$this->loadConfiguration();
-		$this->configurePlugins();
 		$this->finalisePlugin();
 	}
 	
