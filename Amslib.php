@@ -154,6 +154,8 @@ class Amslib
 
 	static public function requireFile($file,$data=array())
 	{
+		if(!is_string($file)) return false;	
+		
 		$path = "";
 
 		if(!file_exists($file)){
