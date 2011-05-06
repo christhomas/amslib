@@ -115,8 +115,6 @@ class Amslib_Validator
 		$this->__setRequiredRules(false);
 
 		$this->register("text",				array("Amslib_Validator","__text"));
-		//	Sometimes people mistake text<->string so make string an alias of text
-		$this->register("string",			array("Amslib_Validator","__text"));
 		$this->register("alpha",			array("Amslib_Validator","__alpha"));
 		$this->register("alpha_relaxed",	array("Amslib_Validator","__alpha_relaxed"));
 		$this->register("password",			array("Amslib_Validator","__password"));
@@ -135,10 +133,35 @@ class Amslib_Validator
 		$this->register("nif",				array("Amslib_Validator","__nif"));
 		$this->register("nie",				array("Amslib_Validator","__nie"));
 		
-		//	Register some popular mispellings which keep cropping up to make life easier
+		//	Register some popular alternative spellings which keep cropping up to make life easier
 		$this->register("string",			array("Amslib_Validator","__text"));
 		$this->register("numeric",			array("Amslib_Validator","__number"));
-		$this->register("alpha-relaxed",	array("Amslib_Validator","__alpha_relaxed"));		
+		$this->register("alpha-relaxed",	array("Amslib_Validator","__alpha_relaxed"));
+
+		//	Custom validation methods which do things we all want, but don't 
+		//	conform to obvious rules like "number", "text", "date", etc
+		$this->register("require_one",		array("Amslib_Validator","__require_one"));
+	}
+	
+	//	NOTE: we ignore the name, it's not used here
+	function __require_one($name,$value,$required,$options)
+	{
+		unset($options["vobject"]);
+		
+		$dest = array_pop($options);
+		
+		$valid = $this->getValidData();
+		$keys = array_keys($valid);
+		
+		foreach($options as $o){
+			if(in_array($o,$keys)){
+				$this->setValid($dest,$valid[$o]);
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 	
 	function __array($name,$value,$required,$options)
