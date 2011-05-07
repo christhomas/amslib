@@ -151,6 +151,7 @@ class Amslib_Validator
 		$dest = array_pop($options);
 		
 		$valid = $this->getValidData();
+
 		$keys = array_keys($valid);
 		
 		foreach($options as $o){
@@ -213,19 +214,33 @@ class Amslib_Validator
 	 */
 	function __text($name,$value,$required,$options)
 	{
-		$len = strlen($value);
+		$len = strlen(trim($value));
+		
+		$error = false;
 
-		if($len == 0 && $required == true) return "VALIDATOR_TEXT_LENGTH_ZERO";
-		if(isset($options["minlength"]) && $len < $options["minlength"]) return "VALIDATOR_TEXT_LENGTH_IS_BELOW_MINIMUM";
-		if(isset($options["maxlength"]) && $len > $options["maxlength"]) return "VALIDATOR_TEXT_LENGTH_IS_ABOVE_MAXIMUM";
-		if(isset($options["limit-input"])){
-			if(!in_array($value,$options["limit-input"])) return "VALIDATOR_TEXT_CANNOT_MATCH_AGAINST_LIMIT";
+		if($len == 0 && !isset($options["permit-empty"])){
+			$error = "VALIDATOR_TEXT_LENGTH_ZERO";
 		}
-		if(isset($options["invalid"])){
-			if(in_array($value,$options["invalid"])) return "VALIDATOR_TEXT_INVALID_INPUT";
+		
+		if(isset($options["minlength"]) && $len < $options["minlength"]){
+			$error = "VALIDATOR_TEXT_LENGTH_IS_BELOW_MINIMUM";
+		}
+		
+		if(isset($options["maxlength"]) && $len > $options["maxlength"]){
+			$error = "VALIDATOR_TEXT_LENGTH_IS_ABOVE_MAXIMUM";
+		}
+		
+		if(isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
+			$error = "VALIDATOR_TEXT_CANNOT_MATCH_AGAINST_LIMIT";
+		}
+		
+		if(isset($options["invalid"]) && in_array($value,$options["invalid"])){
+			$error = "VALIDATOR_TEXT_INVALID_INPUT";
 		}
 
-		$this->setValid($name,$value);
+		if($required == true && $error !== false) return $error;
+		
+		if($error === false) $this->setValid($name,$value);
 
 		return true;
 	}
