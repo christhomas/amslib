@@ -59,6 +59,8 @@ class Amslib_Array
 	
 	static public function hasKeys($array,$keys)
 	{
+		if(!is_array($array)) return false;
+		
 		if(!is_array($keys)) $keys = array($keys);
 		
 		foreach($keys as $k){
