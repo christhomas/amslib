@@ -93,7 +93,9 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		parent::initialiseModel();
 		
-		Amslib_Database::setSharedConnection($this->model);
+		if($this->model){
+			Amslib_Database::setSharedConnection($this->model);
+		}
 	}
 
 	protected function initialisePlugin()
