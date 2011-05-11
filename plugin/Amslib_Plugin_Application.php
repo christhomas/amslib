@@ -158,7 +158,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		Amslib_Plugin::setPath("plugin",	"__PLUGIN__");
 		Amslib_Plugin::setPath("docroot",	Amslib_Filesystem::documentRoot());
 		
-		$api = $this->load($name,$location);
+		$this->load($name,$location);
 		Amslib_Plugin_Manager::import($name,$this);
 	}
 
