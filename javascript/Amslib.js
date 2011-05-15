@@ -4,6 +4,7 @@ if(typeof(Amslib_Event) == "undefined")
 //	This class provides some simple common routines used all over the place
 var Amslib = Class.create(Amslib_Event,
 {
+	__objectName:	false,
 	parent:			false,
 	value:			false,
 	services:		false,
@@ -21,6 +22,7 @@ var Amslib = Class.create(Amslib_Event,
 		if(!this.parent) this.parent = $(document.body).down(parent);
 		if(!this.parent) return false;
 
+		this.__objectName	=	name || "amslib_controller";
 		this.value			=	new Hash();
 		this.services		=	new Hash();
 		this.callback		=	new Hash();
@@ -31,11 +33,11 @@ var Amslib = Class.create(Amslib_Event,
 		this.runBefore();
 		
 		//	Setup the amslib_controller to make this object available on the node it was associated with
-		this.parent.store(name || "amslib_controller",this);
+		this.parent.store(this.__objectName,this);
 		
 		//	If there is an init callback, it means someone tried to execute something but the object
 		//	was not available yet, so this way we get to "pick up our messages" and act upon them
-		Amslib_Event_Init.run(this.parent,name,this);
+		Amslib_Event_Init.run(this.parent,this.__objectName,this);
 		
 		return this;
 	},
@@ -48,6 +50,11 @@ var Amslib = Class.create(Amslib_Event,
 		//	NOTE:	override this in your child class to set the default observers
 		//	NOTE:	if you don't do this, they might not get called in any amslib_init_callback
 	},
+	
+	getInstanceName: function()
+	{
+		return this.__objectName;
+	}
 	
 	getNode: function()
 	{
@@ -69,10 +76,6 @@ var Amslib = Class.create(Amslib_Event,
 		this.canDebug = state;
 	},
 	
-	//	DEPRECATED METHODS: leave them here for a while and then remove them
-	setCallback: function(type,callback){	this.observe(type,callback);	},
-	getCallback: function(type){			return this.getObserver(type);	},
-
 	readParameters: function(override)
 	{
 		if(!this.parent) return false;
