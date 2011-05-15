@@ -54,7 +54,7 @@ var Amslib = Class.create(Amslib_Event,
 	getInstanceName: function()
 	{
 		return this.__objectName;
-	}
+	},
 	
 	getNode: function()
 	{
