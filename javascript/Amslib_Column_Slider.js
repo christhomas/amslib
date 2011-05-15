@@ -39,6 +39,20 @@ Amslib_Column_Slider = new Class.create(Amslib,
 		this.slideToPx(position,-this.columnWidth);
 	},
 	
+	slideToColumn: function(column)
+	{
+		var column = this.slider.select(".column").slice(column,column+1);
+		
+		
+	},
+	
+	/*	FIXME:	The parameters here left,offset made sense when I wrote this code, but now I'm looking
+	 * 			at it, I can't figure out why I called them left,offset, so I need to clean this up
+	 * 			to give them better understandability when I'm looking 2 weeks later at what I've done.
+	*/
+	
+	//	NOTE: I think left means: the position you want, finally
+	//	NOTE: I think offset means, the offset from your current position to the position you want
 	slideToPx: function(left,offset)
 	{
 		if(this.correctPosition(left) === false){
@@ -59,13 +73,17 @@ Amslib_Column_Slider = new Class.create(Amslib,
 		}
 	},
 	
+	getColumnNumber: function()
+	{
+		return this.slider.select(".column")
+							.invoke("positionedOffset")
+							.pluck("left")
+							.indexOf(-this.slider.positionedOffset().left) + 1;
+	},
+	
 	setColumnNumber: function()
 	{
-		this.columnNumber = this.slider
-								.select(".column")
-								.invoke("positionedOffset")
-								.pluck("left")
-								.indexOf(-this.slider.positionedOffset().left) + 1;
+		this.columnNumber = this.getColumnNumber();
 
 		this.callObserver("get-column-number",this.columnNumber);
 	},
@@ -114,6 +132,36 @@ Amslib_Column_Slider.autoload = function()
 	$$(".amslib_column_slider.amslib_autoload").each(function(b){
 		new Amslib_Column_Slider(b);
 	});
+}
+
+/**
+ * A specialised method to bind a column slider to a multi column object
+ * 
+ * It basically reduces all this code to a one-liner and connects two objects which
+ * are normally associated with each other, but I dont want to keep duplicating this code
+ * everywhere.
+ */
+Amslib_Column_Slider.bindMultiColumn = function(columnObject,multiColumnClassTag,multiColumnName)
+{
+	if(!columnObject) return false;
+	
+	//	If the multi column object changes the number of columns, tell the column slider object
+	var changeColumns = function(src,dst)
+	{
+		src.object.observe("change-columns",dst.object.updatePosition.bind(dst.object));
+	}
+	
+	multiColumnClassTag	=	multiColumnClassTag || ".amslib_multi_column";
+	multiColumnName		=	multiColumnName || "Amslib_Multi_Column";
+	
+	var dstNode = columnObject.getNode();
+	var srcNode = dstNode.down(multiColumnClassTag);
+
+	Amslib.bindObjects(	{name: multiColumnName,					node: srcNode},
+						{name: columnObject.getInstanceName(),	node: dstNode},
+						changeColumns);
+	
+	return true;
 }
 
 Event.observe(window,"load",Amslib_Column_Slider.autoload);
