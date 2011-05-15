@@ -18,7 +18,7 @@ var Amslib = Class.create(Amslib_Event,
 		
 		//	NOTE: I am not sure this will work with every situation
 		//	Try first to just pass it through prototype, then if fails, use as a selector
-		this.parent = $(parent);
+		this.parent = $(parent);// test this in the future -> || $(document.body).down(parent) || false;
 		if(!this.parent) this.parent = $(document.body).down(parent);
 		if(!this.parent) return false;
 
