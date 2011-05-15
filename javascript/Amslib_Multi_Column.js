@@ -122,6 +122,7 @@ Amslib_Multi_Column = Class.create(Amslib,
 			}else{
 				//	TODO:	I think the idea here was to store content which doesnt fit
 				//			into the last column in a variable which is kept in case we need it
+				//	NOTE:	At the moment, we just keep creating new columns without limits
 			}
 		}else{
 			nextColumn = column;
@@ -166,6 +167,7 @@ Amslib_Multi_Column = Class.create(Amslib,
 			next = prev.cloneNode(false);
 			//	We need to clear "id" attributes so they don't clash
 			next.id = "";
+			next.removeClassName("parent").addClassName("child");
 			next.store("link_column",false);
 			prev.store("link_column",next);
 			
