@@ -2,23 +2,39 @@ Amslib_Fullscreen_Image = Class.create(Amslib,
 {
 	container:	false,
 	imageRatio:	false,
+	resizeNode:	false,
 	
 	initialize: function($super,image,container){
 		$super(image,"Amslib_Fullscreen_Image");
 		
-		this.container	=	container;
+		this.container = container || image.up(Amslib_Fullscreen_Image.css.container) || $(document.body);
 		
 		this.observe("change-image",this.changeImage.bind(this));
 		this.changeImage(this.parent);
 		
-		Event.observe(document.onresize ? document : window, "resize",this.resize.bind(this));
+		this.enable();
+	},
+	
+	enable: function()
+	{
+		if(!this.resizeNode) this.resizeNode = document.onresize ? document : window;
+		Event.observe(this.resizeNode, "resize",this.resize.bind(this));
 		
 		this.resize();
+		
+		return this;
+	},
+	
+	disable: function()
+	{
+		Event.stopObserving(this.resizeNode,"resize");
+		
+		return this;
 	},
 	
 	changeImage: function(parent)
 	{
-		if(parent && parent.nodeType && parent.nodeType == "IMG"){
+		if(parent && parent.nodeType && parent.nodeName == "IMG"){
 			this.parent		=	parent;
 			
 			dimensions		=	this.parent.getDimensions();
@@ -30,19 +46,27 @@ Amslib_Fullscreen_Image = Class.create(Amslib,
 		var dContainer	=	this.container.getDimensions();
 		var rContainer	=	dContainer.width / dContainer.height;
 		
-		this.parent.removeClassName("horizontal").removeClassName("vertical");
+		this.parent
+				.removeClassName(Amslib_Fullscreen_Image.css.horizontal)
+				.removeClassName(Amslib_Fullscreen_Image.css.vertical);
 		
-		if(rContainer > this.imageRatio) this.parent.addClassName("horizontal");
-		else this.parent.addClassName("vertical");
+		var c = (rContainer > this.imageRatio) ? Amslib_Fullscreen_Image.css.horizontal : Amslib_Fullscreen_Image.css.vertical;
+		
+		this.parent.addClassName(c);
 	}
 });
 
+Amslib_Fullscreen_Image.css = {
+	autoload:	".amslib_fullscreen_image.amslib_autoload",
+	container:	".amslib_fullscreen_image_container",
+	vertical:	"vertical",
+	horizontal:	"horizontal",
+}
+
 Amslib_Fullscreen_Image.autoload = function(){
-	$$(".amslib_fullscreen_image.amslib_autoload").each(function(image)
+	$$(Amslib_Fullscreen_Image.css.autoload).each(function(image)
 	{
-		var container = image.up(".amslib_fullscreen_image_container") || $(document.body);
-		
-		new Amslib_Fullscreen_Image(image,container);
+		new Amslib_Fullscreen_Image(image);
 	});
 }
 
