@@ -72,8 +72,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 				$v = trim($v);
 
 				//	Now cache the value read from the xml	
-				if(strlen($v)) parent::learn($k,$v);
-				else $v = $k;
+				parent::learn($k,$v);
 			}
 		}
 		
