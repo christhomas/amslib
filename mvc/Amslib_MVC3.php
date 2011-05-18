@@ -310,11 +310,11 @@ class Amslib_MVC3
 		return Amslib::requireFile($service,$parameters);
 	}
 
-	public function setStylesheet($id,$file,$conditional=NULL,$autoload=NULL)
+	public function setStylesheet($id,$file,$conditional=NULL,$autoload=NULL,$media=NULL)
 	{
 		if(!is_string($id) && $file) return;
 		
-		$this->stylesheet[$id] = array("file"=>$file,"conditional"=>$conditional);
+		$this->stylesheet[$id] = array("file"=>$file,"conditional"=>$conditional,"media"=>$media);
 
 		if($autoload) $this->addStylesheet($id);
 	}
@@ -323,7 +323,7 @@ class Amslib_MVC3
 	{
 		if(isset($this->stylesheet[$id])){
 			$s = $this->stylesheet[$id];
-			Amslib_Resource_Compiler::addStylesheet($id,$s["file"],$s["conditional"]);
+			Amslib_Resource_Compiler::addStylesheet($id,$s["file"],$s["conditional"],$s["media"]);
 		}
 	}
 
