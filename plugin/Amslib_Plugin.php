@@ -176,17 +176,20 @@ class Amslib_Plugin
 		//	TEST 1: If the resource has an attribute "absolute" don't process it, return it directly
 		if($node->getAttribute("absolute")) return $resource;
 		
-		//	TEST 2: Does the file exists relative to the document root?
+		//	TEST 2: Test whether the file "exists" without any assistance
+		if(file_exists(Amslib::rchop($resource,"?"))) return Amslib_Website::rel($resource);
+		
+		//	TEST 3: Does the file exists relative to the document root?
 		$path1 = Amslib_File::documentRoot().$resource;
-		if(file_exists($path1)) return Amslib_Website::rel($path1);
+		if(file_exists(Amslib::rchop($path1,"?"))) return Amslib_Website::rel($path1);
 
-		//	TEST 3:	look in the package directory for the file
+		//	TEST 4:	look in the package directory for the file
 		$path2 = Amslib_File::reduceSlashes("$this->location/$resource");
-		if(file_exists($path2)) return Amslib_Website::rel($path2);
+		if(file_exists(Amslib::rchop($path2,"?"))) return Amslib_Website::rel($path2);
 
-		//	TEST 4:	search the include path for the file
+		//	TEST 5:	search the include path for the file
 		$path3 = Amslib_File::find($resource,true);
-		if(file_exists($path3)) return Amslib_Website::rel($path3);
+		if(file_exists(Amslib::rchop($path3,"?"))) return Amslib_Website::rel($path3);
 
 		//	FAILED: you could not find the file
 		return false;
@@ -245,8 +248,9 @@ class Amslib_Plugin
 			}else{
 				$cond	=	$n->getAttribute("condition");
 				$auto	=	$n->getAttribute("autoload");
+				$media	=	$n->getAttribute("media");
 				$item	=	($name == "google_font") ? $n->nodeValue : $this->findResource($this->name,$n);
-				$params	=	array($id,$item,$cond,$auto);
+				$params	=	array($id,$item,$cond,$auto,$media);
 			}
 
 			if(method_exists($this->api,$callback)){
