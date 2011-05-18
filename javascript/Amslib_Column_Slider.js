@@ -114,6 +114,6 @@ Amslib_Column_Slider.autoload = function()
 	$$(".amslib_column_slider.amslib_autoload").each(function(b){
 		new Amslib_Column_Slider(b);
 	});
-}
+};
 
 Event.observe(window,"load",Amslib_Column_Slider.autoload);

@@ -45,6 +45,6 @@ Amslib_Urlname.autoload = function()
 			src.store("amslib_urlname",new Amslib_Urlname(src,dst));
 		}
 	});
-}
+};
 
 Event.observe(window,"load",Amslib_Urlname.autoload);

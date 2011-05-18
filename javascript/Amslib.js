@@ -116,7 +116,7 @@ var Amslib = Class.create(Amslib_Event,
 Amslib.firebug = function(string)
 {
 	if(console && console.log) console.log(string);
-}
+};
 
 /**
  * This is a way to call a function (the callback) in the presence of
@@ -160,4 +160,4 @@ Amslib.bindObjects = function(src,dst,callback)
 			Amslib.bindObjects(src,dst,callback);
 		});
 	}
-}
+};

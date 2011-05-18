@@ -190,6 +190,6 @@ Amslib_Multi_Column.autoload = function()
 	$$(".amslib_multi_column.amslib_autoload").each(function(m){
 		new Amslib_Multi_Column(m);
 	});
-}
+};
 
 Event.observe(window,"load",Amslib_Multi_Column.autoload);

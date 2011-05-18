@@ -50,13 +50,13 @@ Amslib_Auto_Column = Class.create(
 Amslib_Auto_Column.config = {
 	source:	".source",
 	column: ".column"
-}
+};
 
 Amslib_Auto_Column.autoload = function()
 {
 	$$(".amslib_auto_column.amslib_autoload").each(function(c){
 		var column = new Amslib_Auto_Column(c);
 	});
-}
+};
 
 Event.observe(window,"load",Amslib_Auto_Column.autoload);

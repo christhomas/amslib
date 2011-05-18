@@ -41,4 +41,4 @@ if(typeof jQuery != "undefined")
 		$(document.body).down("head").insert({bottom:script});
 	});
 	
-}
+};

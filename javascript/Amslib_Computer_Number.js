@@ -40,12 +40,12 @@ Amslib_Computer_Number = Class.create(
 
 Amslib_Computer_Number.autoload = function(){
 	Amslib_Computer_Number.apply($(document.body));
-}
+};
 
 Amslib_Computer_Number.apply = function(parent){
 	parent.select(".amslib_computer_number").each(function(node){
 		new Amslib_Computer_Number(node);
 	});
-}
+};
 
 Event.observe(window,"load",Amslib_Computer_Number.autoload);

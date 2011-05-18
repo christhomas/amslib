@@ -69,6 +69,6 @@ Amslib_Maximum_Size.autoload = function()
 		
 		max.resize();
 	}
-}
+};
 
 Event.observe(window,"load",Amslib_Maximum_Size.autoload);

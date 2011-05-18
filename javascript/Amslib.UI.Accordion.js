@@ -94,4 +94,4 @@ Amslib.UI.Accordion.config = {
 		close:	"amslib_ui_accordion_close"
 	},
 	duration:	0.5
-}
+};
