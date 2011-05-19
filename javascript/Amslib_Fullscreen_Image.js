@@ -10,7 +10,7 @@ Amslib_Fullscreen_Image = Class.create(Amslib,
 		this.container = container || image.up(Amslib_Fullscreen_Image.css.container) || $(document.body);
 		
 		this.observe("change-image",this.changeImage.bind(this));
-		this.changeImage(this.parent);
+		this.setImage();
 		
 		this.enable();
 	},
@@ -32,17 +32,22 @@ Amslib_Fullscreen_Image = Class.create(Amslib,
 		return this;
 	},
 	
-	changeImage: function(parent)
+	setImage: function(parent)
 	{
+		parent = parent || this.parent;
+		
 		if(parent && parent.nodeType && parent.nodeName == "IMG"){
 			this.parent		=	parent;
 			
-			dimensions		=	this.parent.getDimensions();
-			this.imageRatio	=	dimensions.width / dimensions.height;
+			var layout		=	new Element.Layout(this.parent);
+			this.imageRatio	=	layout.get("width") / layout.get("height");
 		}
 	},
 	
 	resize: function() {
+		//	Sometimes, the image doesn't load until very late, causing the ratio calc to fail
+		if(isNaN(this.imageRatio)) this.setImage();
+		
 		var dContainer	=	this.container.getDimensions();
 		var rContainer	=	dContainer.width / dContainer.height;
 		
@@ -53,7 +58,10 @@ Amslib_Fullscreen_Image = Class.create(Amslib,
 		var c = (rContainer > this.imageRatio) ? Amslib_Fullscreen_Image.css.horizontal : Amslib_Fullscreen_Image.css.vertical;
 		
 		this.parent.addClassName(c);
-	}
+	},
+	
+	//	DEPRECATED METHOD
+	changeImage: function(parent){ this.setImage(parent); }
 });
 
 Amslib_Fullscreen_Image.css = {
@@ -71,3 +79,6 @@ Amslib_Fullscreen_Image.autoload = function(){
 };
 
 Event.observe(window,"load",Amslib_Fullscreen_Image.autoload);
+
+
+/************************************************************************************/
