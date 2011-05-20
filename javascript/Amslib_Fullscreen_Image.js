@@ -68,7 +68,7 @@ Amslib_Fullscreen_Image.css = {
 	autoload:	".amslib_fullscreen_image.amslib_autoload",
 	container:	".amslib_fullscreen_image_container",
 	vertical:	"vertical",
-	horizontal:	"horizontal",
+	horizontal:	"horizontal"
 };
 
 Amslib_Fullscreen_Image.autoload = function(){
@@ -79,6 +79,3 @@ Amslib_Fullscreen_Image.autoload = function(){
 };
 
 Event.observe(window,"load",Amslib_Fullscreen_Image.autoload);
-
-
-/************************************************************************************/

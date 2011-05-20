@@ -15,42 +15,56 @@ class Amslib_Resource
 	
 	static public function addStylesheet($id,$file,$conditional=NULL,$media=NULL)
 	{
-		if($id && $file){
-			if(is_string($conditional) && strlen($conditional)){
-				self::$cssc[$conditional][$id] = $file;
-			}else if(is_string($media) && strlen($media)){
-				self::$cssm[$media][$id] = $file;
-			}else if(strpos($file,"?")){
-				self::$cssi[$id] = $file;
-			}else{
-				self::$css[$id] = $file;
-			}
+		if(!$id || !is_string($id) || !$file || !is_string($file)) return;
+		
+		if(is_string($conditional) && strlen($conditional)){
+			self::$cssc[$conditional][$id] = $file;
+		}else if(is_string($media) && strlen($media)){
+			self::$cssm[$media][$id] = $file;
+		}else if(strpos($file,"?")){
+			self::$cssi[$id] = $file;
+		}else{
+			self::$css[$id] = $file;
 		}
 	}
-
-	static public function getStylesheet()
+	
+	static public function compile()
 	{
-		$output = "";
+		self::compileStylesheet();
+		self::compileJavascript();
+	}
+	
+	static protected function compileStylesheet()
+	{
+		self::$stylesheet = array();
 		
 		$content = "";
-		foreach(self::$css as $file) $content .= file_get_contents(Amslib_File::absolute($file));
-		$output .= "<style type='text/css'>$content</style>";
+		foreach(self::$css as $file) $content .= file_get_contents(Amslib_File::absolute($file))."/**/";
+		self::$stylesheet[] = "<style type='text/css'>$content</style>";
 		
 		foreach(self::$cssm as $media => $list){
-			foreach($list as $file) $output .= "<link rel='stylesheet' type='text/css' href='$file' media='$media' />";
+			foreach($list as $file) self::$stylesheet[] = "<link rel='stylesheet' type='text/css' href='$file' media='$media' />";
 		}
 		
 		foreach(self::$cssc as $conditional => $list){
 			$content = "";
 			foreach($list as $file) $content .= file_get_contents(Amslib_File::absolute($file));
-			$output .= "<!--[$conditional]><style type='text'css'>$content</style><![endif]-->";
+			self::$stylesheet[] = "<!--[$conditional]><style type='text'css'>$content</style><![endif]-->";
 		}
 		
 		foreach(self::$cssi as $file){
-			$output .= "<link rel='stylesheet' type='text/css' href='$file' />";
+			self::$stylesheet[] = "<link rel='stylesheet' type='text/css' href='$file' />";
 		}
-		
-		return $output;
+	}
+	
+	static protected function compileJavascript()
+	{
+
+	}
+	
+	static public function getStylesheet()
+	{
+		return implode("",self::$stylesheet);
 	}
 	
 	static public function removeStylesheet($id)
