@@ -58,6 +58,8 @@ Amslib_Fullscreen_Image = Class.create(Amslib,
 		var c = (rContainer > this.imageRatio) ? Amslib_Fullscreen_Image.css.horizontal : Amslib_Fullscreen_Image.css.vertical;
 		
 		this.parent.addClassName(c);
+		
+		this.callObserver("resize",this.parent,this.container,c);
 	},
 	
 	//	DEPRECATED METHOD

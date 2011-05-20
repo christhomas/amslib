@@ -18,7 +18,7 @@ Element.addMethods({
 	setOpacity: function(element,value){
 		element = $(element);
 	    element.style.opacity = (value < 0.00001) ? 0 : value;
-	    return element;	
+	    return element;
 	}
 });
 
