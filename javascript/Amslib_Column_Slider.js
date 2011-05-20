@@ -24,15 +24,15 @@ Amslib_Column_Slider = new Class.create(Amslib,
 		//	Reset the slider position just in case it's not inside the slide boundaries
 		this.correctPosition();
 	},
-	
-	prevSlide: function()
+
+	slidePrev: function()
 	{
 		var position = this.slider.positionedOffset().left + this.columnWidth;
 		
 		this.slideToPx(position,this.columnWidth);
 	},
 	
-	nextSlide: function()
+	slideNext: function()
 	{
 		var position = this.slider.positionedOffset().left - this.columnWidth;
 		
@@ -41,36 +41,42 @@ Amslib_Column_Slider = new Class.create(Amslib,
 	
 	slideToColumn: function(column)
 	{
-		var column = this.slider.select(".column").slice(column,column+1);
+		var wanted = this.slider.select(".column:nth-child("+(column+1)+")").first();
 		
+		var current = this.getColumnNumber()-1;
 		
+		var left = -(wanted.positionedOffset().left);
+		var offset = (current-column) * this.columnWidth;
+		
+		this.slideToPx(left,offset);
 	},
 	
 	/*	FIXME:	The parameters here left,offset made sense when I wrote this code, but now I'm looking
 	 * 			at it, I can't figure out why I called them left,offset, so I need to clean this up
-	 * 			to give them better understandability when I'm looking 2 weeks later at what I've done.
+	 * 			to give them better names so when I'm looking 2 weeks later, I know what I've done and why
 	*/
 	
 	//	NOTE: I think left means: the position you want, finally
 	//	NOTE: I think offset means, the offset from your current position to the position you want
 	slideToPx: function(left,offset)
-	{
-		if(this.correctPosition(left) === false){
-			this.callObserver("move",left,this.minSlide,this.maxSlide);
-			
-			if(this.mutex) return;
-			this.mutex = true;
-			
-			this.slider.visualEffect("Move",{
-				x:	offset,
-				y:	0,
-				duration: 0.75,
-				afterFinish:function(){ 
-					this.mutex = false;
-					this.setColumnNumber();
-				}.bind(this)
-			});			
-		}
+	{	
+		var tl = this.correctPosition(left);
+		if(tl !== false) left = tl;
+
+		this.callObserver("move",left,this.minSlide,this.maxSlide);
+		
+		if(this.mutex) return;
+		this.mutex = true;
+		
+		this.slider.visualEffect("Move",{
+			x:	offset,
+			y:	0,
+			duration: 0.75,
+			afterFinish:function(){ 
+				this.mutex = false;
+				this.setColumnNumber();
+			}.bind(this)
+		});	
 	},
 	
 	getColumnNumber: function()
@@ -124,7 +130,11 @@ Amslib_Column_Slider = new Class.create(Amslib,
 		var l = new Element.Layout(this.slider);
 		
 		this.callObserver("move",l.get("left"),this.minSlide,this.maxSlide);
-	}
+	},
+	
+	//	DEPRECATED METHODS:
+	prevSlide: function(){ this.slidePrev(); },
+	nextSlide: function(){ this.slideNext(); }
 });
 
 Amslib_Column_Slider.autoload = function()
