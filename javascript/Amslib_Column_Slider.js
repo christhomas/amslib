@@ -24,48 +24,72 @@ Amslib_Column_Slider = new Class.create(Amslib,
 		//	Reset the slider position just in case it's not inside the slide boundaries
 		this.correctPosition();
 	},
-	
-	prevSlide: function()
+
+	slidePrev: function()
 	{
 		var position = this.slider.positionedOffset().left + this.columnWidth;
 		
 		this.slideToPx(position,this.columnWidth);
 	},
 	
-	nextSlide: function()
+	slideNext: function()
 	{
 		var position = this.slider.positionedOffset().left - this.columnWidth;
 		
 		this.slideToPx(position,-this.columnWidth);
 	},
 	
-	slideToPx: function(left,offset)
+	slideToColumn: function(column)
 	{
-		if(this.correctPosition(left) === false){
-			this.callObserver("move",left,this.minSlide,this.maxSlide);
-			
-			if(this.mutex) return;
-			this.mutex = true;
-			
-			this.slider.visualEffect("Move",{
-				x:	offset,
-				y:	0,
-				duration: 0.75,
-				afterFinish:function(){ 
-					this.mutex = false;
-					this.setColumnNumber();
-				}.bind(this)
-			});			
-		}
+		var wanted = this.slider.select(".column:nth-child("+(column+1)+")").first();
+		
+		var current = this.getColumnNumber()-1;
+		
+		var left = -(wanted.positionedOffset().left);
+		var offset = (current-column) * this.columnWidth;
+		
+		this.slideToPx(left,offset);
+	},
+	
+	/*	FIXME:	The parameters here left,offset made sense when I wrote this code, but now I'm looking
+	 * 			at it, I can't figure out why I called them left,offset, so I need to clean this up
+	 * 			to give them better names so when I'm looking 2 weeks later, I know what I've done and why
+	*/
+	
+	//	NOTE: I think left means: the position you want, finally
+	//	NOTE: I think offset means, the offset from your current position to the position you want
+	slideToPx: function(left,offset)
+	{	
+		var tl = this.correctPosition(left);
+		if(tl !== false) left = tl;
+
+		this.callObserver("move",left,this.minSlide,this.maxSlide);
+		
+		if(this.mutex) return;
+		this.mutex = true;
+		
+		this.slider.visualEffect("Move",{
+			x:	offset,
+			y:	0,
+			duration: 0.75,
+			afterFinish:function(){ 
+				this.mutex = false;
+				this.setColumnNumber();
+			}.bind(this)
+		});	
+	},
+	
+	getColumnNumber: function()
+	{
+		return this.slider.select(".column")
+							.invoke("positionedOffset")
+							.pluck("left")
+							.indexOf(-this.slider.positionedOffset().left) + 1;
 	},
 	
 	setColumnNumber: function()
 	{
-		this.columnNumber = this.slider
-								.select(".column")
-								.invoke("positionedOffset")
-								.pluck("left")
-								.indexOf(-this.slider.positionedOffset().left) + 1;
+		this.columnNumber = this.getColumnNumber();
 
 		this.callObserver("get-column-number",this.columnNumber);
 	},
@@ -106,7 +130,11 @@ Amslib_Column_Slider = new Class.create(Amslib,
 		var l = new Element.Layout(this.slider);
 		
 		this.callObserver("move",l.get("left"),this.minSlide,this.maxSlide);
-	}
+	},
+	
+	//	DEPRECATED METHODS:
+	prevSlide: function(){ this.slidePrev(); },
+	nextSlide: function(){ this.slideNext(); }
 });
 
 Amslib_Column_Slider.autoload = function()
@@ -115,5 +143,35 @@ Amslib_Column_Slider.autoload = function()
 		new Amslib_Column_Slider(b);
 	});
 };
+
+/**
+ * A specialised method to bind a column slider to a multi column object
+ * 
+ * It basically reduces all this code to a one-liner and connects two objects which
+ * are normally associated with each other, but I dont want to keep duplicating this code
+ * everywhere.
+ */
+Amslib_Column_Slider.bindMultiColumn = function(columnObject,multiColumnClassTag,multiColumnName)
+{
+	if(!columnObject) return false;
+	
+	//	If the multi column object changes the number of columns, tell the column slider object
+	var changeColumns = function(src,dst)
+	{
+		src.object.observe("change-columns",dst.object.updatePosition.bind(dst.object));
+	}
+	
+	multiColumnClassTag	=	multiColumnClassTag || ".amslib_multi_column";
+	multiColumnName		=	multiColumnName || "Amslib_Multi_Column";
+	
+	var dstNode = columnObject.getNode();
+	var srcNode = dstNode.down(multiColumnClassTag);
+
+	Amslib.bindObjects(	{name: multiColumnName,					node: srcNode},
+						{name: columnObject.getInstanceName(),	node: dstNode},
+						changeColumns);
+	
+	return true;
+}
 
 Event.observe(window,"load",Amslib_Column_Slider.autoload);

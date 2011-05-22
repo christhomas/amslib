@@ -276,4 +276,9 @@ class Amslib_Router_Source2_XML
 
 		return $instance;
 	}
+	
+	public function dump()
+	{
+		return array("routes"=>$this->routes,"url"=>$this->url);
+	}
 }

@@ -36,6 +36,19 @@ class Amslib_Array
 
 		return $returnFiltered ? $filter : $array;
 	}
+	
+	static public function countValues($array)
+	{
+		$counts = array();
+		
+		foreach($array as $v){
+			if(!isset($counts[$v])) $counts[$v] = 0;
+			
+			$counts[$v]++;
+		}
+		
+		return $counts;
+	}
 
 	static public function find($array,$key,$value)
 	{
