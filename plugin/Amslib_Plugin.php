@@ -172,6 +172,9 @@ class Amslib_Plugin
 	protected function findResource($plugin,$node)
 	{
 		$resource = $node->nodeValue;
+		
+		//	PREPARE THE STRING: expand any parameters inside the resource name
+		$resource = self::expandPath($resource);
 
 		//	TEST 1: If the resource has an attribute "absolute" don't process it, return it directly
 		if($node->getAttribute("absolute")) return $resource;
