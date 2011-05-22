@@ -257,6 +257,33 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return $activePlugin;
 	}
 	
+	protected function runService()
+	{
+		$parameters = Amslib_Router3::getParameter();
+
+		if(isset($parameters["plugin"]) && isset($parameters["service"])){
+			$api = Amslib_Plugin_Manager::getAPI($parameters["plugin"]);
+			if($api){
+				//	NOTE:	this could be better if there was an api method to call
+				//			because that would mean it'll get the parameters 
+				//			directly + specifically for it's needs
+				
+				//	Call the service script to setup any static parameters required
+				Amslib::requireFile(Amslib_Website::abs("/plugins/service.php"));
+				
+				$api->callService($parameters["service"]);
+			}
+			
+			//	TODO: we have to implement a way to redirect away from this script after we're done, right?
+			//	TODO: we need to redirect away if we posted here, if it's ajax, it doesnt matter
+		}else{
+			//	TODO: we are being a bit hasty in assuming that "home" route even exists?
+			Amslib_Website::redirect("home");
+		}
+		
+		die();
+	}
+	
 	public function render()
 	{
 		//	Request the website render itself now
