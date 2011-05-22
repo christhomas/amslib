@@ -9,11 +9,28 @@
  * 						www.crazywebsite.com	=> 	.crazywebsite.com
  * 4)	You're done.
  */
+function getTrackerInfo()
+{
+	var info = false;
+	
+	//	Copied from how scriptaculous does it's "query string" thing
+	var js = /Amslib_Google_Analytics\.js(\?.*)?$/;
+    $$('head script[src]').findAll(function(s) {
+      return s.src.match(js);
+    }).each(function(s) {
+    	info = s.src.match(/\?.*tracker_id=([a-zA-Z0-9\-]*),domain_name=([a-zA-Z0-9\.\-]*)/);
+    });
+    
+    return info;
+}
+
+info = getTrackerInfo();
+
 var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'TRACKING_CODE_HERE']);
-_gaq.push(['_setDomainName', '.DOMAIN_NAME_HERE']);
-_gaq.push(['_setAllowLinker', true]);
-_gaq.push(['_setAllowHash', false]);
+_gaq.push(['_setAccount',		info[1]		]);
+_gaq.push(['_setDomainName',	"."+info[2]	]);
+_gaq.push(['_setAllowLinker',	true		]);
+_gaq.push(['_setAllowHash',		false		]);
 _gaq.push(['_trackPageview']);
 
 var protocol	=	'https:' == document.location.protocol ? 'https://ssl' : 'http://www';
@@ -38,7 +55,7 @@ if(typeof jQuery != "undefined")
 			src:	url
 		});
 		
-		$(document.body).down("head").insert({bottom:script});
+		$$("head").invoke("insert",script);
 	});
 	
 };
