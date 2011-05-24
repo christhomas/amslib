@@ -160,7 +160,7 @@ abstract class Amslib_Database_MySQL extends Amslib_Database
 	 */
 	public function getRealResultCount()
 	{
-		$result = $this->select("FOUND_ROWS() as num_results",1);
+		$result = $this->select("FOUND_ROWS() as num_results",1,true);
 
 		return (isset($result["num_results"])) ? $result["num_results"] : false;
 	}
