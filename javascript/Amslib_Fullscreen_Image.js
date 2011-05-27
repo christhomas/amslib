@@ -9,7 +9,7 @@ Amslib_Fullscreen_Image = Class.create(Amslib,
 		
 		this.container = container || image.up(Amslib_Fullscreen_Image.css.container) || $(document.body);
 		
-		this.observe("change-image",this.changeImage.bind(this));
+		this.observe("change-image",this.setImage.bind(this));
 		this.setImage();
 		
 		this.enable();
