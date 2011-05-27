@@ -108,10 +108,10 @@ class Amslib_File
 
 	static public function glob($path,$relative=false)
 	{
-		$list = glob(Amslib_Filesystem::absolute($path));
+		$list = glob(self::absolute($path));
 
 		if($relative && !empty($list)) foreach($list as &$l){
-			$l = Amslib_Filesystem::relative($l);
+			$l = self::relative($l);
 		}
 
 		return $list;

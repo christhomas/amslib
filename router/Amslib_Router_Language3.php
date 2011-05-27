@@ -88,7 +88,7 @@ class Amslib_Router_Language3
 				self::set($lang);
 				
 				//	Make sure there are only single slashes and make sure the path starts and ends with a slash
-				return Amslib_Filesystem::reduceSlashes("/".implode("/",$parts)."/");
+				return Amslib_File::reduceSlashes("/".implode("/",$parts)."/");
 			}
 		}
 		

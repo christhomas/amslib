@@ -40,7 +40,7 @@ class Amslib
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
 
 		foreach($includePath as $path){
-			//	NOTE: Cannot use Amslib_Filesystem::reduceSlashes here, chicken/egg type problem
+			//	NOTE: Cannot use Amslib_File::reduceSlashes here, chicken/egg type problem
 			$test = preg_replace('#//+#','/',"$path/$filename");
 			if(@file_exists($test)) return $path;
 		}
@@ -139,7 +139,7 @@ class Amslib
 			if($path !== false && strlen($path)) $path = "$path/";
 		}
 
-		//	NOTE: Cannot use Amslib_Filesystem::reduceSlashes here, chicken/egg type problem
+		//	NOTE: Cannot use Amslib_File::reduceSlashes here, chicken/egg type problem
 		$file = preg_replace('#//+#','/',"{$path}$file");
 
 		if(is_file($file) && file_exists($file)){
@@ -164,7 +164,7 @@ class Amslib
 			if($path !== false && strlen($path)) $path = "$path/";
 		}
 
-		//	NOTE: Cannot use Amslib_Filesystem::reduceSlashes here, chicken/egg type problem
+		//	NOTE: Cannot use Amslib_File::reduceSlashes here, chicken/egg type problem
 		$file = preg_replace('#//+#','/',"{$path}$file");		
 
 		if(is_file($file) && file_exists($file)){

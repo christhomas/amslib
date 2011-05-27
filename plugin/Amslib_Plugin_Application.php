@@ -75,12 +75,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				$value	=	Amslib_Plugin::expandPath($p->nodeValue);
 	
 				if($name == "include"){
-					Amslib::addIncludePath(Amslib_Filesystem::absolute($value));
+					Amslib::addIncludePath(Amslib_File::absolute($value));
 				}else{
 					Amslib_Plugin::setPath($name,$value);
 					
 					if($name == "plugin"){
-						Amslib_Plugin_Manager::addLocation(Amslib_Filesystem::absolute($value));
+						Amslib_Plugin_Manager::addLocation(Amslib_File::absolute($value));
 					}
 				}
 			}
@@ -140,6 +140,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		$source = $this->readValue("//package/router_source");
 		$source = Amslib_Plugin::expandPath($source);
+		Amslib_FirePHP::output("source",$source);
 
 		//	Initialise and execute the router
 		//	TODO: As noted in initRouter, why are we hardcoding an XML source?
@@ -158,7 +159,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		Amslib_Plugin::setPath("website",	"__WEBSITE__");
 		Amslib_Plugin::setPath("admin",		"__ADMIN__");
 		Amslib_Plugin::setPath("plugin",	"__PLUGIN__");
-		Amslib_Plugin::setPath("docroot",	Amslib_Filesystem::documentRoot());
+		Amslib_Plugin::setPath("docroot",	Amslib_File::documentRoot());
 		
 		$this->load($name,$location);
 		Amslib_Plugin_Manager::import($name,$this);

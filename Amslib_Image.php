@@ -103,7 +103,7 @@ class Amslib_Image
 
 	public function enableCache($location)
 	{
-		$this->cache = Amslib_Filesystem::absolute($location);
+		$this->cache = Amslib_File::absolute($location);
 	}
 
 	public function clearCache()
@@ -147,7 +147,7 @@ class Amslib_Image
 		if(is_string($parameters)) $parameters = array("image"=>$parameters);
 
 		//	Make the path absolute and obtain a unique name for this requested file
-		$parameters["image"]	=	Amslib_Filesystem::absolute($parameters["image"]);
+		$parameters["image"]	=	Amslib_File::absolute($parameters["image"]);
 		//	Get the extension for this file
 		$extension				=	end(explode(".",strtolower($parameters["image"])));
 		$uniqueName				=	sha1(http_build_query($parameters)).".$extension";

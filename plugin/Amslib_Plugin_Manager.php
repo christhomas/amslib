@@ -41,7 +41,7 @@ class Amslib_Plugin_Manager
 				//	double check that the location starts and ends with a slash
 				//	something this isn't the case and the programmer forgets
 				//	then the plugin doesnt load, all because of a simple missing slash
-				return Amslib_Filesystem::reduceSlashes("/$location/");
+				return Amslib_File::reduceSlashes("/$location/");
 			}
 		}
 

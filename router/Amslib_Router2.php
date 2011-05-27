@@ -41,7 +41,7 @@ class Amslib_Router2
 
 	public function load($source,$webdir=NULL)
 	{
-		if(!$webdir) $webdir = Amslib_Filesystem::documentRoot();
+		if(!$webdir) $webdir = Amslib_File::documentRoot();
 		
 		$this->source = $source;
 		$this->webdir = $webdir;
@@ -70,7 +70,7 @@ class Amslib_Router2
 		$this->routerPath = Amslib::getParam("router_path");
 
 		if($this->routerPath !== NULL){
-			$this->routerPath = Amslib_Filesystem::relative($this->routerPath);
+			$this->routerPath = Amslib_File::relative($this->routerPath);
 
 			Amslib_Router_Language2::setRouter($this);
 			Amslib_Router_Language2::detect($this->routerPath);

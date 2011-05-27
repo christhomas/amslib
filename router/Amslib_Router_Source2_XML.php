@@ -119,12 +119,18 @@ class Amslib_Router_Source2_XML
 	{
 		//	NOTE:	Added a call to absolute to fix finding the file, because in some cases,
 		//			the file cannot be found. But I am not sure of the side-effects (if any) of doing this
-		$path = Amslib_Filesystem::find(Amslib_Filesystem::absolute($source),true);
-
+		$path = Amslib_File::find(Amslib_File::absolute($source),true);
+		
 		if(!file_exists($path)){
+			print("s = ".Amslib::var_dump(Amslib_File::absolute($source),true));
 			//	TODO: Should move to using Amslib_Keystore("error") instead
-			print("Amslib_Router_Source2_XML::load(), source = ".Amslib::var_dump($source,true));
-			die("Amslib_Router_Source2_XML::load(), source file does not exist");
+			print(get_class($this)."::load(), __FILE__ = ".__FILE__."<br/>");
+			$d = dirname(dirname(dirname(__FILE__)))."/*.*";
+			print("d = $d<br/>");
+			print("dir = ".Amslib::var_dump(glob($d),true));
+			print(get_class($this)."::load(), source = ".Amslib::var_dump($source,true));
+			print(get_class($this)."::load(), path = ".Amslib::var_dump($path,true));
+			die(get_class($this)."::load(), source file does not exist");
 		}
 
 		$routes = array();
@@ -138,7 +144,7 @@ class Amslib_Router_Source2_XML
 			foreach($paths as $p) $this->addPath($p,$routes);
 		}else{
 			//	TODO: Should move to using Amslib_Keystore("error") instead
-			print("Amslib_Router_Source2_XML::load(), source[$source], path[$path] FAILED TO OPEN<br/>");
+			print(get_class($this)."::load(), source[$source], path[$path] FAILED TO OPEN<br/>");
 		}
 
 		return $routes;

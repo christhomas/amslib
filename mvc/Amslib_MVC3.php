@@ -303,7 +303,7 @@ class Amslib_MVC3
 	public function callService($id)
 	{
 		$service = $this->getService($id);
-		$service = Amslib_Filesystem::absolute($service);
+		$service = Amslib_File::absolute($service);
 
 		$parameters["api"] = $this;
 

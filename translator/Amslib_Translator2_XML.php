@@ -36,7 +36,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 		{
 			$this->database = Amslib_Website::abs("$this->location/{$this->language}.xml");
 			
-			if(!file_exists($this->database)) $this->database = Amslib_Filesystem::find($this->database,true);
+			if(!file_exists($this->database)) $this->database = Amslib_File::find($this->database,true);
 			
 			if(!file_exists($this->database)){
 				die(get_class($this)."::load(), LOCATION: '$this->location', DATABASE '$this->database' DOES NOT EXIST<br/>");

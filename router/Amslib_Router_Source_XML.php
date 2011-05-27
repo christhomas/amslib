@@ -105,8 +105,8 @@ class Amslib_Router_Source_XML
 		//	TODO:	we added this call to absolute because in some cases, it wouldn't find the file correctly
 		//			so I figured it would be the easiest way to solve the problem, but I wonder if it causes
 		//			problems of it's own?
-		$source = Amslib_Filesystem::absolute($source);
-		$source = Amslib_Filesystem::find($source,true);
+		$source = Amslib_File::absolute($source);
+		$source = Amslib_File::find($source,true);
 		
 		if(!file_exists($source)){
 			//	TODO: Should move to using Amslib_Keystore("error") instead
