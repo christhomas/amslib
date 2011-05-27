@@ -1,6 +1,16 @@
 <?php
 class Amslib_Array
 {
+	static public function valid($array=NULL)
+	{
+		//	Invalid values return an empty array
+		if(!$array || !is_array($array) || is_null($array)) return array();
+		//	cast objects to arrays
+		if(is_object($array)) return (array)$a;
+		//	return the original value
+		return $array;
+	}
+	
 	static public function pluck($array,$key)
 	{
 		if(!is_array($array) || !self::isMulti($array)) return false;
