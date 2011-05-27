@@ -17,7 +17,7 @@ class Amslib_Array
 		
 		$values = array();
 		
-		if(!empty($array)) foreach($array as $item){
+		foreach(self::valid($array) as $item){
 			if(isset($item[$key])) $values[] = $item[$key];
 		}
 		
@@ -28,7 +28,7 @@ class Amslib_Array
 	{
 		$filter = array();
 
-		if(!empty($array)) foreach($array as $k=>$v)
+		foreach(self::valid($array) as $k=>$v)
 		{
 			$found = false;
 			
@@ -51,7 +51,7 @@ class Amslib_Array
 	{
 		$counts = array();
 		
-		foreach($array as $v){
+		foreach(self::valid($array) as $v){
 			if(!isset($counts[$v])) $counts[$v] = 0;
 			
 			$counts[$v]++;
@@ -62,7 +62,7 @@ class Amslib_Array
 
 	static public function find($array,$key,$value)
 	{
-		foreach($array as $a){
+		foreach(self::valid($array) as $a){
 			if($a[$key] == $value) return $a;
 		}
 
@@ -73,7 +73,7 @@ class Amslib_Array
 	{
 		$matches = array();
 
-		foreach($array as $k=>$v){
+		foreach(self::valid($array) as $k=>$v){
 			if(strpos($k,$filter) !== false) $matches[$k] = $v;
 		}
 
