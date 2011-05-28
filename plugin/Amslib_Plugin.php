@@ -180,19 +180,19 @@ class Amslib_Plugin
 		if($node->getAttribute("absolute")) return $resource;
 		
 		//	TEST 2: Test whether the file "exists" without any assistance
-		if(file_exists(Amslib::rchop($resource,"?"))) return Amslib_Website::rel($resource);
-		
+		if(file_exists(Amslib::rchop($resource,"?"))) return Amslib_File::relative($resource);
+
 		//	TEST 3: Does the file exists relative to the document root?
-		$path1 = Amslib_File::documentRoot().$resource;
-		if(file_exists(Amslib::rchop($path1,"?"))) return Amslib_Website::rel($path1);
+		$test3 = Amslib_File::absolute($resource);
+		if(file_exists(Amslib::rchop($test3,"?"))) return Amslib_File::relative($resource);
 
 		//	TEST 4:	look in the package directory for the file
-		$path2 = Amslib_File::reduceSlashes("$this->location/$resource");
-		if(file_exists(Amslib::rchop($path2,"?"))) return Amslib_Website::rel($path2);
+		$test4 = Amslib_File::reduceSlashes("$this->location/$resource");
+		if(file_exists(Amslib::rchop($test4,"?"))) return Amslib_File::relative($test4);
 
 		//	TEST 5:	search the include path for the file
-		$path3 = Amslib_File::find($resource,true);
-		if(file_exists(Amslib::rchop($path3,"?"))) return Amslib_Website::rel($path3);
+		$test5 = Amslib_File::find($resource,true);
+		if(file_exists(Amslib::rchop($test5,"?"))) return Amslib_File::relative($test5);
 
 		//	FAILED: you could not find the file
 		return false;
