@@ -1,25 +1,37 @@
 <?php 
 class Amslib_File
 {
-	static public function documentRoot()
+	static protected $docroot = false;
+	
+	static public function documentRoot($docroot=NULL)
 	{
+		//	Manually override the document root
+		if($docroot && is_dir($docroot)) self::$docroot = $docroot;
+		//	If the document root was already calculated, return it's cached value
+		if(self::$docroot) return self::$docroot;
+		
+		//	If the document root index exists, ues it to calculate the docroot
 		if(isset($_SERVER["DOCUMENT_ROOT"]))
 		{
 			//	Sometimes idiotic webhosts like dinahosting.com have shit setups and we need to deal with them :)
 			//	the base root dir for dirname(__FILE__) and docroot are different, here we fix that situation
-			$missing = Amslib::rchop(dirname(__FILE__),$_SERVER["DOCUMENT_ROOT"]);
+			$missing	=	Amslib::rchop(dirname(__FILE__),$_SERVER["DOCUMENT_ROOT"]);
 			//	good hosting will have empty string missing, bad hosting will have a prepend string
-			return self::reduceSlashes("$missing/{$_SERVER["DOCUMENT_ROOT"]}");
+			$docroot	=	self::reduceSlashes("$missing/{$_SERVER["DOCUMENT_ROOT"]}");
+		}else{
+			//	on IIS, there is no parameter DOCUMENT_ROOT, have to construct it yourself.
+	
+			//	Switch the document separators to match windows dumbass separators
+			$phpself	=	str_replace("/","\\",$_SERVER["PHP_SELF"]);
+			//	delete from script filename, the php self, which should reveal the base directory
+			$root		=	str_replace($phpself,"",$_SERVER["SCRIPT_FILENAME"]);
+	
+			$docroot	=	self::removeWindowsDrive($root);
 		}
-
-		//	on IIS, there is no parameter DOCUMENT_ROOT, have to construct it yourself.
-
-		//	Switch the document separators to match windows dumbass separators
-		$phpself	=	str_replace("/","\\",$_SERVER["PHP_SELF"]);
-		//	delete from script filename, the php self, which should reveal the base directory
-		$root		=	str_replace($phpself,"",$_SERVER["SCRIPT_FILENAME"]);
-
-		return self::removeWindowsDrive($root);
+		
+		self::$docroot = $docroot;
+		
+		return self::$docroot;
 	}
 
 	static public function removeWindowsDrive($location)
@@ -38,12 +50,12 @@ class Amslib_File
 		return (strpos($dirname,":") !== false) ? self::removeWindowsDrive($dirname) : $dirname;
 	}
 
-	static public function absolute($filename)
+	static public function absolute($path)
 	{
-		$root		=	self::documentRoot();
-		$filename	=	Amslib::lchop($filename,$root);
-
-		return self::reduceSlashes("$root/$filename");
+		$root	=	self::documentRoot();
+		$rel	=	Amslib::lchop($path,$root);
+		
+		return self::reduceSlashes("$root/$rel");
 	}
 
 	static public function relative($filename)
