@@ -58,12 +58,12 @@ class Amslib_File
 		return self::reduceSlashes("$root/$rel");
 	}
 
-	static public function relative($filename)
+	static public function relative($path)
 	{
-		$root		=	self::documentRoot();
-		$filename	=	Amslib::lchop($filename,$root);
+		$root	=	self::documentRoot();
+		$rel	=	Amslib::lchop($path,$root);
 
-		return self::reduceSlashes($filename);
+		return self::reduceSlashes("/$rel");
 	}
 
 	static public function find($filename,$includeFilename=false)
