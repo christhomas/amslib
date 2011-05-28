@@ -79,9 +79,15 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				}else{
 					Amslib_Plugin::setPath($name,$value);
 					
-					if($name == "plugin"){
-						Amslib_Plugin_Manager::addLocation(Amslib_File::absolute($value));
-					}
+					switch($name){
+						case "plugin":{
+							Amslib_Plugin_Manager::addLocation($value);
+						}break;
+						
+						case "docroot":{
+							Amslib_File::documentRoot($value);						
+						}break;
+					};
 				}
 			}
 	
