@@ -122,12 +122,7 @@ class Amslib_Router_Source2_XML
 		$path = Amslib_File::find(Amslib_File::absolute($source),true);
 		
 		if(!file_exists($path)){
-			print("s = ".Amslib::var_dump(Amslib_File::absolute($source),true));
 			//	TODO: Should move to using Amslib_Keystore("error") instead
-			print(get_class($this)."::load(), __FILE__ = ".__FILE__."<br/>");
-			$d = dirname(dirname(dirname(__FILE__)))."/*.*";
-			print("d = $d<br/>");
-			print("dir = ".Amslib::var_dump(glob($d),true));
 			print(get_class($this)."::load(), source = ".Amslib::var_dump($source,true));
 			print(get_class($this)."::load(), path = ".Amslib::var_dump($path,true));
 			die(get_class($this)."::load(), source file does not exist");
