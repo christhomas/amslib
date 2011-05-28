@@ -146,7 +146,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		$source = $this->readValue("//package/router_source");
 		$source = Amslib_Plugin::expandPath($source);
-		Amslib_FirePHP::output("source",$source);
 
 		//	Initialise and execute the router
 		//	TODO: As noted in initRouter, why are we hardcoding an XML source?
