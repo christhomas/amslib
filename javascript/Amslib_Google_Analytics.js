@@ -58,4 +58,4 @@ if(typeof jQuery != "undefined")
 		$$("head").invoke("insert",script);
 	});
 	
-}
+};

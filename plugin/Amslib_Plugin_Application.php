@@ -75,13 +75,19 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				$value	=	Amslib_Plugin::expandPath($p->nodeValue);
 	
 				if($name == "include"){
-					Amslib::addIncludePath(Amslib_Filesystem::absolute($value));
+					Amslib::addIncludePath(Amslib_File::absolute($value));
 				}else{
 					Amslib_Plugin::setPath($name,$value);
 					
-					if($name == "plugin"){
-						Amslib_Plugin_Manager::addLocation(Amslib_Filesystem::absolute($value));
-					}
+					switch($name){
+						case "plugin":{
+							Amslib_Plugin_Manager::addLocation($value);
+						}break;
+						
+						case "docroot":{
+							Amslib_File::documentRoot($value);						
+						}break;
+					};
 				}
 			}
 	
@@ -93,7 +99,9 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		parent::initialiseModel();
 		
-		Amslib_Database::setSharedConnection($this->model);
+		if($this->model){
+			Amslib_Database::setSharedConnection($this->model);
+		}
 	}
 
 	protected function initialisePlugin()
@@ -156,9 +164,9 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		Amslib_Plugin::setPath("website",	"__WEBSITE__");
 		Amslib_Plugin::setPath("admin",		"__ADMIN__");
 		Amslib_Plugin::setPath("plugin",	"__PLUGIN__");
-		Amslib_Plugin::setPath("docroot",	Amslib_Filesystem::documentRoot());
+		Amslib_Plugin::setPath("docroot",	Amslib_File::documentRoot());
 		
-		$api = $this->load($name,$location);
+		$this->load($name,$location);
 		Amslib_Plugin_Manager::import($name,$this);
 	}
 
@@ -192,7 +200,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->loadDependencies();
 		$this->loadRouter();
 		$this->loadConfiguration();
-		$this->configurePlugins();
 		$this->finalisePlugin();
 	}
 	
@@ -256,6 +263,33 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		}
 
 		return $activePlugin;
+	}
+	
+	protected function runService()
+	{
+		$parameters = Amslib_Router3::getParameter();
+
+		if(isset($parameters["plugin"]) && isset($parameters["service"])){
+			$api = Amslib_Plugin_Manager::getAPI($parameters["plugin"]);
+			if($api){
+				//	NOTE:	this could be better if there was an api method to call
+				//			because that would mean it'll get the parameters 
+				//			directly + specifically for it's needs
+				
+				//	Call the service script to setup any static parameters required
+				Amslib::requireFile(Amslib_Website::abs("/plugins/service.php"));
+				
+				$api->callService($parameters["service"]);
+			}
+			
+			//	TODO: we have to implement a way to redirect away from this script after we're done, right?
+			//	TODO: we need to redirect away if we posted here, if it's ajax, it doesnt matter
+		}else{
+			//	TODO: we are being a bit hasty in assuming that "home" route even exists?
+			Amslib_Website::redirect("home");
+		}
+		
+		die();
 	}
 	
 	public function render()

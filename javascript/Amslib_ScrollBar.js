@@ -146,4 +146,4 @@ Amslib_ScrollBar.config = {
 		track:		"amslib_scrollbar_track",
 		handle:		"amslib_scrollbar_handle"
 	}
-}
+};

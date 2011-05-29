@@ -266,7 +266,7 @@ class Amslib_MVC
 	public function callService($id)
 	{
 		$service = $this->getService($id);
-		$service = Amslib_Filesystem::absolute($service);
+		$service = Amslib_File::absolute($service);
 		
 		$parameters["widget_manager"]	=	$this->widgetManager;
 		$parameters["api"]				=	$this;

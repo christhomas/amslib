@@ -1,0 +1,19 @@
+@CHARSET "UTF-8";
+
+.amslib_slider_gallery{
+	position: relative;
+	overflow: hidden;
+}
+
+.amslib_slider_gallery .amslib_slider_gallery_container{
+	position: absolute;
+	left: 0;
+	top: 0;
+	white-space: nowrap;
+}
+
+.amslib_slider_gallery .amslib_slider_gallery_container .amslib_slider_gallery_item{
+	position: relative;
+	display: inline-block;
+	margin-right: 5px;
+}

@@ -19,7 +19,7 @@
  * title: Antimatter Plugin: Plugin Manager object
  * description: An object to store all the plugins and provide a central method
  * 				to access them all
- * version: 1.3
+ * version: 1.4
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -34,14 +34,14 @@ class Amslib_Plugin_Manager
 	static protected function findPlugin($name,$location=NULL)
 	{
 		$search = array_merge(array($location),self::$location);
-
+		
 		foreach($search as $location)
 		{
 			if(file_exists("$location/$name/package.xml")){
 				//	double check that the location starts and ends with a slash
 				//	something this isn't the case and the programmer forgets
 				//	then the plugin doesnt load, all because of a simple missing slash
-				return Amslib_Filesystem::reduceSlashes("/$location/");
+				return Amslib_File::reduceSlashes("/$location/");
 			}
 		}
 
@@ -55,7 +55,7 @@ class Amslib_Plugin_Manager
 
 	static public function addLocation($location)
 	{
-		self::$location[] = Amslib_Website::abs($location);
+		self::$location[] = Amslib_File::absolute($location);
 	}
 
 	static public function getLocation()

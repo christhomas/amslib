@@ -34,12 +34,13 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 	{	
 		if($this->language)
 		{
-			$this->database = Amslib_Website::abs("$this->location/{$this->language}.xml");
+			$this->database = Amslib_File::relative("$this->location/{$this->language}.xml");
+			$this->database = Amslib_File::absolute($this->database);
 			
-			if(!file_exists($this->database)) $this->database = Amslib_Filesystem::find($this->database,true);
+			if(!file_exists($this->database)) $this->database = Amslib_File::find($this->database,true);
 			
 			if(!file_exists($this->database)){
-				die(get_class($this)."::load(), LOCATION: '$this->location', DATABASE '$this->database' DOES NOT EXIST<br/>");
+				die(get_class($this)."::load(), LOCATION: '$this->location', DATABASE '$this->database' for LANGUAGE '$this->language' DOES NOT EXIST<br/>");
 			}
 			
 			$this->xdoc = new DOMDocument("1.0","UTF-8");
@@ -72,8 +73,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 				$v = trim($v);
 
 				//	Now cache the value read from the xml	
-				if(strlen($v)) parent::learn($k,$v);
-				else $v = $k;
+				parent::learn($k,$v);
 			}
 		}
 		

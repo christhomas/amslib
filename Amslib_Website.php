@@ -18,15 +18,15 @@ class Amslib_Website
 			//	Third try and obtain the router dir from the Amslib_Keystore
 			if(!$router_dir) $router_dir = Amslib_Keystore::get("router_dir");
 		}else{
-			$router_dir = Amslib_Filesystem::relative($path);
+			$router_dir = Amslib_File::relative($path);
 		}
 
 		//	If the router dir is not false (means it was set) and it was a string (means it's valid[potentially])
 		if($router_dir && is_string($router_dir)){
-			self::$location = Amslib_Filesystem::relative($router_dir);
+			self::$location = Amslib_File::relative($router_dir);
 
 			//	Make sure the location has a slash at both front+back (ex: /location/, not /location or location/)
-			self::$location = Amslib_Filesystem::reduceSlashes("/".self::$location."/");
+			self::$location = Amslib_File::reduceSlashes("/".self::$location."/");
 		}
 
 		//	NOTE:	Special case having a single slash as the location to being a blank string
@@ -46,13 +46,13 @@ class Amslib_Website
 	//	Return a relative url for the file to the document root
 	static public function rel($file)
 	{
-		return Amslib_Filesystem::relative(self::$location.$file);
+		return Amslib_File::relative(self::$location.$file);
 	}
 
 	//	Return an absolute url for the file to the root directory
 	static public function abs($file)
 	{
-		return Amslib_Filesystem::absolute(self::$location.$file);
+		return Amslib_File::absolute(self::$location.$file);
 	}
 	
 	//	Return a relative url for the file to the website location
@@ -60,7 +60,7 @@ class Amslib_Website
 	//	NOTE: I'm 99% sure this function doesn't do what it's supposed to do
 	static public function web($file)
 	{
-		return Amslib_Filesystem::reduceSlashes("/".str_replace(self::$location,"",self::abs($file))."/");
+		return Amslib_File::reduceSlashes("/".str_replace(self::$location,"",self::abs($file))."/");
 	}
 
 	//	NOTE: I don't like this method anymore.
@@ -69,12 +69,12 @@ class Amslib_Website
 	{
 		//	If the website path is not set, return the path based on the docroot
 		//	NOTE: This will be incorrect if the website path is not the same as the document root
-		if(self::$location === false) return Amslib_Filesystem::absolute($file);
+		if(self::$location === false) return Amslib_File::absolute($file);
 
 		$file	=	Amslib::lchop($file,self::$location);
 		$file	=	str_replace("//","/",self::$location."/$file");
 
-		return ($relative) ? Amslib_Filesystem::relative($file) : $file;
+		return ($relative) ? Amslib_File::relative($file) : $file;
 	}
 
 	static public function redirect($location,$block=true)

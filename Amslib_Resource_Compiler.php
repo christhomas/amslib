@@ -4,10 +4,11 @@ class Amslib_Resource_Compiler
 	static protected $stylesheet = array();
 	static protected $javascript = array();
 	
-	static public function addStylesheet($id,$file,$conditional=NULL)
+	static public function addStylesheet($id,$file,$conditional=NULL,$media=NULL)
 	{
 		if($id && $file){
-			self::$stylesheet[$id] = "<link rel='stylesheet' type='text/css' href='$file' />";
+			$media = $media ? "media='$media'" : "";
+			self::$stylesheet[$id] = "<link rel='stylesheet' type='text/css' href='$file' $media />";
 			
 			if(is_string($conditional) && strlen($conditional)){
 				self::$stylesheet[$id] = "<!--[$conditional]>".self::$stylesheet[$id]."<![endif]-->";

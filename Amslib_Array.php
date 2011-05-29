@@ -1,13 +1,23 @@
 <?php
 class Amslib_Array
 {
+	static public function valid($array=NULL)
+	{
+		//	Invalid values return an empty array
+		if(empty($array) || !$array || !is_array($array) || is_null($array)) return array();
+		//	cast objects to arrays
+		if(is_object($array)) return (array)$a;
+		//	return the original value
+		return $array;
+	}
+	
 	static public function pluck($array,$key)
 	{
 		if(!is_array($array) || !self::isMulti($array)) return false;
 		
 		$values = array();
 		
-		if(!empty($array)) foreach($array as $item){
+		foreach(self::valid($array) as $item){
 			if(isset($item[$key])) $values[] = $item[$key];
 		}
 		
@@ -18,7 +28,7 @@ class Amslib_Array
 	{
 		$filter = array();
 
-		if(!empty($array)) foreach($array as $k=>$v)
+		foreach(self::valid($array) as $k=>$v)
 		{
 			$found = false;
 			
@@ -36,10 +46,23 @@ class Amslib_Array
 
 		return $returnFiltered ? $filter : $array;
 	}
+	
+	static public function countValues($array)
+	{
+		$counts = array();
+		
+		foreach(self::valid($array) as $v){
+			if(!isset($counts[$v])) $counts[$v] = 0;
+			
+			$counts[$v]++;
+		}
+		
+		return $counts;
+	}
 
 	static public function find($array,$key,$value)
 	{
-		foreach($array as $a){
+		foreach(self::valid($array) as $a){
 			if($a[$key] == $value) return $a;
 		}
 
@@ -50,7 +73,7 @@ class Amslib_Array
 	{
 		$matches = array();
 
-		foreach($array as $k=>$v){
+		foreach(self::valid($array) as $k=>$v){
 			if(strpos($k,$filter) !== false) $matches[$k] = $v;
 		}
 
@@ -59,6 +82,8 @@ class Amslib_Array
 	
 	static public function hasKeys($array,$keys)
 	{
+		if(!is_array($array)) return false;
+		
 		if(!is_array($keys)) $keys = array($keys);
 		
 		foreach($keys as $k){

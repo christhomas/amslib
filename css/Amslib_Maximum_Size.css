@@ -1,18 +1,19 @@
 @CHARSET "UTF-8";
 
 .amslib_maximum_size{
-	position: relative;
+	position: absolute;
 	width: 100%;
 	height: 100%;
-	text-align: center;
 	
 	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 	-ms-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
 .amslib_maximum_size .amslib_maximum_size_element,
 .amslib_maximum_size .amslib_maximum_size_landscape{
+	position: absolute;
 	width: 100%;
 }
 

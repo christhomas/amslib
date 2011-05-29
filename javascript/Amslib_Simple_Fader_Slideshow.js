@@ -62,6 +62,6 @@ Amslib_Simple_Fader_Slideshow.autoload = function(){
 	$$(".amslib_simple_fader_slideshow.amslib_autoload").each(function(parent){
 		new Amslib_Simple_Fader_Slideshow(parent);
 	});
-}
+};
 
 Event.observe(window,"load",Amslib_Simple_Fader_Slideshow.autoload);
