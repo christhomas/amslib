@@ -84,6 +84,12 @@ class Amslib
 	{
 		return ($p = strrpos($str,$search)) !== false ? substr($str,0,$p) : $str;
 	}
+	
+	static public function htmlCutString($string,$limit)
+	{
+		$output = new HtmlCutString($string, $limit);
+  		return $output->cut();
+	}
 
 	/**
 	 *	function:	addIncludePath
@@ -232,6 +238,10 @@ class Amslib
 			//	Redirect to include the correct path for the File system classes
 			if(strpos($class_name,"Amslib_File") !== false){
 				$class_name	=	"file/$class_name";
+			}
+			
+			if(strpos($class_name,"HtmlCutString") !== false){
+				$class_name	=	"util/html_cut_string";
 			}
 			
 			$filename = str_replace("//","/","$class_name.php");
