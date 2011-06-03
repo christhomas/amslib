@@ -120,13 +120,15 @@ class Amslib
 		return (strlen($string) > $maxlen) ? substr($string,0,$maxlen).$postfix : $string;
 	}
 
-	static public function var_dump($dump,$preformat=false)
+	static public function var_dump($dump,$preformat=false,$hiddenOutput=false)
 	{
 		ob_start();
 		var_dump($dump);
 		$dump = ob_get_clean();
 
-		return ($preformat) ? "<pre>$dump</pre>" : $dump;
+		$hiddenOutput = $hiddenOutput ? "style='display:none'" : "";
+
+		return ($preformat) ? "<pre $hiddenOutput>$dump</pre>" : $dump;
 	}
 
 	static public function includeFile($file,$data=array())
