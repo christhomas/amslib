@@ -386,8 +386,6 @@ class Amslib_Plugin
 							case "service":{		$api->setService2($n,$p->getService($r,true),true);	}break;
 							case "object":{			$api->setObject($n,$p->getObject($r),true);			}break;
 							case "image":{			$api->setImage($n,$p->getImage($r),true);			}break;
-							case "stylesheet":{		$api->setStylesheet($n,$p->getStylesheet($r),true);	}break;
-							case "javascript":{		$api->setJavascript($n,$p->getJavascript($r),true);	}break;
 						}
 					}
 				}else{
