@@ -106,7 +106,6 @@ class Amslib_Validator3
 		foreach($options as $o){
 			//	Make sure the key exists in the array
 			if(in_array($o,$keys)){
-				Amslib_FirePHP::output("key[$o]",$valid[$o]);
 				//	If the key is a string, makes sure it's not empty
 				if(is_string($valid[$o]) && strlen($valid[$o]) == 0) continue;
 				
