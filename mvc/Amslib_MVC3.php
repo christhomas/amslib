@@ -157,6 +157,11 @@ class Amslib_MVC3
 	{
 		return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name);
 	}
+	
+	public function listValues()
+	{
+		return array_keys($this->value);
+	}
 
 	//	TODO: need to explain the difference between a value and a view param
 	public function setViewParam($parameters)
@@ -180,6 +185,11 @@ class Amslib_MVC3
 	{
 		return $this->controllers[$id];
 	}
+	
+	public function listControllers()
+	{
+		return array_keys($this->controllers);
+	}
 
 	public function setLayout($id,$name,$absolute=false)
 	{
@@ -195,6 +205,11 @@ class Amslib_MVC3
 		if($id && isset($this->layout[$id])) return $this->layout[$id];
 
 		return $this->layout;
+	}
+	
+	public function listLayouts()
+	{
+		return array_keys($this->layout);
 	}
 
 	public function setObject($id,$name,$absolute=false)
@@ -217,6 +232,11 @@ class Amslib_MVC3
 		}
 
 		return false;
+	}
+	
+	public function listObjects()
+	{
+		return array_keys($this->object);
 	}
 
 	public function setView($id,$name,$absolute=false)
@@ -246,6 +266,11 @@ class Amslib_MVC3
 		}
 
 		return "";
+	}
+	
+	public function listViews()
+	{
+		return array_keys($this->view);
 	}
 
 	public function setService($id,$name,$absolute=false)
@@ -283,6 +308,11 @@ class Amslib_MVC3
 		if($url) return $this->getValue("service:$id");
 		
 		return (isset($this->service[$id])) ? $this->service[$id] : NULL;
+	}
+	
+	public function listServices()
+	{
+		return array_keys($this->service);
 	}
 	
 	public function getServiceURL($id)
