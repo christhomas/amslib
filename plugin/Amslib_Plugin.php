@@ -382,7 +382,7 @@ class Amslib_Plugin
 
 						switch($override->nodeName){
 							case "layout":{			$api->setLayout($n,$p->getLayout($r),true);			}break;
-							case "view":{			$api->setView($n,$p->getView($r),true);				}break;
+							case "view":{			$api->setView($n,$p->findView($r),true);			}break;
 							case "service":{		$api->setService2($n,$p->getService($r,true),true);	}break;
 							case "object":{			$api->setObject($n,$p->getObject($r),true);			}break;
 							case "image":{			$api->setImage($n,$p->getImage($r),true);			}break;

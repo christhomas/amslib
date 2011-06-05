@@ -245,9 +245,16 @@ class Amslib_MVC3
 
 		$this->view[$id] = ($absolute == false) ? $this->getComponentPath("view",$name) : $name;
 	}
+	
+	//	TODO: This method should be called getView in line with all the others
+	public function findView($id)
+	{
+		if($id && isset($this->view[$id])) return $this->view[$id];
 
-	//	TODO: investigate: this method is very similar to render, can refactor??
-	public function getView($id,$parameters=array())
+		return $this->view;
+	}
+	
+	public function renderView($id,$parameters=array())
 	{
 		if(is_string($id) && isset($this->view[$id]))
 		{
@@ -517,4 +524,9 @@ class Amslib_MVC3
 
 		return "";
 	}
+	
+	//	DEPRECATED: use renderView() instead
+	//	TODO: investigate: this method is very similar to render, can refactor??
+	//	TODO: Because getView collides with findView above, we should try to move this method to somewhere more inline with renderView() [which is what it actually does]
+	public function getView($id,$parameters=array()){ return $this->renderView($id,$parameters); }
 }
