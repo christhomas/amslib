@@ -144,7 +144,7 @@ class Amslib_Validator3
 	protected function __isbn($name,$value,$required,$options)
 	{
 		//	strip out some characters we know might be present, but have to be removed
-		$value = str_replace(array("-"," ",".",","),"",$value);
+		$value = str_replace(array("isbn","-"," ",".",","),"",strtolower($value));
 		
 		if(is_string($value)){
 			if(strlen($value) == 10)	return $this->__isbn10($name,$value,$required,$options);
