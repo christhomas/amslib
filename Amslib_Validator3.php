@@ -126,7 +126,7 @@ class Amslib_Validator3
 	{
 		if(!isset($options["type"])) return "ARRAY_REQUIRE_TYPE_PARAM";
 		
-		if(!is_array($value)) return "ARRAY_VALUE_NOT_ARRAY";
+		if(!is_array($value)) return "ARRAY_INVALID";
 		
 		$arrayValidator = new Amslib_Validator($value);
 		foreach($value as $k=>$v) $arrayValidator->add($k,$options["type"],$required);
@@ -140,7 +140,51 @@ class Amslib_Validator3
 		$this->setValid($name,$data);
 		return true;
 	}
-
+	
+	protected function __isbn($name,$value,$required,$options)
+	{
+		//	strip out some characters we know might be present, but have to be removed
+		$value = str_replace(array("-"," ",".",","),"",$value);
+		
+		if(is_string($value)){
+			if(strlen($value) == 10)	return $this->__isbn10($name,$value,$required,$options);
+			if(strlen($value) == 13)	return $this->__isbn13($name,$value,$required,$options);
+			
+			if($required) return "ISBN_INVALID";
+		}
+		
+		if($required) return "ISBN_NOT_STRING";
+		
+		return true;
+	}
+	
+	protected function __isbn10($name,$value,$required,$options)
+	{
+		//	Disclaimer, I took this code from the isbn wikipedia article
+    	$check = 0;
+    	for ($i = 0; $i < 9; $i++) $check += (10 - $i) * substr($value, $i, 1);
+    	$t = substr($value, 9, 1); // tenth digit (aka checksum or check digit)
+    	$check += ($t == 'x' || $t == 'X') ? 10 : $t;
+    	
+    	if($check % 11 == 0) $this->setValid($name,$value);
+    	else if($required) return "ISBN_10_INVALID";
+    	
+    	return true;
+	}
+	
+	protected function __isbn13($name,$value,$required,$options)
+	{
+		//	Disclaimer, I took this code from the isbn wikipedia article
+		$check = 0;
+    	for ($i = 0; $i < 13; $i+=2) $check += substr($value, $i, 1);
+    	for ($i = 1; $i < 12; $i+=2) $check += 3 * substr($value, $i, 1);
+    	
+    	if($check % 10 == 0) $this->setValid($name,$value);
+    	else if($required) return "ISBN_13_INVALID";
+    	
+    	return true;
+	}
+	
 	/**
 	 * method:	__text
 	 *
@@ -879,6 +923,7 @@ class Amslib_Validator3
 		$this->register("date",				array($this,"__date"));
 		$this->register("file",				array($this,"__file"));
 		$this->register("array",			array($this,"__array"));
+		$this->register("isbn",				array($this,"__isbn"));
 
 		//	Methods to validate spanish national identification document (dni)
 		$this->register("dni",				array($this,"__dni"));
