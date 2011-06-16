@@ -44,8 +44,14 @@ class Amslib_Router_URL
 		return "http://{$_SERVER["SERVER_NAME"]}$url";
 	}
 	
-	public static function getRoute($route,$option="default")
+	public static function get($route,$option="default")
 	{
 		return self::$router->getRoute($route,$option);
+	}
+	
+	// DEPRECATED METHODS
+	public static function getRoute($route,$option="default")
+	{
+		return self::get($route,$default);
 	}
 }
