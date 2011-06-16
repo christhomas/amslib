@@ -20,7 +20,7 @@
  * description: A database object to centralise all interaction with a mysql databse
  * 		into a single object which nicely hides some of the annoying repetitive
  * 		aspects of a database, whilst giving you a nice candy layer to deal with instead
- * version: 2.6
+ * version: 2.7
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -38,7 +38,7 @@
  *	TODO:
  *		-	Implement connection pooling
  */
-class Amslib_Database_MySQL extends Amslib_Database
+abstract class Amslib_Database_MySQL extends Amslib_Database
 {
 	protected function setEncoding($encoding)
 	{
@@ -50,7 +50,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 		}else{
 			die(	"FATAL ERROR: Your encoding ($encoding) is wrong, this can cause database corruption. ".
 					"I can't allow you to continue<br/>".
-					"allowed encodings = <pre>".print_r($allowedEncodings,true)."</pre>");
+					"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>");
 		}
 	}
 
@@ -160,7 +160,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 */
 	public function getRealResultCount()
 	{
-		$result = $this->select("FOUND_ROWS() as num_results",1);
+		$result = $this->select("FOUND_ROWS() as num_results",1,true);
 
 		return (isset($result["num_results"])) ? $result["num_results"] : false;
 	}
@@ -227,16 +227,36 @@ HAS_TABLE;
 
 		return $this->lastResult;
 	}
-
-	public function select($query,$numResults=0,$optimise=false)
+	
+	public function query($query)
 	{
 		$this->seq++;
 		
 		if($this->getConnectionStatus() == false) return false;
+		
+		$this->setLastQuery($query);
+		$result = mysql_query($query,$this->connection);
+		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
+		
+		if(!$result){
+			$this->fatalError("Query failed<br/>command = '$query'");
+			return false;
+		}
+		
+		return $result;
+	}
 
-		$this->setLastQuery("select $query");
-		$this->selectResult = mysql_query("select $query",$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = 'select $query'<br/></pre>");
+	public function select($query,$numResults=0,$optimise=false)
+	{
+		$this->seq++;
+
+		if($this->getConnectionStatus() == false) return false;
+		
+		$query = "select $query";
+
+		$this->setLastQuery($query);
+		$this->selectResult = mysql_query($query,$this->connection);
+		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
 
 		if($this->selectResult){
 			$rowCount = mysql_num_rows($this->selectResult);
@@ -246,7 +266,7 @@ HAS_TABLE;
 			return $this->getResults($numResults,$this->selectResult,$optimise);
 		}
 
-		$this->fatalError("Transaction failed<br/>command = 'select'<br/>query = '$query'");
+		$this->fatalError("Transaction failed<br/>query = '$query'");
 
 		return false;
 	}
@@ -254,19 +274,21 @@ HAS_TABLE;
 	public function insert($query)
 	{
 		$this->seq++;
-		
-		if($this->getConnectionStatus() == false) return false;
 
-		$this->setLastQuery("insert into $query");
-		$result = mysql_query("insert into $query",$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = 'insert into $query'<br/></pre>");
+		if($this->getConnectionStatus() == false) return false;
+		
+		$query = "insert into $query";
+
+		$this->setLastQuery($query);
+		$result = mysql_query($query,$this->connection);
+		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
 
 		$this->lastInsertId = mysql_insert_id($this->connection);
 		if($result && ($this->lastInsertId !== false)) return $this->lastInsertId;
 
 		$this->lastInsertId = false;
 
-		$this->fatalError("Transaction failed<br/>command = 'insert into'<br/>query = '$query'<br/><pre>result = '".print_r($result,true)."'</pre>lastInsertId = '$this->lastInsertId'<br/>mysql_insert_id() = '".mysql_insert_id()."'");
+		$this->fatalError("Transaction failed<br/>query = '$query'<br/><pre>result = '".print_r($result,true)."'</pre>lastInsertId = '$this->lastInsertId'<br/>mysql_insert_id() = '".mysql_insert_id()."'");
 
 		return false;
 	}
@@ -274,16 +296,18 @@ HAS_TABLE;
 	public function update($query)
 	{
 		$this->seq++;
-		
-		if($this->getConnectionStatus() == false) return false;
 
-		$this->setLastQuery("update $query");
-		$result = mysql_query("update $query",$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = 'update $query'<br/></pre>");
+		if($this->getConnectionStatus() == false) return false;
+		
+		$query = "update $query";
+
+		$this->setLastQuery($query);
+		$result = mysql_query($query,$this->connection);
+		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
 
 		if($result) return mysql_affected_rows() >= 0;
 
-		$this->fatalError("Transaction failed<br/>command = 'update'<br/>query = '$query'");
+		$this->fatalError("Transaction failed<br/>query = '$query'");
 
 		return false;
 	}
@@ -291,16 +315,18 @@ HAS_TABLE;
 	public function delete($query)
 	{
 		$this->seq++;
-		
-		if($this->getConnectionStatus() == false) return false;
 
-		$this->setLastQuery("delete from $query");
-		$result = mysql_query("delete from $query",$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = 'delete from $query'<br/></pre>");
+		if($this->getConnectionStatus() == false) return false;
+		
+		$query = "delete from $query";
+
+		$this->setLastQuery($query);
+		$result = mysql_query($query,$this->connection);
+		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
 
 		if($result) return mysql_affected_rows() >= 0;
 
-		$this->fatalError("Transaction failed<br/>command = 'delete from'<br/>query = '$query'");
+		$this->fatalError("Transaction failed<br/>query = '$query'");
 
 		return false;
 	}
@@ -308,15 +334,6 @@ HAS_TABLE;
 	public function error()
 	{
 		return mysql_error();
-	}
-
-	public function &getInstance($connect=true)
-	{
-		static $instance = NULL;
-
-		if($instance === NULL) $instance = new self($connect);
-
-		return $instance;
 	}
 }
 ?>

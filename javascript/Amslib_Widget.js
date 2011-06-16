@@ -1,4 +1,4 @@
-if(Amslib == "undefined")
+if(typeof(Amslib) == "undefined")
 	throw "Amslib_Widget requires Amslib to be loaded.";
 
 //	This is now just a dummy class to make sure all the other code works whilst 

@@ -1,0 +1,31 @@
+@CHARSET "UTF-8";
+
+.amslib_scrollbar_parent{
+	position: relative;
+	overflow: hidden !important;
+}
+
+.amslib_scrollbar_parent .amslib_scrollbar_content{
+	position: absolute;
+}
+
+.amslib_scrollbar_parent .amslib_scrollbar_track{
+	position: absolute;
+	right: 0;
+	top: 0;
+	background-color: #CDCDCD;
+	width: 12px;
+	height: 100%;
+}
+
+.amslib_scrollbar_parent .amslib_scrollbar_track .amslib_scrollbar_handle{
+	position: absolute;
+	top: 0;
+	width: 10px;
+	margin: 1px;
+	height: 20%;
+	background-color: #444444;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+}
+	

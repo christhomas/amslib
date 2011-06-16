@@ -4,12 +4,6 @@ RewriteBase /
 #RewriteCond %{REQUEST_URI} (gif|png|jpg|jpeg|css|js)$ [NC]
 #RewriteRule ^(.*)$ - [L]
 
-#	Replace with your IP address, this will let you access whilst denying everyone else.
-#RewriteCond %{REQUEST_URI} !/maintenance [NC]
-#RewriteCond %{REQUEST_URI} !/amslib_router [NC]
-#RewriteCond %{REMOTE_HOST} !^81\.32\.166\.153
-#RewriteRule $ /maintenance/ [R=302,L]
-
 #	Perhaps you need to remove -d from here or not, depends on your website
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

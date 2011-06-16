@@ -1,4 +1,29 @@
 <?php
+/*******************************************************************************
+ * Copyright (c) {15/03/2008} {Christopher Thomas} 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * 
+ * File: Amslib_Router_Source_XML.php
+ * Title: The XML router source reader
+ * Version: 1.0
+ * Project: Amslib/Router/Source
+ * 
+ * Contributors/Author:
+ *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *******************************************************************************/
+
 class Amslib_Router_Source_XML
 {
 	protected $document;
@@ -77,11 +102,16 @@ class Amslib_Router_Source_XML
 
 	public function load($source)
 	{
-		$source = Amslib_Filesystem::find($source,true);
+		//	TODO:	we added this call to absolute because in some cases, it wouldn't find the file correctly
+		//			so I figured it would be the easiest way to solve the problem, but I wonder if it causes
+		//			problems of it's own?
+		$source = Amslib_File::absolute($source);
+		$source = Amslib_File::find($source,true);
 		
 		if(!file_exists($source)){
 			//	TODO: Should move to using Amslib_Keystore("error") instead
-			die("Amslib_Router_Source_XML::load(), source file does not exist [$source]");	
+			print("Amslib_Router_Source_XML::load(), source = ".Amslib::var_dump($source,true));
+			die("Amslib_Router_Source_XML::load(), source file does not exist");	
 		}
 		
 		$this->document = new DOMDocument('1.0', 'UTF-8');
@@ -212,7 +242,7 @@ class Amslib_Router_Source_XML
 		return $route;
 	}
 
-	public function &getInstance($source=NULL)
+	static public function &getInstance($source=NULL)
 	{
 		static $instance = NULL;
 

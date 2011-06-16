@@ -19,7 +19,7 @@
  * title: Antimatter Database: Base layer
  * description: A low level object to collect shared data and methods that are common
  * 				to all database layers
- * version: 1.0
+ * version: 1.5
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -36,6 +36,8 @@ class Amslib_Database
  *	NOTE: they are not converted to private yet because they are being
  *	explored for possible problems
  *****************************************************************************/
+	private static $sharedConnection = false;
+	
 	protected $lastResult = array();
 
 	protected $lastInsertId = 0;
@@ -77,6 +79,11 @@ class Amslib_Database
 	 * 	FIXME: The description of this member is incorrect
 	 */
 	protected $connection = false;
+	
+	protected function getDatabaseLogin()
+	{
+		die(get_class($this)."::getDatabaseLogin(), this method is required");
+	}
 
 	protected function setLastQuery($query)
 	{
@@ -173,6 +180,42 @@ class Amslib_Database
 
 	public function copy($database)
 	{
-		$this->connection = $database->getConnection();
+		if($database && method_exists($database,"getConnection")){
+			$c = $database->getConnection();
+			
+			if($c){
+				$this->connection = $c;
+
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * method: setSharedConnection
+	 * 
+	 * Set a shared "application" database connection which can be 
+	 * retrieved from other classes in order to share the "connection" 
+	 * with the application's database
+	 */
+	public static function setSharedConnection($databaseObject)
+	{
+		if(method_exists($databaseObject,"getConnection")){
+			self::$sharedConnection = $databaseObject;
+		}
+	}
+	
+	/**
+	 * method: getSharedConnection
+	 * 
+	 * Get the shared "application" database connection in order to access 
+	 * the application database, without knowing where the connection comes 
+	 * from (example: the application knows, but the plugin does not)
+	 */
+	public static function getSharedConnection()
+	{
+		return self::$sharedConnection;
 	}
 }

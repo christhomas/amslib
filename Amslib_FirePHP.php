@@ -18,30 +18,21 @@ class Amslib_FirePHP extends FirePHP
 	}
 	
 	public static function output($name,$data){
-		$fp = self::getInstance(true);
-		$fp->log($data,$name);	
+		self::$instance->log($data,$name);
 	}
 	
-	/**
-	* 	Gets singleton instance of FirePHP
-	*
-	* 	@param boolean $AutoCreate
-	*	@return FirePHP
-	*/
-	public static function getInstance($AutoCreate=false) {
-		if($AutoCreate===true && !self::$instance) {
-			self::init();
-		}
+	public static function init()
+	{
+		parent::init();
 		
-		return self::$instance;
-	}
-	
-	/**
-	* Creates FirePHP object and stores it for singleton access
-	*
-	* @return FirePHP
-	*/
-	public static function init() {
-		return self::$instance = new self();
+		$options = array(	'maxObjectDepth'		=>	5,
+							'maxArrayDepth'			=>	10,
+							'maxDepth'				=>	10,
+							'useNativeJsonEncode'	=>	true,
+							'includeLineNumbers'	=>	true);
+		
+		self::$instance->setOptions($options);
 	}
 }
+
+Amslib_FirePHP::init();

@@ -180,7 +180,7 @@ class Amslib_Router
 		return false;
 	}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 

@@ -8,7 +8,7 @@
  * 
  * update: rewritten to take advantage of prototype library
  */
-if(Amslib.UI == "undefined")
+if(typeof(Amslib) == "undefined" || typeof(Amslib.UI) == "undefined")
 	throw "Amslib.UI.Fileupload requires Amslib.UI to be loaded.";
 
 Amslib.UI.Fileupload = Class.create(Amslib.UI,
@@ -57,7 +57,7 @@ Amslib.UI.Fileupload.config = {
 	auto:			"amslib_ui_fileupload_auto",
 	nodeStorage:	"amslib_ui_fileupload",
 	fileDisplay:	"filename_display"
-}
+};
 
 Amslib.UI.Fileupload.autoload = function(){
 	$$("."+Amslib.UI.Fileupload.config.auto).each(function(a){
@@ -65,6 +65,6 @@ Amslib.UI.Fileupload.autoload = function(){
 			var fileupload = new Amslib.UI.Fileupload(a);
 		}
 	});
-}
+};
 
 Event.observe(window,"load",Amslib.UI.Fileupload.autoload);

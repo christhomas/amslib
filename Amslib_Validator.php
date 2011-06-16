@@ -115,8 +115,6 @@ class Amslib_Validator
 		$this->__setRequiredRules(false);
 
 		$this->register("text",				array("Amslib_Validator","__text"));
-		//	Sometimes people mistake text<->string so make string an alias of text
-		$this->register("string",			array("Amslib_Validator","__text"));
 		$this->register("alpha",			array("Amslib_Validator","__alpha"));
 		$this->register("alpha_relaxed",	array("Amslib_Validator","__alpha_relaxed"));
 		$this->register("password",			array("Amslib_Validator","__password"));
@@ -127,6 +125,7 @@ class Amslib_Validator
 		$this->register("phone",			array("Amslib_Validator","__phone"));
 		$this->register("date",				array("Amslib_Validator","__date"));
 		$this->register("file",				array("Amslib_Validator","__file"));
+		$this->register("array",			array("Amslib_Validator","__array"));
 
 		//	Methods to validate spanish national identification document (dni)
 		$this->register("dni",				array("Amslib_Validator","__dni"));
@@ -134,10 +133,55 @@ class Amslib_Validator
 		$this->register("nif",				array("Amslib_Validator","__nif"));
 		$this->register("nie",				array("Amslib_Validator","__nie"));
 		
-		//	Register some popular mispellings which keep cropping up to make life easier
+		//	Register some popular alternative spellings which keep cropping up to make life easier
 		$this->register("string",			array("Amslib_Validator","__text"));
 		$this->register("numeric",			array("Amslib_Validator","__number"));
-		$this->register("alpha-relaxed",	array("Amslib_Validator","__alpha_relaxed"));		
+		$this->register("alpha-relaxed",	array("Amslib_Validator","__alpha_relaxed"));
+
+		//	Custom validation methods which do things we all want, but don't 
+		//	conform to obvious rules like "number", "text", "date", etc
+		$this->register("require_one",		array("Amslib_Validator","__require_one"));
+	}
+	
+	//	NOTE: we ignore the name, it's not used here
+	function __require_one($name,$value,$required,$options)
+	{
+		unset($options["vobject"]);
+		
+		$dest = array_pop($options);
+		
+		$valid = $this->getValidData();
+
+		$keys = array_keys($valid);
+		
+		foreach($options as $o){
+			if(in_array($o,$keys)){
+				$this->setValid($dest,$valid[$o]);
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
+	function __array($name,$value,$required,$options)
+	{
+		if(!isset($options["type"])) return "VALIDATOR_ARRAY_REQUIRE_TYPE_PARAM";
+		
+		if(!is_array($value)) return "VALIDATOR_ARRAY_VALUE_NOT_ARRAY";
+		
+		$arrayValidator = new Amslib_Validator($value);
+		foreach($value as $k=>$v) $arrayValidator->add($k,$options["type"],$required);
+		
+		$data = array(
+			"success"	=>	$arrayValidator->execute(),
+			"valid"		=>	$arrayValidator->getValidData(),
+			"errors"	=>	$arrayValidator->getErrors()
+		);
+		
+		$this->setValid($name,$data);
+		return true;
 	}
 
 	/**
@@ -170,19 +214,33 @@ class Amslib_Validator
 	 */
 	function __text($name,$value,$required,$options)
 	{
-		$len = strlen($value);
+		$len = strlen(trim($value));
+		
+		$error = false;
 
-		if($len == 0 && $required == true) return "VALIDATOR_TEXT_LENGTH_ZERO";
-		if(isset($options["minlength"]) && $len < $options["minlength"]) return "VALIDATOR_TEXT_LENGTH_IS_BELOW_MINIMUM";
-		if(isset($options["maxlength"]) && $len > $options["maxlength"]) return "VALIDATOR_TEXT_LENGTH_IS_ABOVE_MAXIMUM";
-		if(isset($options["limit-input"])){
-			if(!in_array($value,$options["limit-input"])) return "VALIDATOR_TEXT_CANNOT_MATCH_AGAINST_LIMIT";
+		if($len == 0 && !isset($options["permit-empty"])){
+			$error = "VALIDATOR_TEXT_LENGTH_ZERO";
 		}
-		if(isset($options["invalid"])){
-			if(in_array($value,$options["invalid"])) return "VALIDATOR_TEXT_INVALID_INPUT";
+		
+		if(isset($options["minlength"]) && $len < $options["minlength"]){
+			$error = "VALIDATOR_TEXT_LENGTH_IS_BELOW_MINIMUM";
+		}
+		
+		if(isset($options["maxlength"]) && $len > $options["maxlength"]){
+			$error = "VALIDATOR_TEXT_LENGTH_IS_ABOVE_MAXIMUM";
+		}
+		
+		if(isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
+			$error = "VALIDATOR_TEXT_CANNOT_MATCH_AGAINST_LIMIT";
+		}
+		
+		if(isset($options["invalid"]) && in_array($value,$options["invalid"])){
+			$error = "VALIDATOR_TEXT_INVALID_INPUT";
 		}
 
-		$this->setValid($name,$value);
+		if($required == true && $error !== false) return $error;
+		
+		if($error === false) $this->setValid($name,$value);
 
 		return true;
 	}
@@ -563,22 +621,38 @@ class Amslib_Validator
 	 */
 	function __number($name,$value,$required,$options)
 	{
-		if($value == NULL && $required && !isset($options["ignorenull"])) return "VALIDATOR_NUMBER_IS_NULL";
-
-		if(strlen($value)){
-			if(is_numeric($value) == false) return "VALIDATOR_NUMBER_NAN";
-		}else{
-			if($required == false) return true;
+		$error = false;
+		
+		if($error == false && $value == NULL && !isset($options["ignorenull"])){
+			$error = "VALIDATOR_NUMBER_IS_NULL";
 		}
-
-		if(isset($options["minvalue"]) && $value < $options["minvalue"]) return "VALIDATOR_NUMBER_IS_BELOW_MINIMUM";
-		if(isset($options["maxvalue"]) && $value > $options["maxvalue"]) return "VALIDATOR_NUMBER_IS_ABOVE_MAXIMUM";
-		if(isset($options["limit-input"])){
-			if(!in_array($value,$options["limit-input"])) return "VALIDATOR_NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
+		
+		if($error == false && !is_numeric($value)){
+			$error = "VALIDATOR_NUMBER_NAN";
 		}
-
+		
+		if($error == false && isset($options["minvalue"]) && $value < $options["minvalue"]){
+			$error = "VALIDATOR_NUMBER_IS_BELOW_MINIMUM";
+		}
+		
+		if($error == false && isset($options["maxvalue"]) && $value > $options["maxvalue"]){
+			$error = "VALIDATOR_NUMBER_IS_ABOVE_MAXIMUM";
+		}
+		
+		if($error == false && isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
+			$error = "VALIDATOR_NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
+		}
+		
+		//	If there was an error
+		if($error !== false)
+		{
+			//	If you require the number to be valid, return the error
+			//	If you don't require a valid number, just return true
+			return ($required) ? $error : true;
+		}
+		
 		$this->setValid($name,$value);
-
+		
 		return true;
 	}
 

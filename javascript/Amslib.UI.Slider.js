@@ -1,6 +1,7 @@
-if(Amslib.UI == "undefined")
+if(typeof(Amslib) == "undefined" || typeof(Amslib.UI) == "undefined")
 	throw "Amslib.UI.Slider requires Amslib.UI to be loaded.";
 
+//	NOTE: Why is there Amslib.UI.Slider and Amslib.UI.ScrollBar ???
 Amslib.UI.Slider = Class.create(Amslib.UI,
 {	
 	track:			false,

@@ -1,5 +1,5 @@
-if(Amslib.UI == "undefined")
-	throw "Amslib.UI.Accordion requires Amslib.UI to be loaded.";
+if(typeof(Amslib) == "undefined" || typeof(Amslib.UI) == "undefined")
+	throw "Amslib.UI.Accordion requires Amslib and Amslib.UI to be loaded.";
 
 Amslib.UI.Accordion = Class.create(Amslib.UI,
 {
@@ -94,4 +94,4 @@ Amslib.UI.Accordion.config = {
 		close:	"amslib_ui_accordion_close"
 	},
 	duration:	0.5
-}
+};

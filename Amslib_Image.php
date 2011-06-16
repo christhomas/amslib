@@ -103,7 +103,7 @@ class Amslib_Image
 
 	public function enableCache($location)
 	{
-		$this->cache = Amslib_Filesystem::absolute($location);
+		$this->cache = Amslib_File::absolute($location);
 	}
 
 	public function clearCache()
@@ -147,7 +147,7 @@ class Amslib_Image
 		if(is_string($parameters)) $parameters = array("image"=>$parameters);
 
 		//	Make the path absolute and obtain a unique name for this requested file
-		$parameters["image"]	=	Amslib_Filesystem::absolute($parameters["image"]);
+		$parameters["image"]	=	Amslib_File::absolute($parameters["image"]);
 		//	Get the extension for this file
 		$extension				=	end(explode(".",strtolower($parameters["image"])));
 		$uniqueName				=	sha1(http_build_query($parameters)).".$extension";
@@ -402,7 +402,7 @@ class Amslib_Image
 
 			//	If cache is enabled, you have to output a copy now to the browser
 			if($this->cache){
-				chmod($destination,0777);
+				chmod($destination,0755);
 				readfile($destination);
 			}
 
@@ -427,7 +427,7 @@ class Amslib_Image
 		//	Image is cached, just copy it to the new location
 		if($image["cache"]){
 			copy($filename,$destination);
-			chmod($destination,0777);
+			chmod($destination,0755);
 
 			//	FIXME: Should I return filename or destination here??
 			return $filename;
@@ -445,13 +445,13 @@ class Amslib_Image
 
 			//	Write the file to a new destination, or to the browser
 			if(file_exists($destination)){
-				chmod($destination,0777);
+				chmod($destination,0755);
 
 				//	Write a copy of this file into the cache
 				if($this->cache){
 					$cacheName = $this->getCacheFilename($filename,$extension);
 					copy($destination,$cacheName);
-					chmod($cacheName,0777);
+					chmod($cacheName,0755);
 				}
 
 				return $destination;
@@ -481,7 +481,7 @@ class Amslib_Image
 		return $this->images[$filename]["mime"];
 	}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 

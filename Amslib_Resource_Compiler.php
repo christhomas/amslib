@@ -4,13 +4,14 @@ class Amslib_Resource_Compiler
 	static protected $stylesheet = array();
 	static protected $javascript = array();
 	
-	static public function addStylesheet($name,$file,$conditional=NULL)
+	static public function addStylesheet($id,$file,$conditional=NULL,$media=NULL)
 	{
-		if($name && $file){
-			self::$stylesheet[$name] = "<link rel='stylesheet' type='text/css' href='$file' />";
+		if($id && $file){
+			$media = $media ? "media='$media'" : "";
+			self::$stylesheet[$id] = "<link rel='stylesheet' type='text/css' href='$file' $media />";
 			
 			if(is_string($conditional) && strlen($conditional)){
-				self::$stylesheet[$name] = "<!--[$conditional]>".self::$stylesheet[$name]."<![endif]-->";
+				self::$stylesheet[$id] = "<!--[$conditional]>".self::$stylesheet[$id]."<![endif]-->";
 			}
 		}
 	}
@@ -25,13 +26,13 @@ class Amslib_Resource_Compiler
 		unset(self::$stylesheet[$id]);
 	}
 	
-	static public function addJavascript($name,$file,$conditional=NULL)
+	static public function addJavascript($id,$file,$conditional=NULL)
 	{
-		if($name && $file){
-			self::$javascript[$name] = "<script type='text/javascript' src='$file'></script>";
+		if($id && $file){
+			self::$javascript[$id] = "<script type='text/javascript' src='$file'></script>";
 			
 			if(is_string($conditional) && strlen($conditional)){
-				self::$javascript[$name] = "<!--[$conditional]>".self::$javascript[$name]."<![endif]-->";
+				self::$javascript[$id] = "<!--[$conditional]>".self::$javascript[$id]."<![endif]-->";
 			}
 		}
 	}
@@ -46,13 +47,13 @@ class Amslib_Resource_Compiler
 		unset(self::$javascript[$id]);
 	}
 	
-	static public function addGoogleFont($name,$font)
+	static public function addGoogleFont($id,$font,$conditional=NULL)
 	{
-		Amslib_Resource_Compiler::addStylesheet($name,"http://fonts.googleapis.com/css?$font");
+		Amslib_Resource_Compiler::addStylesheet($id,"http://fonts.googleapis.com/css?$font",$conditional);
 	}
 	
-	static public function removeGoogleFont($name)
+	static public function removeGoogleFont($id)
 	{
-		Amslib_Resource_Compiler::removeStylesheet($name);
+		Amslib_Resource_Compiler::removeStylesheet($id);
 	}
 }

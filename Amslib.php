@@ -17,7 +17,7 @@
  *
  * File: Amslib.php
  * Title: Amslib core utility object
- * Version: 3.1
+ * Version: 4.5
  * Project: Amslib (antimatter studios library)
  *
  * Contributors/Author:
@@ -27,9 +27,10 @@
 //	Amslib helper class
 class Amslib
 {
-	const VERSION = 3.1;
+	const VERSION = 4.5;
 
-	static protected $showErrorTrigger = false;
+	static protected $showErrorTrigger		=	false;
+	static protected $originalErrorHandler	=	false;
 
 	//	DEPRECATED: should use findPath instead, makes more sense
 	static protected function findFile($filename){ return self::findPath($filename); }
@@ -39,7 +40,8 @@ class Amslib
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
 
 		foreach($includePath as $path){
-			$test = (strpos($filename,"/") !== 0) ? "$path/$filename" : "{$path}{$filename}";
+			//	NOTE: Cannot use Amslib_File::reduceSlashes here, chicken/egg type problem
+			$test = preg_replace('#//+#','/',"$path/$filename");
 			if(@file_exists($test)) return $path;
 		}
 
@@ -58,15 +60,35 @@ class Amslib
 		error_reporting(E_ALL);
 		self::$showErrorTrigger = true;
 	}
+	
+	static public function setErrorHandler($handler)
+	{
+		self::$originalErrorHandler = set_error_handler($handler);
+	}
+	
+	static public function restoreErrorHandler()
+	{
+		if(self::$originalErrorHandler){
+			set_error_handler(self::$originalErrorHandler);
+		}
+	}
 
 	static public function lchop($str,$search)
 	{
-		return ($p = strpos($str,$search)) !== false ? substr($str,$p+strlen($search)) : $str;
+		$p = (strlen($search)) ? strpos($str,$search) : false;
+		
+		return ($p) !== false ? substr($str,$p+strlen($search)) : $str;
 	}
 
 	static public function rchop($str,$search)
 	{
 		return ($p = strrpos($str,$search)) !== false ? substr($str,0,$p) : $str;
+	}
+	
+	static public function htmlCutString($string,$limit)
+	{
+		$output = new HtmlCutString($string, $limit);
+  		return $output->cut();
 	}
 
 	/**
@@ -104,13 +126,15 @@ class Amslib
 		return (strlen($string) > $maxlen) ? substr($string,0,$maxlen).$postfix : $string;
 	}
 
-	static public function var_dump($dump,$preformat=false)
+	static public function var_dump($dump,$preformat=false,$hiddenOutput=false)
 	{
 		ob_start();
 		var_dump($dump);
 		$dump = ob_get_clean();
 
-		return ($preformat) ? "<pre>$dump</pre>" : $dump;
+		$hiddenOutput = $hiddenOutput ? "style='display:none'" : "";
+
+		return ($preformat) ? "<pre $hiddenOutput>$dump</pre>" : $dump;
 	}
 
 	static public function includeFile($file,$data=array())
@@ -123,7 +147,8 @@ class Amslib
 			if($path !== false && strlen($path)) $path = "$path/";
 		}
 
-		$file = "{$path}$file";
+		//	NOTE: Cannot use Amslib_File::reduceSlashes here, chicken/egg type problem
+		$file = preg_replace('#//+#','/',"{$path}$file");
 
 		if(is_file($file) && file_exists($file)){
 			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
@@ -137,6 +162,8 @@ class Amslib
 
 	static public function requireFile($file,$data=array())
 	{
+		if(!is_string($file)) return false;	
+		
 		$path = "";
 
 		if(!file_exists($file)){
@@ -145,7 +172,8 @@ class Amslib
 			if($path !== false && strlen($path)) $path = "$path/";
 		}
 
-		$file = "{$path}$file";
+		//	NOTE: Cannot use Amslib_File::reduceSlashes here, chicken/egg type problem
+		$file = preg_replace('#//+#','/',"{$path}$file");		
 
 		if(is_file($file) && file_exists($file)){
 			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
@@ -199,8 +227,27 @@ class Amslib
 				$class_name =	"xml/$class_name";
 			}
 			
+			//	Redirect to include the correct path for the plugin system
+			if(strpos($class_name,"Amslib_Plugin") !== false){
+				$class_name	=	"plugin/$class_name";
+			}
+			
+			//	Redirect to include the correct path for the MVC system
+			if(strpos($class_name,"Amslib_MVC") !== false){
+				$class_name	=	"mvc/$class_name";
+			}
+			
+			//	Redirect to include the correct path for the File system classes
+			if(strpos($class_name,"Amslib_File") !== false){
+				$class_name	=	"file/$class_name";
+			}
+			
+			if(strpos($class_name,"HtmlCutString") !== false){
+				$class_name	=	"util/html_cut_string";
+			}
+			
 			$filename = str_replace("//","/","$class_name.php");
-
+			
 			return Amslib::requireFile($filename);
 		}
 
