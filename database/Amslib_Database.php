@@ -79,11 +79,6 @@ class Amslib_Database
 	 * 	FIXME: The description of this member is incorrect
 	 */
 	protected $connection = false;
-	
-	protected function getDatabaseLogin()
-	{
-		die(get_class($this)."::getDatabaseLogin(), this method is required");
-	}
 
 	protected function setLastQuery($query)
 	{
