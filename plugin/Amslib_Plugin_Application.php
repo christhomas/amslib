@@ -286,14 +286,26 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			//	TODO: we need to redirect away if we posted here, if it's ajax, it doesnt matter
 		}else{
 			//	TODO: we are being a bit hasty in assuming that "home" route even exists?
+			//	NOTE: yes we are, but right now we have no alternative than assume it exists for now
 			Amslib_Website::redirect("home");
 		}
 		
 		die();
 	}
 	
+	/**
+	 * method: render
+	 * 
+	 * Render the application, or process a web service, depending on the resource
+	 * 
+	 * NOTE:
+	 * 	-	by standard the "resource" === "Service" means a webservice
+	 * 	-	override this default behaviour by overriding this method with a customised version
+	 */
 	public function render()
 	{
+		if(Amslib_Router3::getResource() === "Service") $this->runService();	
+		
 		//	Request the website render itself now
 		print($this->api->render());
 	}
