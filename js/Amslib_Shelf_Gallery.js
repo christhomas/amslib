@@ -87,18 +87,67 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		},this));
 	},
 	
+	toIndex: function(index)
+	{
+		var first	=	$(this.options.selItem+":first",this.parent);
+		var start	=	this.items.index(first);
+		var finish	=	this.items.index(this.items.get(index));
+		
+		if(start == finish) return;
+		
+		if(start > finish){
+			this.toIndexPrev(start,finish);
+		}else{
+			this.toIndexNext(start,finish);
+		}
+	},
+	
+	toIndexPrev: function(s,f)
+	{
+		if(this.mutex) return;
+		this.mutex = true;
+		
+		for(a=s-1;a>=f;a--) this.slider.prepend($(this.items.get(a)).detach());
+		
+		var left = $(this.items.get(s)).position().left;
+		this.slider.css("left","-"+left+"px");
+		var time = (s-f)*500;
+
+		//	Animate to left:0
+		this.slider.animate({left:"0px"},time,$.proxy(function(){
+			//if(cb) cb();
+			
+			this.mutex = false;
+		},this));
+	},
+	
+	toIndexNext: function(s,f)
+	{
+		if(this.mutex) return;
+		this.mutex = true;
+		
+		var end = $(this.items.get(f))
+		var left = end.position().left;
+		var time = (f-s)*500;
+
+		this.slider.animate({left:-left+"px"},time,$.proxy(function(){
+			for(a=s;a<f;a++) this.slider.append($(this.items.get(a)).detach());
+			this.slider.css("left","0px");
+
+			//if(cb) cb();
+			
+			this.mutex = false;
+		},this));
+	},
+	
 	animateAutoNext: function()
 	{
-		this.next($.proxy(function(){
-			setTimeout($.proxy(this,this.options.animate),5000);
-		},this));
+		this.next($.proxy(this,"start"));
 	},
 	
 	animateAutoPrev: function()
 	{
-		this.prev($.proxy(function(){
-			setTimeout($.proxy(this,this.options.animate),5000);
-		},this));
+		this.prev($.proxy(this,"start"));
 	}
 });
 
