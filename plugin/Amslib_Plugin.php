@@ -133,6 +133,7 @@ class Amslib_Plugin
 
 		if($list->length == 1){
 			$node = $list->item(0);
+
 			if($node){
 				$object	=	$node->nodeValue;
 
@@ -144,11 +145,11 @@ class Amslib_Plugin
 					if($api)	$model = $api->getModel();
 					if($model)	$this->model = $model;
 				}
-				
+
 				//	ATTEMPT 2: Is it a plain, ordinary object that exists in the system?
 				if($this->model == false){
 					try{
-						$this->model = @call_user_func(array($object,"getInstance"));
+						$this->model = call_user_func(array($object,"getInstance"));
 					}catch(Exception $e){}
 				}
 
