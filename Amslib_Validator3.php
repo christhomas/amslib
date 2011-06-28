@@ -144,6 +144,7 @@ class Amslib_Validator3
 	protected function __isbn($name,$value,$required,$options)
 	{
 		//	strip out some characters we know might be present, but have to be removed
+		$options["original_value"] = $value;
 		$value = str_replace(array("isbn","-"," ",".",","),"",strtolower($value));
 		
 		if(is_string($value)){
@@ -166,7 +167,7 @@ class Amslib_Validator3
     	$t = substr($value, 9, 1); // tenth digit (aka checksum or check digit)
     	$check += ($t == 'x' || $t == 'X') ? 10 : $t;
     	
-    	if($check % 11 == 0) $this->setValid($name,$value);
+    	if($check % 11 == 0) $this->setValid($name,$options["original_value"]);
     	else if($required) return "ISBN_10_INVALID";
     	
     	return true;
@@ -179,7 +180,7 @@ class Amslib_Validator3
     	for ($i = 0; $i < 13; $i+=2) $check += substr($value, $i, 1);
     	for ($i = 1; $i < 12; $i+=2) $check += 3 * substr($value, $i, 1);
     	
-    	if($check % 10 == 0) $this->setValid($name,$value);
+    	if($check % 10 == 0) $this->setValid($name,$options["original_value"]);
     	else if($required) return "ISBN_13_INVALID";
     	
     	return true;
