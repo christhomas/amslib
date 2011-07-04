@@ -27,8 +27,12 @@ class Amslib_Plugin_Service
 	
 	public function __construct($callback)
 	{
+		//	TODO:	This might not be a great idea to ALWAYS ask for this route, 
+		//			could not exist in some situations and probably will happen.
+		$default			=	Amslib_Router3::getURL("home");
+		
 		$this->validator	=	new Amslib_Validator3($_POST);
-		$this->returnURL	=	Amslib::rchop(Amslib::postParam("return_url"),"?");
+		$this->returnURL	=	Amslib::rchop(Amslib::postParam("return_url",$default),"?");
 		$this->callback		=	$callback;
 		$this->data			=	array();
 		$this->errors		=	array();
@@ -73,5 +77,14 @@ class Amslib_Plugin_Service
 		}
 		
 		$this->errors[$key] = $value;
+	}
+	
+	static public function getError($name=NULL,$erase=true)
+	{
+		$errors = Amslib::sessionParam("service_errors",false,$erase);
+		
+		if($name === NULL) return $errors;
+		
+		return ($errors && isset($errors[$name])) ? $errors[$name] : false;
 	}
 }
