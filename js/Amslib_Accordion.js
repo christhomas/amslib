@@ -10,9 +10,7 @@ $(document).ready(function(){
 		}else{
 			$(dst+"."+o).slideUp().removeClass(o);
 			$(this).addClass(o);
-			t.slideDown(time,function(){
-				$('html, body').animate({ scrollTop: t.offset().top }, time);
-			}).addClass(o);
+			t.slideDown(time).addClass(o);
 		}
 	});
 });
