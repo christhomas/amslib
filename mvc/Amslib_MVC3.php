@@ -302,7 +302,7 @@ class Amslib_MVC3
 			
 			//	NOTE: I should recognise that now Amslib_MVC3 is dependant on Amslib_Router3's existence
 			//	Attempt to find a routed url for this service
-			$url = Amslib_Router3::getUrl("Service:$id");
+			$url = Amslib_Router3::getURL("Service:$id");
 			if(!$url) $url = $this->service[$id];
 
 			//	Set this as a service url for the javascript to acquire
