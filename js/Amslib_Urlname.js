@@ -13,7 +13,7 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 				if(src && dst) src.data("amslib_urlname",new Amslib_Urlname(src,dst));
 			});
 		}
-	}
+	},
 	
 	constructor: function(src,dest)
 	{
@@ -34,12 +34,12 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 	
 	updateFromSrc: function()
 	{
-		this.dest.value = this.slugify(this.src.value);
+		this.dest.val(this.slugify(this.src.val()));
 	},
 	
 	updateFromDest: function()
 	{
-		this.dest.value = this.slugify(this.dest.value);
+		this.dest.val(this.slugify(this.dest.val()));
 	},
 
 	slugify: function(text){
