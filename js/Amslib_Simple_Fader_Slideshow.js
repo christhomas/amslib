@@ -1,4 +1,4 @@
-Amslib_Simple_Fader_Slideshow = my.Class(Amslib,
+var Amslib_Simple_Fader_Slideshow = my.Amslib_Simple_Fader_Slideshow = my.Class(my.Amslib,
 {
 	images:		false,
 	timeout:	false,
