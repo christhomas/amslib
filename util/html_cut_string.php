@@ -4,16 +4,19 @@
 // Date   12/04/2009
 // version 1.0
 
-//	2/06/2011: (chris.thomas@antimatter-studios.com)
+//	02/06/2011: (chris.thomas@antimatter-studios.com)
 //	modified loadXML -> loadHTML to stop it having problems with HTML entities
 
-//	2/06/2011: (chris.thomas@antimatter-studios.com)
+//	02/06/2011: (chris.thomas@antimatter-studios.com)
 //	modified loadHTML call and removed the <div>$string</div> which was the default, I dont want my strings modified
+
+//	08/07/2011: (chris.thomas@antimatter-studios.com)
+//	added the ("1.0","UTF-8") parameters to the creation of DomDocument to fix problems with UTF-8 encoded text
 
 class HtmlCutString{
   function __construct($string, $limit){
     // create dom element using the html string
-    $this->tempDiv = new DomDocument;
+    $this->tempDiv = new DomDocument("1.0","UTF-8");
     $this->tempDiv->loadHTML($string);
     // keep the characters count till now
     $this->charCount = 0;

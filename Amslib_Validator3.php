@@ -943,7 +943,6 @@ class Amslib_Validator3
 	
 	public function setValid($name,$value)
 	{
-		if($name == "src") Amslib_FirePHP::output("src",debug_backtrace());
 		$this->__validData[$name] = $value;
 	}
 
