@@ -11,6 +11,32 @@ class Amslib_Array
 		return $array;
 	}
 	
+	static public function min($array,$key,$returnKey=NULL)
+	{
+		$min = NULL;
+		
+		foreach(self::valid($array) as $item){
+			if($min === NULL) $min = $item;
+			
+			if($item[$key] < $min[$key]) $min = $item;
+		}
+		
+		return $returnKey !== NULL && isset($min[$returnKey]) ? $min[$returnKey] : $min;
+	}
+	
+	static public function max($array,$key,$returnKey=NULL)
+	{
+		$max = NULL;
+		
+		foreach(self::valid($array) as $item){
+			if($max === NULL) $max = $item;
+			
+			if($item[$key] > $max[$key]) $max = $item;
+		}
+		
+		return $returnKey !== NULL && isset($max[$returnKey]) ? $max[$returnKey] : $max;
+	}
+	
 	static public function pluck($array,$key)
 	{
 		if(!is_array($array) || !self::isMulti($array)) return false;

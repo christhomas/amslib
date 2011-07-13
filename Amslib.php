@@ -85,9 +85,15 @@ class Amslib
 		return ($p = strrpos($str,$search)) !== false ? substr($str,0,$p) : $str;
 	}
 	
-	static public function htmlCutString($string,$limit)
+	static public function truncateString($string,$length)
 	{
-		$output = new HtmlCutString($string, $limit);
+		return CakePHP::truncate($string,$length);
+	}
+	
+	//	DEPRECATED: doesn't work very well with non-ascii characters like ü
+	static public function htmlCutString($string,$length)
+	{
+		$output = new HtmlCutString($string, $length);
   		return $output->cut();
 	}
 
@@ -266,8 +272,13 @@ class Amslib
 				$class_name	=	"file/$class_name";
 			}
 			
+			//	DEPRECATED: unless I can find a way to fix the utf-8 broken characters like ü
 			if(strpos($class_name,"HtmlCutString") !== false){
 				$class_name	=	"util/html_cut_string";
+			}
+			
+			if(strpos($class_name,"CakePHP") !== false){
+				$class_name =	"util/CakePHP";
 			}
 			
 			$filename = str_replace("//","/","$class_name.php");

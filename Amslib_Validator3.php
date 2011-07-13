@@ -683,20 +683,22 @@ class Amslib_Validator3
 	 */
 	protected function __email($name,$value,$required,$options)
 	{
-		$value = trim($value);
+		$error	=	false;
+		$value	=	trim($value);
 
-		if(strlen($value) == 0 && $required == true) return "EMAIL_EMPTY";
+		if(strlen($value) == 0 && $required == true) $error = "EMAIL_EMPTY";
+		
+		if(isset($options["invalid"]) && in_array($value,$options["invalid"])) $error = "EMAIL_INVALID_INPUT";
 
 		//	LOL REGEXP
 		$pattern = "^[a-z0-9,!#\$%&'\*\+/=\?\^_`\{\|}~-]+(\.[a-z0-9,!#\$%&'\*\+/=\?\^_`\{\|}~-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*\.([a-z]{2,})$";
-		if(eregi($pattern,$value)){
-			$this->setValid($name,$value);
-			return true;
-		}
-
-		if($required == false) return true;
-
-		return "EMAIL_INVALID";
+		if(!eregi($pattern,$value)) $error = "EMAIL_INVALID";
+		
+		if($required == true && $error !== false) return $error;
+		
+		if($error === false) $this->setValid($name,$value);
+		
+		return true;
 	}
 
 	/**

@@ -147,7 +147,9 @@ class Amslib_Plugin
 				}
 
 				//	ATTEMPT 2: Is it a plain, ordinary object that exists in the system?
-				if($this->model == false){
+				//	NOTE: I have put class_exists to try and stop a warning from loading an impossible to find model object
+				//	NOTE: Why is an object inside the plugin, impossible to find???? thats the real question
+				if($this->model == false && class_exists($object)){
 					try{
 						$this->model = call_user_func(array($object,"getInstance"));
 					}catch(Exception $e){}
