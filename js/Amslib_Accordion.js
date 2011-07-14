@@ -8,7 +8,7 @@ $(document).ready(function(){
 		if(t.hasClass(o)){
 			t.slideUp().removeClass(o);
 		}else{
-			$(dst+"."+o).slideUp().removeClass(o);
+			$(this).siblings("."+o).slideUp().removeClass(o);
 			$(this).addClass(o);
 			t.slideDown(time).addClass(o);
 		}
