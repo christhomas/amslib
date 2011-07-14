@@ -37,6 +37,26 @@ class Amslib_Array
 		return $returnKey !== NULL && isset($max[$returnKey]) ? $max[$returnKey] : $max;
 	}
 	
+	static public function sort($array,$index)
+	{
+		if(count($array) < 2) return $array;
+			 
+		$left = $right = array();
+			 
+		reset($array);
+		$pivot_key = key($array);
+		$pivot = array_shift($array);
+			 
+		foreach($array as $k => $v) {
+			if($v[$index] < $pivot[$index])
+				$left[$k] = $v;
+			else
+				$right[$k] = $v;
+		}
+		
+		return array_merge(self::sort($left,$index), array($pivot_key => $pivot), self::sort($right,$index));
+	}
+	
 	static public function pluck($array,$key)
 	{
 		if(!is_array($array) || !self::isMulti($array)) return false;
