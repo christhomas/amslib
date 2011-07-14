@@ -201,7 +201,7 @@ HAS_TABLE;
 		return false;
 	}
 	
-	public function getTablesFields($table)
+	public function getTableFields($table)
 	{
 		return $this->select("column_name from Information_Schema.Columns where table_name='$table'");
 	}
