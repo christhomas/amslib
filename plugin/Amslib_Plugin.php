@@ -100,6 +100,7 @@ class Amslib_Plugin
 			}
 		}else{
 			//	ERROR: More than one API object is not allowed
+			//	NOTE: why is this? why can't I create/construct multiple objects and then have them bind together as a "system" ?
 		}
 
 		//	An API Object was not created, so create a default Amslib_MVC3 object instead
