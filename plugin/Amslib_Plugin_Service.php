@@ -4,25 +4,42 @@ class Amslib_Plugin_Service
 {
 	protected $validator;
 	protected $returnURL;
+	protected $returnAJAX;
 	protected $callback;
 	protected $data;
 	protected $errors;
 
 	protected function success()
 	{
-		Amslib::insertSessionParam("validation_success",true);
-		
-		Amslib_Website::redirect($this->returnURL);
+		if($this->returnAJAX){
+			Amslib_Website::outputJSON(array(
+				"validation_success"	=>	true,
+				"service_data"			=>	$this->data
+			),true);
+		}else{
+			Amslib::insertSessionParam("validation_success",true);
+			Amslib::insertSessionParam("service_data",$this->data);
+			Amslib_Website::redirect($this->returnURL);
+		}
 	}
 	
 	protected function failure()
 	{
-		Amslib::insertSessionParam("validation_errors",$this->validator->getErrors());
-		Amslib::insertSessionParam("validation_data",$this->data);
-		Amslib::insertSessionParam("validation_success",false);
-		Amslib::insertSessionParam("service_errors",$this->errors);
+		if($this->returnAJAX){
+			Amslib_Website::outputJSON(array(
+				"validation_errors"		=>	$this->validator->getErrors(),
+				"validation_data"		=>	$this->data,
+				"validation_success"	=>	false,
+				"service_errors"		=>	$this->errors
+			),true);
+		}else{
+			Amslib::insertSessionParam("validation_errors",$this->validator->getErrors());
+			Amslib::insertSessionParam("validation_data",$this->data);
+			Amslib::insertSessionParam("validation_success",false);
+			Amslib::insertSessionParam("service_errors",$this->errors);
 		
-		Amslib_Website::redirect($this->returnURL);
+			Amslib_Website::redirect($this->returnURL);	
+		}
 	}
 	
 	public function __construct($callback)
@@ -33,6 +50,7 @@ class Amslib_Plugin_Service
 		
 		$this->validator	=	new Amslib_Validator3($_POST);
 		$this->returnURL	=	Amslib::rchop(Amslib::postParam("return_url",$default),"?");
+		$this->returnAJAX	=	Amslib::postParam("return_ajax");
 		$this->callback		=	$callback;
 		$this->data			=	array();
 		$this->errors		=	array();
