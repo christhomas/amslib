@@ -240,6 +240,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	//	NOTE:	This method looks like it's out of date and needs
 	//			to be revamped with a new way to obtain this info
 	//			because it looks a little bit hacky
+	//	NOTE:	Stop using this method, it's going to get deleted soon
 	public function getPageTitle()
 	{
 		$api = Amslib_Plugin_Manager::getAPI(self::getActivePlugin());

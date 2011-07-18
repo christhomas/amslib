@@ -47,7 +47,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 			if(@$this->xdoc->load($this->database)){
 				$this->xdoc->preserveWhiteSpace = false;
 				$this->xpath = new DOMXPath($this->xdoc);
-	
+				
 				return true;
 			}else{
 				die(get_class($this)."::load() LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
@@ -106,7 +106,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 	public function getKeyList()
 	{					
 		$list = $this->xpath->query("//database/translation/attribute::key");
-		
+
 		$keys = array();
 		foreach($list as $k) $keys[] = $k->value;
 		
