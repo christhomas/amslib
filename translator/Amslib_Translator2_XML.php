@@ -86,7 +86,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 		return parent::learn($k,$v);		
 	}
 	
-	//	TODO: remove the key from the xml database
+	//	TODO: do the physical remove the key from the xml database
 	//	TODO: do I remove from just a single language, or all of them?
 	//	TODO: perhaps remove all by default, or specify the language to single a particular xml database out.
 	public function forget($k)
