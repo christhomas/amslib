@@ -54,6 +54,12 @@ class Amslib_Plugin_Service
 		$this->callback		=	$callback;
 		$this->data			=	array();
 		$this->errors		=	array();
+		
+		//	Reset certain session data structures which are not supposed to exist more than once
+		Amslib::insertSessionParam("validation_errors",false);
+		Amslib::insertSessionParam("validation_data",false);
+		Amslib::insertSessionParam("validation_success",false);
+		Amslib::insertSessionParam("service_errors",false);
 	}
 	
 	public function validate($name,$type,$required=false,$options=array())

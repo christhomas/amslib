@@ -277,8 +277,7 @@ class Amslib_Plugin
 		$this->processBlock("layout",		"name",	"setLayout");
 		$this->processBlock("view",			"name",	"setView");
 		$this->processBlock("object",		"name",	"setObject");
-		$this->processBlock("service",		"file",	"setService");
-		$this->processBlock("service",		"name",	"setService2");
+		$this->processBlock("service",		"name",	"setService");
 		$this->processBlock("image",		"file",	"setImage");
 		$this->processBlock("javascript",	"file",	"setJavascript");
 		$this->processBlock("stylesheet",	"file",	"setStylesheet");
@@ -387,7 +386,7 @@ class Amslib_Plugin
 						switch($override->nodeName){
 							case "layout":{			$api->setLayout($n,$p->getLayout($r),true);			}break;
 							case "view":{			$api->setView($n,$p->findView($r),true);			}break;
-							case "service":{		$api->setService2($n,$p->getService($r,true),true);	}break;
+							case "service":{		$api->setService($n,$p->getService($r,true),true);	}break;
 							case "object":{			$api->setObject($n,$p->getObject($r),true);			}break;
 							case "image":{			$api->setImage($n,$p->getImage($r),true);			}break;
 						}
