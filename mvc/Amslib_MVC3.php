@@ -298,7 +298,7 @@ class Amslib_MVC3
 
 			//	Set this as a service url for the javascript to acquire
 			$this->setValue("service:$id",$url);
-		}
+		}	
 	}
 
 	public function getService($id,$url=false)
