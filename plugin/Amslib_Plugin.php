@@ -384,11 +384,11 @@ class Amslib_Plugin
 						if(!$n || !$p || !$r) continue;
 
 						switch($override->nodeName){
-							case "layout":{			$api->setLayout($n,$p->getLayout($r),true);			}break;
-							case "view":{			$api->setView($n,$p->findView($r),true);			}break;
-							case "service":{		$api->setService($n,$p->getService($r,true),true);	}break;
-							case "object":{			$api->setObject($n,$p->getObject($r),true);			}break;
-							case "image":{			$api->setImage($n,$p->getImage($r),true);			}break;
+							case "layout":{			$api->setLayout($r,$p->getLayout($n),true);			}break;
+							case "view":{			$api->setView($r,$p->findView($n),true);			}break;
+							case "service":{		$api->setService($r,$p->getServiceURL($n),true);	}break;
+							case "object":{			$api->setObject($r,$p->getObject($n),true);			}break;
+							case "image":{			$api->setImage($r,$p->getImage($n),true);			}break;
 						}
 					}
 				}else{
