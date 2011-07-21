@@ -19,7 +19,7 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 				var src = $(this).find(".amslib_urlname_src");
 				var dst = $(this).find(".amslib_urlname_dst");
 				
-				if(src && dst) src.data("amslib_urlname",new Amslib_Urlname(src,dst));
+				if(src && dst) $(this).data("amslib_urlname",new Amslib_Urlname(src,dst));
 			});
 		}
 	},
