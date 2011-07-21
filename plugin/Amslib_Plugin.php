@@ -389,6 +389,8 @@ class Amslib_Plugin
 							case "service":{		$api->setService($r,$p->getServiceURL($n),true);	}break;
 							case "object":{			$api->setObject($r,$p->getObject($n),true);			}break;
 							case "image":{			$api->setImage($r,$p->getImage($n),true);			}break;
+							//	You can't import stylesheets
+							//	You can't import javascripts
 						}
 					}
 				}else{
