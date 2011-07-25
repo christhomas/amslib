@@ -1,9 +1,11 @@
 /**
- * NOTE: I got the diagritics part of the code from: 
+ * NOTE:	I got the diagritics part of the code from: 
+ * 			http://lehelk.com/2011/05/06/script-to-remove-diacritics/
  * 
- * http://lehelk.com/2011/05/06/script-to-remove-diacritics/
+ * NOTE:	I added the trim methods from this website
+ * 			http://www.webtoolkit.info/javascript-trim.html
  * 
- * thanks for helping me and improving the code, it was great
+ * TO ALL:	thanks for helping me and improving the code, it was great
  */
 
 var Amslib_Urlname = my.Amslib_Urlname = my.Class(
@@ -53,7 +55,7 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 	},
 
 	slugify: function(text){
-		return this.removeDiacritics(text).replace(/[^-a-zA-Z0-9]+/ig, '-').toLowerCase();
+		return this.trim(this.removeDiacritics(text).replace(/[^-a-zA-Z0-9]+/ig,'-').toLowerCase(),' -');
 	},
 	
 	removeDiacritics: function(text)
@@ -63,6 +65,20 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 		}
 		
 		return text;
+	},
+	
+	trim: function(str, chars) {
+		return this.ltrim(this.rtrim(str, chars), chars);
+	},
+	 
+	ltrim: function(str, chars) {
+		chars = chars || "\\s";
+		return str.replace(new RegExp("^[" + chars + "]+", "g"), "");
+	},
+	 
+	rtrim: function(str, chars) {
+		chars = chars || "\\s";
+		return str.replace(new RegExp("[" + chars + "]+$", "g"), "");
 	}
 });
 
