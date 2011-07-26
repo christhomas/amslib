@@ -24,6 +24,7 @@
 	background-color: #444444;
 	color: #FFFFFF;
 	cursor: pointer;
+	border-color: #FFFFFF;
 }
 
 .amslib_numeric_field span.value{	
