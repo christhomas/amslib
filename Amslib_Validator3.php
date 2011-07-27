@@ -236,6 +236,7 @@ class Amslib_Validator3
 			$error = "TEXT_CANNOT_MATCH_AGAINST_LIMIT";
 		}
 		
+		//	NOTE: maybe "invalid" should change to "exclude-input" to be closer to the syntax of "limit-input" ?
 		if(isset($options["invalid"]) && in_array($value,$options["invalid"])){
 			$error = "TEXT_INVALID_INPUT";
 		}
