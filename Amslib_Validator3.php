@@ -25,7 +25,7 @@
  *******************************************************************************/
 
 /**
- * class: Amslib_Validator
+ * class: Amslib_Validator3
  *
  * Validates a form posted from the browser to see whether the data conforms to the expected types
  *
@@ -128,8 +128,8 @@ class Amslib_Validator3
 		
 		if(!is_array($value)) return "ARRAY_INVALID";
 		
-		$arrayValidator = new Amslib_Validator($value);
-		foreach($value as $k=>$v) $arrayValidator->add($k,$options["type"],$required);
+		$arrayValidator = new self($value);
+		foreach($value as $k=>$v) $arrayValidator->add($k,$options["type"],$required,$options);
 		
 		$data = array(
 			"success"	=>	$arrayValidator->execute(),
@@ -880,6 +880,20 @@ class Amslib_Validator3
 		return "FILE_NOT_FOUND";
 	}
 	
+	protected function __file_exists($name,$value,$required,$options)
+	{
+		if($options["absolute"] == true) $value = Amslib_Filesystem::absolute($value);
+		
+		if(is_file($value)){
+			$this->setValid("{$options["key"]}$name",$value);
+			return true;
+		}
+		
+		if($required == false) return true;
+		
+		return "FILE_EXISTS_FAILED";
+	}
+	
 	/**
 	 * For description: read the member variables related to this method, they explain all
 	 */
@@ -926,6 +940,7 @@ class Amslib_Validator3
 		$this->register("phone",			array($this,"__phone"));
 		$this->register("date",				array($this,"__date"));
 		$this->register("file",				array($this,"__file"));
+		$this->register("file_exists",		array($this,"__file_exists"));
 		$this->register("array",			array($this,"__array"));
 		$this->register("isbn",				array($this,"__isbn"));
 
@@ -1025,7 +1040,7 @@ class Amslib_Validator3
 	 *
 	 * returns:
 	 * 	If there are no items in the source array, return true or false, depending on whether there are required rules or not
-	 * 	Return whether the result from calling Amslib_Validator::getStatus (true or false, true for no errors)
+	 * 	Return whether the result from calling Amslib_Validator3::getStatus (true or false, true for no errors)
 	 *
 	 * operations:
 	 * 	-	Reset the hasExecuted flag to false
@@ -1041,7 +1056,7 @@ class Amslib_Validator3
 	 * 	-	Return the status of the validator (true = no errors)
 	 *
 	 * notes:
-	 * 	-	Rename Amslib_Validator::__items to Amslib_Validator::__rules or something more descriptive
+	 * 	-	Rename Amslib_Validator3::__items to Amslib_Validator3::__rules or something more descriptive
 	 */
 	public function execute()
 	{
