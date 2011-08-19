@@ -1,5 +1,4 @@
 <?php 
-//	FIXME: This object doesn't yet support processing AJAX requests, everything is done by returnURL, etc
 class Amslib_Plugin_Service
 {
 	protected $validator;
