@@ -133,8 +133,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	protected function initRouter()
 	{
-		//	TODO: need to get rid of the need to do this constructor
-		//	TODO: Why are we hardcoding the type of source to XML? what if we chose a DB source instead?
+		//	TODO:	need to get rid of the need to do this constructor
+		//	FIXME:	initialising the router object like this is fucking ugly....
+		//	TODO:	Why are we hardcoding the type of source to XML? what if we chose a DB source instead?
+		//	FIXME:	we have to coordinate code with executeRouter in order to make sure it still works
+		//			perhaps this should be done in one place only?
 		$r = Amslib_Router3::getInstance();
 		Amslib_Router3::setSource(Amslib_Router3::getObject("source:xml"));
 	}
@@ -148,7 +151,8 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$source = Amslib_Plugin::expandPath($source);
 
 		//	Initialise and execute the router
-		//	TODO: As noted in initRouter, why are we hardcoding an XML source?
+		//	FIXME: allow the use of a database source for routes and not just XML
+		//	FIXME: we already load this in the Amslib_Plugin level, why are we doing it twice??
 		$xml = Amslib_Router3::getObject("source:xml");
 		$xml->load($source);
 
