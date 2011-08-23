@@ -393,24 +393,40 @@ class Amslib_MVC3
 	
 	public function setGoogleFont($id,$file,$conditional=NULL,$autoload=NULL)
 	{
-		if(!is_string($id) && $file) return;
-		
-		$this->googleFont[$id] = array("file"=>$file,"conditional"=>$conditional);
-
-		if($autoload) $this->addGoogleFont($id);
+		$this->setFont("google",$id,$file,$condition,$autoload);
 	}
 	
 	public function addGoogleFont($id)
 	{
-		if(isset($this->googleFont[$id])){
-			$f = $this->googleFont[$id];
-			Amslib_Resource_Compiler::addGoogleFont($id,$f["file"],$f["conditional"]);
-		}
+		$this->addFont($id);
 	}
 	
 	public function removeGoogleFont($id)
 	{
-		Amslib_Resource_Compiler::removeGoogleFont($id);
+		$this->removeFont($id);
+	}
+	
+	public function setFont($type,$id,$file,$condition,$autoload,$media)
+	{
+		//	FIXME: implement the $type field somehow, but atm we only support google webfont
+		if(!is_string($id) && $file) return;
+		
+		$this->font[$id] = array("file"=>$file,"conditional"=>$conditional,"media"=>$media);
+
+		if($autoload) $this->addFont($id);
+	}
+	
+	public function addFont($id)
+	{
+		if(isset($this->font[$id])){
+			$f = $this->font[$id];
+			Amslib_Resource_Compiler::addFont($id,$f["file"],$f["conditional"],$f["media"]);
+		}
+	}
+	
+	public function removeFont($id)
+	{
+		Amslib_Resource_Compiler::removeFont($id);
 	}
 
 	/**
