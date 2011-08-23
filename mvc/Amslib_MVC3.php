@@ -391,21 +391,6 @@ class Amslib_MVC3
 		Amslib_Resource_Compiler::removeJavascript($id);
 	}
 	
-	public function setGoogleFont($id,$file,$conditional=NULL,$autoload=NULL)
-	{
-		$this->setFont("google",$id,$file,$condition,$autoload);
-	}
-	
-	public function addGoogleFont($id)
-	{
-		$this->addFont($id);
-	}
-	
-	public function removeGoogleFont($id)
-	{
-		$this->removeFont($id);
-	}
-	
 	public function setFont($type,$id,$file,$condition,$autoload,$media)
 	{
 		//	FIXME: implement the $type field somehow, but atm we only support google webfont
@@ -545,4 +530,8 @@ class Amslib_MVC3
 	//	TODO: investigate: this method is very similar to render, can refactor??
 	//	TODO: Because getView collides with findView above, we should try to move this method to somewhere more inline with renderView() [which is what it actually does]
 	public function getView($id,$parameters=array()){ return $this->renderView($id,$parameters); }
+	//	use setFont, addFont, removeFont instead
+	public function setGoogleFont($id,$file,$conditional=NULL,$autoload=NULL){$this->setFont("google",$id,$file,$condition,$autoload);}
+	public function addGoogleFont($id){$this->addFont($id);}
+	public function removeGoogleFont($id){$this->removeFont($id);}
 }
