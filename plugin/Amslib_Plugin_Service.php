@@ -1,5 +1,4 @@
-<?php 
-//	FIXME: This object doesn't yet support processing AJAX requests, everything is done by returnURL, etc
+<?php
 class Amslib_Plugin_Service
 {
 	protected $validator;
@@ -77,7 +76,7 @@ class Amslib_Plugin_Service
 			$this->data["validator"] = $this->validator->getValidData();
 
 			if(call_user_func($this->callback,$this,$this->validator->getValidData()) === true){
-				$this->success();
+				return $this->success();
 			}
 			
 			$this->setError("error","service_failed");
@@ -85,7 +84,7 @@ class Amslib_Plugin_Service
 			$this->setError("error","validation_failed");
 		}
 		
-		$this->failure();
+		return $this->failure();
 	}
 	
 	public function setData($key,$value)

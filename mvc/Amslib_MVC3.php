@@ -132,6 +132,18 @@ class Amslib_MVC3
 	{
 		return $this->plugin;
 	}
+	
+	public function getServiceHandler()
+	{
+		$handler = new Amslib_Plugin_Service2($_POST);
+		
+		/*
+		 * 01.	internal services return true/false
+		 * 02.	external services use the form/success, form/failure url's
+		 * 03.	perhaps we use callbacks to change internal codepaths instead of if() statements to be cleaner 
+		 * 
+		 * */
+	}
 
 	public function getRoute($name=NULL)
 	{
@@ -175,6 +187,7 @@ class Amslib_MVC3
 
 	//	NOTE: Controllers are actually not used in this system though are they?
 	//	NOTE: Well, API objects are a type of controller.....so seems we're having a semantic explanation
+	//	NOTE: Perhaps this means we should either move to using controllers, or api objects, but not both, so one must be removed
 	public function setController($id,$name,$absolute=false)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
@@ -292,6 +305,7 @@ class Amslib_MVC3
 			$this->service[$id] = Amslib_Website::rel($this->getComponentPath("service", $name));
 			
 			//	NOTE: I should recognise that now Amslib_MVC3 is dependant on Amslib_Router3's existence
+			//	NOTE: perhaps we should remove this dependency and instead inport the data as opposed to looking it up here
 			//	Attempt to find a routed url for this service
 			$url = Amslib_Router3::getURL("Service:$id");
 			if(!$url) $url = $this->service[$id];
@@ -462,6 +476,7 @@ class Amslib_MVC3
 		return (isset($this->images[$id])) ? $this->images[$id] : false;
 	}
 
+	//	FIXME: we have to formalise what this slot code is supposed to do, opposed to what the view system already does.
 	public function setSlot($name,$content,$index=NULL)
 	{
 		if($index){
