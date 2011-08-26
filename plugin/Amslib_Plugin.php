@@ -249,7 +249,7 @@ class Amslib_Plugin
 			$n		=	$nodes->item($a);
 			$id		=	$n->getAttribute("id");
 
-			if(in_array($name,array("controller","layout","view","object","service"))){
+			if(in_array($name,array("layout","view","object","service"))){
 				$item	=	$n->nodeValue;
 				$params	=	array($id,$item);
 			}else{
@@ -273,7 +273,6 @@ class Amslib_Plugin
 		//	If the API is not valid, return false to trigger an error.
 		if(!$this->api) return false;
 
-		$this->processBlock("controller",	"name",	"setController");
 		$this->processBlock("layout",		"name",	"setLayout");
 		$this->processBlock("view",			"name",	"setView");
 		$this->processBlock("object",		"name",	"setObject");

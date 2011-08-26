@@ -26,7 +26,6 @@
 
 class Amslib_MVC3
 {
-	protected $controller;
 	protected $layout;
 	protected $object;
 	protected $view;
@@ -61,7 +60,6 @@ class Amslib_MVC3
 
 	public function __construct()
 	{
-		$this->controller	=	array();
 		$this->layout		=	array("default"=>false);
 		$this->object		=	array();
 		$this->view			=	array();
@@ -76,7 +74,6 @@ class Amslib_MVC3
 		//	This stores where all the types components are stored as part of the application
 		$this->prefix = array();
 
-		$this->setComponent("controller",	"controllers",	"Ct_");
 		$this->setComponent("layout",		"layouts",		"La_");
 		$this->setComponent("view",			"views",		"Vi_");
 		$this->setComponent("object",		"objects",		"");
@@ -171,25 +168,6 @@ class Amslib_MVC3
 	public function getViewParam($name)
 	{
 		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
-	}
-
-	//	NOTE: Controllers are actually not used in this system though are they?
-	//	NOTE: Well, API objects are a type of controller.....so seems we're having a semantic explanation
-	public function setController($id,$name,$absolute=false)
-	{
-		if(!$id || strlen($id) == 0) $id = $name;
-
-		$this->controllers[$id] = ($absolute == false) ? $this->getComponentPath("controller",$name) : $name;
-	}
-
-	public function getController($id)
-	{
-		return $this->controllers[$id];
-	}
-	
-	public function listControllers()
-	{
-		return array_keys($this->controllers);
 	}
 
 	public function setLayout($id,$name,$absolute=false)
