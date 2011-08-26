@@ -15,86 +15,29 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * file: Amslib_Plugin_Application.php
- * title: Antimatter Plugin, Plugin Application object
+ * file: Amslib_Plugin_Application2.php
+ * title: Antimatter Plugin, Plugin Application object version 2
  * description: An object to handle a plugin, which is actually an application
  * 				which represents a website, the application can have extra configuration
  * 				options which a normal plugin doesn't have.  To setup the "website".
  * 
- * version: 1.0
+ * version: 2.0
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-class Amslib_Plugin_Application extends Amslib_Plugin
+class Amslib_Plugin_Application2 extends Amslib_Plugin2
 {
 	static protected $version;
 	static protected $registeredLanguages = array();
 
-	protected function readValue($query,$default=NULL)
-	{
-		$node = $this->xpath->query($query);
-
-		return ($node && $node->length) ? $node->item(0)->nodeValue : $default;
-	}
-	
-	protected function readSingleNode($query,$default=NULL)
-	{
-		$node = $this->xpath->query($query);
-		
-		return ($node && $node->length) ? $node->item(0) : $default;
-	}
-
-	protected function findResource($plugin,$node)
-	{
-		$node->nodeValue = Amslib_Plugin::expandPath($node->nodeValue);
-
-		return parent::findResource($plugin,$node);
-	}
-
 	protected function readVersion()
 	{
-		self::$version = array(
-			"date"		=>	$this->readValue("//package/version/date"),
-			"number"	=>	$this->readValue("//package/version/number"),
-			"name"		=>	$this->readValue("//package/version/name"),
-		);
+		self::$version = $this->config["version"];
 	}
 
-	protected function readPaths()
-	{
-		$path = $this->readSingleNode("//package/path");
-		if($path)
-		{
-			foreach($path->childNodes as $p)
-			{
-				if($p->nodeType != 1) continue;
-				
-				$name	=	$p->nodeName;
-				$value	=	Amslib_Plugin::expandPath($p->nodeValue);
-	
-				if($name == "include"){
-					Amslib::addIncludePath(Amslib_File::absolute($value));
-				}else{
-					Amslib_Plugin::setPath($name,$value);
-					
-					switch($name){
-						case "plugin":{
-							Amslib_Plugin_Manager::addLocation($value);
-						}break;
-						
-						case "docroot":{
-							Amslib_File::documentRoot($value);						
-						}break;
-					};
-				}
-			}
-	
-			//	NOTE: What should I do if a path is missing? this could cause a crash
-		}
-	}
-
+	//	NOTE: I think this method is deprecated?
 	protected function initialiseModel()
 	{
 		parent::initialiseModel();
@@ -108,9 +51,8 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		//	Set the version of the admin this panel is running
 		$this->readVersion();
-		//	Set all the important paths for the admin to run
-		$this->readPaths();
 		//	Load the router (need to initialise the router first, but execute it after everything is loaded from the plugins)
+		//	NOTE: This is done because of webservices right? perhaps there is a better way of doing this
 		$this->initRouter();
 
 		return true;
@@ -118,9 +60,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	protected function finalisePlugin()
 	{
-		//	Load all the customised configuration into the plugins
-		$this->configurePlugins();
-
 		//	Load the required router library and execute it to setup everything it needs
 		$this->executeRouter();
 		
@@ -147,31 +86,36 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	//			any way, so this functionality is practically worthless.
 	protected function executeRouter()
 	{
-		$source = $this->readValue("//package/router_source");
-		$source = Amslib_Plugin::expandPath($source);
-
 		//	Initialise and execute the router
 		//	FIXME: allow the use of a database source for routes and not just XML
 		//	FIXME: we already load this in the Amslib_Plugin level, why are we doing it twice??
 		$xml = Amslib_Router3::getObject("source:xml");
-		$xml->load($source);
+		$xml->load($this->config["router_source"]);
 
 		Amslib_Router3::setSource($xml);
 		Amslib_Router3::execute();
 	}
 
-	public function __construct($name,$location)
+	public function __construct($name=NULL,$location=NULL)
 	{
 		parent::__construct();
 		
-		Amslib_Plugin::setPath("amslib",	Amslib::locate());
-		Amslib_Plugin::setPath("website",	"__WEBSITE__");
-		Amslib_Plugin::setPath("admin",		"__ADMIN__");
-		Amslib_Plugin::setPath("plugin",	"__PLUGIN__");
-		Amslib_Plugin::setPath("docroot",	Amslib_File::documentRoot());
+		parent::setPath("amslib",	Amslib::locate());
+		parent::setPath("website",	"__WEBSITE__");
+		parent::setPath("admin",	"__ADMIN__");
+		parent::setPath("plugin",	"__PLUGIN__");
+		parent::setPath("docroot",	Amslib_File::documentRoot());
 		
-		$this->load($name,$location);
-		Amslib_Plugin_Manager::import($name,$this);
+		//	remove it here because you need to add it again, but making sure it's at the end!!
+		unset($this->searchXPath["requires"]);
+		$this->searchXPath[] = "path";
+		$this->searchXPath[] = "router_source";
+		$this->searchXPath[] = "version";
+		//	NOTE: Always made sure "requires" is the last item in the list
+		$this->searchXPath[] = "requires";
+		
+		//	Only load the plugin if the require basic information is given, otherwise defer to whoever created the object
+		if($name && $location) $this->load($name,$location);
 	}
 
 	static public function &getInstance()
@@ -182,35 +126,13 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		return $instance;
 	}
-
-	/**
-	 * method: runPackage
-	 *
-	 * Run all the sequence of events that need to happen for the plugin to be opened correctly
-	 *
-	 * NOTE:	we overload this method with a customised version
-	 * 			because the application plugin needs the model initialised
-	 * 			before any plugins load
-	 *
-	 * NOTE:	plugins need that their dependencies are loaded BEFORE they
-	 * 			load their stuff, for example, if models are inherited from
-	 * 			one another, the plugin will break because it's model is
-	 * 			initialised before it's dependency is made available.
-	 */
-	protected function runPackage()
-	{
-		$this->initialisePlugin();
-		$this->initialiseModel();
-		$this->loadDependencies();
-		$this->loadRouter();
-		$this->loadConfiguration();
-		$this->finalisePlugin();
-	}
 	
 	public function setModel($model)
 	{
+		//	FIXME: perhaps setting EVERY model that comes through here is a bad idea
 		Amslib_Database::setSharedConnection($model);
 
+		//	FIXME: perhaps creation of the model object should be lazy, if you don't use it, why create it
 		parent::setModel($model);
 	}
 
@@ -244,10 +166,18 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	//	NOTE:	This method looks like it's out of date and needs
 	//			to be revamped with a new way to obtain this info
 	//			because it looks a little bit hacky
-	//	NOTE:	Stop using this method, it's going to get deleted soon
+	//	NOTE:	Does anybody use this anymore?
+	//	NOTE:	perhaps the loaded plugin should import into the application
+	//			plugin the page title to use, but wouldn't work with our current method of loading all plugins
+	//	NOTE:	This would require a change in how the administration panel uses plugins
+	//			because right now they are all loaded and then we do a "getActivePlugin"
+	//			to obtain the correct plugin, perhaps we should not load all plugins, but only
+	//			the current one based on the route, then it would be simpler
+	//	NOTE:	This would require us to allow a plugin to be queried, but not loaded, perhaps
+	//			we can add a new method alongside load() called config() and it'll only load the config value data
 	public function getPageTitle()
 	{
-		$api = Amslib_Plugin_Manager::getAPI(self::getActivePlugin());
+		$api = Amslib_Plugin_Manager2::getAPI(self::getActivePlugin());
 
 		$title = false;
 
@@ -257,16 +187,18 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return $title;
 	}
 
-	//	NOTE: I don't like this method, I should find a nicer way to do this
+	//	NOTE:	I don't like this method, I should find a nicer way to do this
+	//	NOTE:	if we didnt load all the plugins, we wouldn't need it, but we need to load all plugins
+	//			to get their configuration data for the header section, the url's, etc, etc
 	static public function getActivePlugin()
 	{
 		static $activePlugin = NULL;
 
 		if($activePlugin === NULL){
 			$routeName		=	Amslib_Router3::getName();
-			$activePlugin	=	Amslib_Plugin_Manager::getPluginNameByRouteName($routeName);
+			$activePlugin	=	Amslib_Plugin_Manager2::getPluginNameByRouteName($routeName);
 		}
-
+		
 		return $activePlugin;
 	}
 	
@@ -275,15 +207,18 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$parameters = Amslib_Router3::getParameter();
 
 		if(isset($parameters["plugin"]) && isset($parameters["service"])){
-			$api = Amslib_Plugin_Manager::getAPI($parameters["plugin"]);
+			$api = Amslib_Plugin_Manager2::getAPI($parameters["plugin"]);
 			if($api){
 				//	NOTE:	this could be better if there was an api method to call
 				//			because that would mean it'll get the parameters 
-				//			directly + specifically for it's needs
+				//			directly + specifically for it's needs	
 				
 				//	Call the service script to setup any static parameters required
 				Amslib::requireFile(Amslib_Website::abs("/plugins/service.php"));
 				
+				//	TODO:	we should upgrade the service code so it calls a method, not includes some arbitary file
+				//			this way it would probably be a lot more flexible since we stay inside the api system and not
+				//			in some could-be-anything script that runs anywhere and I dont know where...
 				$api->callService($parameters["service"]);
 			}
 			

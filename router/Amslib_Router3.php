@@ -102,7 +102,7 @@ class Amslib_Router3
 
 			case "language":{
 				return Amslib_Router_Language3::getInstance();
-			}
+			}break;
 		}
 
 		return false;

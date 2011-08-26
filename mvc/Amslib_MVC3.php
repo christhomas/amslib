@@ -26,7 +26,6 @@
 
 class Amslib_MVC3
 {
-	protected $controller;
 	protected $layout;
 	protected $object;
 	protected $view;
@@ -61,7 +60,6 @@ class Amslib_MVC3
 
 	public function __construct()
 	{
-		$this->controller	=	array();
 		$this->layout		=	array("default"=>false);
 		$this->object		=	array();
 		$this->view			=	array();
@@ -76,7 +74,6 @@ class Amslib_MVC3
 		//	This stores where all the types components are stored as part of the application
 		$this->prefix = array();
 
-		$this->setComponent("controller",	"controllers",	"Ct_");
 		$this->setComponent("layout",		"layouts",		"La_");
 		$this->setComponent("view",			"views",		"Vi_");
 		$this->setComponent("object",		"objects",		"");
@@ -185,30 +182,10 @@ class Amslib_MVC3
 		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
 	}
 
-	//	NOTE: Controllers are actually not used in this system though are they?
-	//	NOTE: Well, API objects are a type of controller.....so seems we're having a semantic explanation
-	//	NOTE: Perhaps this means we should either move to using controllers, or api objects, but not both, so one must be removed
-	public function setController($id,$name,$absolute=false)
-	{
-		if(!$id || strlen($id) == 0) $id = $name;
-
-		$this->controllers[$id] = ($absolute == false) ? $this->getComponentPath("controller",$name) : $name;
-	}
-
-	public function getController($id)
-	{
-		return $this->controllers[$id];
-	}
-	
-	public function listControllers()
-	{
-		return array_keys($this->controllers);
-	}
-
 	public function setLayout($id,$name,$absolute=false)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
-
+		
 		$this->layout[$id] = ($absolute == false) ? $this->getComponentPath("layout",$name) : $name;
 
 		if($this->layout["default"] == false) $this->layout["default"] = $this->layout[$id];
@@ -396,26 +373,26 @@ class Amslib_MVC3
 		Amslib_Resource_Compiler::removeJavascript($id);
 	}
 	
-	public function setGoogleFont($id,$file,$conditional=NULL,$autoload=NULL)
+	public function setFont($type,$id,$file,$condition,$autoload)
 	{
+		//	FIXME: implement the $type field somehow, but atm we only support google webfont
 		if(!is_string($id) && $file) return;
 		
-		$this->googleFont[$id] = array("file"=>$file,"conditional"=>$conditional);
+		$this->font[$id] = array("file"=>$file,"conditional"=>$conditional);
 
-		if($autoload) $this->addGoogleFont($id);
+		if($autoload) $this->addFont($id);
 	}
 	
-	public function addGoogleFont($id)
+	public function addFont($id)
 	{
-		if(isset($this->googleFont[$id])){
-			$f = $this->googleFont[$id];
-			Amslib_Resource_Compiler::addGoogleFont($id,$f["file"],$f["conditional"]);
-		}
+		if(!isset($this->font[$id])) return;
+		
+		Amslib_Resource_Compiler::addFont($id,$this->font[$id]["file"],$this->font[$id]["conditional"]);
 	}
 	
-	public function removeGoogleFont($id)
+	public function removeFont($id)
 	{
-		Amslib_Resource_Compiler::removeGoogleFont($id);
+		Amslib_Resource_Compiler::removeFont($id);
 	}
 
 	/**
@@ -537,4 +514,8 @@ class Amslib_MVC3
 	//	TODO: investigate: this method is very similar to render, can refactor??
 	//	TODO: Because getView collides with findView above, we should try to move this method to somewhere more inline with renderView() [which is what it actually does]
 	public function getView($id,$parameters=array()){ return $this->renderView($id,$parameters); }
+	//	use setFont, addFont, removeFont instead
+	public function setGoogleFont($id,$file,$conditional=NULL,$autoload=NULL){$this->setFont("google",$id,$file,$condition,$autoload);}
+	public function addGoogleFont($id){$this->addFont($id);}
+	public function removeGoogleFont($id){$this->removeFont($id);}
 }

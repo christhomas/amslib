@@ -47,13 +47,17 @@ class Amslib_Resource_Compiler
 		unset(self::$javascript[$id]);
 	}
 	
-	static public function addGoogleFont($id,$font,$conditional=NULL)
+	static public function addFont($id,$font,$conditional=NULL)
 	{
-		Amslib_Resource_Compiler::addStylesheet($id,"http://fonts.googleapis.com/css?$font",$conditional);
+		self::addStylesheet($id,"http://fonts.googleapis.com/css?$font",$conditional);
 	}
 	
-	static public function removeGoogleFont($id)
+	static public function removeFont($id)
 	{
-		Amslib_Resource_Compiler::removeStylesheet($id);
+		self::removeStylesheet($id);
 	}
+
+	//	DEPRECATED GOOGLE FONT METHODS
+	static public function addGoogleFont($id,$font,$conditional=NULL){	self::addFont($id,$font,$conditional);	}
+	static public function removeGoogleFont($id){	self::removeFont($id);}
 }
