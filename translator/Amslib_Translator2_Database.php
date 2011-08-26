@@ -8,7 +8,7 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 	public function __construct()
 	{
 		parent::__construct();
-		
+	
 		$this->database	=	NULL;
 		$this->table	=	NULL;
 	}
@@ -36,7 +36,7 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 			
 			die(get_class($this)."::load(), DATABASE '$database' or method 'getInstance' DOES NOT EXIST</br>");
 		}
-		
+
 		return false;
 	}
 	
@@ -45,15 +45,15 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 		$v = parent::translate($k);
 		
 		if($v == $k){
-			$result = $this->database->select("v from {$this->table} where k='$k' and lang='{$this->language}'");
+			$k	=	$this->database->escape($k);
+			$r	=	$this->database->select("v from {$this->table} where k='$k' and lang='{$this->language}'");
+			$v	=	"";
 			
-			$v = "";
-			
-			if(is_array($result)){
-				if(count($result) > 1){
+			if(is_array($r)){
+				if(count($r) > 1){
 					Amslib_Keystore::add("AMSTUDIOS_TRANSLATOR_ERROR","Multiple conflicting translations for key($k) and language({$this->language})");
 				}else{
-					if(isset($result[0]["v"])) $v = trim(stripslashes($result[0]["v"]));	
+					if(isset($r[0]["v"])) $v = trim(stripslashes($r[0]["v"]));	
 				}
 			}
 			
@@ -80,10 +80,11 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 	
 	public function forget($k)
 	{
-		$cache	=	parent::forget($k);
-		$db		=	$this->database->delete("{$this->table} where k='$k' and lang='{$this->language}'");
+		$k	=	$this->database->escape($k);
+		$f	=	parent::forget($k);
+		$d	=	$this->database->delete("{$this->table} where k='$k' and lang='{$this->language}'");
 		
-		return $cache && $db;
+		return $f && $d;
 	}
 	
 	public function getKeyList()

@@ -117,6 +117,41 @@ class Amslib_File
 
 		return $list;
 	}
+	
+	/**
+	 * method: listFiles
+	 * 
+	 * List all the files, not directories in the path given.
+	 * 
+	 * parameters:
+	 * 		$dir		-	The directory to scan through
+	 * 		$recurse	-	Whether to recurse into subdirectories
+	 * 		$exit		-	Whether or not this is the outside call, therefore we are now "exiting" the method
+	 * 
+	 * returns:
+	 * 		An array of files which were found, or an empty array
+	 */
+	static public function listFiles($dir,$recurse=false,$exit=true)
+	{
+		$list = array();
+
+		if(is_dir($dir)){
+			$list = glob(self::reduceSlashes("$dir/*"));
+
+			if($recurse){
+				foreach($list as $l){
+					$list = array_merge($list,self::listFiles($l,$recurse,false));
+				}
+			}
+		}
+		
+		//	Remove all the directories from the list
+		if($exit) foreach($list as $k=>$v){
+			if(is_dir($v)) unset($list[$k]);
+		}
+
+		return $list;
+	}
 
 	static public function glob($path,$relative=false)
 	{

@@ -80,8 +80,7 @@ class Amslib_MVC3
 		$this->setComponent("layout",		"layouts",		"La_");
 		$this->setComponent("view",			"views",		"Vi_");
 		$this->setComponent("object",		"objects",		"");
-		$this->setComponent("service",		"services",		"");
-		$this->setComponent("service2",		"services",		"Sv_");
+		$this->setComponent("service",		"services",		"Sv_");
 	}
 
 	public function setName($name)
@@ -174,6 +173,8 @@ class Amslib_MVC3
 		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
 	}
 
+	//	NOTE: Controllers are actually not used in this system though are they?
+	//	NOTE: Well, API objects are a type of controller.....so seems we're having a semantic explanation
 	public function setController($id,$name,$absolute=false)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
@@ -284,21 +285,11 @@ class Amslib_MVC3
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
 
-		$this->service[$id] = ($absolute == false) ? Amslib_Website::rel($this->getComponentPath("service", $name)) : $name;
-
-		//	Set this as a service url for the javascript to acquire
-		$this->setValue("service:$id", $this->service[$id]);
-	}
-	
-	public function setService2($id,$name,$absolute=false)
-	{
-		if(!$id || strlen($id) == 0) $id = $name;
-
 		if($absolute){
 			$this->service[$id] = $name;
 			$this->setValue("service:$id",$name);
 		}else{
-			$this->service[$id] = Amslib_Website::rel($this->getComponentPath("service2", $name));
+			$this->service[$id] = Amslib_Website::rel($this->getComponentPath("service", $name));
 			
 			//	NOTE: I should recognise that now Amslib_MVC3 is dependant on Amslib_Router3's existence
 			//	Attempt to find a routed url for this service
@@ -307,7 +298,7 @@ class Amslib_MVC3
 
 			//	Set this as a service url for the javascript to acquire
 			$this->setValue("service:$id",$url);
-		}
+		}	
 	}
 
 	public function getService($id,$url=false)
@@ -453,6 +444,8 @@ class Amslib_MVC3
 	{
 		if($dest === NULL) $dest = $id;
 
+		//	FIXME:	previously this used the old setService, but now it's upgraded 
+		//			to use the code from setService2, perhaps this code won't work anymore.
 		$api = Amslib_Plugin_Manager::getAPI($src);
 		$this->setService($dest,$api->getService($id));
 	}

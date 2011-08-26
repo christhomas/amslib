@@ -1,14 +1,10 @@
 var Amslib_Dynamic_Grid = my.Amslib_Dynamic_Grid = my.Class(
 {
-	child:	false,
 	list:	false,
 	
 	STATIC: {
 		autoload: function(){
-			new Amslib_Dynamic_Grid(
-				$(Amslib_Dynamic_Grid.options.parent+".amslib_autoload"),
-				$(Amslib_Dynamic_Grid.options.child)
-			);
+			new Amslib_Dynamic_Grid($(Amslib_Dynamic_Grid.options.parent+".amslib_autoload"));
 		},
 		
 		options: {
@@ -17,10 +13,9 @@ var Amslib_Dynamic_Grid = my.Amslib_Dynamic_Grid = my.Class(
 		}
 	},
 	
-	constructor: function(parent,child)
+	constructor: function(parent)
 	{
-		this.child	=	child;
-		this.list	=	parent.find(this.child);
+		this.list	=	$(Amslib_Dynamic_Grid.options.child,parent);
 		
 		this.resize();
 		
@@ -29,11 +24,13 @@ var Amslib_Dynamic_Grid = my.Amslib_Dynamic_Grid = my.Class(
 	
 	resize: function()
 	{
+		if(this.list.length == 0) return;
+		
 		var element = this.list.first();
 		
-		do{
-			var row = this.list.find(function(f){
-				return f.position().top == element.position().top
+		while(element.length){
+			var row = this.list.map(function(f){
+				if($(this).position().top == element.position().top) return this;
 			});
 			
 			if(row.length){
@@ -44,12 +41,14 @@ var Amslib_Dynamic_Grid = my.Amslib_Dynamic_Grid = my.Class(
 					var h = $(this).height();
 					var m = (max+1) - h;
 					
-					if(m > 0) e.css("marginBottom",m+"px");
+					if(m > 0) $(this).css("marginBottom",m+"px");
 				});
 				
-				element = row.last().next(this.child);
+				element = row.last().next(Amslib_Dynamic_Grid.options.child);
+			}else{
+				element = element.next(Amslib_Dynamic_Grid.options.child);
 			}
-		}while(element);
+		}
 	}
 });
 

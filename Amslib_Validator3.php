@@ -25,7 +25,7 @@
  *******************************************************************************/
 
 /**
- * class: Amslib_Validator
+ * class: Amslib_Validator3
  *
  * Validates a form posted from the browser to see whether the data conforms to the expected types
  *
@@ -128,8 +128,8 @@ class Amslib_Validator3
 		
 		if(!is_array($value)) return "ARRAY_INVALID";
 		
-		$arrayValidator = new Amslib_Validator($value);
-		foreach($value as $k=>$v) $arrayValidator->add($k,$options["type"],$required);
+		$arrayValidator = new self($value);
+		foreach($value as $k=>$v) $arrayValidator->add($k,$options["type"],$required,$options);
 		
 		$data = array(
 			"success"	=>	$arrayValidator->execute(),
@@ -144,6 +144,7 @@ class Amslib_Validator3
 	protected function __isbn($name,$value,$required,$options)
 	{
 		//	strip out some characters we know might be present, but have to be removed
+		$options["original_value"] = $value;
 		$value = str_replace(array("isbn","-"," ",".",","),"",strtolower($value));
 		
 		if(is_string($value)){
@@ -166,7 +167,7 @@ class Amslib_Validator3
     	$t = substr($value, 9, 1); // tenth digit (aka checksum or check digit)
     	$check += ($t == 'x' || $t == 'X') ? 10 : $t;
     	
-    	if($check % 11 == 0) $this->setValid($name,$value);
+    	if($check % 11 == 0) $this->setValid($name,$options["original_value"]);
     	else if($required) return "ISBN_10_INVALID";
     	
     	return true;
@@ -179,7 +180,7 @@ class Amslib_Validator3
     	for ($i = 0; $i < 13; $i+=2) $check += substr($value, $i, 1);
     	for ($i = 1; $i < 12; $i+=2) $check += 3 * substr($value, $i, 1);
     	
-    	if($check % 10 == 0) $this->setValid($name,$value);
+    	if($check % 10 == 0) $this->setValid($name,$options["original_value"]);
     	else if($required) return "ISBN_13_INVALID";
     	
     	return true;
@@ -235,6 +236,7 @@ class Amslib_Validator3
 			$error = "TEXT_CANNOT_MATCH_AGAINST_LIMIT";
 		}
 		
+		//	NOTE: maybe "invalid" should change to "exclude-input" to be closer to the syntax of "limit-input" ?
 		if(isset($options["invalid"]) && in_array($value,$options["invalid"])){
 			$error = "TEXT_INVALID_INPUT";
 		}
@@ -878,6 +880,20 @@ class Amslib_Validator3
 		return "FILE_NOT_FOUND";
 	}
 	
+	protected function __file_exists($name,$value,$required,$options)
+	{
+		if($options["absolute"] == true) $value = Amslib_Filesystem::absolute($value);
+		
+		if(is_file($value)){
+			$this->setValid("{$options["key"]}$name",$value);
+			return true;
+		}
+		
+		if($required == false) return true;
+		
+		return "FILE_EXISTS_FAILED";
+	}
+	
 	/**
 	 * For description: read the member variables related to this method, they explain all
 	 */
@@ -924,6 +940,7 @@ class Amslib_Validator3
 		$this->register("phone",			array($this,"__phone"));
 		$this->register("date",				array($this,"__date"));
 		$this->register("file",				array($this,"__file"));
+		$this->register("file_exists",		array($this,"__file_exists"));
 		$this->register("array",			array($this,"__array"));
 		$this->register("isbn",				array($this,"__isbn"));
 
@@ -1023,7 +1040,7 @@ class Amslib_Validator3
 	 *
 	 * returns:
 	 * 	If there are no items in the source array, return true or false, depending on whether there are required rules or not
-	 * 	Return whether the result from calling Amslib_Validator::getStatus (true or false, true for no errors)
+	 * 	Return whether the result from calling Amslib_Validator3::getStatus (true or false, true for no errors)
 	 *
 	 * operations:
 	 * 	-	Reset the hasExecuted flag to false
@@ -1039,7 +1056,7 @@ class Amslib_Validator3
 	 * 	-	Return the status of the validator (true = no errors)
 	 *
 	 * notes:
-	 * 	-	Rename Amslib_Validator::__items to Amslib_Validator::__rules or something more descriptive
+	 * 	-	Rename Amslib_Validator3::__items to Amslib_Validator3::__rules or something more descriptive
 	 */
 	public function execute()
 	{
