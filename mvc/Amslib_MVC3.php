@@ -476,8 +476,6 @@ class Amslib_MVC3
 	 */
 	public function render($id="default",$parameters=array())
 	{
-		print("rendering[{$this->name}]<br/>");
-		print("layouts = ".Amslib::var_dump($this->layout,true));
 		if(is_string($id) && isset($this->layout[$id])){
 			//	TODO: Not sure whether I need to do this with rendering layouts as well as views
 			//	NOTE: not 100% sure why I removed this, need to document it's reasoning if I remember

@@ -397,7 +397,6 @@ class Amslib_Plugin2
 
 	public function load($name,$location)
 	{
-		print("Loading: '$name'<br/>");
 		$this->name		=	$name;
 		$this->location	=	$location;
 		$this->filename	=	$location."/package.xml";
@@ -424,11 +423,6 @@ class Amslib_Plugin2
 			//	finalise the plugin, finish any last requests by the plugin
 			$this->finalisePlugin();
 			
-			/*	NOTE: in application. model is loaded before dependencies, in plugin, afterwards
-			 * 	I Don't know why this is, or whether it's actually important.
-			 * <<<< have to figure out why, it must be written or understood somewhere.
-			 */
-			print("api[{$this->name}] is valid? = ".($this->api?"true":"false")."<br/>");
 			return $this->api;
 		}
 
@@ -465,7 +459,6 @@ class Amslib_Plugin2
 
 	public function getAPI()
 	{
-		print("getAPI[{$this->name}], api = ".($this->api?"true":"false")."<br/>");
 		return $this->api;
 	}
 
