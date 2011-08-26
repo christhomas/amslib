@@ -12,13 +12,16 @@ class Amslib_FirePHP extends FirePHP
 	
 	public static function backtrace($levels)
 	{
-		//	NOTE: The array_shift gets rid of the first method (which is Amslib_FirePHP::backtrace)
-		$backtrace = array_shift(debug_backtrace($levels));
-		self::output("backtrace",$backtrace);
+		//	NOTE: The array_slide gets rid of the first method (which is Amslib_FirePHP::backtrace)
+		self::output("backtrace",array_slice(debug_backtrace($levels),1,$levels));
 	}
 	
 	public static function output($name,$data){
-		self::$instance->log($data,$name);
+		try{
+			self::$instance->log($data,$name);
+		}catch(Exception $e){
+			print("Amslib_FirePHP::output(), exception occured, output has already started? backtrace = ".Amslib::var_dump(debug_backtrace(),true));
+		}
 	}
 	
 	public static function init()

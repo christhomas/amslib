@@ -194,7 +194,7 @@ class Amslib_MVC3
 	public function setLayout($id,$name,$absolute=false)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
-
+		
 		$this->layout[$id] = ($absolute == false) ? $this->getComponentPath("layout",$name) : $name;
 
 		if($this->layout["default"] == false) $this->layout["default"] = $this->layout[$id];
@@ -391,22 +391,21 @@ class Amslib_MVC3
 		Amslib_Resource_Compiler::removeJavascript($id);
 	}
 	
-	public function setFont($type,$id,$file,$condition,$autoload,$media)
+	public function setFont($type,$id,$file,$condition,$autoload)
 	{
 		//	FIXME: implement the $type field somehow, but atm we only support google webfont
 		if(!is_string($id) && $file) return;
 		
-		$this->font[$id] = array("file"=>$file,"conditional"=>$conditional,"media"=>$media);
+		$this->font[$id] = array("file"=>$file,"conditional"=>$conditional);
 
 		if($autoload) $this->addFont($id);
 	}
 	
 	public function addFont($id)
 	{
-		if(isset($this->font[$id])){
-			$f = $this->font[$id];
-			Amslib_Resource_Compiler::addFont($id,$f["file"],$f["conditional"],$f["media"]);
-		}
+		if(!isset($this->font[$id])) return;
+		
+		Amslib_Resource_Compiler::addFont($id,$this->font[$id]["file"],$this->font[$id]["conditional"]);
 	}
 	
 	public function removeFont($id)
@@ -506,6 +505,8 @@ class Amslib_MVC3
 	 */
 	public function render($id="default",$parameters=array())
 	{
+		print("rendering[{$this->name}]<br/>");
+		print("layouts = ".Amslib::var_dump($this->layout,true));
 		if(is_string($id) && isset($this->layout[$id])){
 			//	TODO: Not sure whether I need to do this with rendering layouts as well as views
 			//	NOTE: not 100% sure why I removed this, need to document it's reasoning if I remember

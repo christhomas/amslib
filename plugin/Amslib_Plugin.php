@@ -161,7 +161,7 @@ class Amslib_Plugin
 					$file = "$this->location/objects/{$object}.php";
 
 					if(file_exists($file)){
-						Amslib::requireFile("$this->location/objects/{$object}.php");
+						Amslib::requireFile($file);
 
 						if(class_exists($object)){
 							$this->model = call_user_func(array($object,"getInstance"));
