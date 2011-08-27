@@ -213,12 +213,6 @@ class Amslib_Plugin2
 							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
 							$p["value"] = $c->nodeValue;
 							
-							//	Special case for models
-							//	NOTE: perhaps it's actually more general and this applies to every object?
-							if($c->nodeName == "model" && !isset($p["import"])){
-								//$p = $this->initialiseModel($p);
-							}
-
 							if($p) $this->config[$node->nodeName][$c->nodeName] = $p;
 						}
 					}break;
@@ -236,7 +230,7 @@ class Amslib_Plugin2
 							$file = "$this->location/objects/{$p["value"]}.php";
 							if(file_exists($file)) $p["file"] = $file;
 
-							if($p) $this->config[$node->nodeName][$c->nodeName] = $p;
+							$this->config[$node->nodeName][$c->nodeName] = $p;
 						}
 					}break;
 					
