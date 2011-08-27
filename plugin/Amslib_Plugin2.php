@@ -303,7 +303,7 @@ class Amslib_Plugin2
 		//	If the API is not valid, return false to trigger an error.
 		if(!$this->api) return false;
 		
-		$keys = array("layout","view","object","service","font","image","javascript","stylesheet");
+		$keys = array("layout","view","object","value","service","font","image","javascript","stylesheet");
 		
 		//	Remove any types which cannot be processed with this object
 		foreach($keys as $k=>$v){
@@ -315,7 +315,7 @@ class Amslib_Plugin2
 			$func		=	array($this->api,$callback);
 			
 			foreach($this->config[$v] as $name=>$c){
-				if(in_array($v,array("layout","view","object","service"))){
+				if(in_array($v,array("layout","view","object","service","value"))){
 					$params		=	array($name,$c["value"]);
 				}else if($v == "font"){
 					$params		=	array($c["type"],$name,$c["value"]);
