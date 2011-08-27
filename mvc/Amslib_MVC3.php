@@ -341,8 +341,12 @@ class Amslib_MVC3
 	public function addStylesheet($id)
 	{
 		if(isset($this->stylesheet[$id])){
-			$s = $this->stylesheet[$id];
-			Amslib_Resource_Compiler::addStylesheet($id,$s["file"],$s["conditional"],$s["media"]);
+			Amslib_Resource_Compiler::addStylesheet(
+				$id,
+				$this->stylesheet[$id]["file"],
+				$this->stylesheet[$id]["conditional"],
+				$this->stylesheet[$id]["media"]
+			);
 		}
 	}
 
@@ -501,6 +505,7 @@ class Amslib_MVC3
 			$parameters["api"]	=	$this;
 			$parameters["_w"]	=	$this->getTranslator("website");
 			$parameters["_c"]	=	$this->getTranslator("content");
+			//die("parameters = ".Amslib::var_dump($parameters,true));
 
 			ob_start();
 			Amslib::requireFile($this->layout[$id],$parameters);

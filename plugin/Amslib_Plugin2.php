@@ -309,7 +309,7 @@ class Amslib_Plugin2
 		//	If the API is not valid, return false to trigger an error.
 		if(!$this->api) return false;
 		
-		$keys = array("layout","view","object","service","image","javascript","stylesheet","font");
+		$keys = array("layout","view","object","service","font","image","javascript","stylesheet");
 		
 		//	Remove any types which cannot be processed with this object
 		foreach($keys as $k=>$v){
@@ -322,18 +322,18 @@ class Amslib_Plugin2
 			
 			foreach($this->config[$v] as $name=>$c){
 				if(in_array($v,array("layout","view","object","service"))){
-					$params = array($name,$c["value"]);
+					$params		=	array($name,$c["value"]);
+				}else if($v == "font"){
+					$params		=	array($c["type"],$name,$c["value"]);
 				}else{
-					$params = array();
-					if(isset($c["type"]))		$params[]	= $c["type"];
-												$params[]	= $name;
-					if(isset($c["value"]))		$params[]	= $c["value"];
-					if(isset($c["condition"]))	$params[]	= $c["condition"];
-					if(isset($c["autoload"]))	$params[]	= $c["autoload"];
-					if(isset($c["media"]))		$params[]	= $c["media"];
-												$params[]	= $c;	
+					$value		=	isset($c["value"]) ? $c["value"] : NULL;
+					$condition	=	isset($c["condition"]) ? $c["condition"] : NULL;
+					$autoload	=	isset($c["autoload"]) ? $c["autoload"] : NULL;
+					$media		=	isset($c["media"]) ? $c["media"] : NULL;
+					
+					$params		=	array($name,$value,$condition,$autoload,$media);
 				}
-											
+
 				call_user_func_array($func,$params);
 			}
 		}
@@ -389,7 +389,44 @@ class Amslib_Plugin2
 	
 	protected function loadTranslators()
 	{
-		//	TODO: copy the appropriate code from the version 1.0 code		
+		if(!empty($this->config["translator"])) foreach($this->config["translator"] as $name=>$t){
+			//print("Translators[{$this->name}] = ".Amslib::var_dump($t,true));
+			if(Amslib_Array::hasKeys($t,array("name","type","language","location"))){
+				//	The location parameter could contain special keys which need to be expanded
+				//	The location parameter has a specific key called __CURRENT_PLUGIN__ which 
+				//		isn't available normally, so expand this one separately
+				$location = $t["location"];
+				if(strpos($location,"__CURRENT_PLUGIN__") !== false){
+					$location = str_replace("__CURRENT_PLUGIN__",$this->location,$location);
+				}
+				$location = Amslib_Plugin::expandPath($location);
+				
+				//	Obtain the language the system should use when printing text
+				$language = Amslib_Plugin_Application::getLanguage($name);
+				if(!$language) $language = reset($t["language"]);
+				
+				//	Create the language translator object and insert it into the api
+				$translator = new Amslib_Translator2($t["type"]);
+				$translator->addLanguage($t["language"]);
+				$translator->setLocation($location);
+				$translator->setLanguage($language);
+				$translator->load();
+				
+				$this->api->setTranslator($name,$translator);			
+				
+				//	If there was a "router" parameter, insert all the languages into the router system
+				if(isset($t["router"])){
+					foreach($t["language"] as $langCode){
+						Amslib_Router_Language3::add($langCode,str_replace("_","-",$langCode));
+					}
+				}
+
+				//	Now register all the languages with the application
+				foreach($t["language"] as $langCode){
+					Amslib_Plugin_Application::registerLanguage($name, $langCode);
+				}				
+			}
+		}
 	}
 	
 	protected function initialisePlugin(){	/* do nothing by default */ }
