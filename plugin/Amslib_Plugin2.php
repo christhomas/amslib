@@ -229,8 +229,11 @@ class Amslib_Plugin2
 							//			filesystm layout? since we are putting the filesystem location directly in here 
 							$file = "$this->location/objects/{$p["value"]}.php";
 							if(file_exists($file)) $p["file"] = $file;
+							
+							//	Make sure generic objects are referenced properly
+							$name = $c->nodeName == "name" ? $p["value"] : $c->nodeName;
 
-							$this->config[$node->nodeName][$c->nodeName] = $p;
+							$this->config[$node->nodeName][$name] = $p;
 						}
 					}break;
 					
@@ -371,7 +374,7 @@ class Amslib_Plugin2
 		$api->setLocation($this->getLocation());
 		$api->setName($this->getName());
 		$api->setPlugin($this);
-
+		
 		//	Assign the model to the plugin
 		$api->setModel($this->createObject($this->config["model"],true,true));
 
