@@ -37,16 +37,6 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		self::$version = $this->config["version"];
 	}
 
-	//	NOTE: I think this method is deprecated?
-	protected function initialiseModel()
-	{
-		parent::initialiseModel();
-
-		if($this->model){
-			Amslib_Database::setSharedConnection($this->model);
-		}
-	}
-
 	protected function initialisePlugin()
 	{
 		//	Set the version of the admin this panel is running
@@ -127,15 +117,13 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		return $instance;
 	}
 	
-	public function setModel($model)
+	public function load($name,$location)
 	{
-		//	FIXME: perhaps setting EVERY model that comes through here is a bad idea
-		Amslib_Database::setSharedConnection($model);
-
-		//	FIXME: perhaps creation of the model object should be lazy, if you don't use it, why create it
-		parent::setModel($model);
+		Amslib_Plugin_Manager2::import($name,$this);
+		
+		return parent::load($name,$location);
 	}
-
+	
 	static public function getVersion($element=NULL)
 	{
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
@@ -179,12 +167,7 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 	{
 		$api = Amslib_Plugin_Manager2::getAPI(self::getActivePlugin());
 
-		$title = false;
-
-		if($api)	$title	=	$api->getValue("page_title");
-		if(!$title)	$title	=	"MISSING PAGE TITLE";
-
-		return $title;
+		return ($api) ? $api->getValue("page_title") : "MISSING PAGE TITLE";
 	}
 
 	//	NOTE:	I don't like this method, I should find a nicer way to do this
