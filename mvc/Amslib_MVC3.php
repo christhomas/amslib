@@ -441,7 +441,9 @@ class Amslib_MVC3
 
 		//	FIXME:	previously this used the old setService, but now it's upgraded 
 		//			to use the code from setService2, perhaps this code won't work anymore.
-		$api = Amslib_Plugin_Manager::getAPI($src);
+		//	FIXME:	I've hardcoded the existence of Amslib_Plugin_Manager2 into this method
+		//			which was probably a bad idea :(
+		$api = Amslib_Plugin_Manager2::getAPI($src);
 		$this->setService($dest,$api->getService($id));
 	}
 
