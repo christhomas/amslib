@@ -74,12 +74,13 @@ class Amslib_Plugin_Manager2
 		if(self::isLoaded($name)) return self::getAPI($name);
 
 		//	Plugin was not present, so create it, load everything required and return it's API
-		$plugin = new Amslib_Plugin2();
-		self::$plugins[$name] = $plugin;
+		//	The first import call assigns the plugin object 
+		self::import($name,new Amslib_Plugin2());
 		
-		$api = $plugin->load($name,$location.$name);
+		$api = self::$plugins[$name]->load($name,$location.$name);
 		if($api){
-			self::import($name,$plugin);
+			//	The second import call assigns the api object
+			self::import($name,self::$plugins[$name]);
 		}else{
 			self::remove($name);
 		}
@@ -92,10 +93,9 @@ class Amslib_Plugin_Manager2
 		if($name && $plugin){
 			$api = $plugin ? $plugin->getAPI() : false;
 			
-			if($api){
-				self::$plugins[$name]	=	$plugin;
-				self::$api[$name]		=	$api;
-			}
+			if($api) self::$api[$name] = $api;
+			
+			self::$plugins[$name] = $plugin;
 		}	
 	}
 
