@@ -70,6 +70,11 @@ class Amslib_Array
 		return $values;
 	}
 	
+	static public function removeValue(array $array,$value, $strict=false)
+	{
+	    return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));
+	}
+	
 	static public function filter($array,$key,$value,$returnFiltered=false,$similar=false)
 	{
 		$filter = array();
@@ -189,6 +194,7 @@ class Amslib_Array
 		return count($array)!==count($array, COUNT_RECURSIVE);
 	}
 	
+	//	FIXME: glob() on an array object? when it refers to the filesystem or array? I think it's a mistake to put this method here
 	static public function glob($location,$relative=false)
 	{
 		$items = glob(Amslib_Website::abs($location));
