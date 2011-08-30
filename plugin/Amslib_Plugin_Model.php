@@ -7,7 +7,6 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	public function __construct()
 	{
 		parent::__construct(false);
-		$this->copy(Amslib_Database::getSharedConnection());
 		
 		$this->table = array();
 	}

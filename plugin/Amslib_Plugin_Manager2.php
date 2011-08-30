@@ -34,7 +34,7 @@ class Amslib_Plugin_Manager2
 	static protected function findPlugin($name,$location=NULL)
 	{
 		$search = array_merge(array($location),self::$location);
-		
+
 		foreach($search as $location)
 		{
 			if(file_exists("$location/$name/package.xml")){

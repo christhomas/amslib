@@ -34,7 +34,11 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 
 	protected function readVersion()
 	{
-		self::$version = $this->config["version"];
+		self::$version = array(
+			"date"		=>	$this->config["version"]["date"],
+			"number"	=>	$this->config["version"]["number"],
+			"name"		=>	$this->config["version"]["name"]
+		);
 	}
 
 	//	NOTE: I think this method is deprecated?
@@ -49,8 +53,6 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 
 	protected function initialisePlugin()
 	{
-		//	Set the version of the admin this panel is running
-		$this->readVersion();
 		//	Load the router (need to initialise the router first, but execute it after everything is loaded from the plugins)
 		//	NOTE: This is done because of webservices right? perhaps there is a better way of doing this
 		$this->initRouter();
@@ -60,6 +62,9 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 
 	protected function finalisePlugin()
 	{
+		//	Set the version of the admin this panel is running
+		$this->readVersion();
+		
 		//	Load the required router library and execute it to setup everything it needs
 		$this->executeRouter();
 		
@@ -107,7 +112,7 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		parent::setPath("docroot",	Amslib_File::documentRoot());
 		
 		//	remove it here because you need to add it again, but making sure it's at the end!!
-		unset($this->searchXPath["requires"]);
+		$this->searchXPath = Amslib_Array::removeValue($this->searchXPath,"requires");
 		$this->searchXPath[] = "path";
 		$this->searchXPath[] = "router_source";
 		$this->searchXPath[] = "version";
@@ -125,6 +130,13 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		if($instance === NULL) $instance = new self();
 
 		return $instance;
+	}
+	
+	public function load($name,$location)
+	{
+		Amslib_Plugin_Manager2::import($name,$this);
+
+		return parent::load($name,$location);
 	}
 	
 	public function setModel($model)

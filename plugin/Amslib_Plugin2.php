@@ -123,6 +123,8 @@ class Amslib_Plugin2
 			//			you need to load and add the plugin's configuration before you load the children
 			"requires"
 		);
+		
+		$this->config = array("api"=>false,"model"=>false);
 
 		//	Only load the plugin if the require basic information is given, otherwise defer to whoever created the object
 		if($name && $location) $this->load($name,$location);
@@ -204,17 +206,30 @@ class Amslib_Plugin2
 						$this->config[$node->nodeName][$name] = $p;
 					}break;
 					
-					case "value":
 					case "version":{
 						$child = $xpath->query("*",$node);
 						
 						foreach($child as $c){
-							$p = array();
-							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
-							$p["value"] = $c->nodeValue;
-							
-							if($p) $this->config[$node->nodeName][$c->nodeName] = $p;
+							$this->config[$node->nodeName][$c->nodeName] = $c->nodeValue;
 						}
+					}break;
+					
+					case "value":{
+						$child = $xpath->query("*",$node);
+						$p = array();
+						foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
+						
+						foreach($child as $c){
+							$p["value"][$c->nodeName] = $c->nodeValue;
+						}
+						
+						$key = "default";
+						if(isset($p["export"])) $key = "export/{$p["export"]}";
+						if(isset($p["import"])) $key = "import/{$p["import"]}";
+						
+						$v = (isset($this->config[$node->nodeName][$key])) ? $this->config[$node->nodeName][$key] : array();
+						
+						$this->config[$node->nodeName][$key] = array_merge($v,$p);
 					}break;
 					
 					case "object":{
@@ -233,7 +248,11 @@ class Amslib_Plugin2
 							//	Make sure generic objects are referenced properly
 							$name = $c->nodeName == "name" ? $p["value"] : $c->nodeName;
 
-							$this->config[$node->nodeName][$name] = $p;
+							if(in_array($name,array("api","model"))){
+								$this->config[$name] = $p;
+							}else{
+								$this->config[$node->nodeName][$name] = $p;
+							}
 						}
 					}break;
 					
@@ -242,7 +261,7 @@ class Amslib_Plugin2
 						
 						foreach($child as $c){
 							$v = Amslib_Plugin2::expandPath($c->nodeValue);
-							
+							Amslib_FirePHP::output("PATH: {$c->nodeName}",$c->nodeValue);
 							if($c->nodeName == "include"){
 								Amslib::addIncludePath(Amslib_File::absolute($v));
 							}else{
@@ -267,34 +286,43 @@ class Amslib_Plugin2
 				}
 			}
 		}
-		
-		//	Transfer these resources to specific keys which are controlled differently
-		$this->config["api"]	=	isset($this->config["object"]["api"]) ? $this->config["object"]["api"] : false;
-		$this->config["model"]	=	isset($this->config["object"]["model"]) ? $this->config["object"]["model"] : false;
-
-		unset($this->config["object"]["api"],$this->config["object"]["model"]);
 	}
 	
 	protected function processRelocations()
 	{
 		//	Process all the import/export/transfer requests on all resources
 		foreach($this->config as $key=>$block){
-			if(!is_array($block)) continue;
-
-			//	Import from the named plugin the requested key into THIS object
-			if(isset($block["import"])){
-				$plugin = Amslib_Plugin_Manager2::getPlugin($block["import"]);
-				$this->setConfig($key,$plugin->getConfig($key));
-				//	If transfer is requested, you must eliminate the original data
-				if(isset($block["transfer"])) $plugin->removeConfig($key);
-			}
-			
-			//	Export from THIS object the requested key to the named plugin
-			if(isset($block["export"])){
-				$plugin = Amslib_Plugin_Manager2::getPlugin($block["export"]);
-				$plugin->setConfig($key,$this->getConfig($key));
-				//	If transfer is requested, you must eliminate the original data
-				if(isset($block["transfer"])) $this->removeConfig($key);
+			if(in_array($key,array("object","view","layout","service","stylesheet","image","javascript"))){
+				foreach($block as $name=>$item){
+					if(isset($item["import"])){
+						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
+						//print("k[$key], n[$name]<br/>".Amslib::var_dump(array($item["import"],$this->name,Amslib_Plugin_Manager2::listPlugins()),true));
+						$this->setConfig(array($key,$name),$plugin->getConfig($key,$name));
+						if(isset($item["move"])) $plugin->removeConfig($key,$name);
+					}else if(isset($item["export"])){
+						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
+						$plugin->setConfig(array($key,$name),$this->getConfig($key,$name));
+						if(isset($item["move"])) $this->removeConfig($key,$name);
+					}
+				}
+			}else if($key == "translator"){
+				//	Translators are imported/exported differently because we share the objects
+				//	therefore we don't just share data, we share a physical PHP object
+			}else if($key == "model"){
+				//	Models are treated slightly differently because they are singular, not plural
+				if(isset($block["import"])){
+					$plugin = Amslib_Plugin_Manager2::getPlugin($block["import"]);
+					$this->setConfig($key,$plugin->getConfig($key));
+					if(isset($block["move"])) $plugin->removeConfig($key);
+				}else if(isset($block["export"])){
+					$plugin = Amslib_Plugin_Manager2::getPlugin($block["export"]);
+					$plugin->setConfig($key,$this->getConfig($key));
+					if(isset($block["move"])) $this->removeConfig($key);
+				}
+			}else if($key == "value"){
+				//	We need to do a customised import/export routine for moving values
+				//	This is because we do them in blocks, not as individual units
+				Amslib_FirePHP::output("value[{$this->name}]",$block);
 			}
 		}
 	}
@@ -342,7 +370,7 @@ class Amslib_Plugin2
 		
 		if(isset($object["file"])) Amslib::requireFile($object["file"]);
 		
-		$error =  "FATAL ERROR(".__CLASS__."::".__METHOD__.") Could not __ERROR__ for plugin '{$this->name}'<br/>";
+		$error =  "FATAL ERROR(".__METHOD__.") Could not __ERROR__ for plugin '{$this->name}'<br/>";
 		
 		//	here we are not interested in import/export, since all that should have happened
 		
@@ -374,7 +402,7 @@ class Amslib_Plugin2
 		$api->setLocation($this->getLocation());
 		$api->setName($this->getName());
 		$api->setPlugin($this);
-		
+	
 		//	Assign the model to the plugin
 		$api->setModel($this->createObject($this->config["model"],true,true));
 
@@ -466,19 +494,31 @@ class Amslib_Plugin2
 		return false;
 	}
 	
-	public function setConfig($name,$value)
+	public function setConfig($key,$value)
 	{
-		$this->config[$name] = $value;
+		if(is_string($key)){
+			$this->config[$key] = $value;
+		}else{
+			$this->config[$key[0]][$key[1]] = $value;
+		}
 	}
 	
-	public function getConfig($name)
+	public function getConfig($type,$id=NULL)
 	{
-		return isset($this->config[$name]) ? $this->config[$name] : false;		
+		if($id === NULL){
+			return isset($this->config[$type]) ? $this->config[$type] : false;	
+		}else{
+			return isset($this->config[$type][$id]) ? $this->config[$type][$id] : false;	
+		}
 	}
 	
-	public function removeConfig($key)
+	public function removeConfig($type,$id=NULL)
 	{
-		unset($this->config[$key]);
+		if($id === NULL){
+			unset($this->config[$type]);
+		}else if(is_array($type)){
+			unset($this->config[$type][$id]);
+		}
 	}
 	
 	public function getLocation()
