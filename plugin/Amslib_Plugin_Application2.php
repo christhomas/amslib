@@ -41,16 +41,6 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		);
 	}
 
-	//	NOTE: I think this method is deprecated?
-	protected function initialiseModel()
-	{
-		parent::initialiseModel();
-
-		if($this->model){
-			Amslib_Database::setSharedConnection($this->model);
-		}
-	}
-
 	protected function initialisePlugin()
 	{
 		//	Load the router (need to initialise the router first, but execute it after everything is loaded from the plugins)
@@ -132,6 +122,20 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		return $instance;
 	}
 	
+	/**
+	 * method: load
+	 * 
+	 * Load the application object into the system
+	 * 
+	 * parameters:
+	 * 	$name		-	The name of the plugin
+	 * 	$location	-	The location inside the system, if specific, or different from that of other plugins
+	 * 
+	 * notes:
+	 * 	-	We do this customised load() method because normally you don't add application objects
+	 * 		in the same way as other objects, they are created using new Object() instead, therefore because of
+	 * 		this, we need to import them manually
+	 */
 	public function load($name,$location)
 	{
 		Amslib_Plugin_Manager2::import($name,$this);
@@ -139,15 +143,6 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		return parent::load($name,$location);
 	}
 	
-	public function setModel($model)
-	{
-		//	FIXME: perhaps setting EVERY model that comes through here is a bad idea
-		Amslib_Database::setSharedConnection($model);
-
-		//	FIXME: perhaps creation of the model object should be lazy, if you don't use it, why create it
-		parent::setModel($model);
-	}
-
 	static public function getVersion($element=NULL)
 	{
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];

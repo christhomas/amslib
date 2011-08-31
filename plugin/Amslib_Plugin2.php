@@ -217,19 +217,11 @@ class Amslib_Plugin2
 					case "value":{
 						$child = $xpath->query("*",$node);
 						$p = array();
-						foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
+						foreach($node->attributes as $k=>$v) $p[$k] = $v->nodeValue;
 						
 						foreach($child as $c){
-							$p["value"][$c->nodeName] = $c->nodeValue;
+							$this->config[$node->nodeName][] = array_merge(array("name"=>$c->nodeName,"value"=>$c->nodeValue),$p);
 						}
-						
-						$key = "default";
-						if(isset($p["export"])) $key = "export/{$p["export"]}";
-						if(isset($p["import"])) $key = "import/{$p["import"]}";
-						
-						$v = (isset($this->config[$node->nodeName][$key])) ? $this->config[$node->nodeName][$key] : array();
-						
-						$this->config[$node->nodeName][$key] = array_merge($v,$p);
 					}break;
 					
 					case "object":{
@@ -261,7 +253,7 @@ class Amslib_Plugin2
 						
 						foreach($child as $c){
 							$v = Amslib_Plugin2::expandPath($c->nodeValue);
-							Amslib_FirePHP::output("PATH: {$c->nodeName}",$c->nodeValue);
+
 							if($c->nodeName == "include"){
 								Amslib::addIncludePath(Amslib_File::absolute($v));
 							}else{
@@ -290,13 +282,14 @@ class Amslib_Plugin2
 	
 	protected function processRelocations()
 	{
+		//	FIXME: omg, it's just a bunch of repeated code, all over the place, ripe for refactoring....
+		
 		//	Process all the import/export/transfer requests on all resources
 		foreach($this->config as $key=>$block){
 			if(in_array($key,array("object","view","layout","service","stylesheet","image","javascript"))){
 				foreach($block as $name=>$item){
 					if(isset($item["import"])){
 						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
-						//print("k[$key], n[$name]<br/>".Amslib::var_dump(array($item["import"],$this->name,Amslib_Plugin_Manager2::listPlugins()),true));
 						$this->setConfig(array($key,$name),$plugin->getConfig($key,$name));
 						if(isset($item["move"])) $plugin->removeConfig($key,$name);
 					}else if(isset($item["export"])){
@@ -320,9 +313,17 @@ class Amslib_Plugin2
 					if(isset($block["move"])) $this->removeConfig($key);
 				}
 			}else if($key == "value"){
-				//	We need to do a customised import/export routine for moving values
-				//	This is because we do them in blocks, not as individual units
-				Amslib_FirePHP::output("value[{$this->name}]",$block);
+				foreach($block as $item){
+					if(isset($item["import"])){
+						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
+						$this->setConfig(array($key,$item["name"]),$plugin->getConfig($key,$item["name"]));
+						if(isset($item["move"])) $plugin->removeConfig($key,$item["name"]);	
+					}else if(isset($item["export"])){
+						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
+						$plugin->setConfig(array($key,$item["name"]),$this->getConfig($key,$item["name"]));
+						if(isset($item["move"])) $this->removeConfig($key,$item["name"]);
+					}
+				}
 			}
 		}
 	}
@@ -346,10 +347,15 @@ class Amslib_Plugin2
 			$func		=	array($this->api,$callback);
 			
 			foreach($this->config[$v] as $name=>$c){
-				if(in_array($v,array("layout","view","object","service","value"))){
+				//	NOTE: If a parameter is marked for export, don't set it inside this object AS WELL
+				if(isset($c["export"])) continue;
+					
+				if(in_array($v,array("layout","view","object","service"))){
 					$params		=	array($name,$c["value"]);
 				}else if($v == "font"){
 					$params		=	array($c["type"],$name,$c["value"]);
+				}else if($v == "value"){
+					$params		=	array($c["name"],$c["value"]);
 				}else{
 					$value		=	isset($c["value"]) ? $c["value"] : NULL;
 					$condition	=	isset($c["condition"]) ? $c["condition"] : NULL;
@@ -459,6 +465,7 @@ class Amslib_Plugin2
 
 	public function load($name,$location)
 	{
+		//Amslib_FirePHP::output("load",$name);
 		$this->name		=	$name;
 		$this->location	=	$location;
 		$this->filename	=	$location."/package.xml";
