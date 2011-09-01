@@ -124,7 +124,7 @@ class Amslib_Plugin2
 			"requires"
 		);
 		
-		$this->config = array("api"=>false,"model"=>false);
+		$this->config = array("api"=>false,"model"=>false,"translator"=>false);
 
 		//	Only load the plugin if the require basic information is given, otherwise defer to whoever created the object
 		if($name && $location) $this->load($name,$location);
@@ -187,23 +187,24 @@ class Amslib_Plugin2
 					case "translator":{
 						$child = $xpath->query("*",$node);
 						$p = array();
-						$l = array();
 						
 						//	Import all the translator parameters, such as import/export
 						foreach($node->attributes as $k=>$v) $p[$k] = $v->nodeValue;
 						
+						$p["name"] = $node->nodeValue;
+						
 						foreach($child as $c){
-							$v = $c->nodeValue;
-							
-							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
-							$p["value"] = $c->nodeValue;
-							
-							if($c->nodeName == "name") $name = $v;
-							if($c->nodeName == "language") $p[$c->nodeName][] = $v;
-							else $p[$c->nodeName] = $v;
+							if($c->nodeName == "language") $p[$c->nodeName][] = $c->nodeValue;
+							else $p[$c->nodeName] = $c->nodeValue;
 						}
 						
-						$this->config[$node->nodeName][$name] = $p;
+						//	Test all required data is present, if so, add the translator to be configured later
+						if(	Amslib_Array::hasKeys($p,array("name","type","location","language")) ||
+							Amslib_Array::hasKeys($p,array("name","import")) ||
+							Amslib_Array::hasKeys($p,array("name","export")))
+						{
+							$this->config[$node->nodeName][$p["name"]] = $p;
+						}
 					}break;
 					
 					case "version":{
@@ -239,7 +240,7 @@ class Amslib_Plugin2
 							
 							//	Make sure generic objects are referenced properly
 							$name = $c->nodeName == "name" ? $p["value"] : $c->nodeName;
-
+							
 							if(in_array($name,array("api","model"))){
 								$this->config[$name] = $p;
 							}else{
@@ -285,9 +286,11 @@ class Amslib_Plugin2
 		//	FIXME: omg, it's just a bunch of repeated code, all over the place, ripe for refactoring....
 		
 		//	Process all the import/export/transfer requests on all resources
+		//	NOTE: translators don't support the "move" parameter
 		foreach($this->config as $key=>$block){
-			if(in_array($key,array("object","view","layout","service","stylesheet","image","javascript"))){
-				foreach($block as $name=>$item){
+			if(in_array($key,array("object","view","layout","service","stylesheet","image","javascript","translator"))){
+				//	TODO: if I used $item["name"] instead of $name as the key, I could merge against the "value" block below
+				foreach(Amslib_Array::valid($block) as $name=>$item){
 					if(isset($item["import"])){
 						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
 						$this->setConfig(array($key,$name),$plugin->getConfig($key,$name));
@@ -298,11 +301,9 @@ class Amslib_Plugin2
 						if(isset($item["move"])) $this->removeConfig($key,$name);
 					}
 				}
-			}else if($key == "translator"){
-				//	Translators are imported/exported differently because we share the objects
-				//	therefore we don't just share data, we share a physical PHP object
 			}else if($key == "model"){
 				//	Models are treated slightly differently because they are singular, not plural
+				//	NOTE: maybe in future models will be plural too, perhaps it's better to make it work plurally anyway
 				if(isset($block["import"])){
 					$plugin = Amslib_Plugin_Manager2::getPlugin($block["import"]);
 					$this->setConfig($key,$plugin->getConfig($key));
@@ -332,13 +333,13 @@ class Amslib_Plugin2
 	{
 		$this->api = $this->createAPI();
 		
-		//	If the API is not valid, return false to trigger an error.
+		//	If the API object is not valid, don't continue to process
 		if(!$this->api) return false;
 		
-		$keys = array("layout","view","object","value","service","font","image","javascript","stylesheet");
+		$keys = array("translator","layout","view","object","value","service","font","image","javascript","stylesheet");
 		
-		//	Remove any types which cannot be processed with this object
 		foreach($keys as $k=>$v){
+			//	Don't process any keys which are not set, empty or the required method to process it is not available
 			if(!isset($this->config[$v]) || empty($this->config[$v]) || !method_exists($this->api,"set".ucwords($v))){
 				continue;		
 			}
@@ -347,7 +348,7 @@ class Amslib_Plugin2
 			$func		=	array($this->api,$callback);
 			
 			foreach($this->config[$v] as $name=>$c){
-				//	NOTE: If a parameter is marked for export, don't set it inside this object AS WELL
+				//	NOTE: If a parameter is marked for export, don't process it.
 				if(isset($c["export"])) continue;
 					
 				if(in_array($v,array("layout","view","object","service"))){
@@ -356,6 +357,14 @@ class Amslib_Plugin2
 					$params		=	array($c["type"],$name,$c["value"]);
 				}else if($v == "value"){
 					$params		=	array($c["name"],$c["value"]);
+				}else if($v == "translator"){
+					$translator = $this->createTranslator($name);
+					
+					if(!$translator) continue;	
+					
+					$this->installLanguages($name,$c);
+					
+					$params		=	array($name,$translator);
 				}else{
 					$value		=	isset($c["value"]) ? $c["value"] : NULL;
 					$condition	=	isset($c["condition"]) ? $c["condition"] : NULL;
@@ -370,6 +379,19 @@ class Amslib_Plugin2
 		}
 	}
 	
+	protected function installLanguages($name,$lang)
+	{
+		foreach($lang["language"] as $langCode){
+			//	If there was a "router" parameter, insert all the languages into the router system
+			if(isset($lang["router"])){
+				Amslib_Router_Language3::add($langCode,str_replace("_","-",$langCode));
+			}
+
+			//	Now register all the languages with the application
+			Amslib_Plugin_Application2::registerLanguage($name, $langCode);
+		}
+	}
+	
 	protected function createObject($object,$singleton=false,$dieOnError=false)
 	{
 		if(!$object || empty($object)) return false;
@@ -377,8 +399,6 @@ class Amslib_Plugin2
 		if(isset($object["file"])) Amslib::requireFile($object["file"]);
 		
 		$error =  "FATAL ERROR(".__METHOD__.") Could not __ERROR__ for plugin '{$this->name}'<br/>";
-		
-		//	here we are not interested in import/export, since all that should have happened
 		
 		if(class_exists($object["value"])){
 			if($singleton){
@@ -418,46 +438,41 @@ class Amslib_Plugin2
 		return $api;
 	}
 	
-	protected function loadTranslators()
+	protected function createTranslator($name)
 	{
-		if(!empty($this->config["translator"])) foreach($this->config["translator"] as $name=>$t){
-			//print("Translators[{$this->name}] = ".Amslib::var_dump($t,true));
-			if(Amslib_Array::hasKeys($t,array("name","type","language","location"))){
-				//	The location parameter could contain special keys which need to be expanded
-				//	The location parameter has a specific key called __CURRENT_PLUGIN__ which 
-				//		isn't available normally, so expand this one separately
-				$location = $t["location"];
-				if(strpos($location,"__CURRENT_PLUGIN__") !== false){
-					$location = str_replace("__CURRENT_PLUGIN__",$this->location,$location);
-				}
-				$location = Amslib_Plugin::expandPath($location);
-				
-				//	Obtain the language the system should use when printing text
-				$language = Amslib_Plugin_Application::getLanguage($name);
-				if(!$language) $language = reset($t["language"]);
-				
-				//	Create the language translator object and insert it into the api
-				$translator = new Amslib_Translator2($t["type"]);
-				$translator->addLanguage($t["language"]);
-				$translator->setLocation($location);
-				$translator->setLanguage($language);
-				$translator->load();
-				
-				$this->api->setTranslator($name,$translator);			
-				
-				//	If there was a "router" parameter, insert all the languages into the router system
-				if(isset($t["router"])){
-					foreach($t["language"] as $langCode){
-						Amslib_Router_Language3::add($langCode,str_replace("_","-",$langCode));
-					}
-				}
-
-				//	Now register all the languages with the application
-				foreach($t["language"] as $langCode){
-					Amslib_Plugin_Application::registerLanguage($name, $langCode);
-				}				
+		if(isset($this->config["translator"][$name])){
+			if(isset($this->config["translator"][$name]["object"])){
+				return $this->config["translator"][$name]["object"];	
 			}
+			
+			$t = $this->config["translator"][$name];
+			
+			//	The location parameter could contain special keys which need to be expanded
+			//	The location parameter has a specific key called __CURRENT_PLUGIN__ which 
+			//		isn't available normally, so expand this one separately
+			$location = $t["location"];
+			if(strpos($location,"__CURRENT_PLUGIN__") !== false){
+				$location = str_replace("__CURRENT_PLUGIN__",$this->location,$location);
+			}
+			$location = Amslib_Plugin::expandPath($location);
+			
+			//	Obtain the language the system should use when printing text
+			$language = Amslib_Plugin_Application2::getLanguage($name);
+			if(!$language) $language = reset($t["language"]);
+			
+			//	Create the language translator object and insert it into the api
+			$translator = new Amslib_Translator2($t["type"]);
+			$translator->addLanguage($t["language"]);
+			$translator->setLocation($location);
+			$translator->setLanguage($language);
+			$translator->load();
+			
+			$this->config["translator"][$name]["object"] = $translator;
+
+			return $translator;
 		}
+
+		return false;
 	}
 	
 	protected function initialisePlugin(){	/* do nothing by default */ }
@@ -465,7 +480,6 @@ class Amslib_Plugin2
 
 	public function load($name,$location)
 	{
-		//Amslib_FirePHP::output("load",$name);
 		$this->name		=	$name;
 		$this->location	=	$location;
 		$this->filename	=	$location."/package.xml";
@@ -485,13 +499,11 @@ class Amslib_Plugin2
 			$this->loadRouter();
 			//	run all the configuration into the api object
 			$this->processConfiguration();
-			//	load all the translators for this plugin so text renders correctly
-			$this->loadTranslators();
 			//	initialise the api object, it's now ready to use externally
 			$this->api->initialise();
 			//	finalise the plugin, finish any last requests by the plugin
 			$this->finalisePlugin();
-			
+
 			return $this->api;
 		}
 
@@ -503,21 +515,34 @@ class Amslib_Plugin2
 	
 	public function setConfig($key,$value)
 	{
-		if(is_string($key)){
-			$this->config[$key] = $value;
+		//	NOTE:	Translators are set differently than other config values because you share the object
+		//			and not just the config data, you set the "object" parameter and it'll be used later
+		if(count($key) == 2 && $key[0] == "translator"){
+			$this->config[$key[0]][$key[1]] = $value;	
 		}else{
-			$this->config[$key[0]][$key[1]] = $value;
+			if(is_string($key)){
+				$this->config[$key] = $value;
+			}else{
+				$this->config[$key[0]][$key[1]] = $value;
+			}
 		}
 	}
 	
 	public function getConfig($type,$id=NULL)
 	{
-		if($id === NULL){
-			return isset($this->config[$type]) ? $this->config[$type] : false;	
+		if($type == "translator"){
+			$this->config[$type][$id]["object"] = $this->createTranslator($id);
+			return $this->config[$type][$id];
 		}else{
-			return isset($this->config[$type][$id]) ? $this->config[$type][$id] : false;	
+			if($id === NULL){
+				return isset($this->config[$type]) ? $this->config[$type] : false;	
+			}else{
+				return isset($this->config[$type][$id]) ? $this->config[$type][$id] : false;	
+			}
 		}
-	}
+		
+		return false;
+	}	
 	
 	public function removeConfig($type,$id=NULL)
 	{

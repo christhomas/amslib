@@ -254,6 +254,7 @@ class Amslib_MVC3
 			//	TODO: what happens if api, _w and _c are already defined and you just overwrote them?
 			//	NOTE: this shouldn't happen, they are special so nobody should use them
 			//	NOTE: perhaps we can warn people when they do this? or perhaps move our keys to a more unique "namespace"
+			//	FIXME: what if multiple translators of the same type are defined? they would start to clash
 			$parameters["api"]	=	$this;
 			$parameters["_w"]	=	$this->getTranslator("website");
 			$parameters["_c"]	=	$this->getTranslator("content");
