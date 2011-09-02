@@ -65,13 +65,13 @@ class Amslib_Plugin_Manager2
 
 	static public function add($name,$location=NULL)
 	{
+		//	Plugin was already loaded, so return it's API directly
+		if(self::isLoaded($name)) return self::getAPI($name);
+		
 		$location = self::findPlugin($name,$location);
 
 		//	Protect against missing plugins
 		if(!$location) return false;
-
-		//	Plugin was already loaded, so return it's API directly
-		if(self::isLoaded($name)) return self::getAPI($name);
 
 		//	Plugin was not present, so create it, load everything required and return it's API
 		//	The first import call assigns the plugin object 
