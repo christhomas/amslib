@@ -24,7 +24,7 @@
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-class Amslib_MVC3
+class Amslib_MVC4
 {
 	protected $layout;
 	protected $object;
@@ -46,17 +46,9 @@ class Amslib_MVC3
 	//	extending their capabilities with customised functionality
 	protected $slots;
 
-	//	MVC Configuration
-	protected $prefix;
-
 	protected $name;
 	protected $location;
 	protected $plugin;
-
-	protected function getComponentPath($component,$name)
-	{
-		return $this->location.$this->prefix[$component]."$name.php";
-	}
 
 	public function __construct()
 	{
@@ -70,14 +62,6 @@ class Amslib_MVC3
 
 		$this->value		=	array();
 		$this->viewParams	=	array();
-
-		//	This stores where all the types components are stored as part of the application
-		$this->prefix = array();
-
-		$this->setComponent("layout",		"layouts",		"La_");
-		$this->setComponent("view",			"views",		"Vi_");
-		$this->setComponent("object",		"objects",		"");
-		$this->setComponent("service",		"services",		"Sv_");
 	}
 
 	public function setName($name)
@@ -98,11 +82,6 @@ class Amslib_MVC3
 	public function initialise()
 	{
 		return $this;
-	}
-
-	public function setComponent($component,$directory,$prefix)
-	{
-		$this->prefix[$component] = "/$directory/$prefix";
 	}
 
 	public function setModel($model)
@@ -182,11 +161,11 @@ class Amslib_MVC3
 		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
 	}
 
-	public function setLayout($id,$name,$absolute=false)
+	public function setLayout($id,$name)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
 		
-		$this->layout[$id] = ($absolute == false) ? $this->getComponentPath("layout",$name) : $name;
+		$this->layout[$id] = $name;
 
 		if($this->layout["default"] == false) $this->layout["default"] = $this->layout[$id];
 	}
@@ -203,17 +182,17 @@ class Amslib_MVC3
 		return array_keys($this->layout);
 	}
 
-	public function setObject($id,$name,$absolute=false)
+	public function setObject($id,$name)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
 
-		$this->object[$id] = ($absolute == false) ? $this->getComponentPath("object",$name) : $name;
+		$this->object[$id] = $name;
 	}
 
 	public function getObject($id,$singleton=false)
 	{
 		if(!isset($this->object[$id])) return false;
-		
+
 		Amslib::requireFile($this->object[$id],array("require_once"=>true));
 		
 		if(class_exists($id)){
@@ -221,7 +200,7 @@ class Amslib_MVC3
 
 			return new $id;
 		}
-
+		
 		return false;
 	}
 	
@@ -230,15 +209,14 @@ class Amslib_MVC3
 		return array_keys($this->object);
 	}
 
-	public function setView($id,$name,$absolute=false)
+	public function setView($id,$name)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
 
-		$this->view[$id] = ($absolute == false) ? $this->getComponentPath("view",$name) : $name;
+		$this->view[$id] = $name;
 	}
 	
-	//	TODO: This method should be called getView in line with all the others
-	public function findView($id)
+	public function getView($id)
 	{
 		if($id && isset($this->view[$id])) return $this->view[$id];
 
@@ -272,17 +250,18 @@ class Amslib_MVC3
 		return array_keys($this->view);
 	}
 
-	public function setService($id,$name,$absolute=false)
+	public function setService($id,$name)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
 
-		if($absolute){
+		//	FIXME: Hmmm.....not sure what to do here....
+		/*if($absolute){
 			$this->service[$id] = $name;
 			$this->setValue("service:$id",$name);
-		}else{
-			$this->service[$id] = Amslib_Website::rel($this->getComponentPath("service", $name));
+		}else{*/
+			$this->service[$id] = Amslib_Website::rel($name);
 			
-			//	NOTE: I should recognise that now Amslib_MVC3 is dependant on Amslib_Router3's existence
+			//	NOTE: I should recognise that now Amslib_MVC4 is dependant on Amslib_Router3's existence
 			//	NOTE: perhaps we should remove this dependency and instead inport the data as opposed to looking it up here
 			//	Attempt to find a routed url for this service
 			$url = Amslib_Router3::getURL("Service:$id");
@@ -290,7 +269,7 @@ class Amslib_MVC3
 
 			//	Set this as a service url for the javascript to acquire
 			$this->setValue("service:$id",$url);
-		}	
+		//}	
 	}
 
 	public function getService($id,$url=false)
@@ -514,13 +493,4 @@ class Amslib_MVC3
 
 		return "";
 	}
-	
-	//	DEPRECATED: use renderView() instead
-	//	TODO: investigate: this method is very similar to render, can refactor??
-	//	TODO: Because getView collides with findView above, we should try to move this method to somewhere more inline with renderView() [which is what it actually does]
-	public function getView($id,$parameters=array()){ return $this->renderView($id,$parameters); }
-	//	use setFont, addFont, removeFont instead
-	public function setGoogleFont($id,$file,$conditional=NULL,$autoload=NULL){$this->setFont("google",$id,$file,$condition,$autoload);}
-	public function addGoogleFont($id){$this->addFont($id);}
-	public function removeGoogleFont($id){$this->removeFont($id);}
 }

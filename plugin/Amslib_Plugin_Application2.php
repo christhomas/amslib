@@ -91,7 +91,7 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		Amslib_Router3::execute();
 	}
 
-	public function __construct($name=NULL,$location=NULL)
+	public function __construct($name,$location)
 	{
 		parent::__construct();
 		
@@ -101,16 +101,14 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		parent::setPath("plugin",	"__PLUGIN__");
 		parent::setPath("docroot",	Amslib_File::documentRoot());
 		
-		//	remove it here because you need to add it again, but making sure it's at the end!!
-		$this->searchXPath = Amslib_Array::removeValue($this->searchXPath,"requires");
-		$this->searchXPath[] = "path";
-		$this->searchXPath[] = "router_source";
-		$this->searchXPath[] = "version";
-		//	NOTE: Always made sure "requires" is the last item in the list
-		$this->searchXPath[] = "requires";
+		$this->search = array_merge($this->search,array("path","router_source","version"));
 		
-		//	Only load the plugin if the require basic information is given, otherwise defer to whoever created the object
-		if($name && $location) $this->load($name,$location);
+		//	Preload the plugin manager with the application object
+		Amslib_Plugin_Manager2::preload($name,$this);
+		//	We can't use Amslib_Plugin_Manager for this, because it's an application plugin
+		$this->config($name,$location);
+		$this->transfer();
+		$this->load();
 	}
 
 	static public function &getInstance()
@@ -120,27 +118,6 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		if($instance === NULL) $instance = new self();
 
 		return $instance;
-	}
-	
-	/**
-	 * method: load
-	 * 
-	 * Load the application object into the system
-	 * 
-	 * parameters:
-	 * 	$name		-	The name of the plugin
-	 * 	$location	-	The location inside the system, if specific, or different from that of other plugins
-	 * 
-	 * notes:
-	 * 	-	We do this customised load() method because normally you don't add application objects
-	 * 		in the same way as other objects, they are created using new Object() instead, therefore because of
-	 * 		this, we need to import them manually
-	 */
-	public function load($name,$location)
-	{
-		Amslib_Plugin_Manager2::import($name,$this);
-
-		return parent::load($name,$location);
 	}
 	
 	static public function getVersion($element=NULL)

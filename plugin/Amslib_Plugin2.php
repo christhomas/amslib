@@ -30,6 +30,9 @@ class Amslib_Plugin2
 	//			templated strings with their dynamically valid replacements
 	static protected $path;
 	
+	//	The ready state of the plugin is true/false depending on whether it has been configured
+	protected $isReady;
+	
 	//	The name of the plugin
 	protected $name;
 	
@@ -49,21 +52,21 @@ class Amslib_Plugin2
 	protected $config;
 	
 	//	The list of XML XPath expressions that will be searched for data and stored
-	protected $searchXPath;
-
-	//	We load the router afterwards because it means the parent routes always override the child routes
-	//	which is desireable behaviour, a child plugin is merely loaded to help the parent, not override the parent
-	//	therefore when you talk about routes, you obviously don't want a child to override the routes of the parent
-	//	since then unpredictable behaviour might arise, like what happened in the version 1, where you'd load
-	//	an administration panel plugin which clashed with it's equal in the website for the same routes, 
-	//	meaning you'd get admin panel routes installed into the website router, obviously this is not a good thing.
-	protected function loadRouter()
+	protected $search;
+	
+	//	The path prefixes of each component type
+	protected $prefix = array();
+	
+	protected function setComponent($component,$directory,$prefix)
 	{
-		//	This loads the routes from the plugin into the central router system
-		$source = Amslib_Router3::getObject("source:xml");
-		$this->routes = $source->load($this->filename);
+		$this->prefix[$component] = "/$directory/$prefix";
 	}
 	
+	protected function getComponent($component,$name)
+	{
+		return $this->location.$this->prefix[$component]."$name.php";
+	}
+
 	protected function findResource($resource,$absolute=false)
 	{
 		//	PREPARE THE STRING: expand any parameters inside the resource name
@@ -91,24 +94,162 @@ class Amslib_Plugin2
 		return false;
 	}
 	
-	static protected function setPath($name,$path)
+	protected function process()
 	{
-		self::$path[$name] = $path;
-	} 
-	
-	static public function expandPath($path)
-	{
-		$path	=	str_replace("__WEBSITE__",			self::$path["website"],	$path);
-		$path	=	str_replace("__ADMIN__",			self::$path["admin"],	$path);
-		$path	=	str_replace("__AMSLIB__",			self::$path["amslib"],	$path);
-		$path	=	str_replace("__DOCROOT__",			self::$path["docroot"],	$path);
+		$this->api = $this->createAPI();
+		$this->api->setModel($this->createObject($this->config["model"],true,true));
+		
+		//	If the API object is not valid, don't continue to process
+		if(!$this->api) return false;
+		
+		//	Load the router, if one is present
+		$source = Amslib_Router3::getObject("source:xml");
+		$this->routes = $source->load($this->filename);
+		
+		//	Load all routes into the plugin, so you can identify which plugin is responsible for a route
+		foreach($this->routes as $name=>$route) $this->api->setRoute($name,$route);
 
-		return Amslib_File::reduceSlashes($path);
+		$keys = array("object","translator","layout","view","value","service","font","image","javascript","stylesheet");
+		
+		foreach($keys as $k=>$v){
+			//	Don't process any keys which are not set, empty or the required method to process it is not available
+			if(!isset($this->config[$v]) || empty($this->config[$v]) || !method_exists($this->api,"set".ucwords($v))){
+				continue;		
+			}
+
+			$callback	=	"set".ucwords($v);
+			$func		=	array($this->api,$callback);
+			
+			foreach($this->config[$v] as $name=>$c){
+				//	NOTE: If a parameter is marked for export, don't process it.
+				if(isset($c["export"])) continue;
+					
+				if(in_array($v,array("layout","view","service"))){
+					$params		=	array($name,$c["value"]);
+				}else if($v == "object"){
+					$params		=	array($name,$c["file"]);
+				}else if($v == "font"){
+					$params		=	array($c["type"],$name,$c["value"]);
+				}else if($v == "value"){
+					$params		=	array($c["name"],$c["value"]);
+				}else if($v == "model"){
+					//	We need to change the array layout to make models a plural of one (lulz irony)
+					//	Then we can reenable this code, it'll be simpler, but not ready to work yet.
+					//$params		=	array($this->createObject($c,true,true));
+				}else if($v == "translator"){
+					$translator	=	$this->createTranslator($name);
+					
+					if(!$translator) continue;	
+					
+					$this->installLanguages($name,$c);
+					
+					$params		=	array($name,$translator);
+				}else{
+					$value		=	isset($c["value"]) ? $c["value"] : NULL;
+					$condition	=	isset($c["condition"]) ? $c["condition"] : NULL;
+					$autoload	=	isset($c["autoload"]) ? $c["autoload"] : NULL;
+					$media		=	isset($c["media"]) ? $c["media"] : NULL;
+					
+					$params		=	array($name,$value,$condition,$autoload,$media);
+				}
+
+				call_user_func_array($func,$params);
+			}
+		}
 	}
 	
-	public function __construct($name=NULL,$location=NULL)
+	protected function installLanguages($name,$lang)
 	{
-		$this->searchXPath = array(
+		foreach($lang["language"] as $langCode){
+			//	If there was a "router" parameter, insert all the languages into the router system
+			if(isset($lang["router"])){
+				Amslib_Router_Language3::add($langCode,str_replace("_","-",$langCode));
+			}
+
+			//	Now register all the languages with the application
+			Amslib_Plugin_Application2::registerLanguage($name, $langCode);
+		}
+	}
+	
+	protected function createObject(&$object,$singleton=false,$dieOnError=false)
+	{
+		if(!$object || empty($object)) return false;
+		
+		if(isset($object["cache"])) return $object["cache"];
+		if(isset($object["file"]))	Amslib::requireFile($object["file"]);
+		
+		$error =  "FATAL ERROR(".__METHOD__.") Could not __ERROR__ for plugin '{$this->name}'<br/>";
+		
+		$cache = false;
+		
+		if(class_exists($object["value"])){
+			if($singleton){
+				if(method_exists($object["value"],"getInstance")){
+					$cache = call_user_func(array($object["value"],"getInstance"));
+				}else{
+					die(str_replace("__ERROR__","find the getInstance method in the API object '{$object["value"]}'",$error));
+				}
+			}else{
+				$cache = new $object["value"];
+			}
+		}else if($dieOnError){
+			die(str_replace("__ERROR__","find class '{$object["value"]}'",$error));
+		}
+		
+		if($cache) $object["cache"] = $cache;
+		
+		return $cache;
+	}
+	
+	protected function createAPI()
+	{ 
+		$api = $this->createObject($this->config["api"],true,true);
+
+		//	An API Object was not created, so create a default Amslib_MVC4 object instead
+		if($api == false) $api = new Amslib_MVC4();
+
+		//	Setup the api with basic name and filesystem location
+		$api->setLocation($this->getLocation());
+		$api->setName($this->getName());
+		$api->setPlugin($this);
+	
+		return $api;
+	}
+	
+	protected function createTranslator($name)
+	{
+		if(!isset($this->config["translator"][$name])) return false;
+		
+		$t = &$this->config["translator"][$name];
+		if(isset($t["cache"])) return $t["cache"];
+			
+		//	Replace __CURRENT_PLUGIN with plugin location and expand any other paths
+		$location = str_replace("__CURRENT_PLUGIN__",$this->location,$t["location"]);
+		$location = Amslib_Plugin::expandPath($location);
+		
+		//	Obtain the language the system should use when printing text
+		$language = Amslib_Plugin_Application2::getLanguage($name);
+		if(!$language) $language = reset($t["language"]);
+		
+		//	Create the language translator object and insert it into the api
+		$translator = new Amslib_Translator2($t["type"]);
+		$translator->addLanguage($t["language"]);
+		$translator->setLocation($location);
+		$translator->setLanguage($language);
+		$translator->load();
+		
+		$t["cache"] = $translator;
+
+		return $translator;
+	}
+	
+	protected function initialisePlugin(){	/* do nothing by default */ }
+	protected function finalisePlugin(){	/* do nothing by default */ }
+	
+	
+	public function __construct()
+	{
+		$this->search = array(
 			"layout",
 			"view",
 			"object",
@@ -118,34 +259,94 @@ class Amslib_Plugin2
 			"stylesheet",
 			"font",
 			"value",
-			"translator",
-			//	NOTE:	Always make sure that "requires" is the last path searched because
-			//			you need to load and add the plugin's configuration before you load the children
-			"requires"
+			"translator"
 		);
 		
-		$this->config = array("api"=>false,"model"=>false,"translator"=>false);
-
-		//	Only load the plugin if the require basic information is given, otherwise defer to whoever created the object
-		if($name && $location) $this->load($name,$location);
+		$this->config = array("api"=>false,"model"=>false,"translator"=>false,"requires"=>false);
+		
+		//	This stores where all the types components are stored as part of the application
+		$this->setComponent("layout",		"layouts",		"La_");
+		$this->setComponent("view",			"views",		"Vi_");
+		$this->setComponent("object",		"objects",		"");
+		$this->setComponent("service",		"services",		"Sv_");
 	}
 	
-	protected function loadConfiguration($xpath)
+	public function transfer()
 	{
+		//	Process all child transfers before the parents	
+		foreach(Amslib_Array::valid($this->config["requires"]) as $name=>$plugin){
+			$plugin->transfer();
+		}
+
+		//	FIXME: omg, it's just a bunch of repeated code, all over the place, ripe for refactoring....
+		
+		//	Process all the import/export/transfer requests on all resources
+		//	NOTE: translators don't support the "move" parameter
+		foreach($this->config as $key=>$block){
+			if(in_array($key,array("object","view","layout","service","stylesheet","image","javascript","translator"))){
+				//	TODO: if I used $item["name"] instead of $name as the key, I could merge against the "value" block below
+				foreach(Amslib_Array::valid($block) as $name=>$item){
+					if(isset($item["import"])){
+						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
+						$this->setConfig(array($key,$name),$plugin->getConfig($key,$name));
+						if(isset($item["move"])) $plugin->removeConfig($key,$name);
+					}else if(isset($item["export"])){
+						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
+						$plugin->setConfig(array($key,$name),$this->getConfig($key,$name));
+						if(isset($item["move"])) $this->removeConfig($key,$name);
+					}
+				}
+			}else if($key == "model"){
+				//	Models are treated slightly differently because they are singular, not plural
+				//	NOTE: maybe in future models will be plural too, perhaps it's better to make it work plurally anyway
+				if(isset($block["import"])){
+					$plugin = Amslib_Plugin_Manager2::getPlugin($block["import"]);
+					$this->setConfig($key,$plugin->getConfig($key));
+					if(isset($block["move"])) $plugin->removeConfig($key);
+				}else if(isset($block["export"])){
+					$plugin = Amslib_Plugin_Manager2::getPlugin($block["export"]);
+					$plugin->setConfig($key,$this->getConfig($key));
+					if(isset($block["move"])) $this->removeConfig($key);
+				}
+			}else if($key == "value"){
+				foreach(Amslib_Array::valid($block) as $item){
+					if(isset($item["import"])){
+						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
+						$this->setConfig(array($key,$item["name"]),$plugin->getConfig($key,$item["name"]));
+						if(isset($item["move"])) $plugin->removeConfig($key,$item["name"]);	
+					}else if(isset($item["export"])){
+						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
+						$plugin->setConfig(array($key,$item["name"]),$this->getConfig($key,$item["name"]));
+						if(isset($item["move"])) $this->removeConfig($key,$item["name"]);
+					}
+				}
+			}
+		}
+	}
+
+	public function config($name,$location)
+	{
+		$this->isReady	=	false;
+		$this->name		=	$name;
+		$this->location	=	$location;
+		$this->filename	=	$location."/package.xml";
+		
+		$xpath			=	false;
+		$document		=	new DOMDocument('1.0', 'UTF-8');
+		
+		if(@$document->load($this->filename)){
+			$document->preserveWhiteSpace = false;
+			$xpath = new DOMXPath($document);
+		}
+		
+		if(!$xpath) return $this->isReady;
+		
 		//	Search each path and store all the configuration data
-		foreach($this->searchXPath as $p){
+		foreach($this->search as $p){
 			$list = $xpath->query("//package/$p");
 			
 			foreach($list as $node){
 				switch($node->nodeName){
-					case "requires":{
-						$plugin = $xpath->query("plugin",$node);
-						
-						foreach($plugin as $p){
-							$this->config[$node->nodeName][$p->nodeValue] = Amslib_Plugin_Manager2::add($p->nodeValue,$this->location);
-						}
-					}break;
-	
 					case "layout":
 					case "view":
 					case "service":{
@@ -155,7 +356,7 @@ class Amslib_Plugin2
 							$p = array();
 							$p["id"] = $c->nodeValue;
 							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
-							$p["value"] = $c->nodeValue;
+							$p["value"] = $this->getComponent($node->nodeName,$c->nodeValue);
 							
 							$this->config[$node->nodeName][$p["id"]] = $p;	
 						}
@@ -233,9 +434,7 @@ class Amslib_Plugin2
 							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
 							$p["value"] = $c->nodeValue;
 							
-							//	NOTE:	hmmm, doesn't this violate the rule Amslib_MVC3 is responsible for the 
-							//			filesystm layout? since we are putting the filesystem location directly in here 
-							$file = "$this->location/objects/{$p["value"]}.php";
+							$file = $this->getComponent("object",$p["value"]);
 							if(file_exists($file)) $p["file"] = $file;
 							
 							//	Make sure generic objects are referenced properly
@@ -279,230 +478,37 @@ class Amslib_Plugin2
 				}
 			}
 		}
-	}
-	
-	protected function processRelocations()
-	{
-		//	FIXME: omg, it's just a bunch of repeated code, all over the place, ripe for refactoring....
 		
-		//	Process all the import/export/transfer requests on all resources
-		//	NOTE: translators don't support the "move" parameter
-		foreach($this->config as $key=>$block){
-			if(in_array($key,array("object","view","layout","service","stylesheet","image","javascript","translator"))){
-				//	TODO: if I used $item["name"] instead of $name as the key, I could merge against the "value" block below
-				foreach(Amslib_Array::valid($block) as $name=>$item){
-					if(isset($item["import"])){
-						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
-						$this->setConfig(array($key,$name),$plugin->getConfig($key,$name));
-						if(isset($item["move"])) $plugin->removeConfig($key,$name);
-					}else if(isset($item["export"])){
-						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
-						$plugin->setConfig(array($key,$name),$this->getConfig($key,$name));
-						if(isset($item["move"])) $this->removeConfig($key,$name);
-					}
-				}
-			}else if($key == "model"){
-				//	Models are treated slightly differently because they are singular, not plural
-				//	NOTE: maybe in future models will be plural too, perhaps it's better to make it work plurally anyway
-				if(isset($block["import"])){
-					$plugin = Amslib_Plugin_Manager2::getPlugin($block["import"]);
-					$this->setConfig($key,$plugin->getConfig($key));
-					if(isset($block["move"])) $plugin->removeConfig($key);
-				}else if(isset($block["export"])){
-					$plugin = Amslib_Plugin_Manager2::getPlugin($block["export"]);
-					$plugin->setConfig($key,$this->getConfig($key));
-					if(isset($block["move"])) $this->removeConfig($key);
-				}
-			}else if($key == "value"){
-				foreach($block as $item){
-					if(isset($item["import"])){
-						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
-						$this->setConfig(array($key,$item["name"]),$plugin->getConfig($key,$item["name"]));
-						if(isset($item["move"])) $plugin->removeConfig($key,$item["name"]);	
-					}else if(isset($item["export"])){
-						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
-						$plugin->setConfig(array($key,$item["name"]),$this->getConfig($key,$item["name"]));
-						if(isset($item["move"])) $this->removeConfig($key,$item["name"]);
-					}
-				}
-			}
-		}
-	}
-	
-	protected function processConfiguration()
-	{
-		$this->api = $this->createAPI();
-		
-		//	If the API object is not valid, don't continue to process
-		if(!$this->api) return false;
-		
-		$keys = array("translator","layout","view","object","value","service","font","image","javascript","stylesheet");
-		
-		foreach($keys as $k=>$v){
-			//	Don't process any keys which are not set, empty or the required method to process it is not available
-			if(!isset($this->config[$v]) || empty($this->config[$v]) || !method_exists($this->api,"set".ucwords($v))){
-				continue;		
-			}
+		//	load all the child plugins
+		$list = $xpath->query("//package/requires/plugin");
 			
-			$callback	=	"set".ucwords($v);
-			$func		=	array($this->api,$callback);
-			
-			foreach($this->config[$v] as $name=>$c){
-				//	NOTE: If a parameter is marked for export, don't process it.
-				if(isset($c["export"])) continue;
-					
-				if(in_array($v,array("layout","view","object","service"))){
-					$params		=	array($name,$c["value"]);
-				}else if($v == "font"){
-					$params		=	array($c["type"],$name,$c["value"]);
-				}else if($v == "value"){
-					$params		=	array($c["name"],$c["value"]);
-				}else if($v == "translator"){
-					$translator = $this->createTranslator($name);
-					
-					if(!$translator) continue;	
-					
-					$this->installLanguages($name,$c);
-					
-					$params		=	array($name,$translator);
-				}else{
-					$value		=	isset($c["value"]) ? $c["value"] : NULL;
-					$condition	=	isset($c["condition"]) ? $c["condition"] : NULL;
-					$autoload	=	isset($c["autoload"]) ? $c["autoload"] : NULL;
-					$media		=	isset($c["media"]) ? $c["media"] : NULL;
-					
-					$params		=	array($name,$value,$condition,$autoload,$media);
-				}
-
-				call_user_func_array($func,$params);
-			}
-		}
-	}
-	
-	protected function installLanguages($name,$lang)
-	{
-		foreach($lang["language"] as $langCode){
-			//	If there was a "router" parameter, insert all the languages into the router system
-			if(isset($lang["router"])){
-				Amslib_Router_Language3::add($langCode,str_replace("_","-",$langCode));
-			}
-
-			//	Now register all the languages with the application
-			Amslib_Plugin_Application2::registerLanguage($name, $langCode);
-		}
-	}
-	
-	protected function createObject($object,$singleton=false,$dieOnError=false)
-	{
-		if(!$object || empty($object)) return false;
-		
-		if(isset($object["file"])) Amslib::requireFile($object["file"]);
-		
-		$error =  "FATAL ERROR(".__METHOD__.") Could not __ERROR__ for plugin '{$this->name}'<br/>";
-		
-		if(class_exists($object["value"])){
-			if($singleton){
-				if(method_exists($object["value"],"getInstance")){
-					return call_user_func(array($object["value"],"getInstance"));
-				}else{
-					die(str_replace("__ERROR__","find the getInstance method in the API object '{$object["value"]}'",$error));
-				}
-			}else{
-				return new $object["value"];
-			}
-		}else if($dieOnError){
-			die(str_replace("__ERROR__","find class '{$object["value"]}'",$error));
+		foreach($list as $node){
+			$this->config["requires"][$node->nodeValue] = Amslib_Plugin_Manager2::config($node->nodeValue,$this->location);
 		}
 		
-		return false;
-	}
-	
-	protected function createAPI()
-	{
-		$api = $this->createObject($this->config["api"],true,true);
-
-		//	An API Object was not created, so create a default Amslib_MVC3 object instead
-		if($api == false) $api = new Amslib_MVC3();
-
-		//	Setup the api with basic name and filesystem location
-		$api->setLocation($this->getLocation());
-		$api->setName($this->getName());
-		$api->setPlugin($this);
-	
-		//	Assign the model to the plugin
-		$api->setModel($this->createObject($this->config["model"],true,true));
-
-		//	Load all routes into the plugin, so you can identify which plugin is responsible for a route
-		foreach($this->routes as $name=>$route) $api->setRoute($name,$route);
-
-		return $api;
-	}
-	
-	protected function createTranslator($name)
-	{
-		if(isset($this->config["translator"][$name])){
-			if(isset($this->config["translator"][$name]["object"])){
-				return $this->config["translator"][$name]["object"];	
-			}
-			
-			$t = $this->config["translator"][$name];
-			
-			//	The location parameter could contain special keys which need to be expanded
-			//	The location parameter has a specific key called __CURRENT_PLUGIN__ which 
-			//		isn't available normally, so expand this one separately
-			$location = $t["location"];
-			if(strpos($location,"__CURRENT_PLUGIN__") !== false){
-				$location = str_replace("__CURRENT_PLUGIN__",$this->location,$location);
-			}
-			$location = Amslib_Plugin::expandPath($location);
-			
-			//	Obtain the language the system should use when printing text
-			$language = Amslib_Plugin_Application2::getLanguage($name);
-			if(!$language) $language = reset($t["language"]);
-			
-			//	Create the language translator object and insert it into the api
-			$translator = new Amslib_Translator2($t["type"]);
-			$translator->addLanguage($t["language"]);
-			$translator->setLocation($location);
-			$translator->setLanguage($language);
-			$translator->load();
-			
-			$this->config["translator"][$name]["object"] = $translator;
-
-			return $translator;
-		}
-
-		return false;
-	}
-	
-	protected function initialisePlugin(){	/* do nothing by default */ }
-	protected function finalisePlugin(){	/* do nothing by default */ }
-
-	public function load($name,$location)
-	{
-		$this->name		=	$name;
-		$this->location	=	$location;
-		$this->filename	=	$location."/package.xml";
+		$this->isReady = true;
 		
-		$document = new DOMDocument('1.0', 'UTF-8');
-		if(@$document->load($this->filename)){
-			$document->preserveWhiteSpace = false;
-			$xpath = new DOMXPath($document);
+		//	Now the configuration data is loaded, initialise the plugin with any custom requirements
+		$this->initialisePlugin();
+		
+		return $this->isReady;
+	}
+
+	public function load()
+	{
+		if($this->isReady)
+		{
+			//	Process all child plugins before the parents	
+			foreach(Amslib_Array::valid($this->config["requires"]) as $plugin) $plugin->load();
 			
-			//	initialise the plugin, do some tasks before starting
-			$this->initialisePlugin();
-			//	load configuration tree
-			$this->loadConfiguration($xpath);
-			//	process all resource relocations within plugin tree
-			$this->processRelocations();
-			//	load all routes, ensuring parent routes override child routes
-			$this->loadRouter();
 			//	run all the configuration into the api object
-			$this->processConfiguration();
+			$this->process();
 			//	initialise the api object, it's now ready to use externally
 			$this->api->initialise();
 			//	finalise the plugin, finish any last requests by the plugin
 			$this->finalisePlugin();
+			//	Insert into the plugin manager
+			Amslib_Plugin_Manager2::insert($this->name,$this);
 
 			return $this->api;
 		}
@@ -515,32 +521,45 @@ class Amslib_Plugin2
 	
 	public function setConfig($key,$value)
 	{
-		//	NOTE:	Translators are set differently than other config values because you share the object
-		//			and not just the config data, you set the "object" parameter and it'll be used later
-		if(count($key) == 2 && $key[0] == "translator"){
-			$this->config[$key[0]][$key[1]] = $value;	
+		//	This is important, because otherwise values imported/exported through transfer() will not execute in process()
+		unset($value["import"],$value["export"]);
+		
+		if(is_string($key)){
+			$this->config[$key] = $value;
+		}else if(is_array($key) && isset($key[0]) && $key[0] == "value"){
+			$k = Amslib_Array::findKey($this->config[$key[0]],"name",$key[1]);
+			if($k !== false) $this->config[$key[0]][$k] = $value;
 		}else{
-			if(is_string($key)){
-				$this->config[$key] = $value;
-			}else{
-				$this->config[$key[0]][$key[1]] = $value;
-			}
+			$this->config[$key[0]][$key[1]] = $value;
 		}
 	}
 	
-	public function getConfig($type,$id=NULL)
+	public function getConfig($type,$name=NULL)
 	{
-		if($type == "translator"){
-			$this->config[$type][$id]["object"] = $this->createTranslator($id);
-			return $this->config[$type][$id];
-		}else{
-			if($id === NULL){
-				return isset($this->config[$type]) ? $this->config[$type] : false;	
-			}else{
-				return isset($this->config[$type][$id]) ? $this->config[$type][$id] : false;	
-			}
+		switch($type){
+			case "translator":{
+				$this->config[$type][$name]["cache"] = $this->createTranslator($name);
+				return $this->config[$type][$name];	
+			}break;
+			
+			case "model":{
+				$this->createObject($this->config[$type]);
+				return $this->config[$type];		
+			}break;
+			
+			case "value":{
+				return Amslib_Array::find($this->config[$type], "name", $name);
+			}break;
+			
+			default:{
+				if($name === NULL){
+					return isset($this->config[$type]) ? $this->config[$type] : false;	
+				}else{
+					return isset($this->config[$type][$name]) ? $this->config[$type][$name] : false;	
+				}	
+			}break;
 		}
-		
+			
 		return false;
 	}	
 	
@@ -581,6 +600,21 @@ class Amslib_Plugin2
 	public function setModel($model)
 	{
 		$this->api->setModel($model);
+	}
+	
+	static protected function setPath($name,$path)
+	{
+		self::$path[$name] = $path;
+	} 
+	
+	static public function expandPath($path)
+	{
+		$path	=	str_replace("__WEBSITE__",			self::$path["website"],	$path);
+		$path	=	str_replace("__ADMIN__",			self::$path["admin"],	$path);
+		$path	=	str_replace("__AMSLIB__",			self::$path["amslib"],	$path);
+		$path	=	str_replace("__DOCROOT__",			self::$path["docroot"],	$path);
+
+		return Amslib_File::reduceSlashes($path);
 	}
 
 	static public function &getInstance()

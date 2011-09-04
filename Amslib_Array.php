@@ -119,6 +119,15 @@ class Amslib_Array
 
 		return false;
 	}
+	
+	static public function findKey($array,$key,$value)
+	{
+		foreach(self::valid($array) as $k=>$a){
+			if($a[$key] == $value) return $k;
+		}
+
+		return false;
+	}
 
 	static public function searchKeys($array,$filter)
 	{
