@@ -34,11 +34,13 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 
 	protected function readVersion()
 	{
-		self::$version = array(
-			"date"		=>	$this->config["version"]["date"],
-			"number"	=>	$this->config["version"]["number"],
-			"name"		=>	$this->config["version"]["name"]
-		);
+		if(isset($this->config["version"])){
+			self::$version = array(
+				"date"		=>	$this->config["version"]["date"],
+				"number"	=>	$this->config["version"]["number"],
+				"name"		=>	$this->config["version"]["name"]
+			);
+		}
 	}
 
 	protected function initialisePlugin()
