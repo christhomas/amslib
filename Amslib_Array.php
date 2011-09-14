@@ -70,7 +70,7 @@ class Amslib_Array
 		return $values;
 	}
 	
-	static public function removeValue(array $array,$value, $strict=false)
+	static public function removeValue(array $array,$value,$strict=false)
 	{
 	    return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));
 	}
@@ -84,6 +84,7 @@ class Amslib_Array
 			$found = false;
 			
 			//	TODO: I'm sure that there are more situations I could take into account here
+			//	TODO: I should document exactly what this method does, because right now I can't remember
 			
 			if(is_array($value) && in_array($v[$key],$value)) $found = true;
 			if($v[$key] == $value) $found = true;
@@ -98,6 +99,8 @@ class Amslib_Array
 		return $returnFiltered ? $filter : $array;
 	}
 	
+	//	TODO: this method is a little open to abuse and in some situations wouldn't do the right thing
+	//	TODO: explain in words what this does and how it should work
 	static public function countValues($array)
 	{
 		$counts = array();
