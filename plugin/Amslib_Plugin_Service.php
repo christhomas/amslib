@@ -12,10 +12,12 @@ class Amslib_Plugin_Service
 	{
 		if($this->returnAJAX){
 			Amslib_Website::outputJSON(array(
+				"validation_complete"	=>	true,
 				"validation_success"	=>	true,
 				"service_data"			=>	$this->data
 			),true);
 		}else{
+			Amslib::insertSessionParam("validation_complete",true);
 			Amslib::insertSessionParam("validation_success",true);
 			Amslib::insertSessionParam("service_data",$this->data);
 			Amslib_Website::redirect($this->returnURL);
@@ -26,12 +28,14 @@ class Amslib_Plugin_Service
 	{
 		if($this->returnAJAX){
 			Amslib_Website::outputJSON(array(
+				"validation_complete"	=>	true,
 				"validation_errors"		=>	$this->validator->getErrors(),
 				"validation_data"		=>	$this->data,
 				"validation_success"	=>	false,
 				"service_errors"		=>	$this->errors
 			),true);
 		}else{
+			Amslib::insertSessionParam("validation_complete",true);
 			Amslib::insertSessionParam("validation_errors",$this->validator->getErrors());
 			Amslib::insertSessionParam("validation_data",$this->data);
 			Amslib::insertSessionParam("validation_success",false);
@@ -72,8 +76,6 @@ class Amslib_Plugin_Service
 	{
 		$this->data = array();
 		
-		Amslib::insertSessionParam("validation_complete",true);
-		
 		if($this->validator->execute()){
 			$this->data["validator"] = $this->validator->getValidData();
 
@@ -111,5 +113,10 @@ class Amslib_Plugin_Service
 		if($name === NULL) return $errors;
 		
 		return ($errors && isset($errors[$name])) ? $errors[$name] : false;
+	}
+	
+	static public function complete()
+	{
+		return Amslib::sessionParam("validation_complete",false,true) == true ? true : false;
 	}
 }
