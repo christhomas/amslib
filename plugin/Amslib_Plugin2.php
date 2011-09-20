@@ -265,17 +265,18 @@ class Amslib_Plugin2
 		$this->config = array("api"=>false,"model"=>false,"translator"=>false,"requires"=>false);
 		
 		//	This stores where all the types components are stored as part of the application
-		$this->setComponent("layout",		"layouts",		"La_");
-		$this->setComponent("view",			"views",		"Vi_");
-		$this->setComponent("object",		"objects",		"");
-		$this->setComponent("service",		"services",		"Sv_");
+		$this->setComponent("layout",	"layouts",	"La_");
+		$this->setComponent("view",		"views",	"Vi_");
+		$this->setComponent("object",	"objects",	"");
+		$this->setComponent("service",	"services",	"Sv_");
 	}
 	
 	public function transfer()
 	{
 		//	Process all child transfers before the parents	
 		foreach(Amslib_Array::valid($this->config["requires"]) as $name=>$plugin){
-			$plugin->transfer();
+			if($plugin && method_exists($plugin,"transfer")) $plugin->transfer();
+			//else Amslib_FirePHP::output("failed to call plugin[$name]->transfer",$this);
 		}
 
 		//	FIXME: omg, it's just a bunch of repeated code, all over the place, ripe for refactoring....
@@ -330,7 +331,7 @@ class Amslib_Plugin2
 		$this->name		=	$name;
 		$this->location	=	$location;
 		$this->filename	=	$location."/package.xml";
-		
+
 		$xpath			=	false;
 		$document		=	new DOMDocument('1.0', 'UTF-8');
 		

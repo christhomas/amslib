@@ -107,6 +107,11 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		
 		//	Preload the plugin manager with the application object
 		Amslib_Plugin_Manager2::preload($name,$this);
+		
+		//	Set the base locations to load plugins from
+		Amslib_Plugin_Manager2::addLocation($location);
+		Amslib_Plugin_Manager2::addLocation($location."/plugins");
+		
 		//	We can't use Amslib_Plugin_Manager for this, because it's an application plugin
 		$this->config($name,$location);
 		$this->transfer();

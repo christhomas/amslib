@@ -871,7 +871,7 @@ class Amslib_Validator3
 	
 	protected function __file_exists($name,$value,$required,$options)
 	{
-		if($options["absolute"] == true) $value = Amslib_Filesystem::absolute($value);
+		if($options["absolute"] == true) $value = Amslib_File::absolute($value);
 		
 		if(is_file($value)){
 			$this->setValid("{$options["key"]}$name",$value);
