@@ -33,6 +33,8 @@ var Amslib_Accordion = my.Amslib_Accordion = my.Class(
 				p.addClass(o);
 				l.slideDown(t).addClass(o);
 			}
+			
+			return false;
 		});
 	}
 });

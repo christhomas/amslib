@@ -6,7 +6,7 @@ class Amslib_XML_Youtube extends Amslib_XML
 	
 	protected $feed;
 	
-protected function decodeFeedEntry(&$feed,$parent)
+	protected function decodeFeedEntry(&$feed,$parent)
 	{
 		$entry = array();
 

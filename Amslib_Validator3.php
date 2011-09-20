@@ -314,11 +314,11 @@ class Amslib_Validator3
 
 	protected function __password($name,$value,$required,$options)
 	{
-		//	TODO: This seems unnecessarily complex
 		if(isset($options["p1"]) && isset($options["p2"])){
 			$f1 = $options["p1"];
 			$f2 = $options["p2"];
 
+			//	Are the fields even available? If not, there is an error
 			if((!isset($this->__source[$f1]) || !isset($this->__source[$f2]))){
 				if($required) return "PASSWORD_FIELDS_MISSING";
 
@@ -328,9 +328,8 @@ class Amslib_Validator3
 			$p1 = $this->__source[$f1];
 			$p2 = $this->__source[$f2];
 
+			//	If strings are not identical, there is an error
 			if($p1 != $p2){
-				//	strings not identical
-
 				//	password is not required, so just return true or "NO_MATCH" if required is true
 				if(!$required) return true;
 
@@ -338,34 +337,24 @@ class Amslib_Validator3
 				$this->setError($f2,$p2,"PASSWORDS_NO_MATCH");
 
 				return "PASSWORDS_NO_MATCH";
-			}else{
-				//	strings are identical
-
-				//	Required is true and strings are both empty
-				if($required && !strlen($p1) && !strlen($p2)){
-					$this->setError($f1,$p1,"PASSWORDS_NO_MATCH");
-					$this->setError($f2,$p2,"PASSWORDS_NO_MATCH");
-
-					return "PASSWORDS_EMPTY";
-				}
-
-				$this->setValid($name,$p1);
-				return true;
-			}
-		}else{
-			$status = $this->__text($name,$value,$required,$options);
-
-			if($status === true){
-				$this->setValid($name,$value);
-				return true;
 			}
 			
-			if($required == false) return true;
-			
-			return $status;
+			//	If the password is empty, there is an error
+			if(strlen($p1) == 0){
+				//	password is not required, so just return true or "EMPTY" if required is true
+				if(!$required) return true;
+
+				$this->setError($f1,$p1,"PASSWORDS_EMPTY");
+				$this->setError($f2,$p2,"PASSWORDS_EMPTY");
+
+				return "PASSWORDS_EMPTY";
+			}
+
+			//	Make the password to test through the __text validator equal to one of the fields
+			$value = $p1;
 		}
-
-		return false;
+		
+		return $this->__text($name,$value,$required,$options);
 	}
 
 	/**
@@ -882,7 +871,7 @@ class Amslib_Validator3
 	
 	protected function __file_exists($name,$value,$required,$options)
 	{
-		if($options["absolute"] == true) $value = Amslib_Filesystem::absolute($value);
+		if($options["absolute"] == true) $value = Amslib_File::absolute($value);
 		
 		if(is_file($value)){
 			$this->setValid("{$options["key"]}$name",$value);

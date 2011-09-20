@@ -1,5 +1,4 @@
-<?php 
-//	FIXME: This object doesn't yet support processing AJAX requests, everything is done by returnURL, etc
+<?php
 class Amslib_Plugin_Service
 {
 	protected $validator;
@@ -13,10 +12,12 @@ class Amslib_Plugin_Service
 	{
 		if($this->returnAJAX){
 			Amslib_Website::outputJSON(array(
+				"validation_complete"	=>	true,
 				"validation_success"	=>	true,
 				"service_data"			=>	$this->data
 			),true);
 		}else{
+			Amslib::insertSessionParam("validation_complete",true);
 			Amslib::insertSessionParam("validation_success",true);
 			Amslib::insertSessionParam("service_data",$this->data);
 			Amslib_Website::redirect($this->returnURL);
@@ -27,12 +28,14 @@ class Amslib_Plugin_Service
 	{
 		if($this->returnAJAX){
 			Amslib_Website::outputJSON(array(
+				"validation_complete"	=>	true,
 				"validation_errors"		=>	$this->validator->getErrors(),
 				"validation_data"		=>	$this->data,
 				"validation_success"	=>	false,
 				"service_errors"		=>	$this->errors
 			),true);
 		}else{
+			Amslib::insertSessionParam("validation_complete",true);
 			Amslib::insertSessionParam("validation_errors",$this->validator->getErrors());
 			Amslib::insertSessionParam("validation_data",$this->data);
 			Amslib::insertSessionParam("validation_success",false);
@@ -55,11 +58,13 @@ class Amslib_Plugin_Service
 		$this->data			=	array();
 		$this->errors		=	array();
 		
-		//	Reset certain session data structures which are not supposed to exist more than once
-		Amslib::insertSessionParam("validation_errors",false);
-		Amslib::insertSessionParam("validation_data",false);
-		Amslib::insertSessionParam("validation_success",false);
-		Amslib::insertSessionParam("service_errors",false);
+		//	Remove all the validation structures so each new validation is a clean sheet
+		Amslib::sessionParam("validation_complete",false,true);
+		Amslib::sessionParam("validation_success",false,true);
+		Amslib::sessionParam("validation_errors",false,true);
+		Amslib::sessionParam("validation_data",false,true);
+		Amslib::sessionParam("service_errors",false,true);
+		Amslib::sessionParam("service_data",false,true);
 	}
 	
 	public function validate($name,$type,$required=false,$options=array())
@@ -71,13 +76,11 @@ class Amslib_Plugin_Service
 	{
 		$this->data = array();
 		
-		Amslib::insertSessionParam("validation_complete",true);
-		
 		if($this->validator->execute()){
 			$this->data["validator"] = $this->validator->getValidData();
 
 			if(call_user_func($this->callback,$this,$this->validator->getValidData()) === true){
-				$this->success();
+				return $this->success();
 			}
 			
 			$this->setError("error","service_failed");
@@ -85,7 +88,7 @@ class Amslib_Plugin_Service
 			$this->setError("error","validation_failed");
 		}
 		
-		$this->failure();
+		return $this->failure();
 	}
 	
 	public function setData($key,$value)
@@ -110,5 +113,10 @@ class Amslib_Plugin_Service
 		if($name === NULL) return $errors;
 		
 		return ($errors && isset($errors[$name])) ? $errors[$name] : false;
+	}
+	
+	static public function complete()
+	{
+		return Amslib::sessionParam("validation_complete",false,true) == true ? true : false;
 	}
 }
