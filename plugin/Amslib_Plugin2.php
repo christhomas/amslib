@@ -75,16 +75,16 @@ class Amslib_Plugin2
 		//	TEST 1: If the resource has an attribute "absolute" don't process it, return it directly
 		if($absolute) return $resource;
 		
-		//	TEST 2: Test whether the file "exists" without any assistance
+		//	TEST 2:	look in the package directory for the file
+		$test2 = Amslib_File::reduceSlashes("$this->location/$resource");
+		if(file_exists(Amslib::rchop($test2,"?"))) return Amslib_File::relative($test2);		
+		
+		//	TEST 3: Test whether the file "exists" without any assistance
 		if(file_exists(Amslib::rchop($resource,"?"))) return Amslib_File::relative($resource);
 
-		//	TEST 3: Does the file exists relative to the document root?
-		$test3 = Amslib_File::absolute($resource);
-		if(file_exists(Amslib::rchop($test3,"?"))) return Amslib_File::relative($resource);
-
-		//	TEST 4:	look in the package directory for the file
-		$test4 = Amslib_File::reduceSlashes("$this->location/$resource");
-		if(file_exists(Amslib::rchop($test4,"?"))) return Amslib_File::relative($test4);
+		//	TEST 4: Does the file exists relative to the document root?
+		$test4 = Amslib_File::absolute($resource);
+		if(file_exists(Amslib::rchop($test4,"?"))) return Amslib_File::relative($resource);
 
 		//	TEST 5:	search the include path for the file
 		$test5 = Amslib_File::find($resource,true);
@@ -373,7 +373,7 @@ class Amslib_Plugin2
 							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
 							$absolute	=	isset($p["absolute"]) ? true : false;
 							$p["value"]	=	$this->findResource($c->nodeValue,$absolute);
-							
+
 							$this->config[$node->nodeName][$p["id"]] = $p;
 						}
 					}break;
