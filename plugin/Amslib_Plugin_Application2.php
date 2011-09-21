@@ -32,12 +32,7 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 	static protected $version;
 	static protected $registeredLanguages = array();
 	static protected $packageName = array();
-	
-	protected function setPackageFilename($domain,$file)
-	{
-		self::$packageName[$domain] = $file;
-	}
-	
+		
 	protected function getPackageFilename()
 	{
 		foreach(Amslib_Array::valid(self::$packageName) as $host=>$file){
@@ -101,8 +96,10 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		//	Initialise and execute the router
 		//	FIXME: allow the use of a database source for routes and not just XML
 		//	FIXME: we already load this in the Amslib_Plugin level, why are we doing it twice??
+		$source = str_replace("__SELF__",$this->filename,$this->config["router_source"]);
+		
 		$xml = Amslib_Router3::getObject("source:xml");
-		$xml->load($this->config["router_source"]);
+		$xml->load($source);
 
 		Amslib_Router3::setSource($xml);
 		Amslib_Router3::execute();
@@ -140,6 +137,11 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		if($instance === NULL) $instance = new self();
 
 		return $instance;
+	}
+	
+	public function setPackageFilename($domain,$file)
+	{
+		self::$packageName[$domain] = $file;
 	}
 	
 	static public function getVersion($element=NULL)

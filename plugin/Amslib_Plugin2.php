@@ -281,10 +281,11 @@ class Amslib_Plugin2
 		//	Process all child transfers before the parents	
 		foreach(Amslib_Array::valid($this->config["requires"]) as $name=>$plugin){
 			if($plugin && method_exists($plugin,"transfer")) $plugin->transfer();
-			//else Amslib_FirePHP::output("failed to call plugin[$name]->transfer",$this);
+			else Amslib_FirePHP::output("failed to call plugin[$name]->transfer",$this);
 		}
 
 		//	FIXME: omg, it's just a bunch of repeated code, all over the place, ripe for refactoring....
+		//	FIXME: it's actually hilarious how much repeated code I have, yet I didnt refactor it yet :)
 		
 		//	Process all the import/export/transfer requests on all resources
 		//	NOTE: translators don't support the "move" parameter
@@ -294,12 +295,16 @@ class Amslib_Plugin2
 				foreach(Amslib_Array::valid($block) as $name=>$item){
 					if(isset($item["import"])){
 						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
-						$this->setConfig(array($key,$name),$plugin->getConfig($key,$name));
-						if(isset($item["move"])) $plugin->removeConfig($key,$name);
+						if($plugin){
+							$this->setConfig(array($key,$name),$plugin->getConfig($key,$name));
+							if(isset($item["move"])) $plugin->removeConfig($key,$name);	
+						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
 					}else if(isset($item["export"])){
 						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
-						$plugin->setConfig(array($key,$name),$this->getConfig($key,$name));
-						if(isset($item["move"])) $this->removeConfig($key,$name);
+						if($plugin){
+							$plugin->setConfig(array($key,$name),$this->getConfig($key,$name));
+							if(isset($item["move"])) $this->removeConfig($key,$name);
+						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
 					}
 				}
 			}else if($key == "model"){
@@ -307,23 +312,31 @@ class Amslib_Plugin2
 				//	NOTE: maybe in future models will be plural too, perhaps it's better to make it work plurally anyway
 				if(isset($block["import"])){
 					$plugin = Amslib_Plugin_Manager2::getPlugin($block["import"]);
-					$this->setConfig($key,$plugin->getConfig($key));
-					if(isset($block["move"])) $plugin->removeConfig($key);
+					if($plugin){
+						$this->setConfig($key,$plugin->getConfig($key));
+						if(isset($block["move"])) $plugin->removeConfig($key);
+					}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
 				}else if(isset($block["export"])){
 					$plugin = Amslib_Plugin_Manager2::getPlugin($block["export"]);
-					$plugin->setConfig($key,$this->getConfig($key));
-					if(isset($block["move"])) $this->removeConfig($key);
+					if($plugin){
+						$plugin->setConfig($key,$this->getConfig($key));
+						if(isset($block["move"])) $this->removeConfig($key);
+					}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
 				}
 			}else if($key == "value"){
 				foreach(Amslib_Array::valid($block) as $item){
 					if(isset($item["import"])){
 						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
-						$this->setConfig(array($key,$item["name"]),$plugin->getConfig($key,$item["name"]));
-						if(isset($item["move"])) $plugin->removeConfig($key,$item["name"]);	
+						if($plugin){
+							$this->setConfig(array($key,$item["name"]),$plugin->getConfig($key,$item["name"]));
+							if(isset($item["move"])) $plugin->removeConfig($key,$item["name"]);
+						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);	
 					}else if(isset($item["export"])){
 						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
-						$plugin->setConfig(array($key,$item["name"]),$this->getConfig($key,$item["name"]));
-						if(isset($item["move"])) $this->removeConfig($key,$item["name"]);
+						if($plugin){
+							$plugin->setConfig(array($key,$item["name"]),$this->getConfig($key,$item["name"]));
+							if(isset($item["move"])) $this->removeConfig($key,$item["name"]);
+						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
 					}
 				}
 			}
@@ -335,7 +348,7 @@ class Amslib_Plugin2
 		$this->isReady	=	false;
 		$this->name		=	$name;
 		$this->location	=	$location;
-		$this->filename	=	$this->getPackageFilename($location);
+		$this->filename	=	$this->getPackageFilename();
 
 		$xpath			=	false;
 		$document		=	new DOMDocument('1.0', 'UTF-8');
@@ -489,7 +502,13 @@ class Amslib_Plugin2
 		$list = $xpath->query("//package/requires/plugin");
 			
 		foreach($list as $node){
-			$this->config["requires"][$node->nodeValue] = Amslib_Plugin_Manager2::config($node->nodeValue,$this->location);
+			$plugin = Amslib_Plugin_Manager2::config($node->nodeValue,$this->location);
+			
+			if($plugin){
+				$this->config["requires"][$node->nodeValue] = $plugin;
+			}else{
+				Amslib_FirePHP::output("AP2::config(), child plugin config failed",array($node->nodeValue,$location));
+			}
 		}
 		
 		$this->isReady = true;
