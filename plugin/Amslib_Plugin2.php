@@ -128,13 +128,13 @@ class Amslib_Plugin2
 			foreach($this->config[$v] as $name=>$c){
 				//	NOTE: If a parameter is marked for export, don't process it.
 				if(isset($c["export"])) continue;
-					
+
 				if(in_array($v,array("layout","view","service"))){
 					$params		=	array($name,$c["value"]);
 				}else if($v == "object"){
 					$params		=	array($name,$c["file"]);
 				}else if($v == "font"){
-					$params		=	array($c["type"],$name,$c["value"]);
+					$params		=	array($c["type"],$name,$c["value"],$c["autoload"]);
 				}else if($v == "value"){
 					$params		=	array($c["name"],$c["value"]);
 				}else if($v == "model"){
@@ -397,11 +397,18 @@ class Amslib_Plugin2
 					}break;
 					
 					case "font":{
-						$p = array();
-						foreach($node->attributes as $k=>$v) $p[$k] = $v->nodeValue;
-						$p["value"] = $node->nodeValue;
+						$child = $xpath->query("*",$node);
+						
+						foreach($child as $font){
+							$p = array();
 							
-						$this->config[$node->nodeName][$p["id"]] = $p;
+							foreach($font->attributes as $k=>$v) $p[$k] = $v->nodeValue;
+							$p["value"]	=	trim($node->nodeValue);
+							$p["type"]	=	$font->nodeName;
+							if(!isset($p["autoload"])) $p["autoload"] = NULL;
+							
+							$this->config[$node->nodeName][$p["id"]] = $p;
+						}
 					}break;
 	
 					case "translator":{

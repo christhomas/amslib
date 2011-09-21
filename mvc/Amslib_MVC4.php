@@ -357,12 +357,12 @@ class Amslib_MVC4
 		Amslib_Resource_Compiler::removeJavascript($id);
 	}
 	
-	public function setFont($type,$id,$file,$condition,$autoload)
+	public function setFont($type,$id,$file,$autoload)
 	{
 		//	FIXME: implement the $type field somehow, but atm we only support google webfont
 		if(!is_string($id) && $file) return;
 		
-		$this->font[$id] = array("file"=>$file,"conditional"=>$conditional);
+		$this->font[$id] = array("file"=>$file);
 
 		if($autoload) $this->addFont($id);
 	}
@@ -371,7 +371,7 @@ class Amslib_MVC4
 	{
 		if(!isset($this->font[$id])) return;
 		
-		Amslib_Resource_Compiler::addFont($id,$this->font[$id]["file"],$this->font[$id]["conditional"]);
+		Amslib_Resource_Compiler::addFont($id,$this->font[$id]["file"]);
 	}
 	
 	public function removeFont($id)
