@@ -66,6 +66,11 @@ class Amslib_Plugin2
 	{
 		return $this->location.$this->prefix[$component]."$name.php";
 	}
+	
+	protected function getPackageFilename()
+	{	
+		return $this->location."/package.xml"; 
+	}
 
 	protected function findResource($resource,$absolute=false)
 	{
@@ -330,7 +335,7 @@ class Amslib_Plugin2
 		$this->isReady	=	false;
 		$this->name		=	$name;
 		$this->location	=	$location;
-		$this->filename	=	$location."/package.xml";
+		$this->filename	=	$this->getPackageFilename($location);
 
 		$xpath			=	false;
 		$document		=	new DOMDocument('1.0', 'UTF-8');

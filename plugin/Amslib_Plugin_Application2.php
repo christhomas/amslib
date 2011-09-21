@@ -31,6 +31,21 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 {
 	static protected $version;
 	static protected $registeredLanguages = array();
+	static protected $packageName = array();
+	
+	protected function setPackageFilename($domain,$file)
+	{
+		self::$packageName[$domain] = $file;
+	}
+	
+	protected function getPackageFilename()
+	{
+		foreach(Amslib_Array::valid(self::$packageName) as $host=>$file){
+			if($_SERVER["HTTP_HOST"] == $host) return "{$this->location}/$file";
+		}
+		
+		return parent::getPackageFilename();
+	}
 
 	protected function readVersion()
 	{
