@@ -36,7 +36,7 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 	protected function getPackageFilename()
 	{
 		foreach(Amslib_Array::valid(self::$packageName) as $host=>$file){
-			if($_SERVER["HTTP_HOST"] == $host) return "{$this->location}/$file";
+			if(strpos($_SERVER["HTTP_HOST"],$host) !== false) return "{$this->location}/$file";
 		}
 		
 		return parent::getPackageFilename();
