@@ -42,6 +42,11 @@ class Amslib_Form
 	{
 		return ($value == $compare) ? "checked='checked'" : "";
 	}
+	
+	static public function selectCheckbox($value,$compare)
+	{
+		return ($value == $compare) ? "checked='checked'" : "";
+	}
 
 	static public function getFilename($name)
 	{
