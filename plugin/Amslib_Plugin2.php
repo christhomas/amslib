@@ -403,7 +403,7 @@ class Amslib_Plugin2
 							$p = array();
 							
 							foreach($font->attributes as $k=>$v) $p[$k] = $v->nodeValue;
-							$p["value"]	=	trim($node->nodeValue);
+							$p["value"]	=	trim($font->nodeValue);
 							$p["type"]	=	$font->nodeName;
 							if(!isset($p["autoload"])) $p["autoload"] = NULL;
 							
