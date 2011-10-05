@@ -11,10 +11,12 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		},
 		
 		options: {
-			amslibName:	"Amslib_Shelf_Gallery",
-			animate:	"animateAutoNext",
-			selSlider:	".amslib_shelf_gallery_slider",
-			selItem:	".amslib_shelf_gallery_item"
+			amslibName:		"Amslib_Shelf_Gallery",
+			animate:		"animateAutoNext",
+			selSlider:		".amslib_shelf_gallery_slider",
+			selItem:		".amslib_shelf_gallery_item",
+			normalTimeout:	5000,
+			fastTimeout:	500
 		}
 	},
 	
@@ -32,7 +34,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 	
 	start: function()
 	{
-		this.timeout = setTimeout($.proxy(this,this.options.animate),5000);
+		this.timeout = setTimeout($.proxy(this,this.options.animate),this.options.normalTimeout);
 	},
 	
 	stop: function()
@@ -57,12 +59,18 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		
 		var first	=	$(this.options.selItem+":first",this.parent);
 		var last	=	$(this.options.selItem+":last",this.parent);
+		
+		if(!last){
+			this.mutex = false;
+			return;
+		}
+		
 		//	Move the last element to the first position, grab the left to offset by
 		this.slider.prepend(last.detach());
-		var left	=	first.position().left;
-		this.slider.css("left","-"+left+"px");
+
+		this.slider.css("left","-"+first.position().left+"px");
 		//	Animate to left:0
-		this.slider.animate({left:"0px"},"slow",$.proxy(function(){
+		this.slider.animate({left:"0px"},this.options.normalTimeout*0.66,$.proxy(function(){
 			if(cb) cb();
 			
 			this.mutex = false;
@@ -75,9 +83,15 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		this.mutex = true;
 		
 		var first = $(this.options.selItem+":first",this.parent);
-		var left = first.next(this.options.selItem).position().left;
+		var next = first.next(this.options.selItem);
+
+		//	If there is no next, return and don't do anything
+		if(!next){
+			this.mutex = false;
+			return;
+		}
 		
-		this.slider.animate({left:"-="+left},"slow",$.proxy(function(){
+		this.slider.animate({left:"-="+next.position().left},this.options.normalTimeout/2,$.proxy(function(){
 			this.slider.append(first.detach());
 			this.slider.css("left","0px");
 			
@@ -111,7 +125,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		
 		var left = $(this.items.get(s)).position().left;
 		this.slider.css("left","-"+left+"px");
-		var time = (s-f)*500;
+		var time = (s-f)*this.options.fastTimeout;
 
 		//	Animate to left:0
 		this.slider.animate({left:"0px"},time,$.proxy(function(){
@@ -128,12 +142,13 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		
 		var end = $(this.items.get(f))
 		var left = end.position().left;
-		var time = (f-s)*500;
+		var time = (f-s)*this.options.fastTimeout;
 
 		this.slider.animate({left:-left+"px"},time,$.proxy(function(){
 			for(a=s;a<f;a++) this.slider.append($(this.items.get(a)).detach());
 			this.slider.css("left","0px");
 
+			//	NOTE: Why is this commented out? and what is cb anyway? callback for what?
 			//if(cb) cb();
 			
 			this.mutex = false;

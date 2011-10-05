@@ -493,4 +493,23 @@ class Amslib_MVC4
 
 		return "";
 	}
+	
+	/**
+	 * method: setupService
+	 * 
+	 * A customisation method which can do "something" based on what service is being called, at the very
+	 * last second before the actual service is run, this might be to setup some static and protected
+	 * data which is only available here and is not convenient to setup elsewhere.
+	 * 
+	 * parameters:
+	 * 	$plugin		-	The plugin for the service
+	 * 	$service	-	The service being run inside the plugin
+	 * 
+	 * notes:
+	 * 	-	The parameters are only really used to identify what service is being run	 
+	 */
+	public function setupService($plugin,$service)
+	{
+		//	NOTE: by default, we don't setup anything.
+	}
 }
