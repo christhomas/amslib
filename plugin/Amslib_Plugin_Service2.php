@@ -8,7 +8,6 @@ class Amslib_Plugin_Service2
 	const VALIDATION_SUCCESS	=	"validation/success";
 	const VALIDATION_ERRORS		=	"validation/errors";
 	const VALIDATION_DATA		=	"validation/data";
-	const VALIDATION_SUCCESS	=	"validation/success";
 	const VALIDATION_COMPLETE	=	"validation/complete";
 	
 	const SERVICE_DATA			=	"service/data";
