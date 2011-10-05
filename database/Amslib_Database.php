@@ -88,7 +88,12 @@ class Amslib_Database
 
 	protected function getDatabaseLogin()
 	{
-		die(get_class($this)."::getDatabaseLogin() -> Your database class is missing this method");
+		$this->setDatabaseLogin();
+	}
+	
+	protected function setDatabaseLogin()
+	{
+		die(get_class($this)."::setDatabaseLogin() -> Your database class is missing this method");
 	}
 
 	protected function getLastTransactionId()
