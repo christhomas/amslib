@@ -39,11 +39,11 @@ class Amslib_Plugin_Service3
 	public function __construct()
 	{
 		//	FIXME: we are hardcoding a route "home" which might not exist, this could be a bad idea
-		$default			=	Amslib_Router3::getURL("home");	
-		$return				=	Amslib::rchop(Amslib::postParam("return_url",$default),"?");
+		$default_url		=	Amslib_Router3::getURL("home");	
+		$return_url			=	Amslib::rchop(Amslib::postParam("return_url",$default_url),"?");
 		
-		$this->successURL	=	Amslib::rchop(Amslib::postParam("success_url",$return),"?");
-		$this->failureURL	=	Amslib::rchop(Amslib::postParam("failure_url",$return),"?");
+		$this->successURL	=	Amslib::rchop(Amslib::postParam("success_url",$return_url),"?");
+		$this->failureURL	=	Amslib::rchop(Amslib::postParam("failure_url",$return_url),"?");
 		$this->isAJAX		=	Amslib::postParam("return_ajax");
 		
 		$this->successCB	=	$this->isAJAX ? "successAJAX" : "successPOST";
