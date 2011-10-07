@@ -10,8 +10,12 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		$this->table = array();
 	}
 	
-	public function setTable($name,$value)
+	public function setTable($name,$value,$singular=false)
 	{
-		$this->table[$name] = $this->escape($value);
+		if($singular){
+			$this->table = $this->escape($value);
+		}else{
+			$this->table[$name] = $this->escape($value);	
+		}
 	}
 }
