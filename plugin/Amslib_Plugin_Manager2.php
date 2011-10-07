@@ -167,6 +167,13 @@ class Amslib_Plugin_Manager2
 
 		return $api ? $api->renderView($view,$parameters) : false;
 	}
+	
+	static public function getObject($plugin,$id,$singleton=false)
+	{
+		$api = self::getAPI($plugin);
+		
+		return $api ? $api->getObject($id,$singleton) : false;
+	}
 
 	static public function setService($plugin,$id,$service)
 	{

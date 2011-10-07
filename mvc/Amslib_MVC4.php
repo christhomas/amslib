@@ -125,9 +125,9 @@ class Amslib_MVC4
 	{
 		//	NOTE:	If name was not passed/NULL return entire routes array,
 		//			otherwise return the route, but if it doesnt exist, return false
-		return ($name === NULL) ?
-			$this->routes : (isset($this->routes[$name])) ?
-				$this->route[$name] : false;
+		if($name === NULL) return $this->routes;
+		
+		return isset($this->routes[$name]) ? $this->routes[$name] : false;
 	}
 
 	public function hasRoute($name)

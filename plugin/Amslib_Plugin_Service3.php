@@ -13,7 +13,7 @@ class Amslib_Plugin_Service3
 		$this->data["success"] = true;
 		$this->setServiceData($this->data);
 
-		Amslib_Website::redirect($this->successURL,true);
+		Amslib_Website::redirect($this->getSuccessURL(),true);
 	}
 	
 	protected function failurePOST()
@@ -21,7 +21,7 @@ class Amslib_Plugin_Service3
 		$this->data["success"] = false;
 		$this->setServiceData($this->data);
 		
-		Amslib_Website::redirect($this->failureURL,true);
+		Amslib_Website::redirect($this->getFailureURL(),true);
 	}
 	
 	protected function successAJAX()
@@ -42,8 +42,8 @@ class Amslib_Plugin_Service3
 		$default_url		=	Amslib_Router3::getURL("home");	
 		$return_url			=	Amslib::rchop(Amslib::postParam("return_url",$default_url),"?");
 		
-		$this->successURL	=	Amslib::rchop(Amslib::postParam("success_url",$return_url),"?");
-		$this->failureURL	=	Amslib::rchop(Amslib::postParam("failure_url",$return_url),"?");
+		$this->setSuccessURL(Amslib::rchop(Amslib::postParam("success_url",$return_url),"?"));
+		$this->setFailureURL(Amslib::rchop(Amslib::postParam("failure_url",$return_url),"?"));
 		$this->isAJAX		=	Amslib::postParam("return_ajax");
 		
 		$this->successCB	=	$this->isAJAX ? "successAJAX" : "successPOST";
@@ -52,6 +52,26 @@ class Amslib_Plugin_Service3
 		//	Reset the service data and session structures
 		$this->data			=	array();
 		$this->setServiceData(false);
+	}
+	
+	public function setSuccessURL($url)
+	{
+		$this->successURL = Amslib_File::reduceSlashes("$url/");
+	}
+	
+	public function getSuccessURL()
+	{
+		return $this->successURL;
+	}
+	
+	public function setFailureURL($url)
+	{
+		$this->failureURL = Amslib_File::reduceSlashes("$url/");;	
+	}
+	
+	public function getFailureURL()
+	{
+		return $this->failureURL;
 	}
 	
 	public function setServiceData($data)
@@ -81,7 +101,7 @@ class Amslib_Plugin_Service3
 	
 	public function setValidationErrors($plugin,$errors)
 	{
-		$this->data[$plugin]["validation/errors"] = $data;
+		$this->data[$plugin]["validation/errors"] = $errors;
 	}
 	
 	public function setData($plugin,$name,$value)
