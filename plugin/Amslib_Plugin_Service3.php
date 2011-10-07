@@ -61,13 +61,17 @@ class Amslib_Plugin_Service3
 	
 	public function execute($plugin,$method)
 	{
-		$cb = call_user_func(array($plugin,$method),$this,$_POST)
-			? $this->successCB 
-			: $this->failureCB;
-		
-		call_user_func(array($this,$cb));
-		
-		die("FAILURE[p:$plugin][m:$method]-> All services should terminate with redirect or json");
+		if(method_exists($plugin,$method)){
+			$cb = call_user_func(array($plugin,$method),$this,$_POST)
+				? $this->successCB 
+				: $this->failureCB;
+			
+			call_user_func(array($this,$cb));
+			
+			die("FAILURE[p:$plugin][m:$method]-> All services should terminate with redirect or json");
+		}else{
+			die("FAILURE[p:$plugin][m:$method]-> method did not exist, so could not be called");
+		}
 	}
 	
 	public function setValidationData($plugin,$data)
