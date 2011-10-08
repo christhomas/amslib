@@ -1,12 +1,23 @@
 <?php 
 class Amslib_Plugin_Service3
 {
+	const S3 = "Amslib_Plugin_Service3";
+	const VD = "validation/data";
+	const VE = "validation/errors";
+	const SD = "service/data";
+	const SE = "service/errors";
+	const DB = "database/errors";
+	const PL = "plugins";
+	
 	protected $successURL;
 	protected $failureURL;
 	protected $successCB;
 	protected $failureCB;
 	protected $isAJAX;
 	protected $data;
+	
+	//	Used in the website to retrieve the session data after processing
+	static protected $serviceData = NULL;
 	
 	protected function successPOST()
 	{
@@ -76,7 +87,7 @@ class Amslib_Plugin_Service3
 	
 	public function setServiceData($data)
 	{
-		$_SESSION["service"] = $data;
+		$_SESSION[self::S3] = $data;
 	}
 	
 	public function execute($plugin,$method)
@@ -96,21 +107,92 @@ class Amslib_Plugin_Service3
 	
 	public function setValidationData($plugin,$data)
 	{
-		$this->data[$plugin]["validation/data"] = $data;
+		$this->data[$plugin][self::VD] = $data;
+		$this->data[self::PL][$plugin] = true;
 	}
 	
 	public function setValidationErrors($plugin,$errors)
 	{
-		$this->data[$plugin]["validation/errors"] = $errors;
+		$this->data[$plugin][self::VE] = $errors;
+		$this->data[self::PL][$plugin] = true;
+	}
+	
+	//	NOTE: Be careful with this method, you could be pushing secret data
+	public function setDatabaseErrors($plugin,$errors)
+	{
+		$this->data[$plugin][self::DB] = $errors;
+		$this->data[self::PL][$plugin] = true;
 	}
 	
 	public function setData($plugin,$name,$value)
 	{
-		$this->data[$plugin]["service/data"][$name] = $value;
+		$this->data[$plugin][self::SD][$name] = $value;
+		$this->data[self::PL][$plugin] = true;
 	}
 	
 	public function setError($plugin,$name,$value)
 	{
-		$this->data[$plugin]["service/errors"][$name] = $value;
+		$this->data[$plugin][self::SE][$name] = $value;
+		$this->data[self::PL][$plugin] = true;
+	}
+	
+	/*****************************************************************************
+	 * 	STATIC API TO RETRIEVE SESSION DATA
+	*****************************************************************************/
+	static public function hasData()
+	{
+		if(self::$serviceData === NULL) self::$serviceData = Amslib::sessionParam(self::S3,false,true);
+		
+		return self::$serviceData ? true : false;
+	}
+	
+	static public function getStatus()
+	{
+		$success = isset(self::$serviceData["success"]) ? self::$serviceData["success"] : false;
+		
+		unset(self::$serviceData["success"]);
+		
+		return $success;
+	}
+	
+	static public function listPlugins()
+	{
+		return array_keys(self::$serviceData[self::PL]);
 	}	
+	
+	static public function getValidationData($plugin)
+	{
+		return isset(self::$serviceData[$plugin][self::VD]) 
+			? Amslib_Array::valid(self::$serviceData[$plugin][self::VD]) 
+			: false;
+	}
+	
+	static public function getValidationErrors($plugin)
+	{
+		return isset(self::$serviceData[$plugin][self::VE]) 
+			? Amslib_Array::valid(self::$serviceData[$plugin][self::VE]) 
+			: false;
+	}
+	
+	static public function getServiceErrors($plugin)
+	{
+		return isset(self::$serviceData[$plugin][self::SE]) 
+			? Amslib_Array::valid(self::$serviceData[$plugin][self::SE]) 
+			: false;
+	}
+	
+	//	NOTE: Be careful with this method, it could leak secret data if you didnt sanitise it properly of sensitive data
+	static public function getDatabaseErrors($plugin)
+	{
+		return isset(self::$serviceData[$plugin][self::DB]) 
+			? Amslib_Array::valid(self::$serviceData[$plugin][self::DB]) 
+			: false;
+	}
+	
+	static public function getDatabaseMessage($plugin)
+	{
+		return isset(self::$serviceData[$plugin][self::DB])
+			? self::$serviceData[$plugin][self::DB]["db_error"]
+			: false;
+	}
 }

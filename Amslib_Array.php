@@ -75,6 +75,17 @@ class Amslib_Array
 	    return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));
 	}
 	
+	static public function filterKey($array,$filter)
+	{
+		if(self::isMulti($array)){
+			foreach($array as &$a) $a = array_intersect_key($a, array_flip($filter));
+		}else{
+			$array = array_intersect_key($array, array_flip($filter));	
+		}
+		
+		return $array;
+	}
+	
 	static public function filter($array,$key,$value,$returnFiltered=false,$similar=false)
 	{
 		$filter = array();

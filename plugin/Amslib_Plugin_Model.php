@@ -1,5 +1,5 @@
 <?php 
-class Amslib_Plugin_Model extends Amslib_Database_MySQL
+class Amslib_Plugin_Model extends Amslib_Database_MySQL2
 {
 	protected $table;
 	

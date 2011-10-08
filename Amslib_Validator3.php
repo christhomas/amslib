@@ -344,9 +344,6 @@ class Amslib_Validator3
 				//	password is not required, so just return true or "EMPTY" if required is true
 				if(!$required) return true;
 
-				$this->setError($f1,$p1,"PASSWORDS_EMPTY");
-				$this->setError($f2,$p2,"PASSWORDS_EMPTY");
-
 				return "PASSWORDS_EMPTY";
 			}
 

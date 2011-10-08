@@ -143,7 +143,7 @@ class Amslib_Database
 		
 		die("	FATAL ERROR: $msg<br/>
 				database error = '".$this->error()."'<br/>
-				location of error = ".Amslib::var_dump(array_slice(debug_backtrace(),1,2),true)
+				location of error = ".Amslib::var_dump(Amslib_Array::filterKey(array_slice(debug_backtrace(),1,2),array("file","line")),true)
 		);
 	}
 
