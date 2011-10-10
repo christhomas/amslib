@@ -41,6 +41,8 @@ class Amslib_Database_MySQL2 extends Amslib_Database_MySQL
 	public function __construct($connect=true)
 	{
 		parent::__construct($connect);
+		
+		$this->errors = array();
 	}
 	
 	protected function setDebugOutput($query)
@@ -137,7 +139,7 @@ class Amslib_Database_MySQL2 extends Amslib_Database_MySQL
 	
 	public function setErrors($query)
 	{
-		$this->errors = array(
+		$this->errors[] = array(
 			"db_failure"		=>	true,
 			"db_query"			=>	Amslib::var_dump($query,true),
 			"db_error"			=>	mysql_error(),

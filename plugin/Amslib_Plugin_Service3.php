@@ -120,8 +120,10 @@ class Amslib_Plugin_Service3
 	//	NOTE: Be careful with this method, you could be pushing secret data
 	public function setDatabaseErrors($plugin,$errors)
 	{
-		$this->data[$plugin][self::DB] = $errors;
-		$this->data[self::PL][$plugin] = true;
+		if(!empty($errors)){
+			$this->data[$plugin][self::DB] = $errors;
+			$this->data[self::PL][$plugin] = true;
+		}
 	}
 	
 	public function setData($plugin,$name,$value)
@@ -192,7 +194,7 @@ class Amslib_Plugin_Service3
 	static public function getDatabaseMessage($plugin,$default=false)
 	{
 		return isset(self::$serviceData[$plugin][self::DB])
-			? self::$serviceData[$plugin][self::DB]["db_error"]
+			? Amslib_Array::pluck(self::$serviceData[$plugin][self::DB],"db_error")
 			: $default;
 	}
 }
