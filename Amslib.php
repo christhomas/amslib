@@ -404,6 +404,25 @@ class Amslib
 	{
 		$_SESSION[$parameter] = $value;
 	}
+	
+	
+	/**
+	 * 	COOKIE methods
+	 */
+	static public function cookieParam($key,$default=NULL)
+	{
+		return self::arrayParam($_COOKIE,$key,$default);
+	}
+	
+	static public function hasCookie($key)
+	{
+		return (isset($_COOKIE[$key])) ? true : false;
+	}
+
+	static public function insertCookieParam($key,$value)
+	{
+		$_COOKIE[$key] = $value;
+	}
 
 	/**
 	 * 	function:	filesParam

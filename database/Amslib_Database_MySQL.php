@@ -286,14 +286,14 @@ HAS_TABLE;
 
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
+		if($this->debug) Amslib_Keystore::set("mysql_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
 
 		$this->lastInsertId = mysql_insert_id($this->connection);
 		if($result && ($this->lastInsertId !== false)) return $this->lastInsertId;
 
 		$this->lastInsertId = false;
 
-		$this->fatalError("Transaction failed<br/>query = '$query'<br/><pre>result = '".print_r($result,true)."'</pre>lastInsertId = '$this->lastInsertId'<br/>mysql_insert_id() = '".mysql_insert_id()."'");
+		$this->fatalError("Transaction failed<br/>query = '$query'<br/><pre>result = '".print_r($result,true)."'</pre>lastInsertId = '$this->lastInsertId'<br/>mysql_insert_id() = '".mysql_insert_id()."'<br/>mysql_error() = '".mysql_error()."'");
 
 		return false;
 	}

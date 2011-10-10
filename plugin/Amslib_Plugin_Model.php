@@ -1,8 +1,7 @@
 <?php 
-class Amslib_Plugin_Model extends Amslib_Database_MySQL
+class Amslib_Plugin_Model extends Amslib_Database_MySQL2
 {
 	protected $table;
-	protected $prefix;
 	
 	public function __construct()
 	{
@@ -11,15 +10,12 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		$this->table = array();
 	}
 	
-	public function setTable($name,$value)
+	public function setTable($name,$value,$singular=false)
 	{
-		$this->table[$name] = $this->escape($value);
-	}
-	
-	public function setTablePrefix($prefix)
-	{
-		foreach($this->table as &$t) $t = $this->escape(str_replace($this->prefix,$prefix,$t));
-
-		$this->prefix = $prefix;
+		if($singular){
+			$this->table = $this->escape($value);
+		}else{
+			$this->table[$name] = $this->escape($value);	
+		}
 	}
 }
