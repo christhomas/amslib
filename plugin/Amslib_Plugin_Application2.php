@@ -34,11 +34,13 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 
 	protected function readVersion()
 	{
-		self::$version = array(
-			"date"		=>	$this->config["version"]["date"],
-			"number"	=>	$this->config["version"]["number"],
-			"name"		=>	$this->config["version"]["name"]
-		);
+		if(isset($this->config["version"])){
+			self::$version = array(
+				"date"		=>	$this->config["version"]["date"],
+				"number"	=>	$this->config["version"]["number"],
+				"name"		=>	$this->config["version"]["name"]
+			);
+		}
 	}
 
 	protected function initialisePlugin()
@@ -101,7 +103,7 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		parent::setPath("plugin",	"__PLUGIN__");
 		parent::setPath("docroot",	Amslib_File::documentRoot());
 		
-		$this->search = array_merge($this->search,array("path","router_source","version"));
+		$this->search = array_merge(array("path","router_source","version"),$this->search);
 		
 		//	Preload the plugin manager with the application object
 		Amslib_Plugin_Manager2::preload($name,$this);
