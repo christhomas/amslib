@@ -140,9 +140,9 @@ class Amslib_MVC4
 		$this->value[$name] = $value;
 	}
 
-	public function getValue($name)
+	public function getValue($name,$default=NULL)
 	{
-		return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name);
+		return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name,$default);
 	}
 	
 	public function listValues()
@@ -156,9 +156,9 @@ class Amslib_MVC4
 		$this->viewParams = $parameters;
 	}
 
-	public function getViewParam($name)
+	public function getViewParam($name,$default=NULL)
 	{
-		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
+		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : $default;
 	}
 
 	public function setLayout($id,$name)
