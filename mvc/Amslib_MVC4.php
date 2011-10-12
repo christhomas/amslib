@@ -109,18 +109,6 @@ class Amslib_MVC4
 		return $this->plugin;
 	}
 	
-	public function getServiceHandler()
-	{
-		$handler = new Amslib_Plugin_Service2($_POST);
-		
-		/*
-		 * 01.	internal services return true/false
-		 * 02.	external services use the form/success, form/failure url's
-		 * 03.	perhaps we use callbacks to change internal codepaths instead of if() statements to be cleaner 
-		 * 
-		 * */
-	}
-
 	public function getRoute($name=NULL)
 	{
 		//	NOTE:	If name was not passed/NULL return entire routes array,
