@@ -153,7 +153,13 @@ class Amslib_MVC4
 	
 	public function setFields($name,$value)
 	{
-		$this->setValue("validate/$name",$value);
+		$name = "validate/$name";
+		
+		$f = $this->getValue($name,array());
+		
+		if(!is_array($value)) $value = array();
+		
+		$this->setValue($name,array_merge($f,$value));
 	}
 	
 	public function getFields($name)
