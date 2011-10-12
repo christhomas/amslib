@@ -2,7 +2,8 @@
 class Amslib_Plugin_Service
 {
 	protected $validator;
-	protected $returnURL;
+	protected $successURL;
+	protected $failureURL;
 	protected $returnAJAX;
 	protected $callback;
 	protected $data;
@@ -20,7 +21,7 @@ class Amslib_Plugin_Service
 			Amslib::insertSessionParam("validation_complete",true);
 			Amslib::insertSessionParam("validation_success",true);
 			Amslib::insertSessionParam("service_data",$this->data);
-			Amslib_Website::redirect($this->returnURL);
+			Amslib_Website::redirect($this->successURL);
 		}
 	}
 	
@@ -41,7 +42,7 @@ class Amslib_Plugin_Service
 			Amslib::insertSessionParam("validation_success",false);
 			Amslib::insertSessionParam("service_errors",$this->errors);
 		
-			Amslib_Website::redirect($this->returnURL);	
+			Amslib_Website::redirect($this->failureURL);	
 		}
 	}
 	
@@ -50,9 +51,11 @@ class Amslib_Plugin_Service
 		//	TODO:	This might not be a great idea to ALWAYS ask for this route, 
 		//			could not exist in some situations and probably will happen.
 		$default			=	Amslib_Router3::getURL("home");
+		$return				=	Amslib::postParam("return_url",$default);
 		
 		$this->validator	=	new Amslib_Validator3($_POST);
-		$this->returnURL	=	Amslib::rchop(Amslib::postParam("return_url",$default),"?");
+		$this->successURL	=	Amslib::rchop(Amslib::postParam("success_url",$return),"?");
+		$this->failureURL	=	Amslib::rchop(Amslib::postParam("failure_url",$return),"?");
 		$this->returnAJAX	=	Amslib::postParam("return_ajax");
 		$this->callback		=	$callback;
 		$this->data			=	array();
@@ -100,7 +103,7 @@ class Amslib_Plugin_Service
 	{
 		//	FIXME: could be possible set more than one error, then the url is invalid: ?error=something?error=another?error=whatever
 		if($key == "error"){
-			$this->returnURL .= "?error={$value}";	
+			$this->failureURL .= "?error={$value}";	
 		}
 		
 		$this->errors[$key] = $value;

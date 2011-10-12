@@ -55,7 +55,7 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 	},
 
 	slugify: function(text){
-		return this.trim(this.removeDiacritics(text).replace(/[^-a-zA-Z0-9\.]+/ig,'-').toLowerCase(),' -');
+		return this.trim(this.removeDiacritics(text).replace(/[^-a-zA-Z0-9\.\-]+/ig,'-').toLowerCase(),' ')
 	},
 	
 	removeDiacritics: function(text)

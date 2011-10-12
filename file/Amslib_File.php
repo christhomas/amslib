@@ -15,6 +15,8 @@ class Amslib_File
 		{
 			//	Sometimes idiotic webhosts like dinahosting.com have shit setups and we need to deal with them :)
 			//	the base root dir for dirname(__FILE__) and docroot are different, here we fix that situation
+			//	FIXME: this breaks code on "sane" hosts where you are using amslib from a different "root" than the website trying to use it
+			//	EXAMPLE www.website.com and content.website.com, the content website will be broken by this "fix" for those dinahosting bullshits
 			$missing	=	Amslib::rchop(dirname(__FILE__),$_SERVER["DOCUMENT_ROOT"]);
 			//	good hosting will have empty string missing, bad hosting will have a prepend string
 			$docroot	=	self::reduceSlashes("$missing/{$_SERVER["DOCUMENT_ROOT"]}");

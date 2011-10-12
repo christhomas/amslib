@@ -47,9 +47,9 @@ class Amslib_Resource_Compiler
 		unset(self::$javascript[$id]);
 	}
 	
-	static public function addFont($id,$font,$conditional=NULL)
+	static public function addFont($id,$font)
 	{
-		self::addStylesheet($id,"http://fonts.googleapis.com/css?$font",$conditional);
+		self::addStylesheet($id,"http://fonts.googleapis.com/css?$font");
 	}
 	
 	static public function removeFont($id)

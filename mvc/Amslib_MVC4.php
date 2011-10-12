@@ -113,9 +113,9 @@ class Amslib_MVC4
 	{
 		//	NOTE:	If name was not passed/NULL return entire routes array,
 		//			otherwise return the route, but if it doesnt exist, return false
-		return ($name === NULL) ?
-			$this->routes : (isset($this->routes[$name])) ?
-				$this->route[$name] : false;
+		if($name === NULL) return $this->routes;
+		
+		return isset($this->routes[$name]) ? $this->routes[$name] : false;
 	}
 
 	public function hasRoute($name)
@@ -125,12 +125,34 @@ class Amslib_MVC4
 
 	public function setValue($name,$value)
 	{
-		$this->value[$name] = $value;
+		if(is_string($name) && strlen($name)){
+			$this->value[$name] = $value;
+		}
 	}
 
-	public function getValue($name)
+	public function getValue($name,$default=NULL)
 	{
-		return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name);
+		if(is_string($name) && strlen($name)){
+			return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name,$default);
+		}
+		
+		return $default;
+	}
+	
+	public function setFields($name,$value)
+	{
+		$name = "validate/$name";
+		
+		$f = $this->getValue($name,array());
+		
+		if(!is_array($value)) $value = array();
+		
+		$this->setValue($name,array_merge($f,$value));
+	}
+	
+	public function getFields($name)
+	{
+		return $this->getValue("validate/$name",array());
 	}
 	
 	public function listValues()
@@ -144,9 +166,9 @@ class Amslib_MVC4
 		$this->viewParams = $parameters;
 	}
 
-	public function getViewParam($name)
+	public function getViewParam($name,$default=NULL)
 	{
-		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
+		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : $default;
 	}
 
 	public function setLayout($id,$name)
@@ -345,12 +367,12 @@ class Amslib_MVC4
 		Amslib_Resource_Compiler::removeJavascript($id);
 	}
 	
-	public function setFont($type,$id,$file,$condition,$autoload)
+	public function setFont($type,$id,$file,$autoload)
 	{
 		//	FIXME: implement the $type field somehow, but atm we only support google webfont
 		if(!is_string($id) && $file) return;
 		
-		$this->font[$id] = array("file"=>$file,"conditional"=>$conditional);
+		$this->font[$id] = array("file"=>$file);
 
 		if($autoload) $this->addFont($id);
 	}
@@ -359,7 +381,7 @@ class Amslib_MVC4
 	{
 		if(!isset($this->font[$id])) return;
 		
-		Amslib_Resource_Compiler::addFont($id,$this->font[$id]["file"],$this->font[$id]["conditional"]);
+		Amslib_Resource_Compiler::addFont($id,$this->font[$id]["file"]);
 	}
 	
 	public function removeFont($id)
@@ -480,5 +502,24 @@ class Amslib_MVC4
 		}
 
 		return "";
+	}
+	
+	/**
+	 * method: setupService
+	 * 
+	 * A customisation method which can do "something" based on what service is being called, at the very
+	 * last second before the actual service is run, this might be to setup some static and protected
+	 * data which is only available here and is not convenient to setup elsewhere.
+	 * 
+	 * parameters:
+	 * 	$plugin		-	The plugin for the service
+	 * 	$service	-	The service being run inside the plugin
+	 * 
+	 * notes:
+	 * 	-	The parameters are only really used to identify what service is being run	 
+	 */
+	public function setupService($plugin,$service)
+	{
+		//	NOTE: by default, we don't setup anything.
 	}
 }

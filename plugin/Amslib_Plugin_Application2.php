@@ -31,6 +31,18 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 {
 	static protected $version;
 	static protected $registeredLanguages = array();
+	static protected $packageName = array();
+	
+	protected $completionCallback;
+		
+	protected function getPackageFilename()
+	{
+		foreach(Amslib_Array::valid(self::$packageName) as $host=>$file){
+			if(strpos($_SERVER["HTTP_HOST"],$host) !== false) return "{$this->location}/$file";
+		}
+		
+		return parent::getPackageFilename();
+	}
 
 	protected function readVersion()
 	{
@@ -86,8 +98,10 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		//	Initialise and execute the router
 		//	FIXME: allow the use of a database source for routes and not just XML
 		//	FIXME: we already load this in the Amslib_Plugin level, why are we doing it twice??
+		$source = str_replace("__SELF__",$this->filename,$this->config["router_source"]);
+		
 		$xml = Amslib_Router3::getObject("source:xml");
-		$xml->load($this->config["router_source"]);
+		$xml->load($source);
 
 		Amslib_Router3::setSource($xml);
 		Amslib_Router3::execute();
@@ -103,7 +117,9 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		parent::setPath("plugin",	"__PLUGIN__");
 		parent::setPath("docroot",	Amslib_File::documentRoot());
 		
-		$this->search = array_merge($this->search,array("path","router_source","version"));
+		$this->search = array_merge(array("path","router_source","version"),$this->search);
+		
+		$this->completionCallback = array();
 		
 		//	Preload the plugin manager with the application object
 		Amslib_Plugin_Manager2::preload($name,$this);
@@ -116,6 +132,8 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		$this->config($name,$location);
 		$this->transfer();
 		$this->load();
+		
+		$this->runCompletionCallbacks();
 	}
 
 	static public function &getInstance()
@@ -125,6 +143,27 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		if($instance === NULL) $instance = new self();
 
 		return $instance;
+	}
+	
+	public function addCompletionCallback($function,$object=NULL)
+	{
+		if($object){
+			$this->completionCallback[] = array($object,$function);
+		}else{
+			$this->completionCallback[] = $function;
+		}
+	}
+	
+	public function runCompletionCallbacks()
+	{
+		foreach(Amslib_Array::valid($this->completionCallback) as $cb){
+			call_user_func($cb);
+		}
+	}
+	
+	public function setPackageFilename($domain,$file)
+	{
+		self::$packageName[$domain] = $file;
 	}
 	
 	static public function getVersion($element=NULL)
@@ -195,10 +234,12 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 	
 	protected function runService()
 	{
-		$parameters = Amslib_Router3::getParameter();
-
-		if(isset($parameters["plugin"]) && isset($parameters["service"])){
-			$api = Amslib_Plugin_Manager2::getAPI($parameters["plugin"]);
+		$plugin		=	Amslib_Router3::getParameter("plugin",false);
+		$service	=	Amslib_Router3::getParameter("service",false);
+		
+		if($plugin && $service){
+			$api = Amslib_Plugin_Manager2::getAPI($plugin);
+			
 			if($api){
 				//	NOTE:	this could be better if there was an api method to call
 				//			because that would mean it'll get the parameters 
@@ -210,7 +251,7 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 				//	TODO:	we should upgrade the service code so it calls a method, not includes some arbitary file
 				//			this way it would probably be a lot more flexible since we stay inside the api system and not
 				//			in some could-be-anything script that runs anywhere and I dont know where...
-				$api->callService($parameters["service"]);
+				$api->callService($service);
 			}
 			
 			//	TODO: we have to implement a way to redirect away from this script after we're done, right?
@@ -221,7 +262,31 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 			Amslib_Website::redirect("home");
 		}
 		
-		die();
+		//	Protect against any code branch which doesn't complete and block (all code paths should block)
+		die("FAILURE TO COMPLETE SERVICE CORRECTLY");
+	}
+	
+	protected function runService2()
+	{
+		$plugin		=	Amslib_Router3::getParameter("plugin",false);
+		$handler	=	Amslib_Router3::getParameter("service",false);
+		
+		if($plugin && $handler){
+			$api = Amslib_Plugin_Manager2::getAPI($plugin);
+			
+			if($api){
+				//	This method is called to setup any special data we might need
+				$this->api->setupService($plugin,$handler);
+
+				$service = new Amslib_Plugin_Service3();
+				$service->execute($api,$handler);
+			}
+		}
+		
+		//	NOTE: if you arrive here, it's because the service didn't execute, all services terminate with die()
+		//	TODO: we are being a bit hasty in assuming that "home" route even exists?
+		//	NOTE: yes we are, but right now we have no alternative than assume it exists for now
+		Amslib_Website::redirect("home",true);
 	}
 	
 	/**
@@ -235,7 +300,9 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 	 */
 	public function render()
 	{
-		if(Amslib_Router3::getResource() === "Service") $this->runService();	
+		$resource = Amslib_Router3::getResource();
+		if($resource === "Service")		$this->runService();
+		if($resource === "Service2")	$this->runService2();	
 		
 		//	Request the website render itself now
 		print($this->api->render());

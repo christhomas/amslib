@@ -16,6 +16,7 @@ CKEDITOR.config.toolbar_Simple_2 =
 ];
 
 $(document).ready(function(){
+	$(".ckeditor_noconfig").ckeditor();
 	$(".ckeditor_simple_1").ckeditor(function(){},{toolbar:"Simple_1"});
 	$(".ckeditor_simple_2").ckeditor(function(){},{toolbar:"Simple_2"});
 });
