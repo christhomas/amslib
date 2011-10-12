@@ -141,11 +141,11 @@ class Amslib_Database_MySQL2 extends Amslib_Database_MySQL
 	{
 		$this->errors[] = array(
 			"db_failure"		=>	true,
-			"db_query"			=>	Amslib::var_dump($query,true),
+			"db_query"			=>	$query,
 			"db_error"			=>	mysql_error(),
 			"db_last_insert"	=>	$this->lastInsertId,
 			"db_insert_id"		=>	mysql_insert_id(),
-			"db_location"		=>	Amslib::var_dump(Amslib_Array::filterKey(array_slice(debug_backtrace(),1,5),array("file","line")),true),
+			"db_location"		=>	Amslib_Array::filterKey(array_slice(debug_backtrace(),1,5),array("file","line")),
 		);
 	}
 	
