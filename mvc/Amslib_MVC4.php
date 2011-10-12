@@ -137,12 +137,28 @@ class Amslib_MVC4
 
 	public function setValue($name,$value)
 	{
-		$this->value[$name] = $value;
+		if(is_string($name) && strlen($name)){
+			$this->value[$name] = $value;
+		}
 	}
 
 	public function getValue($name,$default=NULL)
 	{
-		return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name,$default);
+		if(is_string($name) && strlen($name)){
+			return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name,$default);
+		}
+		
+		return $default;
+	}
+	
+	public function setFields($name,$value)
+	{
+		$this->setValue("validate/$name",$value);
+	}
+	
+	public function getFields($name)
+	{
+		return $this->getValue("validate/$name",$array());
 	}
 	
 	public function listValues()
