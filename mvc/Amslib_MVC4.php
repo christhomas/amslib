@@ -164,7 +164,7 @@ class Amslib_MVC4
 	
 	public function getFields($name)
 	{
-		return $this->getValue("validate/$name",$array());
+		return $this->getValue("validate/$name",array());
 	}
 	
 	public function listValues()

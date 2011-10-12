@@ -208,6 +208,7 @@ class Amslib_Plugin2
 	
 	protected function createAPI()
 	{ 
+		//	Create the API object
 		$api = $this->createObject($this->config["api"],true,true);
 
 		//	An API Object was not created, so create a default Amslib_MVC4 object instead

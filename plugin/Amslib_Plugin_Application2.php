@@ -32,6 +32,8 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 	static protected $version;
 	static protected $registeredLanguages = array();
 	static protected $packageName = array();
+	
+	protected $completionCallback;
 		
 	protected function getPackageFilename()
 	{
@@ -117,6 +119,8 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		
 		$this->search = array_merge(array("path","router_source","version"),$this->search);
 		
+		$this->completionCallback = array();
+		
 		//	Preload the plugin manager with the application object
 		Amslib_Plugin_Manager2::preload($name,$this);
 		
@@ -128,6 +132,8 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		$this->config($name,$location);
 		$this->transfer();
 		$this->load();
+		
+		$this->runCompletionCallbacks();
 	}
 
 	static public function &getInstance()
@@ -137,6 +143,22 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		if($instance === NULL) $instance = new self();
 
 		return $instance;
+	}
+	
+	public function addCompletionCallback($function,$object=NULL)
+	{
+		if($object){
+			$this->completionCallback[] = array($object,$function);
+		}else{
+			$this->completionCallback[] = $function;
+		}
+	}
+	
+	public function runCompletionCallbacks()
+	{
+		foreach(Amslib_Array::valid($this->completionCallback) as $cb){
+			call_user_func($cb);
+		}
 	}
 	
 	public function setPackageFilename($domain,$file)
