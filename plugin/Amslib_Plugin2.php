@@ -131,7 +131,7 @@ class Amslib_Plugin2
 
 				if(in_array($v,array("layout","view","service"))){
 					$params		=	array($name,$c["value"]);
-				}else if($v == "object"){
+				}else if($v == "object" && isset($c["file"]	)){
 					$params		=	array($name,$c["file"]);
 				}else if($v == "font"){
 					$params		=	array($c["type"],$name,$c["value"],$c["autoload"]);
@@ -392,8 +392,9 @@ class Amslib_Plugin2
 							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
 							$absolute	=	isset($p["absolute"]) ? true : false;
 							$p["value"]	=	$this->findResource($c->nodeValue,$absolute);
-
-							$this->config[$node->nodeName][$p["id"]] = $p;
+							
+							//	If a valid id exists, insert the configuration
+							if(isset($p["id"])) $this->config[$node->nodeName][$p["id"]] = $p;
 						}
 					}break;
 					

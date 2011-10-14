@@ -99,9 +99,9 @@ class Amslib_Plugin_Service3
 			
 			call_user_func(array($this,$cb));
 			
-			die("FAILURE[p:$plugin][m:$method]-> All services should terminate with redirect or json");
+			die("FAILURE[p:".get_class($plugin)."][m:$method]-> All services should terminate with redirect or json");
 		}else{
-			die("FAILURE[p:$plugin][m:$method]-> method did not exist, so could not be called");
+			die("FAILURE[p:".get_class($plugin)."][m:$method]-> method did not exist, so could not be called");
 		}
 	}
 	
