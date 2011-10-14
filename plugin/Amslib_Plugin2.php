@@ -229,9 +229,14 @@ class Amslib_Plugin2
 		$t = &$this->config["translator"][$name];
 		if(isset($t["cache"])) return $t["cache"];
 			
-		//	Replace __CURRENT_PLUGIN with plugin location and expand any other paths
-		$location = str_replace("__CURRENT_PLUGIN__",$this->location,$t["location"]);
-		$location = Amslib_Plugin::expandPath($location);
+		if($t["type"] == "xml"){
+			//	Replace __CURRENT_PLUGIN with plugin location and expand any other paths
+			$location = str_replace("__CURRENT_PLUGIN__",$this->location,$t["location"]);
+			$location = Amslib_Plugin::expandPath($location);
+		}else if($t["type"] == "database"){
+			$database = $this->config["model"]["value"];
+			$location = str_replace("__CURRENT_PLUGIN__",$database,$t["location"]);
+		}
 		
 		//	Obtain the language the system should use when printing text
 		$language = Amslib_Plugin_Application2::getLanguage($name);
@@ -419,8 +424,6 @@ class Amslib_Plugin2
 						
 						//	Import all the translator parameters, such as import/export
 						foreach($node->attributes as $k=>$v) $p[$k] = $v->nodeValue;
-						
-						$p["name"] = $node->nodeValue;
 						
 						foreach($child as $c){
 							if($c->nodeName == "language") $p[$c->nodeName][] = $c->nodeValue;
