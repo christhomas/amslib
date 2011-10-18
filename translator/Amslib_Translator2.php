@@ -93,6 +93,7 @@ class Amslib_Translator2 extends Amslib_Translator2_Source
 	public function forget($k){					return $this->source->forget($k);				}
 	public function getKeyList(){				return $this->source->getKeyList();				}
 	public function getValueList(){				return $this->source->getValueList();			}
+	public function getList(){					return $this->source->getList();				}
 	public function updateKey($k,$nk){			return $this->source->updateKey($k,$nk);		}
 	
 	/********************************************************************************

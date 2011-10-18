@@ -118,4 +118,9 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 	{				
 		return array();		
 	}
+	
+	public function getList()
+	{
+		return array();
+	}
 }

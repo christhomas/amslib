@@ -159,26 +159,26 @@ class Amslib_Plugin_Service3
 	
 	static public function listPlugins()
 	{
-		return array_keys(self::$serviceData[self::PL]);
+		return isset(self::$serviceData[self::PL]) ? array_keys(self::$serviceData[self::PL]) : array();
 	}	
 	
 	static public function getValidationData($plugin,$default=false)
 	{
-		return isset(self::$serviceData[$plugin][self::VD]) 
+		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][self::VD]) 
 			? Amslib_Array::valid(self::$serviceData[$plugin][self::VD]) 
 			: $default;
 	}
 	
 	static public function getValidationErrors($plugin,$default=false)
 	{
-		return isset(self::$serviceData[$plugin][self::VE]) 
+		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][self::VE]) 
 			? Amslib_Array::valid(self::$serviceData[$plugin][self::VE]) 
 			: $default;
 	}
 	
 	static public function getServiceErrors($plugin,$default=false)
 	{
-		return isset(self::$serviceData[$plugin][self::SE]) 
+		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][self::SE])
 			? Amslib_Array::valid(self::$serviceData[$plugin][self::SE]) 
 			: $default;
 	}
@@ -186,14 +186,14 @@ class Amslib_Plugin_Service3
 	//	NOTE: Be careful with this method, it could leak secret data if you didnt sanitise it properly of sensitive data
 	static public function getDatabaseErrors($plugin,$default=false)
 	{
-		return isset(self::$serviceData[$plugin][self::DB]) 
+		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][self::DB])
 			? Amslib_Array::valid(self::$serviceData[$plugin][self::DB]) 
 			: $default;
 	}
 	
 	static public function getDatabaseMessage($plugin,$default=false)
 	{
-		return isset(self::$serviceData[$plugin][self::DB])
+		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][self::DB])
 			? Amslib_Array::pluck(self::$serviceData[$plugin][self::DB],"db_error")
 			: $default;
 	}

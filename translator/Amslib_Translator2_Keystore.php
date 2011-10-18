@@ -94,4 +94,9 @@ class Amslib_Translator2_Keystore extends Amslib_Translator2_Source
 	{
 		return array_values($this->store[$this->language]);
 	}
+	
+	public function getList()
+	{
+		return $this->store[$this->language];
+	}
 }

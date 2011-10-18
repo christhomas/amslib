@@ -75,12 +75,16 @@ class Amslib_Array
 	    return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));
 	}
 	
-	static public function filterKey($array,$filter)
+	static public function filterKey($array,$filter,$similar=false)
 	{
-		if(self::isMulti($array)){
-			foreach($array as &$a) $a = array_intersect_key($a, array_flip($filter));
+		if($similar === false){
+			if(self::isMulti($array)){
+				foreach($array as &$a) $a = array_intersect_key($a, array_flip($filter));
+			}else{
+				$array = array_intersect_key($array, array_flip($filter));	
+			}
 		}else{
-			$array = array_intersect_key($array, array_flip($filter));	
+			$array = self::filter($array,NULL,$filter,true,true);
 		}
 		
 		return $array;
@@ -97,9 +101,25 @@ class Amslib_Array
 			//	TODO: I'm sure that there are more situations I could take into account here
 			//	TODO: I should document exactly what this method does, because right now I can't remember
 			
-			if(is_array($value) && in_array($v[$key],$value)) $found = true;
-			if($v[$key] == $value) $found = true;
-			if($similar == true && strpos($v[$key],$value) !== false) $found = true;
+			$search = $key ? $v[$key] : $v;
+
+			if($similar == true && strpos($search,$value) !== false) $found = true;
+			else if($search == $value) $found = true;
+			else if(is_array($value)){
+				if($similar == true){
+					foreach($value as $subvalue){
+						if(strpos($search,$subvalue) !== false){
+							//	NOTE: here I am adjusting the key to reply the key=>value meaning the subvalue=>value
+							//	NOTE: but I am not sure whether I want to do this 100% of the time, for now, it's a good choice
+							$k = $subvalue;
+							$found = true;
+							break;
+						}
+					}
+				}else if(in_array($search,$value)){
+					$found = true;	
+				}
+			}
 			
 			if($found){
 				$filter[$k] = $v;

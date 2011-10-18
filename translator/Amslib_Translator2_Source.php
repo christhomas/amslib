@@ -16,6 +16,7 @@ abstract class Amslib_Translator2_Source
 	abstract public function updateKey			($k,$nk);
 	abstract public function getKeyList			();
 	abstract public function getValueList		();
+	abstract public function getList			();
 	
 	public function t($k){
 		return $this->translate($k);

@@ -89,11 +89,16 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 	
 	public function getKeyList()
 	{
-		return $this->database->select("k from {$this->table} where lang='{$this->language}'");
+		return Amslib_Array::valid($this->database->select("k from {$this->table} where lang='{$this->language}'"));
 	}
 	
 	public function getValueList()
 	{				
-		return $this->database->select("v from {$this->table} where lang='{$this->language}'");		
+		return Amslib_Array::valid($this->database->select("v from {$this->table} where lang='{$this->language}'"));		
+	}
+	
+	public function getList()
+	{
+		return Amslib_Array::valid($this->database->select("k,v from {$this->table} where lang='{$this->language}'"));
 	}
 }
