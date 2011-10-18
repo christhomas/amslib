@@ -40,65 +40,80 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 		return false;
 	}
 	
-	public function translate($k)
+	public function translate($k,$l=NULL)
 	{			
-		$v = parent::translate($k);
+		$v = parent::translate($k,$l);
 		
 		if($v == $k){
+			if(!$l) $l = $this->language;
+			
 			$k	=	$this->database->escape($k);
-			$r	=	$this->database->select("v from {$this->table} where k='$k' and lang='{$this->language}'");
+			$r	=	$this->database->select("v from {$this->table} where k='$k' and lang='$l'");
 			$v	=	"";
 			
 			if(is_array($r)){
 				if(count($r) > 1){
-					Amslib_Keystore::add("AMSTUDIOS_TRANSLATOR_ERROR","Multiple conflicting translations for key($k) and language({$this->language})");
+					Amslib_Keystore::add("AMSTUDIOS_TRANSLATOR_ERROR","Multiple conflicting translations for key($k) and language($l)");
 				}else{
 					if(isset($r[0]["v"])) $v = trim(stripslashes($r[0]["v"]));	
 				}
 			}
 			
-			if(strlen($v)) parent::learn($k,$v);
+			if(strlen($v)) parent::learn($k,$v,$l);
 			else $v = $k;
 		}
 		
 		return $v;
 	}
 	
-	public function learn($k,$v)
+	public function learn($k,$v,$l=NULL)
 	{			
 		$k	=	$this->database->escape($k);
 		$v	=	$this->database->escape($v);
 		
-		$found = $this->database->select("COUNT(id) from {$this->table} where k='$k' and lang='{$this->language}'",1,true);
+		if(strlen($k) == 0) return false;
+		$lc = $l;
+		if(!$l) $l = $this->language;
+		
+		$found = $this->database->select("COUNT(id) from {$this->table} where k='$k' and lang='$l'",1,true);
+		Amslib_FirePHP::output("learn","[$lc]: COUNT(id) from {$this->table} where k='$k' and lang='$l'");
 		if($found["COUNT(id)"] == 0)
 		{
-			return $this->database->insert("{$this->table} set k='$k',v='$v',lang='{$this->language}'");
+			return $this->database->insert("{$this->table} set k='$k',v='$v',lang='$l'");
 		}
 		
-		return $this->database->update("{$this->table} set v='$v' where k='$k' and lang='{$this->language}'");
+		return $this->database->update("{$this->table} set v='$v' where k='$k' and lang='$l'");
 	}
 	
-	public function forget($k)
+	public function forget($k,$l=NULL)
 	{
+		if(!$l) $l = $this->language;
+		
 		$k	=	$this->database->escape($k);
-		$f	=	parent::forget($k);
-		$d	=	$this->database->delete("{$this->table} where k='$k' and lang='{$this->language}'");
+		$f	=	parent::forget($k,$l);
+		$d	=	$this->database->delete("{$this->table} where k='$k' and lang='$l'");
 		
 		return $f && $d;
 	}
 	
-	public function getKeyList()
+	public function getKeyList($l=NULL)
 	{
-		return Amslib_Array::valid($this->database->select("k from {$this->table} where lang='{$this->language}'"));
+		if(!$l) $l = $this->language;
+		
+		return Amslib_Array::valid($this->database->select("k from {$this->table} where lang='$l'"));
 	}
 	
-	public function getValueList()
+	public function getValueList($l=NULL)
 	{				
-		return Amslib_Array::valid($this->database->select("v from {$this->table} where lang='{$this->language}'"));		
+		if(!$l) $l = $this->language;
+		
+		return Amslib_Array::valid($this->database->select("v from {$this->table} where lang='$l'"));		
 	}
 	
-	public function getList()
+	public function getList($l=NULL)
 	{
-		return Amslib_Array::valid($this->database->select("k,v from {$this->table} where lang='{$this->language}'"));
+		if(!$l) $l = $this->language;
+		
+		return Amslib_Array::valid($this->database->select("k,v from {$this->table} where lang='$l'"));
 	}
 }

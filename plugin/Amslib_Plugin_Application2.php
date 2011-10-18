@@ -30,6 +30,7 @@
 class Amslib_Plugin_Application2 extends Amslib_Plugin2
 {
 	static protected $version;
+	static protected $langKey = "amslib/lang/shared";
 	static protected $registeredLanguages = array();
 	static protected $packageName = array();
 	
@@ -60,7 +61,7 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		//	Load the router (need to initialise the router first, but execute it after everything is loaded from the plugins)
 		//	NOTE: This is done because of webservices right? perhaps there is a better way of doing this
 		$this->initRouter();
-
+		
 		return true;
 	}
 
@@ -73,6 +74,8 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		$this->executeRouter();
 		
 		//	We need a valid language for the website, make sure it's valid
+
+		self::$langKey = $this->api->getValue("lang_key",self::$langKey);
 		$langCode = self::getLanguage("website");
 		if(!$langCode) self::setLanguage("website",reset(self::getLanguageList("website")));
 
@@ -147,11 +150,9 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 	
 	public function addCompletionCallback($function,$object=NULL)
 	{
-		if($object){
-			$this->completionCallback[] = array($object,$function);
-		}else{
-			$this->completionCallback[] = $function;
-		}
+		$this->completionCallback[] = $object 
+			? array($object,$function) 
+			: $function;
 	}
 	
 	public function runCompletionCallbacks()
@@ -173,12 +174,12 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 	
 	static public function setLanguage($name,$langCode)
 	{
-		Amslib::insertSessionParam("language_code_{$name}",$langCode);
+		Amslib::insertSessionParam(self::$langKey."/$name",$langCode);
 	}
 	
 	static public function getLanguage($name)
 	{
-		return Amslib::sessionParam("language_code_{$name}");
+		return Amslib::sessionParam(self::$langKey."/$name");
 	}
 	
 	static public function registerLanguage($name,$langCode)
@@ -191,30 +192,6 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		return isset(self::$registeredLanguages[$name]) 
 					? array_keys(self::$registeredLanguages[$name]) 
 					: array();
-	}
-
-	//	NOTE:	This method looks like it's out of date and needs
-	//			to be revamped with a new way to obtain this info
-	//			because it looks a little bit hacky
-	//	NOTE:	Does anybody use this anymore?
-	//	NOTE:	perhaps the loaded plugin should import into the application
-	//			plugin the page title to use, but wouldn't work with our current method of loading all plugins
-	//	NOTE:	This would require a change in how the administration panel uses plugins
-	//			because right now they are all loaded and then we do a "getActivePlugin"
-	//			to obtain the correct plugin, perhaps we should not load all plugins, but only
-	//			the current one based on the route, then it would be simpler
-	//	NOTE:	This would require us to allow a plugin to be queried, but not loaded, perhaps
-	//			we can add a new method alongside load() called config() and it'll only load the config value data
-	public function getPageTitle()
-	{
-		$api = Amslib_Plugin_Manager2::getAPI(self::getActivePlugin());
-
-		$title = false;
-
-		if($api)	$title	=	$api->getValue("page_title");
-		if(!$title)	$title	=	"MISSING PAGE TITLE";
-
-		return $title;
 	}
 
 	//	NOTE:	I don't like this method, I should find a nicer way to do this
@@ -306,5 +283,18 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		
 		//	Request the website render itself now
 		print($this->api->render());
+	}
+	
+	//	DEPRECATED
+	public function getPageTitle()
+	{
+		$api = Amslib_Plugin_Manager2::getAPI(self::getActivePlugin());
+
+		$title = false;
+
+		if($api)	$title	=	$api->getValue("page_title");
+		if(!$title)	$title	=	"MISSING PAGE TITLE";
+
+		return $title;
 	}
 }

@@ -57,9 +57,9 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 		return false;
 	}
 	
-	public function translate($k)
+	public function translate($k,$l=NULL)
 	{			
-		$v = parent::translate($k);
+		$v = parent::translate($k,$l);
 		
 		if($v == $k){
 			$node = $this->xpath->query("//database/translation[@key='$k'][1]");
@@ -73,7 +73,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 				$v = trim($v);
 
 				//	Now cache the value read from the xml	
-				parent::learn($k,$v);
+				parent::learn($k,$v,$l);
 			}
 		}
 		
@@ -81,29 +81,29 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 	}
 	
 	//	TODO: we need to add the key/value to the xml database on disk
-	public function learn($k,$v)
+	public function learn($k,$v,$l=NULL)
 	{			
-		return parent::learn($k,$v);		
+		return parent::learn($k,$v,$l);		
 	}
 	
 	//	TODO: do the physical remove the key from the xml database
 	//	TODO: do I remove from just a single language, or all of them?
 	//	TODO: perhaps remove all by default, or specify the language to single a particular xml database out.
-	public function forget($k)
+	public function forget($k,$l=NULL)
 	{
-		$cache	=	parent::forget($k);
+		$cache	=	parent::forget($k,$l);
 		$xml	=	false;
 
 		return $cache && $xml;
 	}
 	
-	public function updateKey($k,$nk)
+	public function updateKey($k,$nk,$l=NULL)
 	{
-		$this->learn($nk,$this->translate($k));
-		$this->forget($k);
+		$this->learn($nk,$this->translate($k,$l),$l);
+		$this->forget($k,$l);
 	}
 	
-	public function getKeyList()
+	public function getKeyList($l=NULL)
 	{					
 		$list = $this->xpath->query("//database/translation/attribute::key");
 
@@ -114,12 +114,12 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 	}
 	
 	//	TODO: NOT IMPLEMENTED YET
-	public function getValueList()
+	public function getValueList($l=NULL)
 	{				
 		return array();		
 	}
 	
-	public function getList()
+	public function getList($l=NULL)
 	{
 		return array();
 	}

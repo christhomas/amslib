@@ -64,39 +64,51 @@ class Amslib_Translator2_Keystore extends Amslib_Translator2_Source
 		return ($langCode == $this->language);
 	}
 	
-	public function translate($k)
+	public function translate($k,$l=NULL)
 	{
-		return (is_string($k) && isset($this->store[$this->language][$k])) ? $this->store[$this->language][$k] : $k;	
+		if(!$l) $l = $this->language;
+		
+		return (is_string($k) && isset($this->store[$l][$k])) ? $this->store[$l][$k] : $k;	
 	}
 	
-	public function learn($k,$v)
+	public function learn($k,$v,$l=NULL)
 	{
-		$this->store[$this->language][$k] = $v;
+		if(!$l) $l = $this->language;
+		
+		$this->store[$l][$k] = $v;
 	}
 	
-	public function forget($k)
+	public function forget($k,$l=NULL)
 	{
-		unset($this->store[$this->language][$k]);
+		if(!$l) $l = $this->language;
+		
+		unset($this->store[$l][$k]);
 	}
 	
-	public function updateKey($k,$nk)
+	public function updateKey($k,$nk,$l=NULL)
 	{
-		$this->learn($nk,$this->translate($k));
-		$this->forget($k);
+		$this->learn($nk,$this->translate($k,$l),$l);
+		$this->forget($k,$l);
 	}
 	
-	public function getKeyList()
+	public function getKeyList($l=NULL)
 	{
-		return array_keys($this->store[$this->language]);
+		if(!$l) $l = $this->language;
+		
+		return array_keys($this->store[$l]);
 	}
 	
-	public function getValueList()
+	public function getValueList($l=NULL)
 	{
-		return array_values($this->store[$this->language]);
+		if(!$l) $l = $this->language;
+		
+		return array_values($this->store[$l]);
 	}
 	
-	public function getList()
+	public function getList($l=NULL)
 	{
-		return $this->store[$this->language];
+		if(!$l) $l = $this->language;
+		
+		return $this->store[$l];
 	}
 }

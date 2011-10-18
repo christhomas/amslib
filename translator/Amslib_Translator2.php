@@ -88,13 +88,13 @@ class Amslib_Translator2 extends Amslib_Translator2_Source
 	********************************************************************************/
 	public function setLocation($location){		return $this->source->setLocation($location);	}
 	public function load(){						return $this->source->load();					}
-	public function translate($k){				return $this->source->translate($k);			}
-	public function learn($k,$v){				return $this->source->learn($k,$v);				}
-	public function forget($k){					return $this->source->forget($k);				}
-	public function getKeyList(){				return $this->source->getKeyList();				}
-	public function getValueList(){				return $this->source->getValueList();			}
-	public function getList(){					return $this->source->getList();				}
-	public function updateKey($k,$nk){			return $this->source->updateKey($k,$nk);		}
+	public function translate($k,$l=NULL){		return $this->source->translate($k,$l);			}
+	public function learn($k,$v,$l=NULL){		return $this->source->learn($k,$v,$l);			}
+	public function forget($k,$l=NULL){			return $this->source->forget($k,$l);			}
+	public function getKeyList($l=NULL){		return $this->source->getKeyList($l);			}
+	public function getValueList($l=NULL){		return $this->source->getValueList($l);			}
+	public function getList($l=NULL){			return $this->source->getList($l);				}
+	public function updateKey($k,$nk,$l=NULL){	return $this->source->updateKey($k,$nk,$l);		}
 	
 	/********************************************************************************
 	 *	IMPORT TRANSLATION METHODS

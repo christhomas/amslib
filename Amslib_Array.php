@@ -147,12 +147,31 @@ class Amslib_Array
 
 	static public function find($array,$key,$value)
 	{
+		$result = NULL;
+		
 		foreach(self::valid($array) as $a){
 			if($a[$key] == $value) return $a;
 		}
 
 		return false;
 	}
+
+	/*
+	//	I don't know how to integrate this into the api yet, but it's a cool function!!!
+	//	author: d3x from freenode's #php channel
+	//	usage: find($array,$k1,$k2,$k3,$k4)
+	//	description: you have a multi-dimensional array, the keys will represent a path to the final kv pair
+	function find($array) {
+		$args = func_get_args();
+		array_shift($args);
+		if ($args) {
+			$key = array_shift($args);
+			array_unshift($args, $array[$key]);
+			return call_user_func_array(__FUNCTION__, $args); 
+		}
+		return $array;
+	}
+	*/
 	
 	static public function findKey($array,$key,$value)
 	{

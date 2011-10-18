@@ -132,13 +132,13 @@ class Amslib
 	//	blatently stolen code from: http://snipplr.com/view/22741/slugify-a-string-in-php/ :-) thank you!
 	//	modified 01/08/2011: added ability to allow custom regex through so you can add terms if required
 	//	 
-	static public function slugify($text,$customise="")
+	static public function slugify($text,$remove="",$replace="-")
 	{
 		// replace non letter or digits by -
-		$text = preg_replace("~[^\\pL\d{$customise}]+~u", '-', $text);
+		$text = preg_replace("~[^\\pL\d{$remove}]+~u", $replace, $text);
 		 
 		// trim
-		$text = trim($text, '-');
+		$text = trim($text, $replace);
 		 
 		// transliterate
 		if (function_exists('iconv')) $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
@@ -147,7 +147,7 @@ class Amslib
 		$text = strtolower($text);
 		 
 		// remove unwanted characters
-		$text = preg_replace("~[^-\w{$customise}]+~", '', $text);
+		$text = preg_replace("~[^-\w{$remove}]+~", '', $text);
 		 
 		if (empty($text)) return 'n-a';
 		 

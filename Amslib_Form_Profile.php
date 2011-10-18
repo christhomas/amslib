@@ -5,7 +5,7 @@ class Amslib_Form_Profile
 	const FAILURE	=	"form/failure";
 	const AJAX		=	"form/ajax";
 	
-	const KEY		=	"amslib_form_profile";
+	const KEY		=	"amslib/form_profile";
 	
 	//	Here we cache all the profiles so they are only called once
 	static protected $profiles	=	false;
@@ -18,8 +18,6 @@ class Amslib_Form_Profile
 	
 	static public function initialise()
 	{
-		@session_start();
-		
 		if(!isset($_SESSION[self::KEY])) $_SESSION[self::KEY] = array();
 		
 		self::$profiles = &$_SESSION[self::KEY];

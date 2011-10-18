@@ -1,7 +1,7 @@
 <?php 
 class Amslib_Plugin_Service3
 {
-	const S3 = "Amslib_Plugin_Service3";
+	const S3 = "amslib/service/validate";
 	const VD = "validation/data";
 	const VE = "validation/errors";
 	const SD = "service/data";
