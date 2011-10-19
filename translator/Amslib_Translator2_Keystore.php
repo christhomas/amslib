@@ -90,6 +90,18 @@ class Amslib_Translator2_Keystore extends Amslib_Translator2_Source
 		$this->learn($nk,$this->translate($k,$l),$l);
 		$this->forget($k,$l);
 	}
+
+	public function searchKey($k,$s=false,$l=NULL)
+	{
+		//	TODO: not implemented yet
+		return array();
+	}
+	
+	public function searchValue($v,$s=false,$l=NULL)
+	{
+		//	TODO: not implemented yet
+		return array();
+	}
 	
 	public function getKeyList($l=NULL)
 	{

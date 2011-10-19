@@ -14,6 +14,8 @@ abstract class Amslib_Translator2_Source
 	abstract public function learn				($k,$v,$l=NULL);
 	abstract public function forget				($k,$l=NULL);
 	abstract public function updateKey			($k,$nk,$l=NULL);
+	abstract public function searchKey			($k,$s=false,$l=NULL);
+	abstract public function searchValue		($v,$s=false,$l=NULL);
 	abstract public function getKeyList			($l=NULL);
 	abstract public function getValueList		($l=NULL);
 	abstract public function getList			($l=NULL);
@@ -28,5 +30,13 @@ abstract class Amslib_Translator2_Source
 	
 	public function f($k,$l=NULL){
 		return $this->forget($k,$l);
+	}
+	
+	public function sk($k,$s=false,$l=NULL){
+		return $this->searchKey($k,$s,$l);
+	}
+	
+	public function sv($v,$s=false,$l=NULL){
+		return $this->searchValue($v,$s,$l);
 	}
 }

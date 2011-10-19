@@ -46,7 +46,7 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 		
 		if($v == $k){
 			if(!$l) $l = $this->language;
-			
+			$l	=	$this->database->escape($l);
 			$k	=	$this->database->escape($k);
 			$r	=	$this->database->select("v from {$this->table} where k='$k' and lang='$l'");
 			$v	=	"";
@@ -68,15 +68,16 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 	
 	public function learn($k,$v,$l=NULL)
 	{			
+		if(!$l) $l = $this->language;
+		$l	=	$this->database->escape($l);
 		$k	=	$this->database->escape($k);
 		$v	=	$this->database->escape($v);
 		
 		if(strlen($k) == 0) return false;
 		$lc = $l;
-		if(!$l) $l = $this->language;
 		
 		$found = $this->database->select("COUNT(id) from {$this->table} where k='$k' and lang='$l'",1,true);
-		Amslib_FirePHP::output("learn","[$lc]: COUNT(id) from {$this->table} where k='$k' and lang='$l'");
+		
 		if($found["COUNT(id)"] == 0)
 		{
 			return $this->database->insert("{$this->table} set k='$k',v='$v',lang='$l'");
@@ -88,6 +89,7 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 	public function forget($k,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
+		$l = $this->database->escape($l);
 		
 		$k	=	$this->database->escape($k);
 		$f	=	parent::forget($k,$l);
@@ -96,9 +98,32 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 		return $f && $d;
 	}
 	
+	public function searchKey($k,$s=false,$l=NULL)
+	{
+		if(!$l) $l = $this->language;
+		$l = $this->database->escape($l);
+		$k = $this->database->escape($k);
+		
+		$filter = "where lang='$l' AND ".($s ? "k LIKE '%$k%'" : "k='$k'");
+
+		return Amslib_Array::valid($this->database->select("k,v from {$this->table} $filter"));
+	}
+	
+	public function searchValue($v,$s=false,$l=NULL)
+	{
+		if(!$l) $l = $this->language;
+		$l = $this->database->escape($l);
+		$v = $this->database->escape($v);
+		
+		$filter = "where lang='$l' AND ".($s ? "v LIKE '%$v%'" : "v='$v'");
+
+		return Amslib_Array::valid($this->database->select("k,v from {$this->table} $filter"));
+	}
+	
 	public function getKeyList($l=NULL)
 	{
 		if(!$l) $l = $this->language;
+		$l = $this->database->escape($l);
 		
 		return Amslib_Array::valid($this->database->select("k from {$this->table} where lang='$l'"));
 	}
@@ -106,6 +131,7 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 	public function getValueList($l=NULL)
 	{				
 		if(!$l) $l = $this->language;
+		$l = $this->database->escape($l);
 		
 		return Amslib_Array::valid($this->database->select("v from {$this->table} where lang='$l'"));		
 	}
@@ -113,6 +139,7 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 	public function getList($l=NULL)
 	{
 		if(!$l) $l = $this->language;
+		$l = $this->database->escape($l);
 		
 		return Amslib_Array::valid($this->database->select("k,v from {$this->table} where lang='$l'"));
 	}
