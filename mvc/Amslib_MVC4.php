@@ -276,7 +276,7 @@ class Amslib_MVC4
 			//	Attempt to find a routed url for this service
 			$url = Amslib_Router3::getURL("Service:$id");
 			if(!$url) $url = $this->service[$id];
-
+			
 			//	Set this as a service url for the javascript to acquire
 			$this->setValue("service:$id",$url);
 		//}	

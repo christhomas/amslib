@@ -4,7 +4,7 @@ CKEDITOR.config.toolbar_CKeditor_Config_1 =
 	['Bold','Italic','Strike'],
 	['NumberedList','BulletedList'],
 	['Cut','Copy','Paste','PasteFromWord'],
-	['Link','Unlink','JustifyLeft','JustifyBlock']
+	['Link','Unlink','JustifyLeft','JustifyCenter','JustifyBlock']
 ];
 
 CKEDITOR.config.toolbar_CKeditor_Config_2 =
@@ -12,7 +12,7 @@ CKEDITOR.config.toolbar_CKeditor_Config_2 =
 	['Styles','Format','Font','FontSize'],
 	['Bold','Italic','Strike'],
 	['Cut','Copy','Paste','PasteFromWord'],
-	['Link','Unlink','JustifyLeft','JustifyBlock']
+	['Link','Unlink','JustifyLeft','JustifyCenter','JustifyBlock']
 ];
 
 CKEDITOR.config.toolbar_CKeditor_Config_3 =
@@ -21,7 +21,7 @@ CKEDITOR.config.toolbar_CKeditor_Config_3 =
 	['Bold','Italic','Strike'],
 	['NumberedList','BulletedList'],
 	['Cut','Copy','Paste','PasteFromWord'],
-	['Link','Unlink','JustifyLeft','JustifyBlock']
+	['Link','Unlink','JustifyLeft','JustifyCenter','JustifyBlock']
 ];
 
 $(document).ready(function(){

@@ -6,8 +6,10 @@ class Amslib_Plugin_Service3
 	const VE = "validation/errors";
 	const SD = "service/data";
 	const SE = "service/errors";
+	const FB = "service/feedback";
 	const DB = "database/errors";
 	const PL = "plugins";
+	const SC = "success";
 	
 	protected $successURL;
 	protected $failureURL;
@@ -21,7 +23,7 @@ class Amslib_Plugin_Service3
 	
 	protected function successPOST()
 	{
-		$this->data["success"] = true;
+		$this->data[self::SC] = true;
 		$this->setServiceData($this->data);
 
 		Amslib_Website::redirect($this->getSuccessURL(),true);
@@ -29,7 +31,7 @@ class Amslib_Plugin_Service3
 	
 	protected function failurePOST()
 	{
-		$this->data["success"] = false;
+		$this->data[self::SC] = false;
 		$this->setServiceData($this->data);
 		
 		Amslib_Website::redirect($this->getFailureURL(),true);
@@ -37,13 +39,13 @@ class Amslib_Plugin_Service3
 	
 	protected function successAJAX()
 	{
-		$this->data["success"] = true;
+		$this->data[self::SC] = true;
 		Amslib_Website::outputJSON($this->data,true);
 	}
 		
 	protected function failureAJAX()
 	{
-		$this->data["success"] = false;
+		$this->data[self::SC] = false;
 		Amslib_Website::outputJSON($this->data,true);
 	}
 	
@@ -62,6 +64,7 @@ class Amslib_Plugin_Service3
 		
 		//	Reset the service data and session structures
 		$this->data			=	array();
+		$this->showFeedback();
 		$this->setServiceData(false);
 	}
 	
@@ -88,6 +91,16 @@ class Amslib_Plugin_Service3
 	public function setServiceData($data)
 	{
 		$_SESSION[self::S3] = $data;
+	}
+	
+	public function showFeedback()
+	{
+		$this->data[self::FB] = true;
+	}
+	
+	public function hideFeedback()
+	{
+		$this->data[self::FB] = false;
 	}
 	
 	public function execute($plugin,$method)
@@ -141,6 +154,11 @@ class Amslib_Plugin_Service3
 	/*****************************************************************************
 	 * 	STATIC API TO RETRIEVE SESSION DATA
 	*****************************************************************************/
+	static public function displayFeedback()
+	{
+		return self::$serviceData[self::FB];
+	}
+	
 	static public function hasData()
 	{
 		if(self::$serviceData === NULL) self::$serviceData = Amslib::sessionParam(self::S3,false,true);
@@ -150,9 +168,9 @@ class Amslib_Plugin_Service3
 	
 	static public function getStatus()
 	{
-		$success = isset(self::$serviceData["success"]) ? self::$serviceData["success"] : false;
+		$success = isset(self::$serviceData[self::SC]) ? self::$serviceData[self::SC] : false;
 		
-		unset(self::$serviceData["success"]);
+		unset(self::$serviceData[self::SC]);
 		
 		return $success;
 	}

@@ -6,7 +6,7 @@ class Amslib_Array
 		//	Invalid values return an empty array
 		if(empty($array) || !$array || !is_array($array) || is_null($array)) return array();
 		//	cast objects to arrays
-		if(is_object($array)) return (array)$a;
+		if(is_object($array)) $array = (array)$a;
 		//	return the original value
 		return $array;
 	}
@@ -206,20 +206,14 @@ class Amslib_Array
 		return true;
 	}
 
-	//	NOTE: I am not sure of the consequences of defaulting key="" will break anything
-	static public function stripSlashesMulti($array,$key="")
+	static public function stripSlashesMulti($array,$key=NULL)
 	{
-		if($key == "") $key = array_keys($array);
-
-		if(!is_array($key)){
-			foreach($array as &$element){
-				$element[$key] = stripslashes($element[$key]);
-			}
-		}else{
-			foreach($array as &$element){
-				foreach($key as $index){
-					$element[$index] = stripslashes($element[$index]);
-				}
+		if(is_string($key)) $key = array($key);
+		
+		foreach($array as &$element){
+			if(!$key) $key = array_keys($element);
+			foreach($key as $index){
+				$element[$index] = stripslashes($element[$index]);
 			}
 		}
 

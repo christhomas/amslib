@@ -61,6 +61,8 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 			
 			if(strlen($v)) parent::learn($k,$v,$l);
 			else $v = $k;
+			
+			$v = stripslashes($v);
 		}
 		
 		return $v;
@@ -106,7 +108,9 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 		
 		$filter = "where lang='$l' AND ".($s ? "k LIKE '%$k%'" : "k='$k'");
 
-		return Amslib_Array::valid($this->database->select("k,v from {$this->table} $filter"));
+		$list = Amslib_Array::valid($this->database->select("k,v from {$this->table} $filter"));
+		
+		return Amslib_Array::stripSlashesMulti($list);
 	}
 	
 	public function searchValue($v,$s=false,$l=NULL)
@@ -117,7 +121,9 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 		
 		$filter = "where lang='$l' AND ".($s ? "v LIKE '%$v%'" : "v='$v'");
 
-		return Amslib_Array::valid($this->database->select("k,v from {$this->table} $filter"));
+		$list = Amslib_Array::valid($this->database->select("k,v from {$this->table} $filter"));
+		
+		return Amslib_Array::stripSlashesMulti($list);
 	}
 	
 	public function getKeyList($l=NULL)
