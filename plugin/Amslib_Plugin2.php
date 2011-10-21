@@ -114,7 +114,7 @@ class Amslib_Plugin2
 		//	Load all routes into the plugin, so you can identify which plugin is responsible for a route
 		foreach($this->routes as $name=>$route) $this->api->setRoute($name,$route);
 
-		$keys = array("object","translator","layout","view","value","service","font","image","javascript","stylesheet");
+		$keys = array("object","value","translator","layout","view","service","font","image","javascript","stylesheet");
 		
 		foreach($keys as $k=>$v){
 			//	Don't process any keys which are not set, empty or the required method to process it is not available
@@ -243,7 +243,7 @@ class Amslib_Plugin2
 		if(!$language) $language = reset($t["language"]);
 		
 		//	Create the language translator object and insert it into the api
-		$translator = new Amslib_Translator2($t["type"]);
+		$translator = new Amslib_Translator2($t["type"],$name);
 		$translator->addLanguage($t["language"]);
 		$translator->setLocation($location);
 		$translator->setLanguage($language);
@@ -256,7 +256,6 @@ class Amslib_Plugin2
 	
 	protected function initialisePlugin(){	/* do nothing by default */ }
 	protected function finalisePlugin(){	/* do nothing by default */ }
-	
 	
 	public function __construct()
 	{
@@ -296,24 +295,7 @@ class Amslib_Plugin2
 		//	Process all the import/export/transfer requests on all resources
 		//	NOTE: translators don't support the "move" parameter
 		foreach($this->config as $key=>$block){
-			if(in_array($key,array("object","view","layout","service","stylesheet","image","javascript","translator"))){
-				//	TODO: if I used $item["name"] instead of $name as the key, I could merge against the "value" block below
-				foreach(Amslib_Array::valid($block) as $name=>$item){
-					if(isset($item["import"])){
-						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
-						if($plugin){
-							$this->setConfig(array($key,$name),$plugin->getConfig($key,$name));
-							if(isset($item["move"])) $plugin->removeConfig($key,$name);	
-						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
-					}else if(isset($item["export"])){
-						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
-						if($plugin){
-							$plugin->setConfig(array($key,$name),$this->getConfig($key,$name));
-							if(isset($item["move"])) $this->removeConfig($key,$name);
-						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
-					}
-				}
-			}else if($key == "model"){
+			 if($key == "model"){
 				//	Models are treated slightly differently because they are singular, not plural
 				//	NOTE: maybe in future models will be plural too, perhaps it's better to make it work plurally anyway
 				if(isset($block["import"])){
@@ -342,6 +324,23 @@ class Amslib_Plugin2
 						if($plugin){
 							$plugin->setConfig(array($key,$item["name"]),$this->getConfig($key,$item["name"]));
 							if(isset($item["move"])) $this->removeConfig($key,$item["name"]);
+						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
+					}
+				}
+			}else if(in_array($key,array("object","view","layout","service","stylesheet","image","javascript","translator"))){
+				//	TODO: if I used $item["name"] instead of $name as the key, I could merge against the "value" block below
+				foreach(Amslib_Array::valid($block) as $name=>$item){
+					if(isset($item["import"])){
+						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
+						if($plugin){
+							$this->setConfig(array($key,$name),$plugin->getConfig($key,$name));
+							if(isset($item["move"])) $plugin->removeConfig($key,$name);	
+						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
+					}else if(isset($item["export"])){
+						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
+						if($plugin){
+							$plugin->setConfig(array($key,$name),$this->getConfig($key,$name));
+							if(isset($item["move"])) $this->removeConfig($key,$name);
 						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
 					}
 				}

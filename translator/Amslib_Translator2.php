@@ -38,8 +38,10 @@ class Amslib_Translator2 extends Amslib_Translator2_Source
 	protected	$source;
 	protected	$stackLanguage;
 
-	public function __construct($type)
+	public function __construct($type,$name=NULL)
 	{
+		$this->name = $name;
+		
 		switch($type){
 			case "xml":{		$this->source = new Amslib_Translator2_XML();		}break;
 			case "database":{	$this->source = new Amslib_Translator2_Database();	}break;
@@ -56,12 +58,14 @@ class Amslib_Translator2 extends Amslib_Translator2_Source
 		return $instance;
 	}
 
+	/********************************************************************************
+	 *	LANGUAGE METHODS
+	********************************************************************************/
 	public function addLanguage($langCode){		return $this->source->addLanguage($langCode);	}
 	public function setLanguage($langCode){		return $this->source->setLanguage($langCode);	}
 	public function getLanguage(){				return $this->source->getLanguage();			}
 	public function getAllLanguages(){			return $this->source->getAllLanguages();		}
 	public function isLanguage($langCode){		return $this->source->isLanguage($langCode);	}
-	
 	
 	//	NOTE: This method is used to temporarily change the language of the translator, but not lose the original
 	//	NOTE: should change this method to use like a stack of plates

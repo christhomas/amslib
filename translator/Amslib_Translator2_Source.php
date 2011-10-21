@@ -1,6 +1,7 @@
 <?php 
 abstract class Amslib_Translator2_Source
 {
+	protected $name;
 	protected $language;
 	
 	abstract public function addLanguage		($langCode);

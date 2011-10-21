@@ -74,14 +74,12 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		$this->executeRouter();
 		
 		//	We need a valid language for the website, make sure it's valid
-
-		self::$langKey = $this->api->getValue("lang_key",self::$langKey);
 		$langCode = self::getLanguage("website");
 		if(!$langCode) self::setLanguage("website",reset(self::getLanguageList("website")));
 
 		return true;
 	}
-
+	
 	protected function initRouter()
 	{
 		//	TODO:	need to get rid of the need to do this constructor
@@ -133,6 +131,9 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		
 		//	We can't use Amslib_Plugin_Manager for this, because it's an application plugin
 		$this->config($name,$location);
+		//	We need to set this before any plugins are touched, because other plugins will depend on it's knowledge
+		//	NOTE: It sounds like I'm setting up a system of "priming" certain values which are important, this might need expanding in the future
+		$this->setLanguageKey();
 		$this->transfer();
 		$this->load();
 		
@@ -170,6 +171,12 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 	static public function getVersion($element=NULL)
 	{
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
+	}
+	
+	public function setLanguageKey()
+	{
+		$k = current(Amslib_Array::filter(Amslib_Array::valid($this->config["value"]),"name","lang_key",true));
+		if(!empty($k)) self::$langKey = $k["value"];
 	}
 	
 	static public function setLanguage($name,$langCode)
