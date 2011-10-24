@@ -80,6 +80,9 @@ class Amslib_Website
 	static public function redirect($location,$block=true)
 	{
 		$message = "waiting to redirect";
+		
+		$location = rtrim($location,"/");
+		if($location == "") $location = "/";
 
 		if(is_string($location) && strlen($location)){
 			header("Location: $location");

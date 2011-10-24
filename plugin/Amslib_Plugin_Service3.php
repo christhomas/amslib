@@ -159,9 +159,9 @@ class Amslib_Plugin_Service3
 		return self::$serviceData[self::FB];
 	}
 	
-	static public function hasData()
+	static public function hasData($remove=true)
 	{
-		if(self::$serviceData === NULL) self::$serviceData = Amslib::sessionParam(self::S3,false,true);
+		if(self::$serviceData === NULL) self::$serviceData = Amslib::sessionParam(self::S3,false,$remove);
 		
 		return self::$serviceData ? true : false;
 	}
