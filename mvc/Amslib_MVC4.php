@@ -448,7 +448,8 @@ class Amslib_MVC4
 		if(isset($this->images[$id])) return $this->images[$id];
 		
 		//	Step 2: find the image relative to the website base (perhaps it's a path)
-		$path = Amslib_Website::abs($id);
+		$path = Amslib_Website::abs($this->location.$id);
+
 		if(file_exists($path)){
 			return $relative ? Amslib_Website::rel($path) : $path;
 		}

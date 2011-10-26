@@ -82,12 +82,14 @@ class Amslib
 		return ($p = strrpos($str,$search)) !== false ? substr($str,0,$p) : $str;
 	}
 	
+	//	FIXME: I have two methods to cut a string, wtf....which do I use??
 	static public function truncateString($string,$length)
 	{
 		return CakePHP::truncate($string,$length);
 	}
 	
 	//	DEPRECATED: doesn't work very well with non-ascii characters like ü
+	//	NOTE: if this is deprecated does it mean I should internally call truncateString?
 	static public function htmlCutString($string,$length)
 	{
 		$output = new HtmlCutString($string, $length);

@@ -50,6 +50,7 @@ class Amslib_Website
 	}
 
 	//	Return an absolute url for the file to the root directory
+	//	FIXME: if you pass an absolute filename into this method, it won't return the correct filename back
 	static public function abs($file)
 	{
 		return Amslib_File::absolute(self::$location.$file);
@@ -58,6 +59,7 @@ class Amslib_Website
 	//	Return a relative url for the file to the website location
 	//	NOTE: what??? does this function even work correctly?
 	//	NOTE: I'm 99% sure this function doesn't do what it's supposed to do
+	//	NOTE: Does anybody use this anymore?
 	static public function web($file)
 	{
 		return Amslib_File::reduceSlashes("/".str_replace(self::$location,"",self::abs($file))."/");
