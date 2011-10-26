@@ -442,9 +442,19 @@ class Amslib_MVC4
 		$this->setValue("image:$id", $file);
 	}
 
-	public function getImage($id)
+	public function getImage($id,$relative=true)
 	{
-		return (isset($this->images[$id])) ? $this->images[$id] : false;
+		//	Step 1: find the image inside the plugin
+		if(isset($this->images[$id])) return $this->images[$id];
+		
+		//	Step 2: find the image relative to the website base (perhaps it's a path)
+		$path = Amslib_Website::abs($id);
+		if(file_exists($path)){
+			return $relative ? Amslib_Website::rel($path) : $path;
+		}
+		
+		//	Step 3: return false, image was not found
+		return false;
 	}
 
 	//	FIXME: we have to formalise what this slot code is supposed to do, opposed to what the view system already does.
