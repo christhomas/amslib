@@ -87,16 +87,18 @@ class Amslib_Database_MySQL2 extends Amslib_Database_MySQL
 
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
+		
 		$this->setDebugOutput($query);
+		
+		if(!$result){
+			$this->lastInsertId = false;
+			$this->setErrors($query);
+			return false;	
+		}
 
 		$this->lastInsertId = mysql_insert_id($this->connection);
-		if($result && ($this->lastInsertId !== false)) return $this->lastInsertId;
-
-		$this->lastInsertId = false;
 		
-		$this->setErrors($query);
-		
-		return false;
+		return $this->lastInsertId;
 	}
 
 	public function update($query)
@@ -110,12 +112,13 @@ class Amslib_Database_MySQL2 extends Amslib_Database_MySQL
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
 		$this->setDebugOutput($query);
-
-		if($result) return mysql_affected_rows() >= 0;
 		
-		$this->setErrors($query);
+		if(!$result){
+			$this->setErrors($query);
+			return false;
+		}
 
-		return false;
+		return mysql_affected_rows($this->connection) >= 0;
 	}
 
 	public function delete($query)
@@ -129,12 +132,13 @@ class Amslib_Database_MySQL2 extends Amslib_Database_MySQL
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
 		$this->setDebugOutput($query);
+		
+		if(!$result){
+			$this->setErrors($query);
+			return false;	
+		}
 
-		if($result) return mysql_affected_rows() >= 0;
-		
-		$this->setErrors($query);
-		
-		return false;
+		return mysql_affected_rows($this->connection) >= 0;
 	}
 	
 	public function setErrors($query)
@@ -142,10 +146,11 @@ class Amslib_Database_MySQL2 extends Amslib_Database_MySQL
 		$this->errors[] = array(
 			"db_failure"		=>	true,
 			"db_query"			=>	$query,
-			"db_error"			=>	mysql_error(),
+			"db_error"			=>	mysql_error($this->connection),
+			"db_error_num"		=>	mysql_errno($this->connection),
 			"db_last_insert"	=>	$this->lastInsertId,
-			"db_insert_id"		=>	mysql_insert_id(),
-			"db_location"		=>	Amslib_Array::filterKey(array_slice(debug_backtrace(),1,5),array("file","line")),
+			"db_insert_id"		=>	mysql_insert_id($this->connection),
+			"db_location"		=>	Amslib_Array::filterKey(array_slice(debug_backtrace(),0,5),array("file","line")),
 		);
 	}
 	
@@ -154,4 +159,3 @@ class Amslib_Database_MySQL2 extends Amslib_Database_MySQL
 		return $this->errors;
 	}
 }
-?>
