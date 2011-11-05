@@ -853,17 +853,21 @@ class Amslib_Validator3
 
 		if($required == false) return true;
 		
-		//	Return some alternative errors to FILE_NOT_FOUND
-		if($value["error"] == UPLOAD_ERR_INI_SIZE)		return "FILE_EXCEED_INI_SIZE";
-		if($value["error"] == UPLOAD_ERR_FORM_SIZE)		return "FILE_EXCEED_FORM_SIZE";
-		if($value["error"] == UPLOAD_ERR_PARTIAL)		return "FILE_PARTIAL_FILE";
-		if($value["error"] == UPLOAD_ERR_NO_FILE)		return "FILE_MISSING_FILE";
-		if($value["error"] == UPLOAD_ERR_NO_TMP_DIR)	return "FILE_NO_TMP_DIRECTORY";
-		if($value["error"] == UPLOAD_ERR_CANT_WRITE)	return "FILE_CANNOT_WRITE";
-		if($value["error"] == UPLOAD_ERR_EXTENSION)		return "FILE_BANNED_EXTENSION";
-
-		//	Unknown error, just comment it here so I can't lose the info: "FILE_REQUEST_FILE_NOT_FOUND"
-		return "FILE_NOT_FOUND";
+		if($value){
+			//	Return some alternative errors to FILE_NOT_FOUND
+			if($value["error"] == UPLOAD_ERR_INI_SIZE)		return "FILE_EXCEED_INI_SIZE";
+			if($value["error"] == UPLOAD_ERR_FORM_SIZE)		return "FILE_EXCEED_FORM_SIZE";
+			if($value["error"] == UPLOAD_ERR_PARTIAL)		return "FILE_PARTIAL_FILE";
+			if($value["error"] == UPLOAD_ERR_NO_FILE)		return "FILE_MISSING_FILE";
+			if($value["error"] == UPLOAD_ERR_NO_TMP_DIR)	return "FILE_NO_TMP_DIRECTORY";
+			if($value["error"] == UPLOAD_ERR_CANT_WRITE)	return "FILE_CANNOT_WRITE";
+			if($value["error"] == UPLOAD_ERR_EXTENSION)		return "FILE_BANNED_EXTENSION";
+			
+			//	Unknown error, just comment it here so I can't lose the info
+			return "FILE_UNKNOWN_ERROR[{$value["error"]}]";
+		}
+		
+		return "FILE_NOT_FOUND[{$value["error"]}]";
 	}
 	
 	protected function __file_exists($name,$value,$required,$options)

@@ -21,6 +21,13 @@ class Amslib_Plugin_Service3
 	//	Used in the website to retrieve the session data after processing
 	static protected $serviceData = NULL;
 	
+	static protected function getData($plugin,$default,$key)
+	{
+		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][$key]) 
+			? Amslib_Array::valid(self::$serviceData[$plugin][$key]) 
+			: $default;
+	}
+		
 	protected function successPOST()
 	{
 		$this->data[self::SC] = true;
@@ -178,41 +185,36 @@ class Amslib_Plugin_Service3
 	static public function listPlugins()
 	{
 		return isset(self::$serviceData[self::PL]) ? array_keys(self::$serviceData[self::PL]) : array();
-	}	
-	
+	}
+
 	static public function getValidationData($plugin,$default=false)
 	{
-		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][self::VD]) 
-			? Amslib_Array::valid(self::$serviceData[$plugin][self::VD]) 
-			: $default;
+		return self::getData($plugin,$default,self::VD);
 	}
 	
 	static public function getValidationErrors($plugin,$default=false)
 	{
-		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][self::VE]) 
-			? Amslib_Array::valid(self::$serviceData[$plugin][self::VE]) 
-			: $default;
+		return self::getData($plugin,$default,self::VE);
 	}
 	
 	static public function getServiceErrors($plugin,$default=false)
 	{
-		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][self::SE])
-			? Amslib_Array::valid(self::$serviceData[$plugin][self::SE]) 
-			: $default;
+		return self::getData($plugin,$default,self::SE);
+	}
+	
+	static public function getServiceData($plugin,$default=false)
+	{
+		return self::getData($plugin,$default,self::SD);
 	}
 	
 	//	NOTE: Be careful with this method, it could leak secret data if you didnt sanitise it properly of sensitive data
 	static public function getDatabaseErrors($plugin,$default=false)
 	{
-		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][self::DB])
-			? Amslib_Array::valid(self::$serviceData[$plugin][self::DB]) 
-			: $default;
+		return self::getData($plugin,$default,self::DB);
 	}
 	
 	static public function getDatabaseMessage($plugin,$default=false)
 	{
-		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][self::DB])
-			? Amslib_Array::pluck(self::$serviceData[$plugin][self::DB],"db_error")
-			: $default;
+		return Amslib_Array::pluck(self::getDatabaseErrors($plugin,$default),"db_error");
 	}
 }
