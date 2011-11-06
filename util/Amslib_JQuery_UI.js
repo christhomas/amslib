@@ -4,7 +4,7 @@ This script will automatically include all the other resources without any fuss
 
 (function(){
 	//	Copied from how scriptaculous does it's "query string" thing
-	var js = /^(.*?)\/util\/jquery\/Amslib_JQuery_UI\.js$/;
+	var js = /^(.*?)\/util\/Amslib_JQuery_UI\.js$/;
 	$("head script[src]").each(function(){
 		var src = this.src.match(js);
 	
