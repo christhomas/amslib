@@ -7,7 +7,34 @@ var Amslib = my.Amslib = my.Class(
 		firebug: function(string)
 		{
 			if(console && console.log) console.log(string);
-		}
+		},
+		
+		getPath: function(file)
+		{
+			//	Copied from how scriptaculous does it's "query string" thing
+			var re 		=	new RegExp("^(.*?)"+file.replace(/[-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&")+"$","g");
+			var path	=	false;
+			
+			$("head script[src]").each(function(){
+				var matches = re.exec(this.src);
+				
+				if(matches){
+					path = matches[1]; 
+					return false;
+				}
+			});
+			
+			if(!path) Amslib.firebug("requested path["+file+"] using regexp["+re+"] was not found");
+				
+			return path;
+		},
+		
+		loadCSS: function(file)
+		{
+			$("head").append($("<link/>").attr({rel:"stylesheet",type:"text/css",href: file}));
+		},
+		
+		loader: {}
 	},
 	
 	constructor: function(parent,name)

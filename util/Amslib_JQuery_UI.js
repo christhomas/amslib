@@ -2,21 +2,15 @@
 This script will automatically include all the other resources without any fuss
 */
 
-(function(){
-	//	Copied from how scriptaculous does it's "query string" thing
-	var js = /^(.*?)\/util\/Amslib_JQuery_UI\.js$/;
-	$("head script[src]").each(function(){
-		var src = this.src.match(js);
+if(Amslib == undefined || window.exports == undefined) throw("Amslib_JQuery_UI.js: requires amslib/my.common to be loaded first");
+
+var path = Amslib.getPath("/util/Amslib_JQuery_UI.js");
+
+if(path){
+	Amslib.loader.jqueryui = require(path+"/js/jquery-ui-1.8.14.custom.min.js");
 	
-		if(src){
-			$.getScript(src[1]+"/js/jquery-ui-1.8.14.custom.min.js",function(){
-				$("head").append($("<link/>").attr({
-					rel: "stylesheet",
-					type: "text/css",
-					//	TODO: make the 'theme' optional as part of this files "url"
-					href: src[1]+"/css/jqueryui/smoothness/jquery-ui-1.8.14.custom.css"
-				}));
-			});
-		}
-	});
-})();
+	scope.ready(function(){
+		//	TODO: make the 'theme' optional as part of this files "url"
+		Amslib.loadCSS(path+"/css/jqueryui/smoothness/jquery-ui-1.8.14.custom.css");
+	},Amslib.loader.jqueryui);
+};
