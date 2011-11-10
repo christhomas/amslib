@@ -202,9 +202,11 @@ class Amslib_Plugin_Service3
 		return self::getData($plugin,$default,self::SE);
 	}
 	
-	static public function getServiceData($plugin,$default=false)
+	static public function getServiceData($plugin,$default=false,$key=false)
 	{
-		return self::getData($plugin,$default,self::SD);
+		$data = self::getData($plugin,$default,self::SD);
+		
+		return $key && $data && isset($data[$key]) ? $data[$key] : $data;
 	}
 	
 	//	NOTE: Be careful with this method, it could leak secret data if you didnt sanitise it properly of sensitive data

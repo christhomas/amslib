@@ -7,10 +7,7 @@ if(Amslib == undefined || window.exports == undefined) throw("Amslib_JQuery_UI.j
 var path = Amslib.getPath("/util/Amslib_JQuery_UI.js");
 
 if(path){
+	//	TODO: make the 'theme' changable somehow
+	Amslib.loadCSS(path+"/css/jqueryui/smoothness/jquery-ui-1.8.14.custom.css");
 	Amslib.loader.jqueryui = require(path+"/js/jquery-ui-1.8.14.custom.min.js");
-	
-	scope.ready(function(){
-		//	TODO: make the 'theme' optional as part of this files "url"
-		Amslib.loadCSS(path+"/css/jqueryui/smoothness/jquery-ui-1.8.14.custom.css");
-	},Amslib.loader.jqueryui);
 };

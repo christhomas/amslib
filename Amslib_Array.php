@@ -59,7 +59,7 @@ class Amslib_Array
 	
 	static public function pluck($array,$key)
 	{
-		if(!is_array($array) || !self::isMulti($array)) return false;
+		if(!is_array($array) || !self::isMulti($array)) return array();
 		
 		$values = array();
 		
