@@ -16,6 +16,8 @@ if(path){
 			CKEDITOR.config.toolbar_CKeditor_Config_1 = Amslib_CKEditor[0];
 			CKEDITOR.config.toolbar_CKeditor_Config_2 = Amslib_CKEditor[1];
 			CKEDITOR.config.toolbar_CKeditor_Config_3 = Amslib_CKEditor[2];
+			CKEDITOR.config.ignoreEmptyParagraph = true;
+			CKEDITOR.config.enterMode = CKEDITOR.ENTER_DIV;
 			
 			$(".ckeditor_noconfig").ckeditor();
 			//	These are still here for compatibility with old code until they can be updated
