@@ -250,6 +250,7 @@ class Amslib_Array
 		return count($array)!==count($array, COUNT_RECURSIVE);
 	}
 	
+	//	DEPRECATED: this is not supposed to be here
 	//	FIXME: glob() on an array object? when it refers to the filesystem or array? I think it's a mistake to put this method here
 	static public function glob($location,$relative=false)
 	{
