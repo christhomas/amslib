@@ -74,24 +74,24 @@ class Amslib_Plugin2
 
 	protected function findResource($resource,$absolute=false)
 	{
-		//	PREPARE THE STRING: expand any parameters inside the resource name
-		$resource = self::expandPath($resource);
-
-		//	TEST 1: If the resource has an attribute "absolute" don't process it, return it directly
+		//	If the resource has an attribute "absolute" don't process it, return it directly
 		if($absolute) return $resource;
 		
-		//	TEST 2:	look in the package directory for the file
+		//	PREPARE THE STRING: expand any parameters inside the resource name
+		$resource = self::expandPath($resource);
+		
+		//	TEST 1:	look in the package directory for the file
 		$test2 = Amslib_File::reduceSlashes("$this->location/$resource");
 		if(file_exists(Amslib::rchop($test2,"?"))) return Amslib_File::relative($test2);		
 		
-		//	TEST 3: Test whether the file "exists" without any assistance
+		//	TEST 2: Test whether the file "exists" without any assistance
 		if(file_exists(Amslib::rchop($resource,"?"))) return Amslib_File::relative($resource);
 
-		//	TEST 4: Does the file exists relative to the document root?
+		//	TEST 3: Does the file exists relative to the document root?
 		$test4 = Amslib_File::absolute($resource);
 		if(file_exists(Amslib::rchop($test4,"?"))) return Amslib_File::relative($resource);
 
-		//	TEST 5:	search the include path for the file
+		//	TEST 4:	search the include path for the file
 		$test5 = Amslib_File::find($resource,true);
 		if(file_exists(Amslib::rchop($test5,"?"))) return Amslib_File::relative($test5);
 
