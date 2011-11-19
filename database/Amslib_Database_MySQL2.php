@@ -29,10 +29,68 @@
  * 	class:	Amslib_Database_MySQL2
  *
  */
-class Amslib_Database_MySQL2 extends Amslib_Database_MySQL
+class Amslib_Database_MySQL2 extends Amslib_Database2
 {
 	protected $errors;
 	
+	protected function setDebugOutput($query)
+	{
+		if($this->debug){
+			Amslib_Keystore::set("db_query[{$this->seq}][".microtime(true)."]",Amslib::var_dump($query,true));
+		}
+	}
+
+	protected function setEncoding($encoding)
+	{
+		$allowedEncodings = array("utf8","latin1");
+
+		if(in_array($encoding,$allowedEncodings)){
+			mysql_query("SET NAMES '$encoding'",$this->connection);
+			mysql_query("SET CHARACTER SET $encoding",$this->connection);
+		}else{
+			die(	"FATAL ERROR: Your encoding ($encoding) is wrong, this can cause database corruption. ".
+					"I'm sorry dave, but I can't allow you to do that<br/>".
+					"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>");
+		}
+	}
+
+	/**
+	 * 	method:	makeConnection
+	 *
+	 * 	Connect to the MYSQL database using various details
+	 *
+	 * 	todo:
+	 * 		-	Need to move the database details to somewhere more secure (like inside the database!! ROFL!! joke, don't do that!!!!)
+	 */
+	protected function makeConnection()
+	{
+		$this->disconnect();
+		$details = $this->loginDetails;
+		$this->loginDetails = NULL;
+
+		if($details){
+			if($c = mysql_connect($details["server"],$details["username"],$details["password"],true))
+			{
+				if(!mysql_select_db($details["database"],$c)){
+					$this->disconnect();
+					$this->setError("Failed to open database requested '{$details["database"]}'");
+				}
+				else{
+					$this->connection = $c;
+
+					$this->setFetchMethod("mysql_fetch_assoc");
+					$this->setEncoding("utf8");
+				}
+			// Replace these errors with PHPTranslator codes instead (language translation)
+			}else $this->setError("Failed to connect to database: {$details["database"]}<br/>");
+		// Replace these errors with PHPTranslator codes instead (language translation)
+		}else $this->setError("Failed to find the database connection details, check this information<br/>");
+	}
+
+	/******************************************************************************
+	 *	PUBLIC MEMBERS
+	 *****************************************************************************/
+
 	/**
 	 * 	method:	__construct
 	 *
@@ -40,16 +98,144 @@ class Amslib_Database_MySQL2 extends Amslib_Database_MySQL
 	 */
 	public function __construct($connect=true)
 	{
-		parent::__construct($connect);
-		
+		parent::__construct();
+
 		$this->errors = array();
+
+		//	TODO: we should implement a try/catch block to easily catch disconnected databases
+		if($connect) $this->connect();
+	}
+
+	public function escape($value)
+	{
+		return $this->getConnectionStatus() 
+			? mysql_real_escape_string($value) 
+			: die("unsafe string escape: database not connected");
+	}
+		
+	public function fixColumnEncoding($src,$dst,$table,$primaryKey,$column)
+	{
+		$encoding_map = array(
+			"latin1"	=>	"latin1",
+			"utf8"		=>	"utf-8"
+		);
+
+		if(!isset($encoding_map[$src])) return false;
+		if(!isset($encoding_map[$dst])) return false;
+
+		$this->setEncoding($src);
+		$data = $this->select("$primaryKey,$column from $table");
+
+		if(!empty($data)){
+			$this->setEncoding($dst);
+
+			$ic_src = $encoding_map[$src];
+			$ic_dst = $encoding_map[$dst];
+
+			foreach($data as $c){
+				$string = iconv($ic_src,$ic_dst,$c[$column]);
+
+				if($string && is_string($string) && strlen($string)){
+					$string = $this->escape($string);
+
+					$this->update("$table set $column=\"$string\" where $primaryKey=\"{$c[$primaryKey]}\"");
+				}
+			}
+
+			return true;
+		}
+	}
+
+	/**
+	 * method:	getRealResultCount
+	 *
+	 * Obtain a real row count from the previous query, if you use limit and want to know how many
+	 * a query WOULD return without the limit, you can use this method, but in the query, you need
+	 * to put SQL_CALC_FOUND_ROWS as one of the selected fields
+	 *
+	 * returns:
+	 * 	The number of results the previous query would have returned without the limit statement,
+	 * 	if using SQL_CALC_FOUND_ROWS in the query
+	 *
+	 * notes:
+	 * 	-	this method uses the select result stack to store the previous query, which is assumed
+	 * 		to be the query that generated the results, but you need the real result count before you
+	 * 		process all the results, normally, calling this method would destroy the previous query
+	 * 		and all your results with it.
+	 */
+	public function getRealResultCount()
+	{
+		$result = $this->select("FOUND_ROWS() as num_results",1,true);
+
+		return (isset($result["num_results"])) ? $result["num_results"] : false;
+	}
+
+	/**
+	 * method: hasTable
+	 *
+	 * Find out whether the connected mysql database has a table on the database given
+	 * this is useful for determining whether a database can support certain functionality
+	 * or not
+	 *
+	 * parameters:
+	 * 	$database	-	The database to check for the table
+	 * 	$table		-	The table to check for
+	 *
+	 * returns:
+	 * 	A boolean true or false result, depending on the existence of the table
+	 */
+	public function hasTable($database,$table)
+	{
+		$database	=	mysql_real_escape_string($database);
+		$table		=	mysql_real_escape_string($table);
+
+$query=<<<HAS_TABLE
+			COUNT(*)
+		from
+			information_schema.tables
+		where
+			table_schema = '$database' and table_name='$table'
+HAS_TABLE;
+
+		$result = $this->select($query,1);
+
+		if(isset($result["COUNT(*)"])){
+			return $result["COUNT(*)"] ? true : false;
+		}
+
+		return false;
 	}
 	
-	protected function setDebugOutput($query)
+	public function getTableFields($table)
 	{
-		if($this->debug){
-			Amslib_Keystore::set("db_query[{$this->seq}][".microtime(true)."]",Amslib::var_dump($query,true));
+		return $this->select("column_name from Information_Schema.Columns where table_name='$table'");
+	}
+
+	/**
+	 * 	method:	disconnect
+	 *
+	 * 	Disconnect from the Database
+	 */
+	public function disconnect()
+	{
+		if($this->connection) mysql_close($this->connection);
+		$this->connection = false;
+	}
+
+	public function getResults($numResults,$resultHandle=NULL,$optimise=false)
+	{
+		$this->lastResult = array();
+
+		if($resultHandle == NULL) $resultHandle = $this->getSearchResultHandle();
+
+		for($a=0;$a<$numResults;$a++){
+			$this->lastResult[] = mysql_fetch_assoc($resultHandle);
 		}
+
+		if($optimise && $numResults == 1) $this->lastResult = current($this->lastResult);
+		if(count($this->lastResult) == 0) $this->lastResult = false;
+
+		return $this->lastResult;
 	}
 
 	public function select($query,$numResults=0,$optimise=false)
@@ -152,6 +338,11 @@ class Amslib_Database_MySQL2 extends Amslib_Database_MySQL
 			"db_insert_id"		=>	mysql_insert_id($this->connection),
 			"db_location"		=>	Amslib_Array::filterKey(array_slice(debug_backtrace(),0,5),array("file","line")),
 		);
+	}
+	
+	public function setError($error)
+	{
+		$this->errors[] = $error;
 	}
 	
 	public function getErrors()
