@@ -110,9 +110,9 @@ class Amslib_Database_MySQL2 extends Amslib_Database2
 	{
 		return $this->getConnectionStatus() 
 			? mysql_real_escape_string($value) 
-			: die("unsafe string escape: database not connected");
+			: die("unsafe string escape: database not connected, backtrace: ".Amslib::var_dump(Amslib::backtrace(1,3,"file","line"),true));
 	}
-		
+	
 	public function fixColumnEncoding($src,$dst,$table,$primaryKey,$column)
 	{
 		$encoding_map = array(
