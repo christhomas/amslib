@@ -87,9 +87,9 @@ abstract class Amslib_Database_MySQL extends Amslib_Database
 		$this->loginDetails = NULL;
 	}
 
-/******************************************************************************
- *	PUBLIC MEMBERS
- *****************************************************************************/
+	/******************************************************************************
+	 *	PUBLIC MEMBERS
+	 *****************************************************************************/
 
 	/**
 	 * 	method:	__construct
@@ -105,6 +105,7 @@ abstract class Amslib_Database_MySQL extends Amslib_Database
 
 	public function escape($value)
 	{
+		die(Amslib::var_dump(debug_backtrace(),true));
 		return mysql_real_escape_string($value);
 	}
 

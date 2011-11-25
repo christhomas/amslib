@@ -166,6 +166,20 @@ class Amslib
 
 		return ($preformat) ? "<pre $hiddenOutput>$dump</pre>" : $dump;
 	}
+	
+	public function backtrace()
+	{
+		$args	=	func_get_args();
+		$bt		=	debug_backtrace();
+		
+		$slice	=	array($bt);
+		if(count($args) && is_numeric($args[0])) $slice[] = array_shift($args);
+		if(count($args) && is_numeric($args[0])) $slice[] = array_shift($args);
+
+		if(count($slice) > 1) $bt = call_user_func_array("array_slice",$slice);
+		
+		return Amslib_Array::filterKey($bt,Amslib_Array::filterType($args,"is_string"));
+	}
 
 	static public function includeFile($file,$data=array())
 	{

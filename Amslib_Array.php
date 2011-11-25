@@ -75,6 +75,11 @@ class Amslib_Array
 	    return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));
 	}
 	
+	public function filterType($array,$callback)
+	{
+		return function_exists($callback) ? array_filter(self::valid($array),$callback) : $array;
+	}
+	
 	static public function filterKey($array,$filter,$similar=false)
 	{
 		$array = self::valid($array);

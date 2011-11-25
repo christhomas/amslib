@@ -5,10 +5,23 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 	protected $location;
 	protected $xpath;
 	protected $xdoc;
+	protected $error;
 	
 	public function __construct()
 	{
 		parent::__construct();
+		
+		$this->error = array();
+	}
+	
+	public function setError($error)
+	{
+		$this->error[] = $error;
+	}
+	
+	public function getErrors()
+	{
+		return $this->error;
 	}
 	
 	public function setLocation($location)
@@ -23,7 +36,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 	 * 	$location	-	The location to load the XML database files from
 	 * 
 	 * returns:
-	 * 	Boolean true or false depending on whether it succeeded, there are some codepaths which call die() 
+	 * 	Boolean true or false depending on whether it succeeded, there are some codepaths which call setError() 
 	 * 	this is because of serious errors which can't be handled at the moment
 	 * 
 	 * NOTE:
@@ -40,7 +53,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 			if(!file_exists($this->database)) $this->database = Amslib_File::find($this->database,true);
 			
 			if(!file_exists($this->database)){
-				die(get_class($this)."::load(), LOCATION: '$this->location', DATABASE '$this->database' for LANGUAGE '$this->language' DOES NOT EXIST<br/>");
+				$this->setError(get_class($this)."::load(), LOCATION: '$this->location', DATABASE '$this->database' for LANGUAGE '$this->language' DOES NOT EXIST<br/>");
 			}
 			
 			$this->xdoc = new DOMDocument("1.0","UTF-8");
@@ -50,7 +63,7 @@ class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
 				
 				return true;
 			}else{
-				die(get_class($this)."::load() LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
+				$this->setError(get_class($this)."::load() LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
 			}
 		}
 		
