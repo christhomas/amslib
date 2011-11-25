@@ -322,9 +322,9 @@ class Amslib_Plugin2
 					}else if(isset($item["export"])){
 						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
 						if($plugin){
-							$plugin->setConfig(array($key,$item["name"]),$this->getConfig($key,$item["name"]));
+							$plugin->setConfig(array($key,$item["name"]),$item);
 							if(isset($item["move"])) $this->removeConfig($key,$item["name"]);
-						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
+						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",array($item,$plugin));
 					}
 				}
 			}else if(in_array($key,array("object","view","layout","service","stylesheet","image","javascript","translator"))){
@@ -563,6 +563,10 @@ class Amslib_Plugin2
 		if(is_string($key)){
 			$this->config[$key] = $value;
 		}else if(is_array($key) && isset($key[0]) && $key[0] == "value"){
+			//	NOTE:	I think this is broken, if you have multiple <value> blocks each 
+			//			implementing it's own db_table parameter (for example) this code 
+			//			will find the first occurance in EVERY situation, even if you need 
+			//			the third block, it'll always return the first and perhaps you'll lose data
 			$k = Amslib_Array::findKey($this->config[$key[0]],"name",$key[1]);
 			if($k !== false) $this->config[$key[0]][$k] = $value;
 		}else{
@@ -584,6 +588,10 @@ class Amslib_Plugin2
 			}break;
 			
 			case "value":{
+				//	NOTE:	I think this is broken, if you have multiple <value> blocks each 
+				//			implementing it's own db_table parameter (for example) this code 
+				//			will find the first occurance in EVERY situation, even if you need 
+				//			the third block, it'll always return the first.
 				return Amslib_Array::find($this->config[$type], "name", $name);
 			}break;
 			

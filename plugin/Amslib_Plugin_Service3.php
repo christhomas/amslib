@@ -217,6 +217,7 @@ class Amslib_Plugin_Service3
 	
 	static public function getDatabaseMessage($plugin,$default=false)
 	{
-		return Amslib_Array::pluck(self::getDatabaseErrors($plugin,$default),"db_error");
+		//return Amslib_Array::pluck(self::getDatabaseErrors($plugin,$default),array("db_error","db_location"));
+		return Amslib_Array::filterKey(self::getDatabaseErrors($plugin,$default),array("db_error","db_location"));
 	}
 }

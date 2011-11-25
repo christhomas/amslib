@@ -77,6 +77,8 @@ class Amslib_Array
 	
 	static public function filterKey($array,$filter,$similar=false)
 	{
+		$array = self::valid($array);
+		
 		if($similar === false){
 			if(self::isMulti($array)){
 				foreach($array as &$a) $a = array_intersect_key($a, array_flip($filter));
