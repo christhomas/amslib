@@ -8,7 +8,7 @@ class Amslib_Form
 		foreach(Amslib_Array::valid($array) as $item){
 			if(is_array($item)){
 				$text	=	$indexText && isset($item[$indexText])		?	$item[$indexText]	:	"";
-				$value	=	$indexValue && isset($item[$indexValue])	?	$item[$indexText]	:	"";
+				$value	=	$indexValue && isset($item[$indexValue])	?	$item[$indexValue]	:	"";
 			}else{
 				$text = $value = $item;
 			}
