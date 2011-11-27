@@ -561,7 +561,7 @@ class Amslib_Validator3
 	protected function __boolean($name,$value,$required,$options)
 	{
 		if(is_string($value)){
-			$valid = array("1","0","true","false","on","off","yes","no");
+			$valid = array("1","0","true","false","on","off","yes","no","");
 
 			$value = strtolower($value);
 
