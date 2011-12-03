@@ -513,12 +513,14 @@ class Amslib_Plugin2
 		$list = $xpath->query("//package/requires/plugin");
 			
 		foreach($list as $node){
-			$plugin = Amslib_Plugin_Manager2::config($node->nodeValue,$this->location);
-			
-			if($plugin){
-				$this->config["requires"][$node->nodeValue] = $plugin;
-			}else{
-				Amslib_FirePHP::output("AP2::config(), child plugin config failed",array($node->nodeValue,$location));
+			if($this->getName() != $node->nodeValue){
+				$plugin = Amslib_Plugin_Manager2::config($node->nodeValue,$this->location);
+				
+				if($plugin){
+					$this->config["requires"][$node->nodeValue] = $plugin;
+				}else{
+					Amslib_FirePHP::output("AP2::config(), child plugin config failed",array($node->nodeValue,$location));
+				}
 			}
 		}
 		
