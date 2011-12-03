@@ -75,14 +75,12 @@ class Amslib_Translator2_Database extends Amslib_Translator2_Keystore
 		$v	=	$this->database->escape($v);
 		
 		if(strlen($k) == 0) return false;
-		//	WTF: why do I make a copy of the $l parameter into $lc here?? makes no sense...
-		$lc = $l;
 		
 		$found = $this->database->select("COUNT(id) as c from {$this->table} where k='$k' and lang='$l'",1,true);
 		
 		return $found && $found["c"]
 			? $this->database->update("{$this->table} set v='$v' where k='$k' and lang='$l'")
-			: $this->database->insert("{$this->table} set k='$k',v='$v',lang='$l'");
+			: $this->database->insert("{$this->table} set v='$v', k='$k',lang='$l'");
 	}
 	
 	public function forget($k,$l=NULL)
