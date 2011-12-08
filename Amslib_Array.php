@@ -84,15 +84,19 @@ class Amslib_Array
 	{
 		if($similar === false){
 			if(self::isMulti($array)){
+				//	NOTE: perhaps I should recurse here?
+				//	EXAMPLE: foreach($array as &$a) $a = self::FilterKey($a,$filter,$similar);
+				//	NOTE: can we use array_map here??
+				//	NOTE: I don't think array_map will work because this method requires parameters that it can't forward
 				foreach($array as &$a) $a = array_intersect_key($a, array_flip($filter));
 			}else{
 				$array = array_intersect_key($array, array_flip($filter));	
 			}
-		}else{
-			$array = self::filter($array,NULL,$filter,true,true);
+			
+			return $array;
 		}
 		
-		return $array;
+		return self::filter($array,NULL,$filter,true,true);
 	}
 	
 	static public function filter($array,$key,$value,$returnFiltered=false,$similar=false)
