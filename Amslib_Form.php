@@ -1,24 +1,26 @@
 <?php
 class Amslib_Form
 {
-	static public function arrayToSelectOptions($array,$keyText,$keyValue,$selected=NULL)
+	static public function selectOptions($array,$selected=NULL,$indexText=NULL,$indexValue=NULL)
 	{
-		$options = "";
-
-		if(!$array || !is_array($array) || empty($array)) return $options;
-
-		foreach($array as $key=>$value){
-			$text		=	(isset($value[$keyText])) ? $value[$keyText] : "";
-			$value		=	(isset($value[$keyValue])) ? $value[$keyValue] : "";
-			$enabled	=	($value == $selected) ? "selected='selected'" : "";
-
-			//	ignore blank strings
+		$options = array();
+		
+		foreach(Amslib_Array::valid($array) as $item){
+			if(is_array($item)){
+				$text	=	$indexText && isset($item[$indexText])		?	$item[$indexText]	:	"";
+				$value	=	$indexValue && isset($item[$indexValue])	?	$item[$indexValue]	:	"";
+			}else{
+				$text = $value = $item;
+			}
+			
 			if(strlen($text) == 0 || strlen($value) == 0) continue;
-
-			$options .= "<option $enabled value='$value'>$text</option>";
+			
+			$enabled = $value == $selected ? "selected='selected'" : "";
+			
+			$options[] = "<option $enabled value='$value'>$text</option>";
 		}
-
-		return $options;
+		
+		return implode("",$options);
 	}
 
 	static public function numberSequenceToSelectOptions($start,$stop,$selected=NULL,$pad=NULL)
@@ -60,5 +62,11 @@ class Amslib_Form
 		$file = Amslib::filesParam($name);
 
 		return ($file && isset($file["tmp_name"])) ? $file["tmp_name"] : false;
+	}
+	
+	//	DEPRECATED METHOD: use selectOptions() instead
+	static public function arrayToSelectOptions($array,$keyText,$keyValue,$selected=NULL)
+	{
+		return self::selectOptions($array,$selected,$keyText,$keyValue);
 	}
 }

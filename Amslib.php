@@ -180,53 +180,41 @@ class Amslib
 		
 		return Amslib_Array::filterKey($bt,Amslib_Array::filterType($args,"is_string"));
 	}
-
-	static public function includeFile($file,$data=array())
+	
+	//	NOTE: This method has weird parameter names to make it harder to clash with extract()'d parameters from the $__p parameter
+	static public function __importFile($__r,$__f,$__p=array())
 	{
 		$path = "";
 
-		if(!file_exists($file)){
-			$path = self::findFile($file);
+		if(!file_exists($__f)){
+			$path = self::findFile($__f);
 
 			if($path !== false && strlen($path)) $path = "$path/";
 		}
 
-		//	NOTE: Cannot use Amslib_File::reduceSlashes here, chicken/egg type problem
-		$file = preg_replace('#//+#','/',"{$path}$file");
+		//	NOTE:	Cannot use Amslib_File::reduceSlashes here, chicken/egg type problem
+		//	NOTE:	Actually, I think it's much more than that, you can't use anything autoloaded here
+		$__f = preg_replace('#//+#','/',"{$path}$__f");
 
-		if(is_file($file) && file_exists($file)){
-			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
+		if(is_file($__f) && file_exists($__f)){
+			if(is_array($__p) && count($__p)) extract($__p, EXTR_SKIP);
 			
-			if(isset($data["include_once"])) return include_once($file);
-			return include($file);
+			return $__r
+				? (isset($require_once) ? require_once($__f) : require($__f))
+				: (isset($include_once) ? include_once($__f) : include($__f));
 		}
 
 		return false;
 	}
 
-	static public function requireFile($file,$data=array())
+	static public function includeFile($file,$params=array())
 	{
-		if(!is_string($file)) return false;	
-		
-		$path = "";
+		return self::__importFile(false,$file,$params);
+	}
 
-		if(!file_exists($file)){
-			$path = self::findFile($file);
-
-			if($path !== false && strlen($path)) $path = "$path/";
-		}
-
-		//	NOTE: Cannot use Amslib_File::reduceSlashes here, chicken/egg type problem
-		$file = preg_replace('#//+#','/',"{$path}$file");		
-
-		if(is_file($file) && file_exists($file)){
-			if(is_array($data) && count($data)) extract($data, EXTR_SKIP);
-
-			if(isset($data["require_once"])) return require_once($file);
-			return require($file);
-		}
-
-		return false;
+	static public function requireFile($file,$params=array())
+	{
+		return self::__importFile(true,$file,$params);
 	}
 
 	static public function autoloader()

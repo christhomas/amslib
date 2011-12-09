@@ -82,6 +82,8 @@ class Amslib_Array
 	
 	static public function filterKey($array,$filter,$similar=false)
 	{
+		$array = self::valid($array);
+		
 		if($similar === false){
 			if(self::isMulti($array)){
 				//	NOTE: perhaps I should recurse here?
