@@ -6,7 +6,7 @@ var Amslib = my.Amslib = my.Class(
 	STATIC: {
 		firebug: function(string)
 		{
-			if(console && console.log) console.log(string);
+			if(console && console.log) console.log.apply(null,arguments);
 		},
 		
 		getPath: function(file)
