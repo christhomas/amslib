@@ -12,7 +12,7 @@ class Amslib_FirePHP extends FirePHP
 	
 	public static function backtrace($levels)
 	{
-		//	NOTE: The array_slide gets rid of the first method (which is Amslib_FirePHP::backtrace)
+		//	NOTE: The array_slice gets rid of the first method (which is Amslib_FirePHP::backtrace)
 		self::output("backtrace",array_slice(debug_backtrace($levels),1,$levels));
 	}
 	
