@@ -234,7 +234,7 @@ class Amslib_Plugin_Manager2
 	static public function render($plugin,$layout="default",$parameters=array())
 	{
 		$api = self::getAPI($plugin);
-		
+
 		return $api ? $api->render($layout,$parameters) : false;
 	}
 }

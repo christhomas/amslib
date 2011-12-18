@@ -10,10 +10,15 @@ class Amslib_FirePHP extends FirePHP
 		parent::__construct();
 	}
 	
-	public static function backtrace($levels)
+	public static function backtrace($levels=false)
 	{
-		//	NOTE: The array_slice gets rid of the first method (which is Amslib_FirePHP::backtrace)
-		self::output("backtrace",array_slice(debug_backtrace($levels),1,$levels));
+		$e = new Exception();
+		
+		$trace = (is_numeric($levels) && $levels > 0) 
+			? array_slice($e->getTrace(),0,(int)$levels) 
+			: $e->getTrace();
+		
+		self::output("backtrace",$trace);
 	}
 	
 	public static function output($name,$data){

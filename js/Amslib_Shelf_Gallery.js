@@ -5,7 +5,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 	
 	STATIC: {
 		autoload: function(){
-			$(".amslib_shelf_gallery").each(function(){
+			$(Amslib_Shelf_Gallery.options.parent).each(function(){
 				new Amslib_Shelf_Gallery($(this));
 			});
 		},
@@ -13,10 +13,11 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		options: {
 			amslibName:		"Amslib_Shelf_Gallery",
 			animate:		"animateAutoNext",
+			parent:			".amslib_shelf_gallery",
 			selSlider:		".amslib_shelf_gallery_slider",
 			selItem:		".amslib_shelf_gallery_item",
-			normalTimeout:	5000,
-			fastTimeout:	500
+			autoTimeout:	5000,
+			clickTimeout:	500
 		}
 	},
 	
@@ -34,7 +35,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 	
 	start: function()
 	{
-		this.timeout = setTimeout($.proxy(this,this.options.animate),this.options.normalTimeout);
+		this.timeout = setTimeout($.proxy(this,this.options.animate),this.options.autoTimeout);
 	},
 	
 	stop: function()
@@ -70,7 +71,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 
 		this.slider.css("left","-"+first.position().left+"px");
 		//	Animate to left:0
-		this.slider.animate({left:"0px"},this.options.normalTimeout*0.66,$.proxy(function(){
+		this.slider.animate({left:"0px"},this.options.autoTimeout*0.66,$.proxy(function(){
 			if(cb) cb();
 			
 			this.mutex = false;
@@ -91,7 +92,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 			return;
 		}
 		
-		this.slider.animate({left:"-="+next.position().left},this.options.normalTimeout/2,$.proxy(function(){
+		this.slider.animate({left:"-="+next.position().left},this.options.autoTimeout/2,$.proxy(function(){
 			this.slider.append(first.detach());
 			this.slider.css("left","0px");
 			
@@ -125,7 +126,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		
 		var left = $(this.items.get(s)).position().left;
 		this.slider.css("left","-"+left+"px");
-		var time = (s-f)*this.options.fastTimeout;
+		var time = (s-f)*this.options.clickTimeout;
 
 		//	Animate to left:0
 		this.slider.animate({left:"0px"},time,$.proxy(function(){
@@ -142,7 +143,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		
 		var end = $(this.items.get(f))
 		var left = end.position().left;
-		var time = (f-s)*this.options.fastTimeout;
+		var time = (f-s)*this.options.clickTimeout;
 
 		this.slider.animate({left:-left+"px"},time,$.proxy(function(){
 			for(a=s;a<f;a++) this.slider.append($(this.items.get(a)).detach());
