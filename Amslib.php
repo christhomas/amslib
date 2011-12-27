@@ -322,18 +322,18 @@ class Amslib
 	 * 	returns:
 	 * 		-	The value from the GET global array, if not exists, the value of the parameter return
 	 */
-	static public function getParam($value,$default=NULL,$erase=false)
+	static public function getGET($key,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_GET,$value,$default,$erase);
 	}
 	
-	static public function hasGet($value)
+	static public function hasGET($value)
 	{
 		return (isset($_GET[$value])) ? true : false;
 	}
 
 	/**
-	 *	function:	insertGetParameter
+	 *	function:	setGet
 	 *
 	 *	Insert a parameter into the global GET array
 	 *
@@ -344,11 +344,11 @@ class Amslib
 	 *	notes:
 	 *		-	Sometimes this is helpful, because it can let you build certain types of code flow which arent possible otherwise
 	 */
-	static public function insertGetParam($parameter,$value)
+	static public function setGET($key,$value)
 	{
-		$_GET[$parameter] = $value;
+		$_GET[$key] = $value;
 	}
-
+	
 	/**
 	 * 	function:	postParam
 	 *
@@ -362,18 +362,18 @@ class Amslib
 	 * 	returns:
 	 * 		-	The value from the POST global array, if not exists, the value of the parameter return
 	 */
-	static public function postParam($value,$default=NULL,$erase=false)
+	static public function getPOST($key,$default=NULL,$erase=false)
 	{
-		return self::arrayParam($_POST,$value,$default,$erase);
+		return self::arrayParam($_POST,$key,$default,$erase);
 	}
 	
-	static public function hasPost($value)
+	static public function hasPOST($value)
 	{
 		return (isset($_POST[$value])) ? true : false;
 	}
 
 	/**
-	 *	function:	insertPostParameter
+	 *	function:	setPost
 	 *
 	 *	Insert a parameter into the global POST array
 	 *
@@ -384,7 +384,7 @@ class Amslib
 	 *	notes:
 	 *		-	Sometimes this is helpful, because it can let you build certain types of code flow which arent possible otherwise
 	 */
-	static public function insertPostParam($parameter,$value)
+	static public function setPOST($parameter,$value)
 	{
 		$_POST[$parameter] = $value;
 	}
@@ -402,40 +402,39 @@ class Amslib
 	 * 	returns:
 	 * 		-	The value from the SESSION global array, if not exists, the value of the parameter return
 	 */
-	static public function sessionParam($value,$default=NULL,$erase=false)
+	static public function getSESSION($key,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_SESSION,$value,$default,$erase);
 	}
 	
-	static public function hasSession($value)
+	static public function hasSESSION($value)
 	{
 		return (isset($_SESSION[$value])) ? true : false;
 	}
 
-	static public function insertSessionParam($parameter,$value)
+	static public function setSESSION($key,$value)
 	{
 		$_SESSION[$parameter] = $value;
-	}
-	
+	}	
 	
 	/**
 	 * 	COOKIE methods
 	 */
-	static public function cookieParam($key,$default=NULL)
+	static public function getCOOKIE($key,$default=NULL)
 	{
 		return self::arrayParam($_COOKIE,$key,$default);
 	}
 	
-	static public function hasCookie($key)
+	static public function hasCOOKIE($key)
 	{
 		return (isset($_COOKIE[$key])) ? true : false;
 	}
 
-	static public function insertCookieParam($key,$value)
+	static public function setCOOKIE($key,$value)
 	{
 		$_COOKIE[$key] = $value;
 	}
-
+		
 	/**
 	 * 	function:	filesParam
 	 *
@@ -449,25 +448,15 @@ class Amslib
 	 * 	returns:
 	 * 		-	The value from the FILES global array, if not exists, the value of the parameter return
 	 */
-	static public function filesParam($value,$default=NULL,$erase=false)
+	static public function getFILES($key,$default=NULL,$erase=false)
 	{
 		return self::arrayParam($_FILES,$value,$default,$erase);
 	}
 
-	static public function insertFilesParam($parameter,$value)
+	static public function setFILES($parameter,$value)
 	{
 		$_FILES[$parameter] = $value;
-	}
-
-	static public function arrayParam(&$source,$value,$default=NULL,$erase=false)
-	{
-		if(isset($source[$value])){
-			$default = $source[$value];
-			if($erase) unset($source[$value]);
-		}
-
-		return $default;
-	}
+	}	
 
 	/**
 	 * 	function:	requestParam
@@ -482,13 +471,42 @@ class Amslib
 	 * 	returns:
 	 * 		-	The value from the REQUEST global array, if not exists, the value of the parameter return
 	 */
-	static public function requestParam($value,$default=NULL,$erase=false)
+	static public function getREQUEST($key,$default=NULL,$erase=false)
 	{
-		return self::arrayParam($_REQUEST,$value,$default,$erase);
+		return self::arrayParam($_REQUEST,$key,$default,$erase);
 	}
 
-	static public function insertRequestParam($parameter,$value)
+	static public function setREQUEST($parameter,$value)
 	{
 		$_REQUEST[$parameter] = $value;
 	}
+	
+	static public function arrayParam(&$source,$value,$default=NULL,$erase=false)
+	{
+		if(isset($source[$value])){
+			$default = $source[$value];
+			if($erase) unset($source[$value]);
+		}
+
+		return $default;
+	}
+		
+	//	IDEAS FOR A NEW(ER) SIMPLIFIED API
+	static public function getSuper($type,$key,$default=NULL,$erase=false){}
+	static public function setSuper($type,$key,$value){}
+	
+	//	DEPRECATED OLDER SUPER METHODS
+	static public function insertRequestParam($key,$value){	self::setREQUEST($key,$value);	}	
+	static public function insertFilesParam($key,$value){	self::setFILES($key,$value);	}
+	static public function insertCookieParam($key,$value){	self::setCOOKIE($key,$value);	}
+	static public function insertSessionParam($key,$value){	self::setSESSION($key,$value);	}
+	static public function insertPostParam($key,$value){	self::setPOST($key,$value);		}
+	static public function insertGetParam($key,$value){		self::setGET($key,$value);		}
+
+	static public function postParam($key,$default=NULL,$erase=false){ return self::getPost($key,$default,$erase); }
+	static public function getParam($key,$default=NULL,$erase=false){ return self::getGET($key,$default,$erase); }
+	static public function requestParam($key,$default=NULL,$erase=false){ return self::getREQUEST($key,$default,$erase);	}
+	static public function filesParam($key,$default=NULL,$erase=false){ return self::getFILES($key,$default,$erase);	}
+	static public function cookieParam($key,$default=NULL){ return self::getCOOKIE($key,$default); }
+	static public function sessionParam($key,$default=NULL,$erase=false){ return self::getSESSION($key,$default,$erase); }
 }
