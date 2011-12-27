@@ -182,7 +182,7 @@ class Amslib
 	}
 	
 	//	NOTE: This method has weird parameter names to make it harder to clash with extract()'d parameters from the $__p parameter
-	static public function __importFile($__r,$__f,$__p=array())
+	static public function __importFile($__r,$__f,$__p=array(),$__b=false)
 	{
 		$path = "";
 
@@ -199,22 +199,30 @@ class Amslib
 		if(is_file($__f) && file_exists($__f)){
 			if(is_array($__p) && count($__p)) extract($__p, EXTR_SKIP);
 			
-			return $__r
+			//	Optional output buffering
+			if($__b) ob_start();
+			
+			$__v = $__r
 				? (isset($require_once) ? require_once($__f) : require($__f))
 				: (isset($include_once) ? include_once($__f) : include($__f));
+			
+			if($__b) $__v = ob_get_clean();
+			
+			//	Return the result of the require/include, or if output buffering is enabled, return whatever was captured
+			return $__v;
 		}
 
 		return false;
 	}
 
-	static public function includeFile($file,$params=array())
+	static public function includeFile($file,$params=array(),$buffer=false)
 	{
-		return self::__importFile(false,$file,$params);
+		return self::__importFile(false,$file,$params,$buffer);
 	}
 
-	static public function requireFile($file,$params=array())
+	static public function requireFile($file,$params=array(),$buffer=false)
 	{
-		return self::__importFile(true,$file,$params);
+		return self::__importFile(true,$file,$params,$buffer);
 	}
 
 	static public function autoloader()
