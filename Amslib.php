@@ -324,12 +324,12 @@ class Amslib
 	 */
 	static public function getGET($key,$default=NULL,$erase=false)
 	{
-		return self::arrayParam($_GET,$value,$default,$erase);
+		return self::arrayParam($_GET,$key,$default,$erase);
 	}
 	
-	static public function hasGET($value)
+	static public function hasGET($key)
 	{
-		return (isset($_GET[$value])) ? true : false;
+		return (isset($_GET[$key])) ? true : false;
 	}
 
 	/**
@@ -338,7 +338,7 @@ class Amslib
 	 *	Insert a parameter into the global GET array
 	 *
 	 *	parameters:
-	 *		$parameter	-	The parameter to insert
+	 *		$key	-	The parameter to insert
 	 *		$value		-	The value of the parameter being inserted
 	 *
 	 *	notes:
@@ -347,6 +347,8 @@ class Amslib
 	static public function setGET($key,$value)
 	{
 		$_GET[$key] = $value;
+		
+		return $value;
 	}
 	
 	/**
@@ -367,9 +369,9 @@ class Amslib
 		return self::arrayParam($_POST,$key,$default,$erase);
 	}
 	
-	static public function hasPOST($value)
+	static public function hasPOST($key)
 	{
-		return (isset($_POST[$value])) ? true : false;
+		return (isset($_POST[$key])) ? true : false;
 	}
 
 	/**
@@ -378,15 +380,17 @@ class Amslib
 	 *	Insert a parameter into the global POST array
 	 *
 	 *	parameters:
-	 *		$parameter	-	The parameter to insert
+	 *		$key	-	The parameter to insert
 	 *		$value		-	The value of the parameter being inserted
 	 *
 	 *	notes:
 	 *		-	Sometimes this is helpful, because it can let you build certain types of code flow which arent possible otherwise
 	 */
-	static public function setPOST($parameter,$value)
+	static public function setPOST($key,$value)
 	{
-		$_POST[$parameter] = $value;
+		$_POST[$key] = $value;
+		
+		return $value;
 	}
 
 	/**
@@ -404,17 +408,19 @@ class Amslib
 	 */
 	static public function getSESSION($key,$default=NULL,$erase=false)
 	{
-		return self::arrayParam($_SESSION,$value,$default,$erase);
+		return self::arrayParam($_SESSION,$key,$default,$erase);
 	}
 	
-	static public function hasSESSION($value)
+	static public function hasSESSION($key)
 	{
-		return (isset($_SESSION[$value])) ? true : false;
+		return (isset($_SESSION[$key])) ? true : false;
 	}
 
 	static public function setSESSION($key,$value)
 	{
-		$_SESSION[$parameter] = $value;
+		$_SESSION[$key] = $value;
+		
+		return $value;
 	}	
 	
 	/**
@@ -433,6 +439,8 @@ class Amslib
 	static public function setCOOKIE($key,$value)
 	{
 		$_COOKIE[$key] = $value;
+		
+		return $value;
 	}
 		
 	/**
@@ -450,12 +458,14 @@ class Amslib
 	 */
 	static public function getFILES($key,$default=NULL,$erase=false)
 	{
-		return self::arrayParam($_FILES,$value,$default,$erase);
+		return self::arrayParam($_FILES,$key,$default,$erase);
 	}
 
-	static public function setFILES($parameter,$value)
+	static public function setFILES($key,$value)
 	{
-		$_FILES[$parameter] = $value;
+		$_FILES[$key] = $value;
+		
+		return $value;
 	}	
 
 	/**
@@ -476,16 +486,18 @@ class Amslib
 		return self::arrayParam($_REQUEST,$key,$default,$erase);
 	}
 
-	static public function setREQUEST($parameter,$value)
+	static public function setREQUEST($key,$value)
 	{
-		$_REQUEST[$parameter] = $value;
+		$_REQUEST[$key] = $value;
+		
+		return $value;
 	}
 	
-	static public function arrayParam(&$source,$value,$default=NULL,$erase=false)
+	static public function arrayParam(&$source,$key,$default=NULL,$erase=false)
 	{
-		if(isset($source[$value])){
-			$default = $source[$value];
-			if($erase) unset($source[$value]);
+		if(isset($source[$key])){
+			$default = $source[$key];
+			if($erase) unset($source[$key]);
 		}
 
 		return $default;
