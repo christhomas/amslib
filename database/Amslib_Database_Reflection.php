@@ -33,7 +33,7 @@ class Amslib_Database_Reflection extends Amslib_Database
 		parent::__construct();
 	}
 	
-	static public function &getInstance()
+	public function &getInstance()
 	{
 		static $instance = NULL;
 		

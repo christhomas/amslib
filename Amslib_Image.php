@@ -481,11 +481,11 @@ class Amslib_Image
 		return $this->images[$filename]["mime"];
 	}
 
-	static public function &getInstance()
+	public function &getInstance()
 	{
 		static $instance = NULL;
 
-		if($instance === NULL) $instance = new Amslib_Image();
+		if($instance === NULL) $instance = new self();
 
 		return $instance;
 	}

@@ -451,7 +451,7 @@ class Amslib_Plugin
 		$this->api->setModel($model);
 	}
 
-	static public function &getInstance()
+	public function &getInstance()
 	{
 		static $instance = NULL;
 
