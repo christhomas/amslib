@@ -75,7 +75,7 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		
 		//	We need a valid language for the website, make sure it's valid
 		$langCode = self::getLanguage("website");
-		if(!$langCode) self::setLanguage("website",reset(self::getLanguageList("website")));
+		if(!$langCode) self::setLanguage("website",current(self::getLanguageList("website")));
 
 		return true;
 	}
@@ -165,7 +165,7 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		}
 	}
 	
-	public function setPackageFilename($domain,$file)
+	static public function setPackageFilename($domain,$file)
 	{
 		self::$packageName[$domain] = $file;
 	}
