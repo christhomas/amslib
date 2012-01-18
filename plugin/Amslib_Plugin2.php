@@ -272,7 +272,7 @@ class Amslib_Plugin2
 			"translator"
 		);
 		
-		$this->config = array("api"=>false,"model"=>false,"translator"=>false,"requires"=>false);
+		$this->config = array("api"=>false,"model"=>false,"translator"=>false,"requires"=>false,"value"=>false);
 		
 		//	This stores where all the types components are stored as part of the application
 		$this->setComponent("layout",	"layouts",	"La_");

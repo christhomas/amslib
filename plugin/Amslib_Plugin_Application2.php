@@ -99,7 +99,9 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		//	Initialise and execute the router
 		//	FIXME: allow the use of a database source for routes and not just XML
 		//	FIXME: we already load this in the Amslib_Plugin level, why are we doing it twice??
-		$source = str_replace("__SELF__",$this->filename,$this->config["router_source"]);
+		$source = !isset($this->config["router_source"]) 
+			? $this->filename
+			: str_replace("__SELF__",$this->filename,$this->config["router_source"]);
 		
 		$xml = Amslib_Router3::getObject("source:xml");
 		$xml->load($source);
