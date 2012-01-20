@@ -15,7 +15,7 @@ var Amslib = my.Amslib = my.Class(
 			var re 		=	new RegExp("^(.*?)"+file.replace(/[-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&")+"$","g");
 			var path	=	false;
 			
-			$("head script[src]").each(function(){
+			$("script[src]").each(function(){
 				var matches = re.exec(this.src);
 				
 				if(matches){
@@ -29,12 +29,55 @@ var Amslib = my.Amslib = my.Class(
 			return path;
 		},
 		
+		loadJS: function(name,file,onReady)
+		{
+			if(typeof require == 'function'){
+				Amslib.loader[name] = require(file);
+			
+				if(typeof onReady == "function") scope(onReady,Amslib.loader[name]);
+				
+				scope(function(){
+					Amslib.__waitJS(name);
+				},Amslib.loader[name]);
+			}
+		},
+		
+		hasJS: function(name,callback)
+		{
+			if(typeof name == "string") name = new Array(name);
+			
+			var checkGroup = function(){
+				var loaded = true;
+				
+				for(n in name){
+					if(!Amslib.__loaderReady[name[n]]) return; 
+				}
+
+				callback();
+			};
+			
+			for(var n=0;n<name.length;n++){
+				if(Amslib.__loaderReady[name[n]]) checkGroup();
+				else Amslib.__loaderCallback[name[n]] = checkGroup;
+			}
+		},
+		
 		loadCSS: function(file)
 		{
 			$("head").append($("<link/>").attr({rel:"stylesheet",type:"text/css",href: file}));
 		},
 		
-		loader: {}
+		loader: {},
+		
+		//	Support asynchronous loading a provides a "notification callback" system
+		__loaderReady: {},
+		__loaderCallback: {},
+		__waitJS: function(name)
+		{
+			Amslib.__loaderReady[name] = true;
+			
+			if(Amslib.__loaderCallback[name]) Amslib.__loaderCallback[name]();
+		}
 	},
 	
 	constructor: function(parent,name)
