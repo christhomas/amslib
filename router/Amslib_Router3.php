@@ -217,7 +217,7 @@ class Amslib_Router3
 		return $u;
 	}
 
-	static public function &getInstance()
+	public function &getInstance()
 	{
 		static $instance = NULL;
 

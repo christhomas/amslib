@@ -2,6 +2,7 @@ var Amslib = my.Amslib = my.Class(
 {
 	__amslibDefaultName:	"Amslib_Default_Controller",
 	__amslibName:			false,
+	__options:				{},
 	
 	STATIC: {
 		firebug: function(string)
@@ -89,6 +90,13 @@ var Amslib = my.Amslib = my.Class(
 		
 		//	Setup the amslib_controller to make this object available on the node it was associated with
 		this.parent.data(this.__amslibName,this);
+		
+		//	Now merge all the specific options from the static parameter "options" into this
+		//	NOTE: Hmm....I can't think how to obtain the name of the parent class.....shit....
+		//	NOTE: perhaps this is why other plugins don't use a static object?
+		//	NOTE: well shit, that means I have to convert all the javascript objects to not using them
+		//	NOTE: yes, well, what do you want? a medal?
+		//this.__options = this.__options.extend()
 		
 		return this;
 	},
