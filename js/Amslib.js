@@ -79,7 +79,7 @@ var Amslib = my.Amslib = my.Class(
 			
 			if(Amslib.__loaderCallback[name]) Amslib.__loaderCallback[name]();
 		}
-	},
+	},	
 	
 	constructor: function(parent,name)
 	{
