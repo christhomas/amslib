@@ -331,7 +331,7 @@ class Amslib_MVC4
 	public function addStylesheet($id)
 	{
 		if(isset($this->stylesheet[$id])){
-			Amslib_Resource_Compiler::addStylesheet(
+			Amslib_Resource::addStylesheet(
 				$id,
 				$this->stylesheet[$id]["file"],
 				$this->stylesheet[$id]["conditional"],
@@ -342,7 +342,7 @@ class Amslib_MVC4
 
 	public function removeStylesheet($id)
 	{
-		Amslib_Resource_Compiler::removeStylesheet($id);
+		Amslib_Resource::removeStylesheet($id);
 	}
 
 	public function setJavascript($id,$file,$conditional=NULL,$autoload=NULL)
@@ -358,13 +358,13 @@ class Amslib_MVC4
 	{
 		if(isset($this->javascript[$id])){
 			$j = $this->javascript[$id];
-			Amslib_Resource_Compiler::addJavascript($id,$j["file"],$j["conditional"]);
+			Amslib_Resource::addJavascript($id,$j["file"],$j["conditional"]);
 		}
 	}
 
 	public function removeJavascript($id)
 	{
-		Amslib_Resource_Compiler::removeJavascript($id);
+		Amslib_Resource::removeJavascript($id);
 	}
 	
 	public function setFont($type,$id,$file,$autoload)
@@ -381,12 +381,12 @@ class Amslib_MVC4
 	{
 		if(!isset($this->font[$id])) return;
 		
-		Amslib_Resource_Compiler::addFont($id,$this->font[$id]["file"]);
+		Amslib_Resource::addFont($id,$this->font[$id]["file"]);
 	}
 	
 	public function removeFont($id)
 	{
-		Amslib_Resource_Compiler::removeFont($id);
+		Amslib_Resource::removeFont($id);
 	}
 
 	/**
