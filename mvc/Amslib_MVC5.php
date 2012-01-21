@@ -8,7 +8,7 @@ class Amslib_MVC5 extends Amslib_MVC4
 		parent::__construct();
 	}
 	
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 		

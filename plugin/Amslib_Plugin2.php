@@ -663,7 +663,7 @@ class Amslib_Plugin2
 		return Amslib_File::reduceSlashes($path);
 	}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 

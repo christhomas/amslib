@@ -142,7 +142,7 @@ class Amslib_Plugin_Application2 extends Amslib_Plugin2
 		$this->runCompletionCallbacks();
 	}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 

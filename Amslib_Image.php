@@ -481,7 +481,7 @@ class Amslib_Image
 		return $this->images[$filename]["mime"];
 	}
 
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 

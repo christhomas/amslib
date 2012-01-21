@@ -73,7 +73,7 @@ class Amslib_MVC6
 		return false;
 	}
 	
-	public function &getInstance()
+	static public function &getInstance()
 	{
 		static $instance = NULL;
 		
