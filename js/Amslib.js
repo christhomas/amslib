@@ -50,17 +50,21 @@ var Amslib = my.Amslib = my.Class(
 			var checkGroup = function(){
 				var loaded = true;
 				
-				for(n in name){
-					if(!Amslib.__loaderReady[name[n]]) return; 
+				for(n=0;n<name.length;n++){
+					if(!Amslib.__loaderReady[name[n]]) return false;
 				}
 
-				callback();
+				if(callback) callback();
+				
+				return true;
 			};
 			
 			for(var n=0;n<name.length;n++){
-				if(Amslib.__loaderReady[name[n]]) checkGroup();
+				if(Amslib.__loaderReady[name[n]] && checkGroup()) return true;
 				else Amslib.__loaderCallback[name[n]] = checkGroup;
 			}
+			
+			return false;
 		},
 		
 		loadCSS: function(file)
