@@ -29,6 +29,7 @@ var Amslib = my.Amslib = my.Class(
 			if(console && console.log) console.log.apply(null,arguments);
 		},
 		
+		//	DEPRECATED getPath, use Amslib.locate() instead, it does exactly what I was supposed to do here
 		getPath: function(file)
 		{
 			//	Copied from how scriptaculous does it's "query string" thing
@@ -47,6 +48,35 @@ var Amslib = my.Amslib = my.Class(
 			if(!path) Amslib.firebug("requested path["+file+"] using regexp["+re+"] was not found");
 				
 			return path;
+		},
+		
+		locate: function()
+		{
+			Amslib.__location = $("script[src*='/js/Amslib.js']").attr("src").split("/js/Amslib.js")[0];
+			
+			return Amslib.__location || false;
+		},
+		
+		getQuery: function()
+		{
+			var p = function(s){
+				var e,
+		        a = /\+/g,  // Regex for replacing addition symbol with a space
+		        r = /([^&=]+)=?([^&]*)/g,
+		        d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+		        f = [];
+		        
+		        if(i=s.indexOf("?")) s = s.substring(i+1);
+		        
+		        while(e = r.exec(s)) f[d(e[1])] = d(e[2]);
+		        
+		        return f;
+			}
+			
+			if(arguments.length == 1) return p(arguments[0]);
+			if(arguments.length >= 2) return (f=p(arguments[1])) && (arguments[0] in f) ? f[arguments[0]] : f;
+			
+			return false;
 		},
 		
 		loadJS: function(name,file,onReady)
@@ -92,10 +122,12 @@ var Amslib = my.Amslib = my.Class(
 		},
 		
 		loader: {},
+		__loaderReady:		{},
+		__loaderCallback:	{},
+		__urlParams:		[],
+		__location:			false,
 		
 		//	Support asynchronous loading a provides a "notification callback" system
-		__loaderReady: {},
-		__loaderCallback: {},
 		__waitJS: function(name)
 		{
 			Amslib.__loaderReady[name] = true;
