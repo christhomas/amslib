@@ -63,7 +63,7 @@ class Amslib_MVC6
 		$this->value		=	array();
 		$this->viewParams	=	array();
 	}
-	
+
 	public function __call($name,$args)
 	{
 		if(in_array($name,$this->__mixins)){
@@ -72,21 +72,21 @@ class Amslib_MVC6
 
 		return false;
 	}
-	
+
 	static public function &getInstance()
 	{
 		static $instance = NULL;
-		
+
 		if($instance === NULL) $instance = new self();
-		
+
 		return $instance;
 	}
-	
+
 	public function addMixin($object)
 	{
 		if(get_class($object)){
 			$list = get_class_methods($object);
-			
+
 			foreach($list as $m) $this->__mixins[$m] = $object;
 		}
 	}
@@ -125,23 +125,23 @@ class Amslib_MVC6
 	{
 		$this->routes[$name] = $route;
 	}
-	
+
 	public function setPlugin($plugin)
 	{
 		$this->plugin = $plugin;
 	}
-	
+
 	public function getPlugin()
 	{
 		return $this->plugin;
 	}
-	
+
 	public function getRoute($name=NULL)
 	{
 		//	NOTE:	If name was not passed/NULL return entire routes array,
 		//			otherwise return the route, but if it doesnt exist, return false
 		if($name === NULL) return $this->routes;
-		
+
 		return isset($this->routes[$name]) ? $this->routes[$name] : false;
 	}
 
@@ -162,26 +162,26 @@ class Amslib_MVC6
 		if(is_string($name) && strlen($name)){
 			return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name,$default);
 		}
-		
+
 		return $default;
 	}
-	
+
 	public function setFields($name,$value)
 	{
 		$name = "validate/$name";
-		
+
 		$f = $this->getValue($name,array());
-		
+
 		if(!is_array($value)) $value = array();
-		
+
 		$this->setValue($name,array_merge($f,$value));
 	}
-	
+
 	public function getFields($name)
 	{
 		return $this->getValue("validate/$name",array());
 	}
-	
+
 	public function listValues()
 	{
 		return array_keys($this->value);
@@ -205,21 +205,21 @@ class Amslib_MVC6
 		$this->object[$id] = $name;
 	}
 
-	public function getObject($id,$singleton=false)
+	public function getObject($id,$singleton=true)
 	{
 		if(!isset($this->object[$id])) return false;
 
 		Amslib::requireFile($this->object[$id],array("require_once"=>true));
-		
+
 		if(class_exists($id)){
 			if($singleton) return call_user_func(array($id,"getInstance"));
 
 			return new $id;
 		}
-		
+
 		return false;
 	}
-	
+
 	public function listObjects()
 	{
 		return array_keys($this->object);
@@ -231,14 +231,14 @@ class Amslib_MVC6
 
 		$this->view[$id] = $name;
 	}
-	
+
 	public function getView($id)
 	{
 		if($id && isset($this->view[$id])) return $this->view[$id];
 
 		return $this->view;
 	}
-	
+
 	public function renderView($id,$parameters=array())
 	{
 		if(is_string($id) && isset($this->view[$id]))
@@ -261,7 +261,7 @@ class Amslib_MVC6
 
 		return "";
 	}
-	
+
 	public function listViews()
 	{
 		return array_keys($this->view);
@@ -277,13 +277,13 @@ class Amslib_MVC6
 			$this->setValue("service:$id",$name);
 		}else{*/
 			$this->service[$id] = Amslib_Website::rel($name);
-			
+
 			//	NOTE: I should recognise that now Amslib_MVC4 is dependant on Amslib_Router3's existence
 			//	NOTE: perhaps we should remove this dependency and instead inport the data as opposed to looking it up here
 			//	Attempt to find a routed url for this service
 			$url = Amslib_Router3::getURL("Service:$id");
 			if(!$url) $url = $this->service[$id];
-			
+
 			//	Set this as a service url for the javascript to acquire
 			$this->setValue("service:$id",$url);
 		//}
@@ -292,25 +292,25 @@ class Amslib_MVC6
 	public function getService($id,$url=false)
 	{
 		if($url) return $this->getValue("service:$id");
-		
+
 		return (isset($this->service[$id])) ? $this->service[$id] : NULL;
 	}
-	
+
 	public function listServices()
 	{
 		return array_keys($this->service);
 	}
-	
+
 	public function getServiceURL($id)
 	{
 		return $this->getValue("service:$id");
 	}
-	
+
 	public function setTranslator($name,$translator)
 	{
 		$this->translator[$name] = $translator;
 	}
-	
+
 	public function getTranslator($name)
 	{
 		return (isset($this->translator[$name])) ? $this->translator[$name] : reset($this->translator);
@@ -329,7 +329,7 @@ class Amslib_MVC6
 	public function setStylesheet($id,$file,$conditional=NULL,$autoload=NULL,$media=NULL)
 	{
 		if(!is_string($id) && $file) return;
-		
+
 		$this->stylesheet[$id] = array("file"=>$file,"conditional"=>$conditional,"media"=>$media);
 
 		if($autoload) $this->addStylesheet($id);
@@ -355,7 +355,7 @@ class Amslib_MVC6
 	public function setJavascript($id,$file,$conditional=NULL,$autoload=NULL)
 	{
 		if(!is_string($id) && $file) return;
-		
+
 		$this->javascript[$id] = array("file"=>$file,"conditional"=>$conditional);
 
 		if($autoload) $this->addJavascript($id);
@@ -373,24 +373,24 @@ class Amslib_MVC6
 	{
 		Amslib_Resource::removeJavascript($id);
 	}
-	
+
 	public function setFont($type,$id,$file,$autoload)
 	{
 		//	FIXME: implement the $type field somehow, but atm we only support google webfont
 		if(!is_string($id) && $file) return;
-		
+
 		$this->font[$id] = array("file"=>$file);
 
 		if($autoload) $this->addFont($id);
 	}
-	
+
 	public function addFont($id)
 	{
 		if(!isset($this->font[$id])) return;
-		
+
 		Amslib_Resource::addFont($id,$this->font[$id]["file"]);
 	}
-	
+
 	public function removeFont($id)
 	{
 		Amslib_Resource::removeFont($id);
@@ -436,7 +436,7 @@ class Amslib_MVC6
 	{
 		if($dest === NULL) $dest = $id;
 
-		//	FIXME:	previously this used the old setService, but now it's upgraded 
+		//	FIXME:	previously this used the old setService, but now it's upgraded
 		//			to use the code from setService2, perhaps this code won't work anymore.
 		$api = Amslib_Plugin_Manager2::getAPI($src);
 		$this->setService($dest,$api->getService($id));
@@ -453,14 +453,14 @@ class Amslib_MVC6
 	{
 		//	Step 1: find the image inside the plugin
 		if(isset($this->images[$id])) return $this->images[$id];
-		
+
 		//	Step 2: find the image relative to the website base (perhaps it's a path)
 		$path = Amslib_Website::abs($this->location.$id);
 
 		if(file_exists($path)){
 			return $relative ? Amslib_Website::rel($path) : $path;
 		}
-		
+
 		//	Step 3: return false, image was not found
 		return false;
 	}
@@ -490,17 +490,17 @@ class Amslib_MVC6
 
 	/**
 	 * method: setupService
-	 * 
+	 *
 	 * A customisation method which can do "something" based on what service is being called, at the very
 	 * last second before the actual service is run, this might be to setup some static and protected
 	 * data which is only available here and is not convenient to setup elsewhere.
-	 * 
+	 *
 	 * parameters:
 	 * 	$plugin		-	The plugin for the service
 	 * 	$service	-	The service being run inside the plugin
-	 * 
+	 *
 	 * notes:
-	 * 	-	The parameters are only really used to identify what service is being run	 
+	 * 	-	The parameters are only really used to identify what service is being run
 	 */
 	public function setupService($plugin,$service)
 	{

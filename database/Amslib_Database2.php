@@ -37,7 +37,7 @@ class Amslib_Database2
  *	explored for possible problems
  *****************************************************************************/
 	private static $sharedConnection = false;
-	
+
 	protected $lastResult = array();
 
 	protected $lastInsertId = 0;
@@ -47,7 +47,7 @@ class Amslib_Database2
 	protected $debug = false;
 
 	protected $selectResult = false;
-	
+
 	protected $seq = 0;
 
 /******************************************************************************
@@ -100,24 +100,41 @@ class Amslib_Database2
 	{
 		$this->seq = 0;
 	}
-	
+
 	public function setFetchMethod($method)
 	{
 		if(function_exists($method)){
 			$this->fetchMethod = $method;
 		}
 	}
-	
+
 	public function setLoginDetails()
 	{
 		die("FATAL ERROR: setLoginDetails was not defined in your database object, so connection attempt will fail");
 	}
-	
+
 	public function setDebug($state)
 	{
 		$this->debug = $state;
 	}
-	
+
+	public function getLastQuery()
+	{
+		return $this->lastQuery;
+	}
+
+	public function getSearchResultHandle()
+	{
+		return $this->selectResult;
+	}
+
+	public function connect()
+	{
+		//	NOTE: I don't like this logic, it seems ugly
+		$this->setLoginDetails();
+		$this->makeConnection();
+	}
+
 	/**
 	 * 	method:	getConnectionStatus
 	 *
@@ -144,41 +161,23 @@ class Amslib_Database2
 		return $this->connection;
 	}
 
-	public function getLastQuery()
+	public function setConnection($connection)
 	{
-		return $this->lastQuery;
+		$this->connection = $connection;
 	}
 
-	public function getSearchResultHandle()
-	{
-		return $this->selectResult;
-	}
-
-	public function connect()
-	{
-		//	NOTE: I don't like this logic, it seems ugly
-		$this->setLoginDetails();
-		$this->makeConnection();
-	}
-
-	public function copy($database)
+	public function copyConnection($database)
 	{
 		if($database && method_exists($database,"getConnection")){
-			$c = $database->getConnection();
-			
-			if($c){
-				$this->connection = $c;
-
-				return true;
-			}
+			$this->setConnection($database->getConnection());
 		}
-		
-		return false;
+
+		return $this->connection ? true : false;
 	}
-	
+
 	/**
 	 * method: setSharedConnection
-	 * 
+	 *
 	 * A simple way to share a database connection without
 	 * having to pass the object around
 	 */
@@ -188,10 +187,10 @@ class Amslib_Database2
 			self::$sharedConnection = $databaseObject;
 		}
 	}
-	
+
 	/**
 	 * method: getSharedConnection
-	 * 
+	 *
 	 * Retrieve the shared database connection, this is useful
 	 * in scenarios where you need to simply share the object
 	 * but don't want to pass the object around
