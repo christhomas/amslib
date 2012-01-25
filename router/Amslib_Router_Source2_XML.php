@@ -120,8 +120,8 @@ class Amslib_Router_Source2_XML
 		//	NOTE:	Added a call to absolute to fix finding the file, because in some cases,
 		//			the file cannot be found. But I am not sure of the side-effects (if any) of doing this
 		$path = Amslib_File::find(Amslib_File::absolute($source),true);
-		
-		if(!file_exists($path)){
+
+		if(!is_file($path)){
 			//	TODO: Should move to using Amslib_Keystore("error") instead
 			print(get_class($this)."::load(), source = ".Amslib::var_dump($source,true));
 			print(get_class($this)."::load(), path = ".Amslib::var_dump($path,true));
@@ -180,15 +180,15 @@ class Amslib_Router_Source2_XML
 
 		return $this->createPath($path,$routes);
 	}
-	
+
 	public function createPath($path,&$routes=NULL)
 	{
 		$name = $path["name"];
-		
+
 		$this->routes[$name] = $path;
-		
+
 		$this->addInversePath($name);
-		
+
 				//	NOTE:	This is so the route can be captured and returned
 		//			We need to do this so plugins can know whether a route belongs to them
 		//			or someone else, this is needed because sometimes we need to identify
@@ -277,7 +277,7 @@ class Amslib_Router_Source2_XML
 
 		return $instance;
 	}
-	
+
 	public function dump()
 	{
 		return array("routes"=>$this->routes,"url"=>$this->url);

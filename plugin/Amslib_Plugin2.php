@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*******************************************************************************
  * Copyright (c) {15/03/2008} {Christopher Thomas}
  * This library is free software; you can redistribute it and/or
@@ -26,64 +26,64 @@
  *******************************************************************************/
 class Amslib_Plugin2
 {
-	//	NOTE:	The paths registered in the application which are ways to replace 
+	//	NOTE:	The paths registered in the application which are ways to replace
 	//			templated strings with their dynamically valid replacements
 	static protected $path;
-	
+
 	//	The ready state of the plugin is true/false depending on whether it has been configured
 	protected $isReady;
-	
+
 	//	The name of the plugin
 	protected $name;
-	
+
 	//	The location of the plugin on the filesystem
 	protected $location;
-	
+
 	//	The API object created by the plugin
-	protected $api;	
-	
+	protected $api;
+
 	//	The filename on disk with the plugin configuration (typically package.xml)
 	protected $filename;
-	
+
 	//	The XPath object used to query the xml configuration
 	protected $xpath;
-	
+
 	//	The Current XML Configuration storing all the data from the package XML file
 	protected $config;
-	
+
 	//	The list of XML XPath expressions that will be searched for data and stored
 	protected $search;
-	
+
 	//	The path prefixes of each component type
 	protected $prefix = array();
-	
+
 	protected function setComponent($component,$directory,$prefix)
 	{
 		$this->prefix[$component] = "/$directory/$prefix";
 	}
-	
+
 	protected function getComponent($component,$name)
 	{
 		return $this->location.$this->prefix[$component]."$name.php";
 	}
-	
+
 	protected function getPackageFilename()
-	{	
-		return $this->location."/package.xml"; 
+	{
+		return $this->location."/package.xml";
 	}
 
 	protected function findResource($resource,$absolute=false)
 	{
 		//	If the resource has an attribute "absolute" don't process it, return it directly
 		if($absolute) return $resource;
-		
+
 		//	PREPARE THE STRING: expand any parameters inside the resource name
 		$resource = self::expandPath($resource);
-		
+
 		//	TEST 1:	look in the package directory for the file
 		$test2 = Amslib_File::reduceSlashes("$this->location/$resource");
-		if(file_exists(Amslib::rchop($test2,"?"))) return Amslib_File::relative($test2);		
-		
+		if(file_exists(Amslib::rchop($test2,"?"))) return Amslib_File::relative($test2);
+
 		//	TEST 2: Test whether the file "exists" without any assistance
 		if(file_exists(Amslib::rchop($resource,"?"))) return Amslib_File::relative($resource);
 
@@ -98,33 +98,33 @@ class Amslib_Plugin2
 		//	FAILED: you could not find the file
 		return false;
 	}
-	
+
 	protected function process()
 	{
 		$this->api = $this->createAPI();
 		$this->api->setModel($this->createObject($this->config["model"],true,true));
-		
+
 		//	If the API object is not valid, don't continue to process
 		if(!$this->api) return false;
-		
+
 		//	Load the router, if one is present
 		$source = Amslib_Router3::getObject("source:xml");
 		$this->routes = $source->load($this->filename);
-		
+
 		//	Load all routes into the plugin, so you can identify which plugin is responsible for a route
 		foreach($this->routes as $name=>$route) $this->api->setRoute($name,$route);
 
 		$keys = array("object","value","translator","layout","view","service","font","image","javascript","stylesheet");
-		
+
 		foreach($keys as $k=>$v){
 			//	Don't process any keys which are not set, empty or the required method to process it is not available
 			if(!isset($this->config[$v]) || empty($this->config[$v]) || !method_exists($this->api,"set".ucwords($v))){
-				continue;		
+				continue;
 			}
 
 			$callback	=	"set".ucwords($v);
 			$func		=	array($this->api,$callback);
-			
+
 			foreach($this->config[$v] as $name=>$c){
 				//	NOTE: If a parameter is marked for export, don't process it.
 				if(isset($c["export"])) continue;
@@ -143,18 +143,18 @@ class Amslib_Plugin2
 					//$params		=	array($this->createObject($c,true,true));
 				}else if($v == "translator"){
 					$translator	=	$this->createTranslator($name);
-					
-					if(!$translator) continue;	
-					
+
+					if(!$translator) continue;
+
 					$this->installLanguages($name,$c);
-					
+
 					$params		=	array($name,$translator);
 				}else{
 					$value		=	isset($c["value"]) ? $c["value"] : NULL;
 					$condition	=	isset($c["condition"]) ? $c["condition"] : NULL;
 					$autoload	=	isset($c["autoload"]) ? $c["autoload"] : NULL;
 					$media		=	isset($c["media"]) ? $c["media"] : NULL;
-					
+
 					$params		=	array($name,$value,$condition,$autoload,$media);
 				}
 
@@ -162,7 +162,7 @@ class Amslib_Plugin2
 			}
 		}
 	}
-	
+
 	protected function installLanguages($name,$lang)
 	{
 		foreach($lang["language"] as $langCode){
@@ -175,18 +175,18 @@ class Amslib_Plugin2
 			Amslib_Plugin_Application2::registerLanguage($name, $langCode);
 		}
 	}
-	
+
 	protected function createObject(&$object,$singleton=false,$dieOnError=false)
 	{
 		if(!$object || empty($object)) return false;
-		
+
 		if(isset($object["cache"])) return $object["cache"];
 		if(isset($object["file"]))	Amslib::requireFile($object["file"]);
-		
+
 		$error =  "FATAL ERROR(".__METHOD__.") Could not __ERROR__ for plugin '{$this->name}'<br/>";
-		
+
 		$cache = false;
-		
+
 		if(class_exists($object["value"])){
 			if($singleton){
 				if(method_exists($object["value"],"getInstance")){
@@ -200,14 +200,14 @@ class Amslib_Plugin2
 		}else if($dieOnError){
 			die(str_replace("__ERROR__","find class '{$object["value"]}'",$error));
 		}
-		
+
 		if($cache) $object["cache"] = $cache;
-		
+
 		return $cache;
 	}
-	
+
 	protected function createAPI()
-	{ 
+	{
 		//	Create the API object
 		$api = $this->createObject($this->config["api"],true,true);
 
@@ -218,17 +218,17 @@ class Amslib_Plugin2
 		$api->setLocation($this->getLocation());
 		$api->setName($this->getName());
 		$api->setPlugin($this);
-	
+
 		return $api;
 	}
-	
+
 	protected function createTranslator($name)
 	{
 		if(!isset($this->config["translator"][$name])) return false;
-		
+
 		$t = &$this->config["translator"][$name];
 		if(isset($t["cache"])) return $t["cache"];
-			
+
 		if($t["type"] == "xml"){
 			//	Replace __CURRENT_PLUGIN with plugin location and expand any other paths
 			$location = str_replace("__CURRENT_PLUGIN__",$this->location,$t["location"]);
@@ -237,26 +237,26 @@ class Amslib_Plugin2
 			$database = $this->config["model"]["value"];
 			$location = str_replace("__CURRENT_PLUGIN__",$database,$t["location"]);
 		}
-		
+
 		//	Obtain the language the system should use when printing text
 		$language = Amslib_Plugin_Application2::getLanguage($name);
 		if(!$language) $language = reset($t["language"]);
-		
+
 		//	Create the language translator object and insert it into the api
 		$translator = new Amslib_Translator2($t["type"],$name);
 		$translator->addLanguage($t["language"]);
 		$translator->setLocation($location);
 		$translator->setLanguage($language);
 		$translator->load();
-		
+
 		$t["cache"] = $translator;
 
 		return $translator;
 	}
-	
+
 	protected function initialisePlugin(){	/* do nothing by default */ }
 	protected function finalisePlugin(){	/* do nothing by default */ }
-	
+
 	public function __construct()
 	{
 		$this->search = array(
@@ -271,19 +271,19 @@ class Amslib_Plugin2
 			"value",
 			"translator"
 		);
-		
+
 		$this->config = array("api"=>false,"model"=>false,"translator"=>false,"requires"=>false,"value"=>false);
-		
+
 		//	This stores where all the types components are stored as part of the application
 		$this->setComponent("layout",	"layouts",	"La_");
 		$this->setComponent("view",		"views",	"Vi_");
 		$this->setComponent("object",	"objects",	"");
 		$this->setComponent("service",	"services",	"Sv_");
 	}
-	
+
 	public function transfer()
 	{
-		//	Process all child transfers before the parents	
+		//	Process all child transfers before the parents
 		foreach(Amslib_Array::valid($this->config["requires"]) as $name=>$plugin){
 			if($plugin && method_exists($plugin,"transfer")) $plugin->transfer();
 			else Amslib_FirePHP::output("failed to call plugin[$name]->transfer",$this);
@@ -291,7 +291,7 @@ class Amslib_Plugin2
 
 		//	FIXME: omg, it's just a bunch of repeated code, all over the place, ripe for refactoring....
 		//	FIXME: it's actually hilarious how much repeated code I have, yet I didnt refactor it yet :)
-		
+
 		//	Process all the import/export/transfer requests on all resources
 		//	NOTE: translators don't support the "move" parameter
 		foreach($this->config as $key=>$block){
@@ -318,7 +318,7 @@ class Amslib_Plugin2
 						if($plugin){
 							$this->setConfig(array($key,$item["name"]),$plugin->getConfig($key,$item["name"]));
 							if(isset($item["move"])) $plugin->removeConfig($key,$item["name"]);
-						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);	
+						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
 					}else if(isset($item["export"]) && $item["export"] != $this->getName()){
 						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
 						if($plugin){
@@ -334,7 +334,7 @@ class Amslib_Plugin2
 						$plugin = Amslib_Plugin_Manager2::getPlugin($item["import"]);
 						if($plugin){
 							$this->setConfig(array($key,$name),$plugin->getConfig($key,$name));
-							if(isset($item["move"])) $plugin->removeConfig($key,$name);	
+							if(isset($item["move"])) $plugin->removeConfig($key,$name);
 						}else Amslib_FirePHP::output("AP2::transfer(): plugin invalid",$item);
 					}else if(isset($item["export"]) && $item["export"] != $this->getName()){
 						$plugin = Amslib_Plugin_Manager2::getPlugin($item["export"]);
@@ -357,78 +357,78 @@ class Amslib_Plugin2
 
 		$xpath			=	false;
 		$document		=	new DOMDocument('1.0', 'UTF-8');
-		
+
 		if(@$document->load($this->filename)){
 			$document->preserveWhiteSpace = false;
 			$xpath = new DOMXPath($document);
 		}
-		
+
 		if(!$xpath) return $this->isReady;
-		
+
 		//	Search each path and store all the configuration data
 		foreach($this->search as $p){
 			$list = $xpath->query("//package/$p");
-			
+
 			foreach($list as $node){
 				switch($node->nodeName){
 					case "layout":
 					case "view":
 					case "service":{
 						$child = $xpath->query("name",$node);
-						
+
 						foreach($child as $c){
 							$p = array();
 							$p["id"] = $c->nodeValue;
 							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
 							$p["value"] = $this->getComponent($node->nodeName,$c->nodeValue);
-							
-							$this->config[$node->nodeName][$p["id"]] = $p;	
+
+							$this->config[$node->nodeName][$p["id"]] = $p;
 						}
 					}break;
-					
+
 					case "javascript":
 					case "stylesheet":
 					case "image":{
 						$child = $xpath->query("file",$node);
-						
+
 						foreach($child as $c){
 							$p = array();
 							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
 							$absolute	=	isset($p["absolute"]) ? true : false;
 							$p["value"]	=	$this->findResource($c->nodeValue,$absolute);
-							
+
 							//	If a valid id exists, insert the configuration
 							if(isset($p["id"])) $this->config[$node->nodeName][$p["id"]] = $p;
 						}
 					}break;
-					
+
 					case "font":{
 						$child = $xpath->query("*",$node);
-						
+
 						foreach($child as $font){
 							$p = array();
-							
+
 							foreach($font->attributes as $k=>$v) $p[$k] = $v->nodeValue;
 							$p["value"]	=	trim($font->nodeValue);
 							$p["type"]	=	$font->nodeName;
 							if(!isset($p["autoload"])) $p["autoload"] = NULL;
-							
+
 							$this->config[$node->nodeName][$p["id"]] = $p;
 						}
 					}break;
-	
+
 					case "translator":{
 						$child = $xpath->query("*",$node);
 						$p = array();
-						
+
 						//	Import all the translator parameters, such as import/export
 						foreach($node->attributes as $k=>$v) $p[$k] = $v->nodeValue;
-						
+
 						foreach($child as $c){
 							if($c->nodeName == "language") $p[$c->nodeName][] = $c->nodeValue;
 							else $p[$c->nodeName] = $c->nodeValue;
 						}
-						
+
 						//	Test all required data is present, if so, add the translator to be configured later
 						if(	Amslib_Array::hasKeys($p,array("name","type","location","language")) ||
 							Amslib_Array::hasKeys($p,array("name","import")) ||
@@ -437,39 +437,39 @@ class Amslib_Plugin2
 							$this->config[$node->nodeName][$p["name"]] = $p;
 						}
 					}break;
-					
+
 					case "version":{
 						$child = $xpath->query("*",$node);
-						
+
 						foreach($child as $c){
 							$this->config[$node->nodeName][$c->nodeName] = $c->nodeValue;
 						}
 					}break;
-					
+
 					case "value":{
 						$child = $xpath->query("*",$node);
 						$p = array();
 						foreach($node->attributes as $k=>$v) $p[$k] = $v->nodeValue;
-						
+
 						foreach($child as $c){
 							$this->config[$node->nodeName][] = array_merge(array("name"=>$c->nodeName,"value"=>$c->nodeValue),$p);
 						}
 					}break;
-					
+
 					case "object":{
 						$child = $xpath->query("*",$node);
-						
+
 						foreach($child as $c){
 							$p = array();
 							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
 							$p["value"] = $c->nodeValue;
-							
+
 							$file = $this->getComponent("object",$p["value"]);
 							if(file_exists($file)) $p["file"] = $file;
-							
+
 							//	Make sure generic objects are referenced properly
 							$name = $c->nodeName == "name" ? $p["value"] : $c->nodeName;
-							
+
 							if(in_array($name,array("api","model"))){
 								$this->config[$name] = $p;
 							}else{
@@ -477,10 +477,10 @@ class Amslib_Plugin2
 							}
 						}
 					}break;
-					
+
 					case "path":{
 						$child = $xpath->query("*",$node);
-						
+
 						foreach($child as $c){
 							$v = Amslib_Plugin2::expandPath($c->nodeValue);
 
@@ -488,34 +488,34 @@ class Amslib_Plugin2
 								Amslib::addIncludePath(Amslib_File::absolute($v));
 							}else{
 								Amslib_Plugin2::setPath($c->nodeName,$v);
-								
+
 								switch($c->nodeName){
 									case "plugin":{
 										Amslib_Plugin_Manager2::addLocation($v);
 									}break;
-									
+
 									case "docroot":{
-										Amslib_File::documentRoot($v);			
+										Amslib_File::documentRoot($v);
 									}break;
 								};
 							}
 						}
 					}break;
-					
+
 					default:{
-						$this->config[$node->nodeName] = Amslib_Plugin2::expandPath($node->nodeValue);	
+						$this->config[$node->nodeName] = Amslib_Plugin2::expandPath($node->nodeValue);
 					}break;
 				}
 			}
 		}
-		
+
 		//	load all the child plugins
 		$list = $xpath->query("//package/requires/plugin");
-			
+
 		foreach($list as $node){
 			if($this->getName() != $node->nodeValue){
 				$plugin = Amslib_Plugin_Manager2::config($node->nodeValue,$this->location);
-				
+
 				if($plugin){
 					$this->config["requires"][$node->nodeValue] = $plugin;
 				}else{
@@ -523,12 +523,12 @@ class Amslib_Plugin2
 				}
 			}
 		}
-		
+
 		$this->isReady = true;
-		
+
 		//	Now the configuration data is loaded, initialise the plugin with any custom requirements
 		$this->initialisePlugin();
-		
+
 		return $this->isReady;
 	}
 
@@ -536,9 +536,9 @@ class Amslib_Plugin2
 	{
 		if($this->isReady)
 		{
-			//	Process all child plugins before the parents	
+			//	Process all child plugins before the parents
 			foreach(Amslib_Array::valid($this->config["requires"]) as $plugin) $plugin->load();
-			
+
 			//	run all the configuration into the api object
 			$this->process();
 			//	initialise the api object, it's now ready to use externally
@@ -556,18 +556,18 @@ class Amslib_Plugin2
 
 		return false;
 	}
-	
+
 	public function setConfig($key,$value)
 	{
 		//	This is important, because otherwise values imported/exported through transfer() will not execute in process()
 		unset($value["import"],$value["export"]);
-		
+
 		if(is_string($key)){
 			$this->config[$key] = $value;
 		}else if(is_array($key) && isset($key[0]) && $key[0] == "value"){
-			//	NOTE:	I think this is broken, if you have multiple <value> blocks each 
-			//			implementing it's own db_table parameter (for example) this code 
-			//			will find the first occurance in EVERY situation, even if you need 
+			//	NOTE:	I think this is broken, if you have multiple <value> blocks each
+			//			implementing it's own db_table parameter (for example) this code
+			//			will find the first occurance in EVERY situation, even if you need
 			//			the third block, it'll always return the first and perhaps you'll lose data
 			$k = Amslib_Array::findKey($this->config[$key[0]],"name",$key[1]);
 			if($k !== false) $this->config[$key[0]][$k] = $value;
@@ -575,40 +575,40 @@ class Amslib_Plugin2
 			$this->config[$key[0]][$key[1]] = $value;
 		}
 	}
-	
+
 	public function getConfig($type,$name=NULL)
 	{
 		switch($type){
 			case "translator":{
 				$this->config[$type][$name]["cache"] = $this->createTranslator($name);
-				return $this->config[$type][$name];	
+				return $this->config[$type][$name];
 			}break;
-			
+
 			case "model":{
 				$this->createObject($this->config[$type]);
-				return $this->config[$type];		
+				return $this->config[$type];
 			}break;
-			
+
 			case "value":{
-				//	NOTE:	I think this is broken, if you have multiple <value> blocks each 
-				//			implementing it's own db_table parameter (for example) this code 
-				//			will find the first occurance in EVERY situation, even if you need 
+				//	NOTE:	I think this is broken, if you have multiple <value> blocks each
+				//			implementing it's own db_table parameter (for example) this code
+				//			will find the first occurance in EVERY situation, even if you need
 				//			the third block, it'll always return the first.
 				return Amslib_Array::find($this->config[$type], "name", $name);
 			}break;
-			
+
 			default:{
 				if($name === NULL){
-					return isset($this->config[$type]) ? $this->config[$type] : false;	
+					return isset($this->config[$type]) ? $this->config[$type] : false;
 				}else{
-					return isset($this->config[$type][$name]) ? $this->config[$type][$name] : false;	
-				}	
+					return isset($this->config[$type][$name]) ? $this->config[$type][$name] : false;
+				}
 			}break;
 		}
-			
+
 		return false;
-	}	
-	
+	}
+
 	public function removeConfig($type,$id=NULL)
 	{
 		if($id === NULL){
@@ -617,7 +617,7 @@ class Amslib_Plugin2
 			unset($this->config[$type][$id]);
 		}
 	}
-	
+
 	public function getLocation()
 	{
 		return $this->location;
@@ -647,12 +647,12 @@ class Amslib_Plugin2
 	{
 		$this->api->setModel($model);
 	}
-	
+
 	static protected function setPath($name,$path)
 	{
 		self::$path[$name] = $path;
-	} 
-	
+	}
+
 	static public function expandPath($path)
 	{
 		$path	=	str_replace("__WEBSITE__",			self::$path["website"],	$path);

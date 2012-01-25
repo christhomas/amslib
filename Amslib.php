@@ -31,7 +31,7 @@ class Amslib
 
 	//	DEPRECATED: should use findPath instead, makes more sense
 	static protected function findFile($filename){ return self::findPath($filename); }
-	
+
 	static protected function findPath($filename)
 	{
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
@@ -57,12 +57,12 @@ class Amslib
 		error_reporting(E_ALL);
 		self::$showErrorTrigger = true;
 	}
-	
+
 	static public function setErrorHandler($handler)
 	{
 		self::$originalErrorHandler = set_error_handler($handler);
 	}
-	
+
 	static public function restoreErrorHandler()
 	{
 		if(self::$originalErrorHandler){
@@ -73,7 +73,7 @@ class Amslib
 	static public function lchop($str,$search)
 	{
 		$p = (strlen($search)) ? strpos($str,$search) : false;
-		
+
 		return ($p) !== false ? substr($str,$p+strlen($search)) : $str;
 	}
 
@@ -81,13 +81,13 @@ class Amslib
 	{
 		return ($p = strrpos($str,$search)) !== false ? substr($str,0,$p) : $str;
 	}
-	
+
 	//	FIXME: I have two methods to cut a string, wtf....which do I use??
 	static public function truncateString($string,$length)
 	{
 		return CakePHP::truncate($string,$length);
 	}
-	
+
 	//	DEPRECATED: doesn't work very well with non-ascii characters like ü
 	//	NOTE: if this is deprecated does it mean I should internally call truncateString?
 	static public function htmlCutString($string,$length)
@@ -122,37 +122,37 @@ class Amslib
 		ob_start();
 		Amslib::includeFile($filename);
 		$contents = ob_get_clean();
-		
+
 		return $contents;
 	}
-	
+
 	static public function trimString($string,$maxlen,$postfix="...")
 	{
 		return (strlen($string) > $maxlen) ? substr($string,0,$maxlen).$postfix : $string;
 	}
-	
+
 	//	blatently stolen code from: http://snipplr.com/view/22741/slugify-a-string-in-php/ :-) thank you!
 	//	modified 01/08/2011: added ability to allow custom regex through so you can add terms if required
-	//	 
+	//
 	static public function slugify($text,$remove="",$replace="-")
 	{
 		// replace non letter or digits by -
 		$text = preg_replace("~[^\\pL\d{$remove}]+~u", $replace, $text);
-		 
+
 		// trim
 		$text = trim($text, $replace);
-		 
+
 		// transliterate
 		if (function_exists('iconv')) $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-		 
+
 		// lowercase
 		$text = strtolower($text);
-		 
+
 		// remove unwanted characters
 		$text = preg_replace("~[^-\w{$remove}]+~", '', $text);
-		 
+
 		if (empty($text)) return 'n-a';
-		 
+
 		return $text;
 	}
 
@@ -166,21 +166,21 @@ class Amslib
 
 		return ($preformat) ? "<pre $hiddenOutput>$dump</pre>" : $dump;
 	}
-	
+
 	public function backtrace()
 	{
 		$args	=	func_get_args();
 		$bt		=	debug_backtrace();
-		
+
 		$slice	=	array($bt);
 		if(count($args) && is_numeric($args[0])) $slice[] = array_shift($args);
 		if(count($args) && is_numeric($args[0])) $slice[] = array_shift($args);
 
 		if(count($slice) > 1) $bt = call_user_func_array("array_slice",$slice);
-		
+
 		return Amslib_Array::filterKey($bt,Amslib_Array::filterType($args,"is_string"));
 	}
-	
+
 	//	NOTE: This method has weird parameter names to make it harder to clash with extract()'d parameters from the $__p parameter
 	static public function __importFile($__r,$__f,$__p=array(),$__b=false)
 	{
@@ -198,16 +198,16 @@ class Amslib
 
 		if(is_file($__f) && file_exists($__f)){
 			if(is_array($__p) && count($__p)) extract($__p, EXTR_SKIP);
-			
+
 			//	Optional output buffering
 			if($__b) ob_start();
-			
+
 			$__v = $__r
 				? (isset($require_once) ? require_once($__f) : require($__f))
 				: (isset($include_once) ? include_once($__f) : include($__f));
-			
+
 			if($__b) $__v = ob_get_clean();
-			
+
 			//	Return the result of the require/include, or if output buffering is enabled, return whatever was captured
 			return $__v;
 		}
@@ -242,7 +242,7 @@ class Amslib
 			if($class_name == "FirePHP"){
 				$class_name	=	"util/FirePHPCore/$class_name.class";
 			}
-			
+
 			if($class_name == "phpQuery"){
 				$class_name =	"util/phpquery.php";
 			}
@@ -261,38 +261,38 @@ class Amslib
 			if(strpos($class_name,"Amslib_Database") !== false){
 				$class_name	=	"database/$class_name";
 			}
-			
+
 			//	Redirect to include the correct path for the xml system
 			if(strpos($class_name,"Amslib_XML") !== false){
 				$class_name =	"xml/$class_name";
 			}
-			
+
 			//	Redirect to include the correct path for the plugin system
 			if(strpos($class_name,"Amslib_Plugin") !== false){
 				$class_name	=	"plugin/$class_name";
 			}
-			
+
 			//	Redirect to include the correct path for the MVC system
 			if(strpos($class_name,"Amslib_MVC") !== false){
 				$class_name	=	"mvc/$class_name";
 			}
-			
+
 			//	Redirect to include the correct path for the File system classes
 			if(strpos($class_name,"Amslib_File") !== false){
 				$class_name	=	"file/$class_name";
 			}
-			
+
 			//	DEPRECATED: unless I can find a way to fix the utf-8 broken characters like ü
 			if(strpos($class_name,"HtmlCutString") !== false){
 				$class_name	=	"util/html_cut_string";
 			}
-			
+
 			if(strpos($class_name,"CakePHP") !== false){
 				$class_name =	"util/CakePHP";
 			}
-			
+
 			$filename = str_replace("//","/","$class_name.php");
-			
+
 			return Amslib::requireFile($filename);
 		}
 
@@ -326,7 +326,7 @@ class Amslib
 	{
 		return self::arrayParam($_GET,$key,$default,$erase);
 	}
-	
+
 	static public function hasGET($key)
 	{
 		return (isset($_GET[$key])) ? true : false;
@@ -347,10 +347,10 @@ class Amslib
 	static public function setGET($key,$value)
 	{
 		$_GET[$key] = $value;
-		
+
 		return $value;
 	}
-	
+
 	/**
 	 * 	function:	postParam
 	 *
@@ -368,7 +368,7 @@ class Amslib
 	{
 		return self::arrayParam($_POST,$key,$default,$erase);
 	}
-	
+
 	static public function hasPOST($key)
 	{
 		return (isset($_POST[$key])) ? true : false;
@@ -389,7 +389,7 @@ class Amslib
 	static public function setPOST($key,$value)
 	{
 		$_POST[$key] = $value;
-		
+
 		return $value;
 	}
 
@@ -410,7 +410,7 @@ class Amslib
 	{
 		return self::arrayParam($_SESSION,$key,$default,$erase);
 	}
-	
+
 	static public function hasSESSION($key)
 	{
 		return (isset($_SESSION[$key])) ? true : false;
@@ -419,10 +419,10 @@ class Amslib
 	static public function setSESSION($key,$value)
 	{
 		$_SESSION[$key] = $value;
-		
+
 		return $value;
-	}	
-	
+	}
+
 	/**
 	 * 	COOKIE methods
 	 */
@@ -430,7 +430,7 @@ class Amslib
 	{
 		return self::arrayParam($_COOKIE,$key,$default);
 	}
-	
+
 	static public function hasCOOKIE($key)
 	{
 		return (isset($_COOKIE[$key])) ? true : false;
@@ -439,10 +439,10 @@ class Amslib
 	static public function setCOOKIE($key,$value)
 	{
 		$_COOKIE[$key] = $value;
-		
+
 		return $value;
 	}
-		
+
 	/**
 	 * 	function:	filesParam
 	 *
@@ -464,9 +464,9 @@ class Amslib
 	static public function setFILES($key,$value)
 	{
 		$_FILES[$key] = $value;
-		
+
 		return $value;
-	}	
+	}
 
 	/**
 	 * 	function:	requestParam
@@ -489,10 +489,10 @@ class Amslib
 	static public function setREQUEST($key,$value)
 	{
 		$_REQUEST[$key] = $value;
-		
+
 		return $value;
 	}
-	
+
 	static public function arrayParam(&$source,$key,$default=NULL,$erase=false)
 	{
 		if(isset($source[$key])){
@@ -502,13 +502,13 @@ class Amslib
 
 		return $default;
 	}
-		
+
 	//	IDEAS FOR A NEW(ER) SIMPLIFIED API
 	static public function getSuper($type,$key,$default=NULL,$erase=false){}
 	static public function setSuper($type,$key,$value){}
-	
+
 	//	DEPRECATED OLDER SUPER METHODS
-	static public function insertRequestParam($key,$value){	self::setREQUEST($key,$value);	}	
+	static public function insertRequestParam($key,$value){	self::setREQUEST($key,$value);	}
 	static public function insertFilesParam($key,$value){	self::setFILES($key,$value);	}
 	static public function insertCookieParam($key,$value){	self::setCOOKIE($key,$value);	}
 	static public function insertSessionParam($key,$value){	self::setSESSION($key,$value);	}
