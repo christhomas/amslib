@@ -11,7 +11,7 @@ class Admin_MVC_Model extends Amslib_Database_MySQL2
 	{
 		parent::__construct($autoconnect);
 		
-		if(self::$connection) $this->copy(self::$connection);
+		if(self::$connection) $this->copyConnection(self::$connection);
 	}
 	
 	static public function setConnection($database)
