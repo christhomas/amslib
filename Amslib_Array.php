@@ -10,80 +10,80 @@ class Amslib_Array
 		//	return the original value
 		return $array;
 	}
-	
+
 	static public function min($array,$key,$returnKey=NULL)
 	{
 		$min = NULL;
-		
+
 		foreach(self::valid($array) as $item){
 			if($min === NULL) $min = $item;
-			
+
 			if($item[$key] < $min[$key]) $min = $item;
 		}
-		
+
 		return $returnKey !== NULL && isset($min[$returnKey]) ? $min[$returnKey] : $min;
 	}
-	
+
 	static public function max($array,$key,$returnKey=NULL)
 	{
 		$max = NULL;
-		
+
 		foreach(self::valid($array) as $item){
 			if($max === NULL) $max = $item;
-			
+
 			if($item[$key] > $max[$key]) $max = $item;
 		}
-		
+
 		return $returnKey !== NULL && isset($max[$returnKey]) ? $max[$returnKey] : $max;
 	}
-	
+
 	static public function sort($array,$index)
 	{
 		if(count($array) < 2) return $array;
-			 
+
 		$left = $right = array();
-			 
+
 		reset($array);
 		$pivot_key = key($array);
 		$pivot = array_shift($array);
-			 
+
 		foreach($array as $k => $v) {
 			if($v[$index] < $pivot[$index])
 				$left[$k] = $v;
 			else
 				$right[$k] = $v;
 		}
-		
+
 		return array_merge(self::sort($left,$index), array($pivot_key => $pivot), self::sort($right,$index));
 	}
-	
+
 	static public function pluck($array,$key)
 	{
 		if(!is_array($array) || !self::isMulti($array)) return array();
-		
+
 		$values = array();
-		
+
 		foreach(self::valid($array) as $item){
 			if(isset($item[$key])) $values[] = $item[$key];
 		}
-		
+
 		return $values;
 	}
-	
+
 	static public function removeValue(array $array,$value,$strict=false)
 	{
 	    return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));
 	}
-	
-	public function filterType($array,$callback)
+
+	static public function filterType($array,$callback)
 	{
 		return function_exists($callback) ? array_filter(self::valid($array),$callback) : $array;
 	}
-	
+
 	static public function filterKey($array,$filter,$similar=false)
 	{
 		$array = self::valid($array);
-		
+
 		if($similar === false){
 			if(self::isMulti($array)){
 				//	NOTE: perhaps I should recurse here?
@@ -92,15 +92,15 @@ class Amslib_Array
 				//	NOTE: I don't think array_map will work because this method requires parameters that it can't forward
 				foreach($array as &$a) $a = array_intersect_key($a, array_flip($filter));
 			}else{
-				$array = array_intersect_key($array, array_flip($filter));	
+				$array = array_intersect_key($array, array_flip($filter));
 			}
-			
+
 			return $array;
 		}
-		
+
 		return self::filter($array,NULL,$filter,true,true);
 	}
-	
+
 	static public function filter($array,$key,$value,$returnFiltered=false,$similar=false)
 	{
 		$filter = array();
@@ -108,10 +108,10 @@ class Amslib_Array
 		foreach(self::valid($array) as $k=>$v)
 		{
 			$found = false;
-			
+
 			//	TODO: I'm sure that there are more situations I could take into account here
 			//	TODO: I should document exactly what this method does, because right now I can't remember
-			
+
 			$search = $key ? $v[$key] : $v;
 
 			if($similar == true && strpos($search,$value) !== false) $found = true;
@@ -128,10 +128,10 @@ class Amslib_Array
 						}
 					}
 				}else if(in_array($search,$value)){
-					$found = true;	
+					$found = true;
 				}
 			}
-			
+
 			if($found){
 				$filter[$k] = $v;
 				unset($array[$k]);
@@ -140,26 +140,26 @@ class Amslib_Array
 
 		return $returnFiltered ? $filter : $array;
 	}
-	
+
 	//	TODO: this method is a little open to abuse and in some situations wouldn't do the right thing
 	//	TODO: explain in words what this does and how it should work
 	static public function countValues($array)
 	{
 		$counts = array();
-		
+
 		foreach(self::valid($array) as $v){
 			if(!isset($counts[$v])) $counts[$v] = 0;
-			
+
 			$counts[$v]++;
 		}
-		
+
 		return $counts;
 	}
 
 	static public function find($array,$key,$value)
 	{
 		$result = NULL;
-		
+
 		foreach(self::valid($array) as $a){
 			if($a[$key] == $value) return $a;
 		}
@@ -178,12 +178,12 @@ class Amslib_Array
 		if ($args) {
 			$key = array_shift($args);
 			array_unshift($args, $array[$key]);
-			return call_user_func_array(__FUNCTION__, $args); 
+			return call_user_func_array(__FUNCTION__, $args);
 		}
 		return $array;
 	}
 	*/
-	
+
 	static public function findKey($array,$key,$value)
 	{
 		foreach(self::valid($array) as $k=>$a){
@@ -203,24 +203,24 @@ class Amslib_Array
 
 		return $matches;
 	}
-	
+
 	static public function hasKeys($array,$keys)
 	{
 		if(!is_array($array)) return false;
-		
+
 		if(!is_array($keys)) $keys = array($keys);
-		
+
 		foreach($keys as $k){
 			if(!isset($array[$k])) return false;
 		}
-		
+
 		return true;
 	}
 
 	static public function stripSlashesMulti($array,$key=NULL)
 	{
 		if(is_string($key)) $key = array($key);
-		
+
 		foreach($array as &$element){
 			if(!$key) $key = array_keys($element);
 			foreach($key as $index){
@@ -260,19 +260,19 @@ class Amslib_Array
 	{
 		return count($array)!==count($array, COUNT_RECURSIVE);
 	}
-	
+
 	//	DEPRECATED: this is not supposed to be here
 	//	FIXME: glob() on an array object? when it refers to the filesystem or array? I think it's a mistake to put this method here
 	static public function glob($location,$relative=false)
 	{
 		$items = glob(Amslib_Website::abs($location));
-		
+
 		if($relative){
 			foreach($items as &$i){
 				$i = Amslib_Website::rel($i);
 			}
 		}
-		
+
 		return $items;
 	}
 }

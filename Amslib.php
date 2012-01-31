@@ -167,7 +167,7 @@ class Amslib
 		return ($preformat) ? "<pre $hiddenOutput>$dump</pre>" : $dump;
 	}
 
-	public function backtrace()
+	static public function backtrace()
 	{
 		$args	=	func_get_args();
 		$bt		=	debug_backtrace();

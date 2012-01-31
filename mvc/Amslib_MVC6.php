@@ -212,7 +212,7 @@ class Amslib_MVC6
 		Amslib::requireFile($this->object[$id],array("require_once"=>true));
 
 		if(class_exists($id)){
-			if($singleton) return call_user_func(array($id,"getInstance"));
+			if($singleton && method_exists($id,"getInstance")) return call_user_func(array($id,"getInstance"));
 
 			return new $id;
 		}
