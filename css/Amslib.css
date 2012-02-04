@@ -1,0 +1,89 @@
+@CHARSET "UTF-8";
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-size: 100%;
+	vertical-align: baseline;
+	background: transparent;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+
+/* remember to define focus styles! */
+:focus {
+	outline: 0;
+}
+
+/* remember to highlight inserts somehow! */
+ins {
+	text-decoration: none;
+}
+del {
+	text-decoration: line-through;
+}
+
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+/* Fix the stupid W3C box model, Internet explorer was the correct box model */
+*{
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	box-sizing: border-box;	
+}
+
+/****************************************************************************/
+/* CSS enclose float hack to make floats enclose within the container div	*/
+/****************************************************************************/
+.floatfix:after{
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+/* Which float to clear, left or right, both is automatic */
+.floatfix-left:after{	clear: left;			}
+.floatfix-right:after{	clear: right;			}
+.floatfix{				display: inline-table; 	} /* Mark Hadley's fix for IE Mac */
+/* Back Mac Hack, Hides this css from Mac IE (this back slash-->) \*/
+.floatfix{				display: block;			}
+/* End of Back Mac Hack */
+/* End of CSS enclose float hack */
+.hbox{					float: left;			}
+.hbox-right{			float: right;			}
+/* ie6 fixes */ 
+.ie6 .floatfix{			height: 1%;				}
+.ie6 .hbox{				display: inline;		}
+.ie6 .hbox-right{		display: inline;		}
+/* ie7 fixes */
+.ie7 .floatfix{			display: inline-block;	}
+.ie7 .hbox{				display: inline;		}
+.ie7 .hbox-right{		display: inline;		}
