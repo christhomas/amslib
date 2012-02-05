@@ -125,7 +125,7 @@ class Amslib_MVC6
 	{
 		$this->routes[$name] = $route;
 	}
-
+	
 	public function setPlugin($plugin)
 	{
 		$this->plugin = $plugin;
@@ -278,10 +278,10 @@ class Amslib_MVC6
 		}else{*/
 			$this->service[$id] = Amslib_Website::rel($name);
 
-			//	NOTE: I should recognise that now Amslib_MVC4 is dependant on Amslib_Router3's existence
+			//	NOTE: I should recognise that now Amslib_MVC* is dependant on Amslib_Router3's existence
 			//	NOTE: perhaps we should remove this dependency and instead inport the data as opposed to looking it up here
 			//	Attempt to find a routed url for this service
-			$url = Amslib_Router3::getURL("Service:$id");
+			$url = Amslib_Router4::getURL("Service:$id");
 			if(!$url) $url = $this->service[$id];
 
 			//	Set this as a service url for the javascript to acquire
@@ -438,7 +438,7 @@ class Amslib_MVC6
 
 		//	FIXME:	previously this used the old setService, but now it's upgraded
 		//			to use the code from setService2, perhaps this code won't work anymore.
-		$api = Amslib_Plugin_Manager2::getAPI($src);
+		$api = Amslib_Plugin_Manager3::getAPI($src);
 		$this->setService($dest,$api->getService($id));
 	}
 

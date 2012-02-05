@@ -15,16 +15,16 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: Amslib_Router3.php
- * Title: Version 3.0 of the Core router object
- * Version: 3.2
+ * File: Amslib_Router4.php
+ * Title: Version 4.0 of the Core router object
+ * Version: 4.0
  * Project: Amslib/Router
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-class Amslib_Router3
+class Amslib_Router4
 {
 	static protected $source;
 	static protected $location;
@@ -93,15 +93,15 @@ class Amslib_Router3
 	{
 		switch($type){
 			case "source:xml":{
-				return Amslib_Router_Source2_XML::getInstance();
+				return Amslib_Router_Source4_XML::getInstance();
 			}break;
 
 			case "source:database":{
-				return Amslib_Router_Source_Database::getInstance();
+				return Amslib_Router_Source4_Database::getInstance();
 			}break;
 
 			case "language":{
-				return Amslib_Router_Language3::getInstance();
+				return Amslib_Router_Language4::getInstance();
 			}break;
 		}
 
@@ -111,7 +111,7 @@ class Amslib_Router3
 	static public function execute()
 	{
 		if(self::$source && self::$path){
-			self::$path		=	Amslib_Router_Language3::extract(self::$path);
+			self::$path		=	Amslib_Router_Language4::extract(self::$path);
 			self::$route	=	self::getRouteByURL(self::$path);
 		}
 	}
@@ -131,7 +131,7 @@ class Amslib_Router3
 		$route = self::getRoute($name,$version,$lang);
 
 		//	TODO: Support passing the $lang parameter and have it override the language setup
-		$lang = Amslib_Router_Language3::getName();
+		$lang = Amslib_Router_Language4::getName();
 		if($lang) $lang = "/$lang/";
 
 		return Amslib_Website::rel($lang.$route["route"]);
@@ -141,8 +141,8 @@ class Amslib_Router3
 	{
 		if($name == NULL) return self::$route;
 
-		if($lang == NULL) $lang = Amslib_Router_Language3::getCode();
-		print("<pre>");var_dump(debug_backtrace(false));print("</pre>");
+		if($lang == NULL) $lang = Amslib_Router_Language4::getCode();
+
 		return self::sanitise(self::$source->getRoute($name,$version,$lang));
 	}
 
@@ -170,11 +170,6 @@ class Amslib_Router3
 		return $r["resource"];
 	}
 
-	//	DEPRECATED USE getParameter instead (so I can return one parameter, or all of them at once)
-	static public function getParameters(){ return self::getParameter(); }
-	//	DEPRECATED USE getURLOption instead (so I can return one parameter, or all of them at once)
-	static public function getURLOptions($index=NULL,$default=""){ return self::getURLOption($index,$default); }
-
 	static public function getParameter($name=NULL,$default="")
 	{
 		if($default === "") $default = self::$route["parameters"];
@@ -197,6 +192,16 @@ class Amslib_Router3
 				? self::$route["options"][$index]
 				: $default;
 	}
+	
+	static public function getStylesheets()
+	{
+		return self::$route["stylesheets"];
+	}
+	
+	static public function getJavascripts()
+	{
+		return self::$route["javascripts"];
+	}
 
 	/**
 	 * method: changeLang
@@ -207,12 +212,12 @@ class Amslib_Router3
 	 */
 	static public function changeLang($langName)
 	{
-		Amslib_Router_Language3::push();
-		Amslib_Router_Language3::set($langName);
+		Amslib_Router_Language4::push();
+		Amslib_Router_Language4::set($langName);
 
 		$u = self::getURL();
 
-		Amslib_Router_Language3::pop();
+		Amslib_Router_Language4::pop();
 
 		return $u;
 	}
