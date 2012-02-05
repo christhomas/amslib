@@ -16,30 +16,26 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * file: Amslib_Database_MySQL.php
- * title: Antimatter Database: MySQL library
- * description: A database object to centralise all interaction with a mysql databse
- * 		into a single object which nicely hides some of the annoying repetitive
- * 		aspects of a database, whilst giving you a nice candy layer to deal with instead
- * version: 2.7
+ * title: Antimatter Database: MySQL library version 3
+ * description: This is a small cover object which enhanced the original with some
+ * new functionality aiming to solve the fatal_error problem but keep returning data
+ * version: 3.0
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-/**
- * 	class:	Amslib_Database_MySQL
- *
- * 	The database core class which controls access to the database, ALL SQL
- * 	is done inside here and no SQL should be done elsewhere
- *
- *	notes:
- *		-	Do not directly instantiate this class, instead, extend it into a child and then use a singleton pattern and instantiate that instead
- *
- *	TODO:
- *		-	Implement connection pooling
- */
-abstract class Amslib_Database_MySQL extends Amslib_Database
+class Amslib_Database_MySQL extends Amslib_Database
 {
+	protected $errors;
+	
+	protected function setDebugOutput($query)
+	{
+		if($this->debug){
+			Amslib_Keystore::set("db_query[{$this->seq}][".microtime(true)."]",Amslib::var_dump($query,true));
+		}
+	}
+
 	protected function setEncoding($encoding)
 	{
 		$allowedEncodings = array("utf8","latin1");
@@ -49,29 +45,30 @@ abstract class Amslib_Database_MySQL extends Amslib_Database
 			mysql_query("SET CHARACTER SET $encoding",$this->connection);
 		}else{
 			die(	"FATAL ERROR: Your encoding ($encoding) is wrong, this can cause database corruption. ".
-					"I can't allow you to continue<br/>".
+					"I'm sorry dave, but I can't allow you to do that<br/>".
 					"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>");
 		}
 	}
 
 	/**
-	 * 	method:	makeConnection
+	 * 	method:	connect
 	 *
 	 * 	Connect to the MYSQL database using various details
 	 *
 	 * 	todo:
 	 * 		-	Need to move the database details to somewhere more secure (like inside the database!! ROFL!! joke, don't do that!!!!)
 	 */
-	protected function makeConnection()
+	protected function connect()
 	{
 		$this->disconnect();
+		$details = $this->getConnectionDetails();
 
-		if($this->loginDetails){
-			if($c = mysql_connect($this->loginDetails["server"],$this->loginDetails["username"],$this->loginDetails["password"],true))
+		if($details){
+			if($c = mysql_connect($details["server"],$details["username"],$details["password"],true))
 			{
-				if(!mysql_select_db($this->loginDetails["database"],$c)){
+				if(!mysql_select_db($details["database"],$c)){
 					$this->disconnect();
-					$this->fatalError("Failed to open database requested '{$this->loginDetails["database"]}'");
+					$this->setError("Failed to open database requested '{$details["database"]}'");
 				}
 				else{
 					$this->connection = $c;
@@ -79,12 +76,10 @@ abstract class Amslib_Database_MySQL extends Amslib_Database
 					$this->setFetchMethod("mysql_fetch_assoc");
 					$this->setEncoding("utf8");
 				}
-			// Replace these errors with PHPTranslator codes instead (language translation)
-			}else $this->fatalError("Failed to connect to database: {$this->loginDetails["database"]}<br/>");
-		// Replace these errors with PHPTranslator codes instead (language translation)
-		}else $this->fatalError("Failed to find the database connection details, check this information<br/>");
-
-		$this->loginDetails = NULL;
+			// Replace these errors with Amslib_Translator codes instead (language translation)
+			}else $this->setError("Failed to connect to database: {$details["database"]}<br/>");
+		// Replace these errors with Amslib_Translator codes instead (language translation)
+		}else $this->setError("Failed to find the database connection details, check this information<br/>");
 	}
 
 	/******************************************************************************
@@ -100,15 +95,19 @@ abstract class Amslib_Database_MySQL extends Amslib_Database
 	{
 		parent::__construct();
 
+		$this->errors = array();
+
+		//	TODO: we should implement a try/catch block to easily catch disconnected databases
 		if($connect) $this->connect();
 	}
 
 	public function escape($value)
 	{
-		die(Amslib::var_dump(debug_backtrace(),true));
-		return mysql_real_escape_string($value);
+		return $this->getConnectionStatus() 
+			? mysql_real_escape_string($value) 
+			: die("unsafe string escape: database not connected, backtrace: ".Amslib::var_dump(Amslib::backtrace(1,3,"file","line"),true));
 	}
-
+	
 	public function fixColumnEncoding($src,$dst,$table,$primaryKey,$column)
 	{
 		$encoding_map = array(
@@ -233,24 +232,6 @@ HAS_TABLE;
 
 		return $this->lastResult;
 	}
-	
-	public function query($query)
-	{
-		$this->seq++;
-		
-		if($this->getConnectionStatus() == false) return false;
-		
-		$this->setLastQuery($query);
-		$result = mysql_query($query,$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
-		
-		if(!$result){
-			$this->fatalError("Query failed<br/>command = '$query'");
-			return false;
-		}
-		
-		return $result;
-	}
 
 	public function select($query,$numResults=0,$optimise=false)
 	{
@@ -262,7 +243,7 @@ HAS_TABLE;
 
 		$this->setLastQuery($query);
 		$this->selectResult = mysql_query($query,$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
+		$this->setDebugOutput($query);
 
 		if($this->selectResult){
 			$rowCount = mysql_num_rows($this->selectResult);
@@ -272,7 +253,7 @@ HAS_TABLE;
 			return $this->getResults($numResults,$this->selectResult,$optimise);
 		}
 
-		$this->fatalError("Transaction failed<br/>query = '$query'");
+		$this->setErrors($query);
 
 		return false;
 	}
@@ -287,16 +268,18 @@ HAS_TABLE;
 
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
-		if($this->debug) Amslib_Keystore::set("mysql_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
+		
+		$this->setDebugOutput($query);
+		
+		if(!$result){
+			$this->lastInsertId = false;
+			$this->setErrors($query);
+			return false;	
+		}
 
 		$this->lastInsertId = mysql_insert_id($this->connection);
-		if($result && ($this->lastInsertId !== false)) return $this->lastInsertId;
-
-		$this->lastInsertId = false;
-
-		$this->fatalError("Transaction failed<br/>query = '$query'<br/><pre>result = '".print_r($result,true)."'</pre>lastInsertId = '$this->lastInsertId'<br/>mysql_insert_id() = '".mysql_insert_id()."'<br/>mysql_error() = '".mysql_error()."'");
-
-		return false;
+		
+		return $this->lastInsertId;
 	}
 
 	public function update($query)
@@ -309,13 +292,14 @@ HAS_TABLE;
 
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
+		$this->setDebugOutput($query);
+		
+		if(!$result){
+			$this->setErrors($query);
+			return false;
+		}
 
-		if($result) return mysql_affected_rows() >= 0;
-
-		$this->fatalError("Transaction failed<br/>query = '$query'");
-
-		return false;
+		return mysql_affected_rows($this->connection) >= 0;
 	}
 
 	public function delete($query)
@@ -328,18 +312,36 @@ HAS_TABLE;
 
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
-		if($this->debug) Amslib_Keystore::set("db_query_{$this->seq}_".microtime(true),"<pre>QUERY = '$query'<br/></pre>");
+		$this->setDebugOutput($query);
+		
+		if(!$result){
+			$this->setErrors($query);
+			return false;	
+		}
 
-		if($result) return mysql_affected_rows() >= 0;
-
-		$this->fatalError("Transaction failed<br/>query = '$query'");
-
-		return false;
+		return mysql_affected_rows($this->connection) >= 0;
 	}
-
-	public function error()
+	
+	public function setErrors($query)
 	{
-		return mysql_error();
+		$this->errors[] = array(
+			"db_failure"		=>	true,
+			"db_query"			=>	$query,
+			"db_error"			=>	mysql_error($this->connection),
+			"db_error_num"		=>	mysql_errno($this->connection),
+			"db_last_insert"	=>	$this->lastInsertId,
+			"db_insert_id"		=>	mysql_insert_id($this->connection),
+			"db_location"		=>	Amslib_Array::filterKey(array_slice(debug_backtrace(),0,5),array("file","line")),
+		);
+	}
+	
+	public function setError($error)
+	{
+		$this->errors[] = $error;
+	}
+	
+	public function getErrors()
+	{
+		return $this->errors;
 	}
 }
-?>

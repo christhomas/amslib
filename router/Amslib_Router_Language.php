@@ -17,7 +17,7 @@
  * 
  * File: Amslib_Router_Language.php
  * Title: Language component for the Router subsystem
- * Version: 1.0
+ * Version: 4.0
  * Project: Amslib/Router
  * 
  * Contributors/Author:
@@ -26,43 +26,100 @@
 
 class Amslib_Router_Language
 {
-	protected static $enabled = false;
-	protected static $enabledLanguage;
-	protected static $supportedLanguages	=	array();
-	protected static $defaultLanguage		=	"";
+	protected static $router		=	false;
+	protected static $current		=	false;
+	protected static $supported		=	array();
+	protected static $enabled		=	false;
+	protected static $default		=	false;
+	protected static $push			=	false;
+	//	FIXME: this won't work with the translator system, so we need to combine these together
+	protected static $sessionKey	=	"Amslib_Router_Language";
 	
-			//	If there was a language passed, make sure it's one of those supported
-	protected static function sanitise($language)
+	//	If there was a language passed, make sure it's one of those supported
+	protected static function sanitise($langName=NULL,$langCode=NULL)
 	{
-		if($language !== NULL && in_array($language,self::$supportedLanguages)){
-			return $language;
+		//	Detect by language name (en, de, fr, es, pt, cat, etc, etc)
+		if($langName && in_array($langName,self::$supported)){
+			return $langName;
 		}
-
-		return self::$defaultLanguage;
+		
+		//	Sanitise by language Code (en_GB, de_DE, fr_FR, es_ES, pt_PT, es_CA, etc, etc)
+		if($langCode && isset(self::$supported[$langCode])){
+			return self::$supported[$langCode];	
+		}
+		
+		//	Wasn't found, so return the default language
+		return self::$default;
 	}
 	
-	public static function setup($supported,$default)
+	public static function setSessionKey($name)
 	{
-		self::$supportedLanguages	=	$supported;
-		self::$defaultLanguage		=	$default;
+		self::$sessionKey = $name;
 	}
-
-	public static function initialise($language=NULL,$sessionKey="language")
+	
+	public static function add($langCode,$langName,$default=false)
 	{
+		self::$supported[$langCode] = $langName;
+		
+		/*	NOTE:	Set the default language to the first language added
+					OR if you passed in a language (which will override 
+					anything you set automatically)
+		*/
+		if(!self::$default || $default) self::$default = $langCode;
+	}
+	
+	/**
+	 * method: extract
+	 * 
+	 * Extract from the $path a language embedded as the first part of the url, if there is one, you need
+	 * to override the session language so the page will render in the correct language, this is also
+	 * used in the construction of urls to show in the pages
+	 */
+	public static function extract($path)
+	{
+		//	If the path is just /, then obviously it has nothing, just return it
+		if($path == "/") return $path;
+		
+		$parts = explode("/",trim($path,"/ "));
+		
+		if(count($parts)){
+			$first	=	array_shift($parts);
+			$lang	=	self::sanitise($first);
+			if($lang == $first){
+				self::set($lang);
+				
+				//	Make sure there are only single slashes and make sure the path starts and ends with a slash
+				return Amslib_File::reduceSlashes("/".implode("/",$parts)."/");
+			}
+		}
+		
+		return $path;
+	}
+	
+	public static function execute($langName=NULL)
+	{
+		//	NOTE: You should only enable the system if there are languages added to it.
+		
+		//	If there was no language passed, use the default language
+		if($langName == NULL && self::$default) $langName = self::$supported[self::$default];
+		
+		//	Enable the language system
 		self::enable();
-		 
-		//	If the language passed was invalid, set the language requested to the default
-		$language = self::sanitise($language);
 		
-		//	If there is no session language, set it to the language being requested
-		if(!isset($_SESSION[$sessionKey])) $_SESSION[$sessionKey] = $language;
-
-		//	Then enabledLanguage becomes a reference to this new language
-		//	Remember, if there is a session language set, you cannot override it through this method
-		//	To override this session language, you must provide a routerPath with a language parameter embedded
-		self::$enabledLanguage = &$_SESSION[$sessionKey];
+		//	Enable the required language
+		$langName = self::sanitise($langName);
+		
+		//	Create a session parameter to store the current language in
+		if(!isset($_SESSION[self::$sessionKey])){
+			$_SESSION[self::$sessionKey] = $langName;	
+		}
+		
+		//	You can ONLY set the session parameter, if it doesnt already exist
+		//	If it already exists, the only way to change the current language, is to call setLanguage
+		//	Or pass a language through the url which will/should be picked up through the router
+		self::$current = &$_SESSION[self::$sessionKey];
 	}
-		
+	
 	public static function enable()
 	{
 		self::$enabled = true;
@@ -73,73 +130,33 @@ class Amslib_Router_Language
 		self::$enabled = false;
 	}
 	
-	/**
-	 * method: detect
-	 * 
-	 * Detect from the routerPath a language embedded as the first url part, if there is one, you need
-	 * to override the session language so the page will render in the correct language, this is also
-	 * used in the construction of urls to show in the pages
-	 */
-	public static function detect(&$routerPath)
+	public static function set($langName)
 	{
-		$parts = explode("/",trim($routerPath));
-
-		//	strip the first and last array elements, if they are empty strings 
-		//	(this happens when the url starts and ends with /)
-		if(strlen(current($parts)) == 0) array_shift($parts);
-		if(strlen(end($parts)) == 0) array_pop($parts);
-
-		if(count($parts) > 0){
-			$p0 = reset($parts);
-			$language = self::sanitise($p0);
-			if($language == $p0) self::$enabledLanguage = array_shift($parts);	
-		}
-		
-		$routerPath = "/".implode("/",$parts);
-		
-		return $routerPath;
+		self::$current = self::sanitise($langName);
 	}
 	
-	/**
-	 * method: change
-	 * 
-	 * Create a url for the current route that will change the language into the other one
-	 * this is completely application specific in how this happens, per application, requires perhaps
-	 * a different way to change languages, as long as the url scheme for languages remains the same
-	 * 
-	 * FIXME: Seems to be hard coded into dealing with only spanish and english languages
-	 */
-	public static function change($language)
+	public static function setCode($langCode)
 	{
-		if(self::$enabled){
-			//	Switch language
-			self::set($language);
-		}
-		
-		// return the current page, but with the language swapped
-		$Router = Amslib_Router::getInstance();
-		return $Router->getCurrentRoute();
-	}
-	
-	public static function set($language)
-	{
-		self::$enabledLanguage = self::sanitise($language);
+		self::$current = self::sanitise(NULL,$langCode);
 	}
 
-	public static function get($url=false)
+	public static function getName()
 	{
-		$lang = "";
-		
-		if(self::$enabled){
-			if($url) $lang = "/";
-			$lang = $lang.self::$enabledLanguage;
-		}
-		
-		return $lang;
+		return self::$current;
 	}
 	
 	public static function getCode()
 	{
-		return array_search(self::$enabledLanguage,self::$supportedLanguages);	
+		return array_search(self::$current,self::$supported);	
+	}
+	
+	public static function push()
+	{
+		self::$push = self::$current;
+	}
+	
+	public static function pop()
+	{
+		self::$current = self::$push;
 	}
 }

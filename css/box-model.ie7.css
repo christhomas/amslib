@@ -1,6 +1,0 @@
-@CHARSET "UTF-8";
-
-/* ie7 fixes */
-*+html .floatfix{	display: inline-block;	}
-.hbox{				display: inline;		}
-.hbox-right{		display: inline;		}

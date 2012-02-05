@@ -15,7 +15,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * file: Amslib_Translator2.php
+ * file: Amslib_Translator.php
  * title: Human Language Translator
  * version: 3.0
  * description: A translator object which uses a language catalog like gettext but doesnt
@@ -28,12 +28,12 @@
  *******************************************************************************/
 
 /**
- * class: Amslib_Translator2
+ * class: Amslib_Translator
  *
  * Translate strings from between a recognised input and output, it's fast,
  * flexible and easy to use (easier than PO files anyway)
  */
-class Amslib_Translator2 extends Amslib_Translator2_Source
+class Amslib_Translator extends Amslib_Translator_Source
 {
 	protected	$source;
 	protected	$stackLanguage;
@@ -43,9 +43,9 @@ class Amslib_Translator2 extends Amslib_Translator2_Source
 		$this->name = $name;
 		
 		switch($type){
-			case "xml":{		$this->source = new Amslib_Translator2_XML();		}break;
-			case "database":{	$this->source = new Amslib_Translator2_Database();	}break;
-			case "keystore":{	$this->source = new Amslib_Translator2_Keystore();	}break;
+			case "xml":{		$this->source = new Amslib_Translator_XML();		}break;
+			case "database":{	$this->source = new Amslib_Translator_Database();	}break;
+			case "keystore":{	$this->source = new Amslib_Translator_Keystore();	}break;
 		}
 	}
 	

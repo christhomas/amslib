@@ -1,5 +1,5 @@
 <?php 
-class Amslib_Translator2_XML extends Amslib_Translator2_Keystore
+class Amslib_Translator_XML extends Amslib_Translator_Keystore
 {
 	protected $database;
 	protected $location;

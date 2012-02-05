@@ -24,7 +24,7 @@
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-class Amslib_MVC6
+class Amslib_MVC
 {
 	protected $__mixins = array();
 	protected $object;
@@ -239,7 +239,7 @@ class Amslib_MVC6
 		return $this->view;
 	}
 
-	public function renderView($id,$parameters=array())
+	public function render($id,$parameters=array())
 	{
 		if(is_string($id) && isset($this->view[$id]))
 		{
@@ -278,10 +278,10 @@ class Amslib_MVC6
 		}else{*/
 			$this->service[$id] = Amslib_Website::rel($name);
 
-			//	NOTE: I should recognise that now Amslib_MVC* is dependant on Amslib_Router3's existence
+			//	NOTE: I should recognise that now Amslib_MVC is dependant on Amslib_Router's existence
 			//	NOTE: perhaps we should remove this dependency and instead inport the data as opposed to looking it up here
 			//	Attempt to find a routed url for this service
-			$url = Amslib_Router4::getURL("Service:$id");
+			$url = Amslib_Router::getURL("Service:$id");
 			if(!$url) $url = $this->service[$id];
 
 			//	Set this as a service url for the javascript to acquire
@@ -438,7 +438,7 @@ class Amslib_MVC6
 
 		//	FIXME:	previously this used the old setService, but now it's upgraded
 		//			to use the code from setService2, perhaps this code won't work anymore.
-		$api = Amslib_Plugin_Manager3::getAPI($src);
+		$api = Amslib_Plugin_Manager::getAPI($src);
 		$this->setService($dest,$api->getService($id));
 	}
 

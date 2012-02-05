@@ -1,5 +1,5 @@
 <?php 
-class Amslib_Resource_Compiler2
+class Amslib_Resource_Compiler
 {
 	static protected $stylesheet = array();
 	static protected $javascript = array();

@@ -15,43 +15,27 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: Amslib_Router_URL.php
- * Title: Base resource<->URL convertor for the router system
- * Version: 1.0
- * Project: Amslib/Router
- * 
- * NEXT VERSION: 
- * 	In reality this object is largely redundant because of a series of optimisations
- * 	done in Amslib_Router2, so basically we need a couple extra static methods to merge
- * 	Amslib_Router2 and Amslib_Router_URL together, keeping Amslib_Router_URL around just for 
- * 	backwards compatibility
+ * File: Amslib_MVC_Missing.php
+ * Title: Implements a fake interface where everything returns false and it logs errors
+ * Description: This object's purpose is to provide an error reporting mechanism whilst
+ * 				avoiding the fatal errors, warnings, etc when you try to obtain a plugin which 
+ * 				doesn't exist, this object will be returned and it's using a __call interface
+ * 				to hijack and control the system, report errors and attempt to correct failures
+ * Version: 4.0
+ * Project: amslib
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-class Amslib_Router_URL
+class Amslib_MVC_Missing
 {
-	protected static $router;
-
-	public static function setRouter($router)
-	{
-		self::$router = $router;
-	}
-
-	public static function AddHost($url)
-	{
-		return "http://{$_SERVER["SERVER_NAME"]}$url";
-	}
+	public function __construct(){}
 	
-	public static function get($route,$option="default")
+	public function __call($name,$args)
 	{
-		return str_replace("//","/",self::$router->getRoute($route,$option));
-	}
-	
-	// DEPRECATED METHODS
-	public static function getRoute($route,$option="default")
-	{
-		return self::get($route,$default);
+		//	TODO: we need a logging interface to record this error
+		
+		return false;
 	}
 }

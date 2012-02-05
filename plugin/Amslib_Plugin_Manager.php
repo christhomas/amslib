@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * file: Amslib_Plugin_Manager.php
- * title: Antimatter Plugin: Plugin Manager object
+ * title: Antimatter Plugin: Plugin Manager object version 3
  * description: An object to store all the plugins and provide a central method
  * 				to access them all
- * version: 1.4
+ * version: 3.0
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -34,7 +34,7 @@ class Amslib_Plugin_Manager
 	static protected function findPlugin($name,$location=NULL)
 	{
 		$search = array_merge(array($location),self::$location);
-		
+
 		foreach($search as $location)
 		{
 			if(file_exists("$location/$name/package.xml")){
@@ -48,6 +48,86 @@ class Amslib_Plugin_Manager
 		return false;
 	}
 
+	static public function config($name,$location)
+	{
+		//	Plugin was already loaded, so return it's Plugin Object directly
+		if(self::isLoaded($name)) return self::$plugins[$name];
+		
+		if($location = self::findPlugin($name,$location)){
+			//	Plugin was not present, so create it, load everything required and return it's API
+			self::$plugins[$name] = new Amslib_Plugin();
+			self::$plugins[$name]->config($name,$location.$name);
+		
+			return self::$plugins[$name];
+		}
+		
+		//	Plugin was not found
+		return false;
+	}
+	
+	static public function load($name,$location=NULL)
+	{
+		//	Config a plugin to be "preloaded" and available
+		$p = self::config($name,$location);
+		
+		//	Process any import/export directives
+		$p->transfer();
+				
+		//	Load the plugin and all it's children and resources
+		$p->load();
+		
+		//	Insert the plugin, or remove it if something has failed
+		if(self::insert($name,$p) == false) self::remove($name);
+		
+		//	Obtain the API object, or false if it doesn't exist
+		return self::getAPI($name);
+	}
+	
+	static public function preload($name,$plugin)
+	{
+		if($name && $plugin) self::$plugins[$name] = $plugin;
+	}
+
+	static public function insert($name,$plugin)
+	{
+		if($name && $plugin){
+			$api = $plugin->getAPI();
+			
+			if($api){
+				self::$api[$name]		=	$api;
+				self::$plugins[$name]	=	$plugin;
+			
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	static public function remove($name)
+	{
+		$r = self::$plugins[$name];
+
+		unset(self::$plugins[$name],self::$api[$name]);
+
+		return $r;
+	}
+
+	static public function getAPI($name)
+	{
+		return (isset(self::$api[$name])) ? self::$api[$name] : false;
+	}
+	
+	static public function getPlugin($name)
+	{
+		return isset(self::$plugins[$name]) ? self::$plugins[$name] : false;
+	}
+	
+	static public function listPlugins()
+	{
+		return array_keys(self::$plugins);
+	}
+	
 	static public function isLoaded($name)
 	{
 		return isset(self::$plugins[$name]) ? true : false;
@@ -62,100 +142,7 @@ class Amslib_Plugin_Manager
 	{
 		return self::$location;
 	}
-
-	static public function add($name,$location=NULL)
-	{
-		$location = self::findPlugin($name,$location);
-
-		//	Protect against missing plugins
-		if(!$location) return false;
-
-		//	Plugin was already loaded, so return it's API directly
-		if(self::isLoaded($name)) return self::getAPI($name);
-
-		//	Plugin was not present, so create it, load everything required and return it's API
-		$plugin = new Amslib_Plugin();
-		$plugin->load($name,$location.$name);
-
-		self::import($name,$plugin);
-
-		return $plugin->getAPI();
-	}
-
-	static public function import($name,$plugin)
-	{
-		if($name && $plugin){
-			$api = $plugin->getAPI();
-
-			if($api){
-				self::$plugins[$name]	=	$plugin;
-				self::$api[$name]		=	$api;
-			}
-		}
-	}
-
-	static public function remove($name)
-	{
-		$r = self::$plugins[$name];
-
-		unset(self::$plugins[$name],self::$api[$name]);
-
-		return $r;
-	}
-
-	/**
-	 * method: setAPI
-	 *
-	 * A way to provide a custom API object that deals with your application specific
-	 * layer and perhaps provides a customised way to deal with the widget in question
-	 * and your qpplication.
-	 *
-	 * parameters:
-	 * 	$name	-	The name of the widget being overriden
-	 * 	$api	-	An object which is to be used to override the default widget api
-	 *
-	 * example:
-	 * 		NOTE: This example is out of date and needs rewriting
-	 *		require_once("CustomApp_Amstudios_Message_Thread_List.php");
-	 *		class CustomApp_Amstudios_Message_Thread_List extends Amstudios_Message_Thread_List{}
-	 *		$api = CustomApp_Amstudios_Message_Thread_List::getInstance();
-	 *		$api->setValue("key","value");
-	 *		$widgetManager->overrideAPI("amstudios_message_thread_list",$api);
-	 *		$widgetManager->render("amstudios_message_thread_list");
-	 */
-	static public function setAPI($name,$api)
-	{
-		if(isset(self::$plugins[$name])){
-			self::$plugins[$name]->setAPI($api);
-			self::$api[$name] = self::$plugins[$name]->getAPI();
-		}
-	}
-
-	static public function getAPI($name)
-	{
-		return (isset(self::$api[$name])) ? self::$api[$name] : false;
-	}
 	
-	static public function getPlugin($name)
-	{
-		return isset(self::$plugins[$name]) ? self::$plugins[$name] : false;
-	}
-
-	static public function getPluginNameByRouteName($routeName)
-	{
-		foreach(self::$api as $pluginName=>$api)
-		{
-			if($api->hasRoute($routeName)) return $pluginName;
-		}
-
-		return false;
-	}
-	
-	static public function listPlugins()
-	{
-		return array_keys(self::$plugins);
-	}
-
 	/*******************************************************************
 	 	HELPER FUNCTIONS
 
@@ -164,11 +151,18 @@ class Amslib_Plugin_Manager
 	 	will find out which appropriate plugin to call to execute
 	 	the functionality
 	********************************************************************/
-	static public function getView($plugin,$view,$parameters=array())
+	static public function render($plugin,$view="default",$parameters=array())
 	{
 		$api = self::getAPI($plugin);
 
-		return $api ? $api->getView($view,$parameters) : false;
+		return $api ? $api->render($view,$parameters) : false;
+	}
+	
+	static public function getObject($plugin,$id,$singleton=false)
+	{
+		$api = self::getAPI($plugin);
+		
+		return $api ? $api->getObject($id,$singleton) : false;
 	}
 
 	static public function setService($plugin,$id,$service)
@@ -225,12 +219,5 @@ class Amslib_Plugin_Manager
 		$api = self::getAPI($plugin);
 
 		return $api ? $api->addJavascript($javascript) : false;
-	}
-
-	static public function render($plugin,$layout="default",$parameters=array())
-	{
-		$api = self::getAPI($plugin);
-		
-		return $api ? $api->render($layout,$parameters) : false;
 	}
 }
