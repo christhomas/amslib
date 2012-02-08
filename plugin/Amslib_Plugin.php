@@ -79,6 +79,7 @@ class Amslib_Plugin
 
 		//	PREPARE THE STRING: expand any parameters inside the resource name
 		$resource = self::expandPath($resource);
+		$resource = str_replace("__PLUGIN__",$this->location,$resource);
 
 		//	TEST 1:	look in the package directory for the file
 		$test2 = Amslib_File::reduceSlashes("$this->location/$resource");
