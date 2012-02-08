@@ -230,16 +230,23 @@ class Amslib_MVC
 		if(!$id || strlen($id) == 0) $id = $name;
 
 		$this->view[$id] = $name;
+		
+		if(!isset($this->view["default"])) $this->view["default"] = $name;
 	}
-
+	
 	public function getView($id)
 	{
 		if($id && isset($this->view[$id])) return $this->view[$id];
 
 		return $this->view;
 	}
+	
+	public function render($id="default",$parameters=array())
+	{
+		return $this->renderView($id,$parameters);
+	}
 
-	public function render($id,$parameters=array())
+	public function renderView($id,$parameters=array())
 	{
 		if(is_string($id) && isset($this->view[$id]))
 		{

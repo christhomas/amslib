@@ -543,10 +543,10 @@ class Amslib_Plugin
 			$this->process();
 			//	initialise the api object, it's now ready to use externally
 			$this->api->initialise();
-			//	finalise the plugin, finish any last requests by the plugin
-			$this->finalisePlugin();
 			//	Insert into the plugin manager
 			Amslib_Plugin_Manager::insert($this->name,$this);
+			//	finalise the plugin, finish any last requests by the plugin
+			$this->finalisePlugin();
 
 			return $this->api;
 		}
