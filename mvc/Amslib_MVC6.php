@@ -347,6 +347,13 @@ class Amslib_MVC6
 		}
 	}
 
+	public function getStylesheet($id,$file=true)
+	{
+		return isset($this->stylesheet[$id])
+			? $file ? $this->stylesheet[$id]["file"] : $this->stylesheet[$id]
+			: "";
+	}
+
 	public function removeStylesheet($id)
 	{
 		Amslib_Resource::removeStylesheet($id);
@@ -367,6 +374,13 @@ class Amslib_MVC6
 			$j = $this->javascript[$id];
 			Amslib_Resource::addJavascript($id,$j["file"],$j["conditional"]);
 		}
+	}
+
+	public function getJavascript($id,$file=true)
+	{
+		return isset($this->javascript[$id])
+			? $file ? $this->javascript[$id]["file"] : $this->javascript[$id]
+			: "";
 	}
 
 	public function removeJavascript($id)
