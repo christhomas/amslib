@@ -38,6 +38,8 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 	protected function setEncoding($encoding)
 	{
+		if($this->getConnectionStatus() == false) return;
+
 		$allowedEncodings = array("utf8","latin1");
 
 		if(in_array($encoding,$allowedEncodings)){
@@ -69,8 +71,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 				if(!mysql_select_db($details["database"],$c)){
 					$this->disconnect();
 					$this->setError("Failed to open database requested '{$details["database"]}'");
-				}
-				else{
+				}else{
 					$this->connection = $c;
 
 					$this->setFetchMethod("mysql_fetch_assoc");

@@ -108,7 +108,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		Amslib_Router::setSource($xml);
 		Amslib_Router::execute();
-		
+
 		//	hack into place the automatic adding of all the stylesheets and javascripts
 		$p = Amslib_Router::getParameter("plugin",false);
 
@@ -116,7 +116,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			$s = Amslib_Router::getStylesheets();
 			$j = Amslib_Router::getJavascripts();
 			$p = Amslib_Plugin_Manager::getAPI($p);
-			
+
 			if($p){
 				foreach(Amslib_Array::valid($s) as $css) $p->addStylesheet($css);
 				foreach(Amslib_Array::valid($j) as $js) $p->addJavascript($js);
@@ -253,7 +253,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		if(Amslib_Router::getResource() === "Service") $this->runService();
 
-		//	Request the website render itself now
-		print($this->api->renderView());
+		//	Render the default view, which is normally the layout if nothing is specified
+		print($this->api->renderView("default"));
 	}
 }
