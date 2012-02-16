@@ -94,10 +94,10 @@ class Amslib_Database
 			$this->fetchMethod = $method;
 		}
 	}
-	
+
 	public function getConnectionDetails()
 	{
-		die("FATAL ERROR: getConnectionDetails was not defined in your database object, so connection attempt will fail");
+		die("(".basename(__FILE__)." / FATAL ERROR): getConnectionDetails was not defined in your database object, so connection attempt will fail");
 	}
 
 	public function setDebug($state)

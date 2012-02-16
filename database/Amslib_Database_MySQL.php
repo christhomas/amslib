@@ -28,7 +28,7 @@
 class Amslib_Database_MySQL extends Amslib_Database
 {
 	protected $errors;
-	
+
 	protected function setDebugOutput($query)
 	{
 		if($this->debug){
@@ -44,7 +44,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			mysql_query("SET NAMES '$encoding'",$this->connection);
 			mysql_query("SET CHARACTER SET $encoding",$this->connection);
 		}else{
-			die(	"FATAL ERROR: Your encoding ($encoding) is wrong, this can cause database corruption. ".
+			die(	"(".basename(__FILE__)." / FATAL ERROR): Your encoding ($encoding) is wrong, this can cause database corruption. ".
 					"I'm sorry dave, but I can't allow you to do that<br/>".
 					"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>");
 		}
@@ -103,11 +103,11 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 	public function escape($value)
 	{
-		return $this->getConnectionStatus() 
-			? mysql_real_escape_string($value) 
+		return $this->getConnectionStatus()
+			? mysql_real_escape_string($value)
 			: die("unsafe string escape: database not connected, backtrace: ".Amslib::var_dump(Amslib::backtrace(1,3,"file","line"),true));
 	}
-	
+
 	public function fixColumnEncoding($src,$dst,$table,$primaryKey,$column)
 	{
 		$encoding_map = array(
@@ -200,7 +200,7 @@ HAS_TABLE;
 
 		return false;
 	}
-	
+
 	public function getTableFields($table)
 	{
 		return $this->select("column_name from Information_Schema.Columns where table_name='$table'");
@@ -238,7 +238,7 @@ HAS_TABLE;
 		$this->seq++;
 
 		if($this->getConnectionStatus() == false) return false;
-		
+
 		$query = "select $query";
 
 		$this->setLastQuery($query);
@@ -263,22 +263,22 @@ HAS_TABLE;
 		$this->seq++;
 
 		if($this->getConnectionStatus() == false) return false;
-		
+
 		$query = "insert into $query";
 
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
-		
+
 		$this->setDebugOutput($query);
-		
+
 		if(!$result){
 			$this->lastInsertId = false;
 			$this->setErrors($query);
-			return false;	
+			return false;
 		}
 
 		$this->lastInsertId = mysql_insert_id($this->connection);
-		
+
 		return $this->lastInsertId;
 	}
 
@@ -287,13 +287,13 @@ HAS_TABLE;
 		$this->seq++;
 
 		if($this->getConnectionStatus() == false) return false;
-		
+
 		$query = "update $query";
 
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
 		$this->setDebugOutput($query);
-		
+
 		if(!$result){
 			$this->setErrors($query);
 			return false;
@@ -307,21 +307,21 @@ HAS_TABLE;
 		$this->seq++;
 
 		if($this->getConnectionStatus() == false) return false;
-		
+
 		$query = "delete from $query";
 
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
 		$this->setDebugOutput($query);
-		
+
 		if(!$result){
 			$this->setErrors($query);
-			return false;	
+			return false;
 		}
 
 		return mysql_affected_rows($this->connection) >= 0;
 	}
-	
+
 	public function setErrors($query)
 	{
 		$this->errors[] = array(
@@ -334,12 +334,12 @@ HAS_TABLE;
 			"db_location"		=>	Amslib_Array::filterKey(array_slice(debug_backtrace(),0,5),array("file","line")),
 		);
 	}
-	
+
 	public function setError($error)
 	{
 		$this->errors[] = $error;
 	}
-	
+
 	public function getErrors()
 	{
 		return $this->errors;
