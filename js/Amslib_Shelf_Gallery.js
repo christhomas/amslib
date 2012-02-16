@@ -17,6 +17,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 			selSlider:		".amslib_shelf_gallery_slider",
 			selItem:		".amslib_shelf_gallery_item",
 			autoTimeout:	5000,
+			animTimeout:	1000,
 			clickTimeout:	500
 		}
 	},
@@ -71,7 +72,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 
 		this.slider.css("left","-"+first.position().left+"px");
 		//	Animate to left:0
-		this.slider.animate({left:"0px"},this.options.autoTimeout*0.66,$.proxy(function(){
+		this.slider.animate({left:"0px"},this.options.animTimeout,$.proxy(function(){
 			if(cb) cb();
 			
 			this.mutex = false;
@@ -92,7 +93,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 			return;
 		}
 		
-		this.slider.animate({left:"-="+next.position().left},this.options.autoTimeout/2,$.proxy(function(){
+		this.slider.animate({left:"-="+next.position().left},this.options.animTimeout,$.proxy(function(){
 			this.slider.append(first.detach());
 			this.slider.css("left","0px");
 			

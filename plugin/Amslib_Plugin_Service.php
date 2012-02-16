@@ -1,125 +1,222 @@
-<?php
+<?php 
 class Amslib_Plugin_Service
 {
-	protected $validator;
+	const S3 = "amslib/service/validate";
+	const VD = "validation/data";
+	const VE = "validation/errors";
+	const SD = "service/data";
+	const SE = "service/errors";
+	const FB = "service/feedback";
+	const DB = "database/errors";
+	const PL = "plugins";
+	const SC = "success";
+	
 	protected $successURL;
 	protected $failureURL;
-	protected $returnAJAX;
-	protected $callback;
+	protected $successCB;
+	protected $failureCB;
+	protected $isAJAX;
 	protected $data;
-	protected $errors;
+	
+	//	Used in the website to retrieve the session data after processing
+	static protected $serviceData = NULL;
+	
+	static protected function getData($plugin,$default,$key)
+	{
+		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][$key]) 
+			? Amslib_Array::valid(self::$serviceData[$plugin][$key]) 
+			: $default;
+	}
+		
+	protected function successPOST()
+	{
+		$this->data[self::SC] = true;
+		$this->setServiceData($this->data);
 
-	protected function success()
-	{
-		if($this->returnAJAX){
-			Amslib_Website::outputJSON(array(
-				"validation_complete"	=>	true,
-				"validation_success"	=>	true,
-				"service_data"			=>	$this->data
-			),true);
-		}else{
-			Amslib::insertSessionParam("validation_complete",true);
-			Amslib::insertSessionParam("validation_success",true);
-			Amslib::insertSessionParam("service_data",$this->data);
-			Amslib_Website::redirect($this->successURL);
-		}
+		Amslib_Website::redirect($this->getSuccessURL(),true);
 	}
 	
-	protected function failure()
+	protected function failurePOST()
 	{
-		if($this->returnAJAX){
-			Amslib_Website::outputJSON(array(
-				"validation_complete"	=>	true,
-				"validation_errors"		=>	$this->validator->getErrors(),
-				"validation_data"		=>	$this->data,
-				"validation_success"	=>	false,
-				"service_errors"		=>	$this->errors
-			),true);
-		}else{
-			Amslib::insertSessionParam("validation_complete",true);
-			Amslib::insertSessionParam("validation_errors",$this->validator->getErrors());
-			Amslib::insertSessionParam("validation_data",$this->data);
-			Amslib::insertSessionParam("validation_success",false);
-			Amslib::insertSessionParam("service_errors",$this->errors);
+		$this->data[self::SC] = false;
+		$this->setServiceData($this->data);
 		
-			Amslib_Website::redirect($this->failureURL);	
-		}
+		Amslib_Website::redirect($this->getFailureURL(),true);
 	}
 	
-	public function __construct($callback)
+	protected function successAJAX()
 	{
-		//	TODO:	This might not be a great idea to ALWAYS ask for this route, 
-		//			could not exist in some situations and probably will happen.
-		$default			=	Amslib_Router3::getURL("home");
-		$return				=	Amslib::postParam("return_url",$default);
+		$this->data[self::SC] = true;
+		Amslib_Website::outputJSON($this->data,true);
+	}
 		
-		$this->validator	=	new Amslib_Validator3($_POST);
-		$this->successURL	=	Amslib::rchop(Amslib::postParam("success_url",$return),"?");
-		$this->failureURL	=	Amslib::rchop(Amslib::postParam("failure_url",$return),"?");
-		$this->returnAJAX	=	Amslib::postParam("return_ajax");
-		$this->callback		=	$callback;
+	protected function failureAJAX()
+	{
+		$this->data[self::SC] = false;
+		Amslib_Website::outputJSON($this->data,true);
+	}
+	
+	public function __construct()
+	{
+		//	FIXME: we are hardcoding a route "home" which might not exist, this could be a bad idea
+		$default_url		=	Amslib_Router::getURL("home");	
+		$return_url			=	Amslib::rchop(Amslib::postParam("return_url",$default_url),"?");
+		
+		$this->setSuccessURL(Amslib::rchop(Amslib::postParam("success_url",$return_url),"?"));
+		$this->setFailureURL(Amslib::rchop(Amslib::postParam("failure_url",$return_url),"?"));
+		$this->isAJAX		=	Amslib::postParam("return_ajax");
+		
+		$this->successCB	=	$this->isAJAX ? "successAJAX" : "successPOST";
+		$this->failureCB	=	$this->isAJAX ? "failureAJAX" : "failurePOST";
+		
+		//	Reset the service data and session structures
 		$this->data			=	array();
-		$this->errors		=	array();
-		
-		//	Remove all the validation structures so each new validation is a clean sheet
-		Amslib::sessionParam("validation_complete",false,true);
-		Amslib::sessionParam("validation_success",false,true);
-		Amslib::sessionParam("validation_errors",false,true);
-		Amslib::sessionParam("validation_data",false,true);
-		Amslib::sessionParam("service_errors",false,true);
-		Amslib::sessionParam("service_data",false,true);
+		$this->showFeedback();
+		$this->setServiceData(false);
 	}
 	
-	public function validate($name,$type,$required=false,$options=array())
-	{ 
-		$this->validator->add($name,$type,$required,$options);
-	}
-	
-	public function execute()
+	public function setSuccessURL($url)
 	{
-		$this->data = array();
-		
-		if($this->validator->execute()){
-			$this->data["validator"] = $this->validator->getValidData();
-
-			if(call_user_func($this->callback,$this,$this->validator->getValidData()) === true){
-				return $this->success();
-			}
+		$this->successURL = Amslib_File::reduceSlashes("$url/");
+	}
+	
+	public function getSuccessURL()
+	{
+		return $this->successURL;
+	}
+	
+	public function setFailureURL($url)
+	{
+		$this->failureURL = Amslib_File::reduceSlashes("$url/");;	
+	}
+	
+	public function getFailureURL()
+	{
+		return $this->failureURL;
+	}
+	
+	public function setServiceData($data)
+	{
+		$_SESSION[self::S3] = $data;
+	}
+	
+	public function showFeedback()
+	{
+		$this->data[self::FB] = true;
+	}
+	
+	public function hideFeedback()
+	{
+		$this->data[self::FB] = false;
+	}
+	
+	public function execute($plugin,$method)
+	{
+		if(method_exists($plugin,$method)){
+			$cb = call_user_func(array($plugin,$method),$this,$_POST)
+				? $this->successCB 
+				: $this->failureCB;
 			
-			$this->setError("error","service_failed");
+			call_user_func(array($this,$cb));
+			
+			die("FAILURE[p:".get_class($plugin)."][m:$method]-> All services should terminate with redirect or json");
 		}else{
-			$this->setError("error","validation_failed");
+			die("FAILURE[p:".get_class($plugin)."][m:$method]-> method did not exist, so could not be called");
 		}
-		
-		return $this->failure();
 	}
 	
-	public function setData($key,$value)
+	public function setValidationData($plugin,$data)
 	{
-		$this->data[$key] = $value;
+		$this->data[$plugin][self::VD] = $data;
+		$this->data[self::PL][$plugin] = true;
 	}
 	
-	public function setError($key,$value)
+	public function setValidationErrors($plugin,$errors)
 	{
-		//	FIXME: could be possible set more than one error, then the url is invalid: ?error=something?error=another?error=whatever
-		if($key == "error"){
-			$this->failureURL .= "?error={$value}";	
+		$this->data[$plugin][self::VE] = $errors;
+		$this->data[self::PL][$plugin] = true;
+	}
+	
+	//	NOTE: Be careful with this method, you could be pushing secret data
+	public function setDatabaseErrors($plugin,$errors)
+	{
+		if(!empty($errors)){
+			$this->data[$plugin][self::DB] = $errors;
+			$this->data[self::PL][$plugin] = true;
 		}
-		
-		$this->errors[$key] = $value;
 	}
 	
-	static public function getError($name=NULL,$erase=true)
+	public function setData($plugin,$name,$value)
 	{
-		$errors = Amslib::sessionParam("service_errors",false,$erase);
-		
-		if($name === NULL) return $errors;
-		
-		return ($errors && isset($errors[$name])) ? $errors[$name] : false;
+		$this->data[$plugin][self::SD][$name] = $value;
+		$this->data[self::PL][$plugin] = true;
 	}
 	
-	static public function complete()
+	public function setError($plugin,$name,$value)
 	{
-		return Amslib::sessionParam("validation_complete",false,true) == true ? true : false;
+		$this->data[$plugin][self::SE][$name] = $value;
+		$this->data[self::PL][$plugin] = true;
+	}
+	
+	/*****************************************************************************
+	 * 	STATIC API TO RETRIEVE SESSION DATA
+	*****************************************************************************/
+	static public function displayFeedback()
+	{
+		return self::$serviceData[self::FB];
+	}
+	
+	static public function hasData($remove=true)
+	{
+		if(self::$serviceData === NULL) self::$serviceData = Amslib::sessionParam(self::S3,false,$remove);
+		
+		return self::$serviceData ? true : false;
+	}
+	
+	static public function getStatus()
+	{
+		$success = isset(self::$serviceData[self::SC]) ? self::$serviceData[self::SC] : false;
+		
+		unset(self::$serviceData[self::SC]);
+		
+		return $success;
+	}
+	
+	static public function listPlugins()
+	{
+		return isset(self::$serviceData[self::PL]) ? array_keys(self::$serviceData[self::PL]) : array();
+	}
+
+	static public function getValidationData($plugin,$default=false)
+	{
+		return self::getData($plugin,$default,self::VD);
+	}
+	
+	static public function getValidationErrors($plugin,$default=false)
+	{
+		return self::getData($plugin,$default,self::VE);
+	}
+	
+	static public function getServiceErrors($plugin,$default=false)
+	{
+		return self::getData($plugin,$default,self::SE);
+	}
+	
+	static public function getServiceData($plugin,$default=false,$key=false)
+	{
+		$data = self::getData($plugin,$default,self::SD);
+		
+		return $key && $data && isset($data[$key]) ? $data[$key] : $data;
+	}
+	
+	//	NOTE: Be careful with this method, it could leak secret data if you didnt sanitise it properly of sensitive data
+	static public function getDatabaseErrors($plugin,$default=false)
+	{
+		return self::getData($plugin,$default,self::DB);
+	}
+	
+	static public function getDatabaseMessage($plugin,$default=false)
+	{
+		return Amslib_Array::filterKey(self::getDatabaseErrors($plugin,$default),array("db_error","db_location"));
 	}
 }

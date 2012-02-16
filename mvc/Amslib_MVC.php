@@ -24,7 +24,7 @@
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-class Amslib_MVC6
+class Amslib_MVC
 {
 	protected $__mixins = array();
 	protected $object;
@@ -125,7 +125,7 @@ class Amslib_MVC6
 	{
 		$this->routes[$name] = $route;
 	}
-
+	
 	public function setPlugin($plugin)
 	{
 		$this->plugin = $plugin;
@@ -230,13 +230,20 @@ class Amslib_MVC6
 		if(!$id || strlen($id) == 0) $id = $name;
 
 		$this->view[$id] = $name;
+		
+		if(!isset($this->view["default"])) $this->view["default"] = $name;
 	}
-
+	
 	public function getView($id)
 	{
 		if($id && isset($this->view[$id])) return $this->view[$id];
 
 		return $this->view;
+	}
+	
+	public function render($id="default",$parameters=array())
+	{
+		return $this->renderView($id,$parameters);
 	}
 
 	public function renderView($id,$parameters=array())
@@ -278,10 +285,10 @@ class Amslib_MVC6
 		}else{*/
 			$this->service[$id] = Amslib_Website::rel($name);
 
-			//	NOTE: I should recognise that now Amslib_MVC4 is dependant on Amslib_Router3's existence
+			//	NOTE: I should recognise that now Amslib_MVC is dependant on Amslib_Router's existence
 			//	NOTE: perhaps we should remove this dependency and instead inport the data as opposed to looking it up here
 			//	Attempt to find a routed url for this service
-			$url = Amslib_Router3::getURL("Service:$id");
+			$url = Amslib_Router::getURL("Service:$id");
 			if(!$url) $url = $this->service[$id];
 
 			//	Set this as a service url for the javascript to acquire
@@ -452,7 +459,7 @@ class Amslib_MVC6
 
 		//	FIXME:	previously this used the old setService, but now it's upgraded
 		//			to use the code from setService2, perhaps this code won't work anymore.
-		$api = Amslib_Plugin_Manager2::getAPI($src);
+		$api = Amslib_Plugin_Manager::getAPI($src);
 		$this->setService($dest,$api->getService($id));
 	}
 

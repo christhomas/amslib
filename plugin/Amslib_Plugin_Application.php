@@ -16,12 +16,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * file: Amslib_Plugin_Application.php
- * title: Antimatter Plugin, Plugin Application object
+ * title: Antimatter Plugin, Plugin Application object version 3
  * description: An object to handle a plugin, which is actually an application
  * 				which represents a website, the application can have extra configuration
  * 				options which a normal plugin doesn't have.  To setup the "website".
- * 
- * version: 1.0
+ *
+ * version: 3.0
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -30,87 +30,36 @@
 class Amslib_Plugin_Application extends Amslib_Plugin
 {
 	static protected $version;
+	static protected $langKey = "amslib/lang/shared";
 	static protected $registeredLanguages = array();
+	static protected $packageName = array();
 
-	protected function readValue($query,$default=NULL)
+	protected $completionCallback;
+
+	protected function getPackageFilename()
 	{
-		$node = $this->xpath->query($query);
+		foreach(Amslib_Array::valid(self::$packageName) as $host=>$file){
+			if(strpos($_SERVER["HTTP_HOST"],$host) !== false) return "{$this->location}/$file";
+		}
 
-		return ($node && $node->length) ? $node->item(0)->nodeValue : $default;
-	}
-	
-	protected function readSingleNode($query,$default=NULL)
-	{
-		$node = $this->xpath->query($query);
-		
-		return ($node && $node->length) ? $node->item(0) : $default;
-	}
-
-	protected function findResource($plugin,$node)
-	{
-		$node->nodeValue = Amslib_Plugin::expandPath($node->nodeValue);
-
-		return parent::findResource($plugin,$node);
+		return parent::getPackageFilename();
 	}
 
 	protected function readVersion()
 	{
-		self::$version = array(
-			"date"		=>	$this->readValue("//package/version/date"),
-			"number"	=>	$this->readValue("//package/version/number"),
-			"name"		=>	$this->readValue("//package/version/name"),
-		);
-	}
-
-	protected function readPaths()
-	{
-		$path = $this->readSingleNode("//package/path");
-		if($path)
-		{
-			foreach($path->childNodes as $p)
-			{
-				if($p->nodeType != 1) continue;
-				
-				$name	=	$p->nodeName;
-				$value	=	Amslib_Plugin::expandPath($p->nodeValue);
-	
-				if($name == "include"){
-					Amslib::addIncludePath(Amslib_File::absolute($value));
-				}else{
-					Amslib_Plugin::setPath($name,$value);
-					
-					switch($name){
-						case "plugin":{
-							Amslib_Plugin_Manager::addLocation($value);
-						}break;
-						
-						case "docroot":{
-							Amslib_File::documentRoot($value);						
-						}break;
-					};
-				}
-			}
-	
-			//	NOTE: What should I do if a path is missing? this could cause a crash
-		}
-	}
-
-	protected function initialiseModel()
-	{
-		parent::initialiseModel();
-
-		if($this->model){
-			Amslib_Database::setSharedConnection($this->model);
+		if(isset($this->config["version"])){
+			self::$version = array(
+				"date"		=>	$this->config["version"]["date"],
+				"number"	=>	$this->config["version"]["number"],
+				"name"		=>	$this->config["version"]["name"]
+			);
 		}
 	}
 
 	protected function initialisePlugin()
 	{
-		//	Set the version of the admin this panel is running
-		$this->readVersion();
-		//	Set all the important paths for the admin to run
-		$this->readPaths();
 		//	Load the router (need to initialise the router first, but execute it after everything is loaded from the plugins)
+		//	NOTE: This is done because of webservices right? perhaps there is a better way of doing this
 		$this->initRouter();
 
 		return true;
@@ -118,15 +67,15 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	protected function finalisePlugin()
 	{
-		//	Load all the customised configuration into the plugins
-		$this->configurePlugins();
+		//	Set the version of the admin this panel is running
+		$this->readVersion();
 
 		//	Load the required router library and execute it to setup everything it needs
 		$this->executeRouter();
-		
+
 		//	We need a valid language for the website, make sure it's valid
 		$langCode = self::getLanguage("website");
-		if(!$langCode) self::setLanguage("website",reset(self::getLanguageList("website")));
+		if(!$langCode) self::setLanguage("website",current(self::getLanguageList("website")));
 
 		return true;
 	}
@@ -138,8 +87,8 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	TODO:	Why are we hardcoding the type of source to XML? what if we chose a DB source instead?
 		//	FIXME:	we have to coordinate code with executeRouter in order to make sure it still works
 		//			perhaps this should be done in one place only?
-		$r = Amslib_Router3::getInstance();
-		Amslib_Router3::setSource(Amslib_Router3::getObject("source:xml"));
+		$r = Amslib_Router::getInstance();
+		Amslib_Router::setSource(Amslib_Router::getObject("source:xml"));
 	}
 
 	//	NOTE:	It might be worth noting that in the future, this functionality might be useless
@@ -147,31 +96,64 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	//			any way, so this functionality is practically worthless.
 	protected function executeRouter()
 	{
-		$source = $this->readValue("//package/router_source");
-		$source = Amslib_Plugin::expandPath($source);
-
 		//	Initialise and execute the router
 		//	FIXME: allow the use of a database source for routes and not just XML
 		//	FIXME: we already load this in the Amslib_Plugin level, why are we doing it twice??
-		$xml = Amslib_Router3::getObject("source:xml");
+		$source = !isset($this->config["router_source"])
+			? $this->filename
+			: str_replace("__SELF__",$this->filename,$this->config["router_source"]);
+
+		$xml = Amslib_Router::getObject("source:xml");
 		$xml->load($source);
 
-		Amslib_Router3::setSource($xml);
-		Amslib_Router3::execute();
+		Amslib_Router::setSource($xml);
+		Amslib_Router::execute();
+		
+		//	hack into place the automatic adding of all the stylesheets and javascripts
+		$p = Amslib_Router::getParameter("plugin",false);
+
+		if($p){
+			$s = Amslib_Router::getStylesheets();
+			$j = Amslib_Router::getJavascripts();
+			$p = Amslib_Plugin_Manager::getAPI($p);
+			
+			if($p){
+				foreach(Amslib_Array::valid($s) as $css) $p->addStylesheet($css);
+				foreach(Amslib_Array::valid($j) as $js) $p->addJavascript($js);
+			}
+		}
 	}
 
 	public function __construct($name,$location)
 	{
 		parent::__construct();
-		
-		Amslib_Plugin::setPath("amslib",	Amslib::locate());
-		Amslib_Plugin::setPath("website",	"__WEBSITE__");
-		Amslib_Plugin::setPath("admin",		"__ADMIN__");
-		Amslib_Plugin::setPath("plugin",	"__PLUGIN__");
-		Amslib_Plugin::setPath("docroot",	Amslib_File::documentRoot());
-		
-		$this->load($name,$location);
-		Amslib_Plugin_Manager::import($name,$this);
+
+		parent::setPath("amslib",	Amslib::locate());
+		parent::setPath("website",	"__WEBSITE__");
+		parent::setPath("admin",	"__ADMIN__");
+		parent::setPath("plugin",	"__PLUGIN__");
+		parent::setPath("docroot",	Amslib_File::documentRoot());
+
+		$this->search = array_merge(array("path","router_source","version"),$this->search);
+
+		$this->completionCallback = array();
+
+		//	Preload the plugin manager with the application object
+		Amslib_Plugin_Manager::preload($name,$this);
+
+		//	Set the base locations to load plugins from
+		Amslib_Plugin_Manager::addLocation($location);
+		Amslib_Plugin_Manager::addLocation($location."/plugins");
+
+		//	We can't use Amslib_Plugin_Manager for this, because it's an application plugin
+		$this->config($name,$location);
+		//	We need to set this before any plugins are touched, because other plugins will depend on it's knowledge
+		//	NOTE: It sounds like I'm setting up a system of "priming" certain values which are important, this might need expanding in the future
+		$this->setLanguageKey();
+		$this->transfer();
+		$this->load();
+
+		$this->runCompletionCallbacks();
 	}
 
 	static public function &getInstance()
@@ -183,135 +165,95 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return $instance;
 	}
 
-	/**
-	 * method: runPackage
-	 *
-	 * Run all the sequence of events that need to happen for the plugin to be opened correctly
-	 *
-	 * NOTE:	we overload this method with a customised version
-	 * 			because the application plugin needs the model initialised
-	 * 			before any plugins load
-	 *
-	 * NOTE:	plugins need that their dependencies are loaded BEFORE they
-	 * 			load their stuff, for example, if models are inherited from
-	 * 			one another, the plugin will break because it's model is
-	 * 			initialised before it's dependency is made available.
-	 */
-	protected function runPackage()
+	public function addCompletionCallback($function,$object=NULL)
 	{
-		$this->initialisePlugin();
-		$this->initialiseModel();
-		$this->loadDependencies();
-		$this->loadRouter();
-		$this->loadConfiguration();
-		$this->finalisePlugin();
+		$this->completionCallback[] = $object
+			? array($object,$function)
+			: $function;
 	}
-	
-	public function setModel($model)
-	{
-		Amslib_Database::setSharedConnection($model);
 
-		parent::setModel($model);
+	public function runCompletionCallbacks()
+	{
+		foreach(Amslib_Array::valid($this->completionCallback) as $cb){
+			call_user_func($cb);
+		}
+	}
+
+	static public function setPackageFilename($domain,$file)
+	{
+		self::$packageName[$domain] = $file;
 	}
 
 	static public function getVersion($element=NULL)
 	{
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
 	}
-	
+
+	public function setLanguageKey()
+	{
+		$k = current(Amslib_Array::filter(Amslib_Array::valid($this->config["value"]),"name","lang_key",true));
+		if(!empty($k)) self::$langKey = $k["value"];
+	}
+
 	static public function setLanguage($name,$langCode)
 	{
-		Amslib::insertSessionParam("amslib_lang/{$name}",$langCode);
+		Amslib::insertSessionParam(self::$langKey."/$name",$langCode);
 	}
-	
+
 	static public function getLanguage($name)
 	{
-		return Amslib::sessionParam("amslib_lang/{$name}");
+		return Amslib::sessionParam(self::$langKey."/$name");
 	}
-	
+
 	static public function registerLanguage($name,$langCode)
 	{
 		self::$registeredLanguages[$name][$langCode] = true;
 	}
-	
+
 	static public function getLanguageList($name)
 	{
-		return isset(self::$registeredLanguages[$name]) 
-					? array_keys(self::$registeredLanguages[$name]) 
+		return isset(self::$registeredLanguages[$name])
+					? array_keys(self::$registeredLanguages[$name])
 					: array();
 	}
 
-	//	NOTE:	This method looks like it's out of date and needs
-	//			to be revamped with a new way to obtain this info
-	//			because it looks a little bit hacky
-	//	NOTE:	Stop using this method, it's going to get deleted soon
-	public function getPageTitle()
-	{
-		$api = Amslib_Plugin_Manager::getAPI(self::getActivePlugin());
-
-		$title = false;
-
-		if($api)	$title	=	$api->getValue("page_title");
-		if(!$title)	$title	=	"MISSING PAGE TITLE";
-
-		return $title;
-	}
-
-	//	NOTE: I don't like this method, I should find a nicer way to do this
-	static public function getActivePlugin()
-	{
-		static $activePlugin = NULL;
-
-		if($activePlugin === NULL){
-			$routeName		=	Amslib_Router3::getName();
-			$activePlugin	=	Amslib_Plugin_Manager::getPluginNameByRouteName($routeName);
-		}
-
-		return $activePlugin;
-	}
-	
 	protected function runService()
 	{
-		$parameters = Amslib_Router3::getParameter();
+		$plugin		=	Amslib_Router::getParameter("plugin",false);
+		$handler	=	Amslib_Router::getParameter("service",false);
 
-		if(isset($parameters["plugin"]) && isset($parameters["service"])){
-			$api = Amslib_Plugin_Manager::getAPI($parameters["plugin"]);
+		if($plugin && $handler){
+			$api = Amslib_Plugin_Manager::getAPI($plugin);
+
 			if($api){
-				//	NOTE:	this could be better if there was an api method to call
-				//			because that would mean it'll get the parameters 
-				//			directly + specifically for it's needs
-				
-				//	Call the service script to setup any static parameters required
-				Amslib::requireFile(Amslib_Website::abs("/plugins/service.php"));
-				
-				$api->callService($parameters["service"]);
+				//	This method is called to setup any special data we might need
+				$this->api->setupService($plugin,$handler);
+
+				$service = new Amslib_Plugin_Service();
+				$service->execute($api,$handler);
 			}
-			
-			//	TODO: we have to implement a way to redirect away from this script after we're done, right?
-			//	TODO: we need to redirect away if we posted here, if it's ajax, it doesnt matter
-		}else{
-			//	TODO: we are being a bit hasty in assuming that "home" route even exists?
-			//	NOTE: yes we are, but right now we have no alternative than assume it exists for now
-			Amslib_Website::redirect("home");
 		}
-		
-		die();
+
+		//	NOTE: if you arrive here, it's because the service didn't execute, all services terminate with die()
+		//	TODO: we are being a bit hasty in assuming that "home" route even exists?
+		//	NOTE: yes we are, but right now we have no alternative than assume it exists for now
+		Amslib_Website::redirect("home",true);
 	}
-	
+
 	/**
 	 * method: render
-	 * 
+	 *
 	 * Render the application, or process a web service, depending on the resource
-	 * 
+	 *
 	 * NOTE:
 	 * 	-	by standard the "resource" === "Service" means a webservice
 	 * 	-	override this default behaviour by overriding this method with a customised version
 	 */
 	public function render()
 	{
-		if(Amslib_Router3::getResource() === "Service") $this->runService();	
-		
+		if(Amslib_Router::getResource() === "Service") $this->runService();
+
 		//	Request the website render itself now
-		print($this->api->render());
+		print($this->api->renderView());
 	}
 }

@@ -1,5 +1,5 @@
 <?php 
-abstract class Amslib_Translator2_Source
+abstract class Amslib_Translator_Source
 {
 	protected $name;
 	protected $language;
