@@ -254,6 +254,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		if(Amslib_Router::getResource() === "Service") $this->runService();
 
 		//	Render the default view, which is normally the layout if nothing is specified
-		print($this->api->renderView("default"));
+		print($this->api->render("default"));
 	}
 }
