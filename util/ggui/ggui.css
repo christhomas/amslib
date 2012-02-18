@@ -1,0 +1,730 @@
+/*------------------------------------*\
+	$WRAPPER
+\*------------------------------------*/
+.buttons.ggui {/* Style as you wish (toolbar) */}
+
+/* The Magnificent CLEARFIX */
+.buttons.ggui:before, .buttons:after {
+  content: "\0020"; display: block; height: 0; visibility: hidden;	
+} 
+.buttons.ggui:after { clear: both; }
+.buttons.ggui { zoom: 1; }
+/* ------------------------ */
+
+
+/*------------------------------------*\
+	$BUTTON
+\*------------------------------------*/
+button.ggui, 
+.button.ggui {
+	text-decoration: none;
+	text-shadow: 0 1px 0 #fff;
+	
+	font: bold 11px Helvetica, Arial, sans-serif;
+	color: #444;
+	line-height: 17px;
+	height: 18px;
+	
+	display: inline-block;
+	
+	margin: 5px;
+	padding: 1px 6px 4px 6px;
+	
+	background: #F3F3F3;
+	border: solid 1px #D9D9D9;
+	
+	border-radius: 2px;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	
+	-webkit-transition: border-color .20s;
+	-moz-transition: border-color .20s;
+	-o-transition: border-color .20s;
+	transition: border-color .20s;
+}
+button.ggui {
+	height: 29px !important;
+	cursor: pointer;
+}
+
+button.ggui.left, 
+.button.ggui.left {
+	margin: 5px 0 5px 5px;
+	
+	border-top-right-radius: 0;
+	-webkit-border-top-right-radius: 0;
+	-moz-border-radius-topright: 0;
+	
+	border-bottom-right-radius: 0;
+	-webkit-border-bottom-right-radius: 0;
+	-moz-border-radius-bottomright: 0;
+}
+button.ggui.middle, 
+.button.ggui.middle {
+	margin: 5px 0;
+	
+	border-left-color: #F4F4F4;
+	
+	border-radius: 0;
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+}
+button.ggui.right, 
+.button.ggui.right {
+	margin: 5px 5px 5px 0;
+	
+	border-left-color: #F4F4F4;
+	
+	border-top-left-radius: 0;
+	-webkit-border-top-left-radius: 0;
+	-moz-border-radius-topleft: 0;
+	
+	border-bottom-left-radius: 0;
+	-webkit-border-bottom-left-radius: 0;
+	-moz-border-radius-bottomleft: 0;
+}
+
+button.ggui:hover, 
+.button.ggui:hover {
+    background: #F4F4F4;
+		border-color: #C0C0C0;
+		color: #333;
+}
+
+button.ggui:active, 
+.button.ggui:active,
+button.ggui.active,
+.button.ggui.active{
+	border-color: #4D90FE;
+	color: #4D90FE;
+	
+	-moz-box-shadow:inset 0 0 10px #D4D4D4;
+	-webkit-box-shadow:inset 0 0 10px #D4D4D4;
+	box-shadow:inset 0 0 10px #D4D4D4;
+}
+
+button.on.ggui, 
+.button.on.ggui {
+	border-color: #BBB;
+	
+	-moz-box-shadow:inset 0 0 10px #D4D4D4;
+	-webkit-box-shadow:inset 0 0 10px #D4D4D4;
+	box-shadow:inset 0 0 10px #D4D4D4;
+}
+button.on.ggui:hover, 
+.button.on.ggui:hover {
+	border-color: #BBB;
+	
+	-moz-box-shadow:inset 0 0 10px #D4D4D4;
+	-webkit-box-shadow:inset 0 0 10px #D4D4D4;
+	box-shadow:inset 0 0 10px #D4D4D4;
+}
+button.on.ggui:active, 
+.button.on.ggui:active {
+	border-color: #4D90FE;
+}
+
+.action.ggui{
+	border: 1px solid #D8D8D8 !important;
+	
+	background: #F2F2F2;
+	background: -webkit-linear-gradient(top, #F5F5F5, #F1F1F1);
+	background: -moz-linear-gradient(top, #F5F5F5, #F1F1F1);
+	background: -ms-linear-gradient(top, #F5F5F5, #F1F1F1);
+	background: -o-linear-gradient(top, #F5F5F5, #F1F1F1);
+	
+	-webkit-transition: border .20s;
+	-moz-transition: border .20s;
+	-o-transition: border .20s;
+	transition: border .20s;
+}
+.action.ggui:hover{
+	border: 1px solid #C6C6C6 !important;
+	
+	background: #F3F3F3;
+	background: -webkit-linear-gradient(top, #F8F8F8, #F1F1F1);
+	background: -moz-linear-gradient(top, #F8F8F8, #F1F1F1);
+	background: -ms-linear-gradient(top, #F8F8F8, #F1F1F1);
+	background: -o-linear-gradient(top, #F8F8F8, #F1F1F1);
+}
+button.blue.ggui, 
+.button.blue.ggui {
+	border: 1px solid #3079ED !important;
+	
+	background: #4B8DF8;
+	background: -webkit-linear-gradient(top, #4C8FFD, #4787ED);
+	background: -moz-linear-gradient(top, #4C8FFD, #4787ED);
+	background: -ms-linear-gradient(top, #4C8FFD, #4787ED);
+	background: -o-linear-gradient(top, #4C8FFD, #4787ED);
+	
+	-webkit-transition: border .20s;
+	-moz-transition: border .20s;
+	-o-transition: border .20s;
+	transition: border .20s;
+}
+button.blue.ggui:hover, 
+.button.blue.ggui:hover {
+	border: 1px solid #2F5BB7 !important;
+	
+	background: #3F83F1;
+	background: -webkit-linear-gradient(top, #4D90FE, #357AE8);
+	background: -moz-linear-gradient(top, #4D90FE, #357AE8);
+	background: -ms-linear-gradient(top, #4D90FE, #357AE8);
+	background: -o-linear-gradient(top, #4D90FE, #357AE8);
+}
+button.green.ggui, 
+.button.green.ggui {
+	border: 1px solid #29691D !important;
+	
+	background: #3A8E00;
+	background: -webkit-linear-gradient(top, #3C9300, #398A00);
+	background: -moz-linear-gradient(top, #3C9300, #398A00);
+	background: -ms-linear-gradient(top, #3C9300, #398A00);
+	background: -o-linear-gradient(top, #3C9300, #398A00);
+	
+	-webkit-transition: border .20s;
+	-moz-transition: border .20s;
+	-o-transition: border .20s;
+	transition: border .20s;
+}
+button.green.ggui:hover, 
+.button.green.ggui:hover {
+	border: 1px solid #2D6200 !important;
+	
+	background: #3F83F1;
+	background: -webkit-linear-gradient(top, #3C9300, #368200);
+	background: -moz-linear-gradient(top, #3C9300, #368200);
+	background: -ms-linear-gradient(top, #3C9300, #368200);
+	background: -o-linear-gradient(top, #3C9300, #368200);
+}
+button.red.ggui, 
+.button.red.ggui {
+	border: 1px solid #D14836 !important;
+	
+	background: #D64937;
+	background: -webkit-linear-gradient(top, #DC4A38, #D14836);
+	background: -moz-linear-gradient(top, #DC4A38, #D14836);
+	background: -ms-linear-gradient(top, #DC4A38, #D14836);
+	background: -o-linear-gradient(top, #DC4A38, #D14836);
+	
+	-webkit-transition: border .20s;
+	-moz-transition: border .20s;
+	-o-transition: border .20s;
+	transition: border .20s;
+}
+button.red.ggui:hover, 
+.button.red.ggui:hover {
+	border: 1px solid #B0281A !important;
+	
+	background: #D14130;
+	background: -webkit-linear-gradient(top, #DC4A38, #C53727);
+	background: -moz-linear-gradient(top, #DC4A38, #C53727);
+	background: -ms-linear-gradient(top, #DC4A38, #C53727);
+	background: -o-linear-gradient(top, #DC4A38, #C53727);
+}
+
+.action.ggui:hover{
+	-moz-box-shadow: 0 1px 0px #DDD;
+	-webkit-box-shadow: 0 1px 0px #DDD;
+	box-shadow:iset 0 1px 0px #DDD;
+}
+.action.ggui:active{
+	-moz-box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+	border-color: #C6C6C6 !important;
+}
+button.blue.ggui:active, 
+.button.blue.ggui:active {
+	border-color: #2F5BB7 !important;
+}
+button.green.ggui:active, 
+.button.green.ggui:active {
+	border-color: #2D6200 !important;
+}
+button.red.ggui:active, 
+.button.red.ggui:active {
+	border-color: #B0281A !important;
+}
+
+
+
+/*------------------------------------*\
+	$BUTTON LABEL
+\*------------------------------------*/
+.ddm.ggui span.label, 
+button.ggui span.label, 
+.button.ggui span.label {
+	display: inline-block;
+	height: 13px;
+	padding: 0 1px;
+	overflow: hidden;
+	color: #444;
+	vertical-align: middle;
+	
+	-webkit-transition: color .20s;
+	-moz-transition: color .20s;
+	-o-transition: color .20s;
+	transition: color .20s;
+} 
+button.ggui span.label {
+	line-height: 15px !important;
+}
+.ddm.ggui:active span.label, 
+button.ggui:active span.label, 
+.button.ggui:active span.label {
+    color: #4D90FE;
+}
+
+button.ggui:hover .label, 
+.button.ggui:hover .label {
+    color: #333;
+}
+button.ggui:hover .label.red, 
+.button.ggui:hover .label.red {
+    color: #DB4A37;
+}
+button.ggui:hover .label.blue, 
+.button.ggui:hover .label.blue {
+    color: #7090C8;
+}
+button.ggui:hover .label.green, 
+.button.ggui:hover .label.green {
+    color: #42B449;
+}
+button.ggui:hover .label.yellow, 
+.button.ggui:hover .label.yellow {
+    color: #F7CB38;
+}
+
+button.blue.ggui .label, 
+.button.blue.ggui .label {
+	color: #FFF !important;
+	text-shadow: 0 1px 0 #2F5BB7 !important;
+}
+button.green.ggui .label, 
+.button.green.ggui .label {
+	color: #FFF !important;
+	text-shadow: 0 1px 0 #2D6200 !important;
+}
+button.red.ggui .label, 
+.button.red.ggui .label {
+	color: #FFF !important;
+	text-shadow: 0 1px 0 #B0281A !important;
+}
+.action.ggui .label{
+	padding: 0 17px !important;
+}
+
+.action.ggui:active .label{
+	color: #333 !important;
+}
+
+button.blue.ggui:active .label, 
+button.green.ggui:active .label, 
+button.red.ggui:active .label, 
+.button.blue.ggui:active .label, 
+.button.green.ggui:active .label, 
+.button.red.ggui:active .label {
+	color: #FFF !important;
+}
+
+
+
+/*------------------------------------*\
+	$BUTTON ICON
+\*------------------------------------*/
+.ddm.ggui span.icon, 
+button.ggui span.icon, 
+.button.ggui span.icon {
+	background-image: url(google+-ui-sprite-gray.png);
+	
+	display: inline-block;
+	/* chris: removed the left margin as this should be controlled by the button */
+	margin: 0 7px 0 0;
+	
+	line-height: 18px;
+	height: 18px;
+	width: 18px;
+	max-width: 18px;
+	
+	overflow: hidden;
+	text-indent: -9999px;
+	vertical-align: middle;
+	
+	background-repeat: no-repeat;
+	
+	-webkit-transition: background-image 0.20s linear;
+	-moz-transition: background-image 0.20s linear;
+	-o-transition: background-image 0.20s linear;
+	transition: background-image 0.20s linear;
+}
+.ddm.ggui:hover span.icon, 
+button.ggui:hover span.icon, 
+.button.ggui:hover span.icon {
+	background-image: url(google+-ui-sprite-colour.png);
+}
+
+
+
+/*------------------------------------*\
+	$ICONS
+	chris: view here for a full lit of icons
+	http://code.shrapp.nl/google-plus-ui-buttons/demo.html
+\*------------------------------------*/
+
+/* Sprite Row 1 */
+.ggui span.icon.abacus {background-position: -0px -0px;}
+.ggui span.icon.access_point {background-position: -18px -0px;}
+.ggui span.icon.add {background-position: -36px -0px;}
+.ggui span.icon.administrator {background-position: -54px -0px;}
+.ggui span.icon.alarm {background-position: -72px -0px;}
+.ggui span.icon.arrow_bidirectional {background-position: -90px -0px;}
+.ggui span.icon.arrow_down {background-position: -108px -0px;}
+.ggui span.icon.arrow_left {background-position: -126px -0px;}
+.ggui span.icon.arrow_right {background-position: -144px -0px;}
+.ggui span.icon.arrow_up {background-position: -162px -0px;}
+.ggui span.icon.attachment {background-position: -180px -0px;}
+.ggui span.icon.audio_knob {background-position: -198px -0px;}
+.ggui span.icon.barcode {background-position: -216px -0px;}
+.ggui span.icon.battery_empty {background-position: -234px -0px;}
+.ggui span.icon.battery_full {background-position: -252px -0px;}
+.ggui span.icon.battery_half {background-position: -270px -0px;}
+.ggui span.icon.bell {background-position: -288px -0px;}
+.ggui span.icon.bill {background-position: -306px -0px;}
+.ggui span.icon.binoculars {background-position: -324px -0px;}
+.ggui span.icon.bold {background-position: -342px -0px;}
+
+/* Sprite Row 2 */
+.ggui span.icon.book {background-position: -0px -18px;}
+.ggui span.icon.bookmark {background-position: -18px -18px;}
+.ggui span.icon.briefcase {background-position: -36px -18px;}
+.ggui span.icon.brightness {background-position: -54px -18px;}
+.ggui span.icon.broken_link {background-position: -72px -18px;}
+.ggui span.icon.brush {background-position: -90px -18px;}
+.ggui span.icon.burn_blueray {background-position: -108px -18px;}
+.ggui span.icon.burn_blueray2 {background-position: -126px -18px;}
+.ggui span.icon.burn_dvd {background-position: -144px -18px;}
+.ggui span.icon.burn_dvd2 {background-position: -162px -18px;}
+.ggui span.icon.cabinet {background-position: -180px -18px;}
+.ggui span.icon.calculator {background-position: -198px -18px;}
+.ggui span.icon.calendar {background-position: -216px -18px;}
+.ggui span.icon.camera {background-position: -234px -18px;}
+.ggui span.icon.cancel {background-position: -252px -18px;}
+.ggui span.icon.card_clubs {background-position: -270px -18px;}
+.ggui span.icon.card_diamonds {background-position: -288px -18px;}
+.ggui span.icon.card_hearts {background-position: -306px -18px;}
+.ggui span.icon.card_spades {background-position: -324px -18px;}
+.ggui span.icon.certificate {background-position: -342px -18px;}
+
+/* Sprite Row 3 */
+.ggui span.icon.certificate2 {background-position: -0px -36px;}
+.ggui span.icon.chat_exclamation {background-position: -18px -36px;}
+.ggui span.icon.checkmark {background-position: -36px -36px;}
+.ggui span.icon.checkmark2 {background-position: -54px -36px;}
+.ggui span.icon.clip {background-position: -72px -36px;}
+.ggui span.icon.clipboard {background-position: -90px -36px;}
+.ggui span.icon.clock {background-position: -108px -36px;}
+.ggui span.icon.close {background-position: -126px -36px;}
+.ggui span.icon.cloud {background-position: -144px -36px;}
+.ggui span.icon.cloud2 {background-position: -162px -36px;}
+.ggui span.icon.coin {background-position: -180px -36px;}
+.ggui span.icon.compress {background-position: -198px -36px;}
+.ggui span.icon.connect {background-position: -216px -36px;}
+.ggui span.icon.contrast {background-position: -234px -36px;}
+.ggui span.icon.copy {background-position: -252px -36px;}
+.ggui span.icon.cross {background-position: -270px -36px;}
+.ggui span.icon.cutter {background-position: -288px -36px;}
+.ggui span.icon.delete {background-position: -306px -36px;}
+.ggui span.icon.dial {background-position: -324px -36px;}
+.ggui span.icon.diary {background-position: -342px -36px;}
+
+/* Sprite Row 4 */
+.ggui span.icon.dimensions {background-position: -0px -54px;}
+.ggui span.icon.directional_down {background-position: -18px -54px;}
+.ggui span.icon.directional_left {background-position: -36px -54px;}
+.ggui span.icon.directional_right {background-position: -54px -54px;}
+.ggui span.icon.directional_up {background-position: -72px -54px;}
+.ggui span.icon.disconnect {background-position: -90px -54px;}
+.ggui span.icon.diskette {background-position: -108px -54px;}
+.ggui span.icon.document {background-position: -126px -54px;}
+.ggui span.icon.door {background-position: -144px -54px;}
+.ggui span.icon.download {background-position: -162px -54px;}
+.ggui span.icon.dropper {background-position: -180px -54px;}
+.ggui span.icon.earphones {background-position: -198px -54px;}
+.ggui span.icon.effects {background-position: -216px -54px;}
+.ggui span.icon.eject {background-position: -234px -54px;}
+.ggui span.icon.emoticon_angry {background-position: -252px -54px;}
+.ggui span.icon.emoticon_confused {background-position: -270px -54px;}
+.ggui span.icon.emoticon_grin {background-position: -288px -54px;}
+.ggui span.icon.emoticon_in_love {background-position: -306px -54px;}
+.ggui span.icon.emoticon_sad {background-position: -324px -54px;}
+.ggui span.icon.emoticon_sleeping {background-position: -342px -54px;}
+
+/* Sprite Row 5 */
+.ggui span.icon.emoticon_smile {background-position: -0px -72px;}
+.ggui span.icon.encrypt {background-position: -18px -72px;}
+.ggui span.icon.eraser {background-position: -36px -72px;}
+.ggui span.icon.eye {background-position: -54px -72px;}
+.ggui span.icon.eye_closed {background-position: -72px -72px;}
+.ggui span.icon.fast_forward {background-position: -90px -72px;}
+.ggui span.icon.file {background-position: -108px -72px;}
+.ggui span.icon.fill {background-position: -126px -72px;}
+.ggui span.icon.fingerprint {background-position: -144px -72px;}
+.ggui span.icon.firewall {background-position: -162px -72px;}
+.ggui span.icon.first {background-position: -180px -72px;}
+.ggui span.icon.folder {background-position: -198px -72px;}
+.ggui span.icon.font {background-position: -216px -72px;}
+.ggui span.icon.font_size {background-position: -234px -72px;}
+.ggui span.icon.game_control {background-position: -252px -72px;}
+.ggui span.icon.gear {background-position: -270px -72px;}
+.ggui span.icon.group {background-position: -288px -72px;}
+.ggui span.icon.hammer {background-position: -306px -72px;}
+.ggui span.icon.hand_point {background-position: -324px -72px;}
+.ggui span.icon.hand_thumbsdown {background-position: -342px -72px;}
+
+/* Sprite Row 6 */
+.ggui span.icon.hand_thumbsup {background-position: -0px -90px;}
+.ggui span.icon.hard_disk {background-position: -18px -90px;}
+.ggui span.icon.headset {background-position: -36px -90px;}
+.ggui span.icon.heart {background-position: -54px -90px;}
+.ggui span.icon.help {background-position: -72px -90px;}
+.ggui span.icon.help2 {background-position: -90px -90px;}
+.ggui span.icon.history {background-position: -108px -90px;}
+.ggui span.icon.home {background-position: -126px -90px;}
+.ggui span.icon.hourglass {background-position: -144px -90px;}
+.ggui span.icon.hourglass2 {background-position: -162px -90px;}
+.ggui span.icon.id {background-position: -180px -90px;}
+.ggui span.icon.info {background-position: -198px -90px;}
+.ggui span.icon.info2 {background-position: -216px -90px;}
+.ggui span.icon.italic {background-position: -234px -90px;}
+.ggui span.icon.item {background-position: -252px -90px;}
+.ggui span.icon.key {background-position: -270px -90px;}
+.ggui span.icon.last {background-position: -288px -90px;}
+.ggui span.icon.lightbulb {background-position: -306px -90px;}
+.ggui span.icon.link {background-position: -324px -90px;}
+.ggui span.icon.list {background-position: -342px -90px;}
+
+/* Sprite Row 7 */
+.ggui span.icon.location {background-position: -0px -108px;}
+.ggui span.icon.lock {background-position: -18px -108px;}
+.ggui span.icon.lock_open {background-position: -36px -108px;}
+.ggui span.icon.login {background-position: -54px -108px;}
+.ggui span.icon.mail {background-position: -72px -108px;}
+.ggui span.icon.mail_open {background-position: -90px -108px;}
+.ggui span.icon.messenger {background-position: -108px -108px;}
+.ggui span.icon.microphone {background-position: -126px -108px;}
+.ggui span.icon.microphone2 {background-position: -144px -108px;}
+.ggui span.icon.money_big {background-position: -162px -108px;}
+.ggui span.icon.monitor {background-position: -180px -108px;}
+.ggui span.icon.moon {background-position: -198px -108px;}
+.ggui span.icon.music {background-position: -216px -108px;}
+.ggui span.icon.music_folder {background-position: -234px -108px;}
+.ggui span.icon.music_library {background-position: -252px -108px;}
+.ggui span.icon.next {background-position: -270px -108px;}
+.ggui span.icon.notepad {background-position: -288px -108px;}
+.ggui span.icon.align_left {background-position: -306px -108px;}
+.ggui span.icon.align_right {background-position: -324px -108px;}
+.ggui span.icon.align_justify {background-position: -342px -108px;}
+
+/* Sprite Row 8 */
+.ggui span.icon.password {background-position: -0px -126px;}
+.ggui span.icon.paste {background-position: -18px -126px;}
+.ggui span.icon.pause {background-position: -36px -126px;}
+.ggui span.icon.pen {background-position: -54px -126px;}
+.ggui span.icon.pencil {background-position: -72px -126px;}
+.ggui span.icon.phone {background-position: -90px -126px;}
+.ggui span.icon.photo_album {background-position: -108px -126px;}
+.ggui span.icon.pictures_folder {background-position: -126px -126px;}
+.ggui span.icon.play {background-position: -144px -126px;}
+.ggui span.icon.point {background-position: -162px -126px;}
+.ggui span.icon.power {background-position: -180px -126px;}
+.ggui span.icon.previous {background-position: -198px -126px;}
+.ggui span.icon.print {background-position: -216px -126px;}
+.ggui span.icon.pyramid {background-position: -234px -126px;}
+.ggui span.icon.random {background-position: -252px -126px;}
+.ggui span.icon.record {background-position: -270px -126px;}
+.ggui span.icon.redo {background-position: -288px -126px;}
+.ggui span.icon.reload {background-position: -306px -126px;}
+.ggui span.icon.repeat {background-position: -324px -126px;}
+.ggui span.icon.resize {background-position: -342px -126px;}
+
+/* Sprite Row 9 */
+.ggui span.icon.rewind {background-position: -0px -144px;}
+.ggui span.icon.rotate {background-position: -18px -144px;}
+.ggui span.icon.round {background-position: -36px -144px;}
+.ggui span.icon.ruler_square {background-position: -54px -144px;}
+.ggui span.icon.satellite {background-position: -72px -144px;}
+.ggui span.icon.scissors {background-position: -90px -144px;}
+.ggui span.icon.screwdriver {background-position: -108px -144px;}
+.ggui span.icon.security {background-position: -126px -144px;}
+.ggui span.icon.shopping_basket {background-position: -144px -144px;}
+.ggui span.icon.software {background-position: -162px -144px;}
+.ggui span.icon.spam {background-position: -180px -144px;}
+.ggui span.icon.speaker {background-position: -198px -144px;}
+.ggui span.icon.speaker2 {background-position: -216px -144px;}
+.ggui span.icon.sphere {background-position: -234px -144px;}
+.ggui span.icon.spreadsheet {background-position: -252px -144px;}
+.ggui span.icon.square {background-position: -270px -144px;}
+.ggui span.icon.star {background-position: -288px -144px;}
+.ggui span.icon.stats_bars {background-position: -306px -144px;}
+.ggui span.icon.stats_lines {background-position: -324px -144px;}
+.ggui span.icon.stats_pie {background-position: -342px -144px;}
+
+/* Sprite Row 10 */
+.ggui span.icon.stop {background-position: -0px -162px;}
+.ggui span.icon.strike_through {background-position: -18px -162px;}
+.ggui span.icon.sun {background-position: -36px -162px;}
+.ggui span.icon.target {background-position: -54px -162px;}
+.ggui span.icon.thunder {background-position: -72px -162px;}
+.ggui span.icon.trash_can {background-position: -90px -162px;}
+.ggui span.icon.underlined {background-position: -108px -162px;}
+.ggui span.icon.undo {background-position: -126px -162px;}
+.ggui span.icon.upload {background-position: -144px -162px;}
+.ggui span.icon.usb {background-position: -162px -162px;}
+.ggui span.icon.user {background-position: -180px -162px;}
+.ggui span.icon.user_woman {background-position: -198px -162px;}
+.ggui span.icon.volume_control {background-position: -216px -162px;}
+.ggui span.icon.webcam {background-position: -234px -162px;}
+.ggui span.icon.window {background-position: -252px -162px;}
+.ggui span.icon.wizard {background-position: -270px -162px;}
+.ggui span.icon.world {background-position: -288px -162px;}
+.ggui span.icon.zoom {background-position: -306px -162px;}
+.ggui span.icon.zoom_in {background-position: -324px -162px;}
+.ggui span.icon.zoom_out {background-position: -342px -162px;}
+
+
+
+/*------------------------------------*\
+	$DROPDOWN MENU
+\*------------------------------------*/
+div.dropdown.ggui {
+	float: left;
+	position: relative;
+}
+
+div.dropdown.ggui span.toggle {
+	width: 19px;
+	height: 16px;
+	
+	margin-left: 7px;
+	margin-top: 1px;
+	margin-right: 2px;
+	padding-left: 8px;
+	
+	float: right;
+	
+	background: url(google+-ui-sprite-toggle.png) top right no-repeat;
+	border-left: 1px solid #D9D9D9;
+	
+	-webkit-transition: border-color .20s;
+	-moz-transition: border .20s;
+	-o-transition: border-color .20s;
+	transition: border-color .20s;
+}
+div.dropdown.ggui span.toggle.active {
+	background: url(google+-ui-sprite-toggle.png) bottom right no-repeat;
+}
+div.dropdown.ggui 
+button.ggui:hover span.toggle, 
+.button.ggui:hover span.toggle {
+	border-color: #C0C0C0;
+}
+
+div.dropdown-slider.ggui {
+	display: none;
+	
+	overflow: hidden;
+	
+	margin: 0 7px 5px 7px;
+	position: absolute;
+	top: 34px;
+	right: 0;
+	
+	background: #F2F2F2;
+	
+	border-right: solid 1px #D9D9D9;
+	border-bottom: solid 1px #D9D9D9;
+	border-left: solid 1px #D9D9D9;
+	
+	-webkit-border-bottom-right-radius: 2px;
+	-webkit-border-bottom-left-radius: 2px;
+	-moz-border-radius-bottomright: 2px;
+	-moz-border-radius-bottomleft: 2px;
+	border-bottom-right-radius: 2px;
+	border-bottom-left-radius: 2px;
+	
+	-webkit-transition: border-color .20s;
+	-moz-transition: border .20s;
+	-o-transition: border-color .20s;
+	transition: border-color .20s;
+}
+.left.ggui div.dropdown-slider {
+	margin: 0 1px 5px 7px;
+}
+.middle.ggui div.dropdown-slider {
+	margin: 0 1px 5px 1px;
+}
+.right.ggui div.dropdown-slider {
+	margin: 0 7px 5px 1px;
+}
+div.dropdown-slider.ggui .ddm {
+	display: block;
+	background: #F2F2F2;
+	color: #585858;
+	
+	text-decoration: none;
+	text-shadow: 0 1px 0 #fff;
+	font: bold 11px Helvetica, Arial, sans-serif;
+	line-height: 18px;
+	height: 18px;
+	
+	margin: 0;
+	padding: 5px 6px 4px 6px;
+	width: 100%;
+	float: left;
+	
+	border-top: 1px solid #FFF;
+	border-bottom: 1px solid #D9D9D9;
+}
+div.dropdown-slider.ggui .ddm:hover {
+	background: #F4F4F4;
+	border-bottom-color: #C0C0C0;
+}
+div.dropdown-slider.ggui .ddm:active {
+	border-bottom-color: #4D90FE;
+	color: #4D90FE;
+	
+	-moz-box-shadow:inset 0 0 10px #D4D4D4;
+	-webkit-box-shadow:inset 0 0 10px #D4D4D4;
+	box-shadow:inset 0 0 10px #D4D4D4;
+}
+div.dropdown-slider.ggui .ddm:last-child {
+	border-bottom: none;
+}
+
+
+/*------------------------------------*\
+	CUSTOM FORM STYLES
+	chris.thomas@antimatter-studios.com
+\*------------------------------------*/
+label.ggui{
+	display: inline-block;
+	font: normal 1em Helvetica, Arial, sans-serif;
+	color: #585858;
+	vertical-align: middle;
+	padding: 5px 0;
+}
+
+.entry.ggui{
+	display: inline-block;
+	font: normal 1em Helvetica, Arial, sans-serif;
+	color: #585858;
+	border: 1px solid #DDDDDD;
+	padding: 5px 10px 5px 6px;
+	
+	-moz-border-radius: 0;
+	-webkit-border-radius: 0;
+	-ms-border-radius: 0;
+	border-radius: 0;
+}
