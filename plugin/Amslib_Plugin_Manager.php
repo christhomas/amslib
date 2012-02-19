@@ -118,6 +118,11 @@ class Amslib_Plugin_Manager
 		return (isset(self::$api[$name])) ? self::$api[$name] : false;
 	}
 	
+	static public function setAPI($name,$api)
+	{
+		self::$api[$name] = $api;
+	}
+	
 	static public function getPlugin($name)
 	{
 		return isset(self::$plugins[$name]) ? self::$plugins[$name] : false;
