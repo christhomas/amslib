@@ -254,7 +254,7 @@ button.red.ggui:active,
 button.ggui span.label, 
 .button.ggui span.label {
 	display: inline-block;
-	height: 13px;
+	height: 15px;
 	padding: 0 1px;
 	overflow: hidden;
 	color: #444;

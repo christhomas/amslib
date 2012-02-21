@@ -7,10 +7,10 @@ if(Amslib == undefined || window.exports == undefined) throw("Amslib_CKEditor.js
 var path = Amslib.getPath("/util/Amslib_CKEditor.js");
 
 if(path){
-	Amslib.loader.ckeditor			=	require(path+"/util/ckeditor/ckeditor.js");
+	Amslib.loader.ckeditor = require(path+"/util/ckeditor/ckeditor.js");
 	
 	scope.ready(function(){
-		Amslib.loader.ckeditor_jquery	=	require(path+"/util/ckeditor/adapters/jquery.js");
+		Amslib.loader.ckeditor_jquery = require(path+"/util/ckeditor/adapters/jquery.js");
 		
 		scope(function(){
 			CKEDITOR.config.toolbar_CKeditor_Config_1 = Amslib_CKEditor[0];
