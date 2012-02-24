@@ -1,0 +1,30 @@
+@CHARSET "UTF-8";
+
+/****************************************************************************/
+/* CSS enclose float hack to make floats enclose within the container div	*/
+/****************************************************************************/
+.floatfix:after{
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+/* Which float to clear, left or right, both is automatic */
+.floatfix-left:after{	clear: left;			}
+.floatfix-right:after{	clear: right;			}
+.floatfix{				display: inline-table; 	} /* Mark Hadley's fix for IE Mac */
+/* Back Mac Hack, Hides this css from Mac IE (this back slash-->) \*/
+.floatfix{				display: block;			}
+/* End of Back Mac Hack */
+/* End of CSS enclose float hack */
+.hbox{					float: left;			}
+.hbox-right{			float: right;			}
+/* ie6 fixes */ 
+.ie6 .floatfix{			height: 1%;				}
+.ie6 .hbox{				display: inline;		}
+.ie6 .hbox-right{		display: inline;		}
+/* ie7 fixes */
+.ie7 .floatfix{			display: inline-block;	}
+.ie7 .hbox{				display: inline;		}
+.ie7 .hbox-right{		display: inline;		}
