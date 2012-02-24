@@ -68,10 +68,20 @@ var Amslib = my.Amslib = my.Class(
 		        
 		        if(i=s.indexOf("?")) s = s.substring(i+1);
 		        
-		        while(e = r.exec(s)) f[d(e[1])] = d(e[2]);
+		        while(e = r.exec(s)){
+		        	var k = d(e[1]), v = d(e[2]);
+		        	
+		        	//	This works with arrays of url params[]
+		        	if(k.indexOf("[]")>=0){
+		        		if(!f[k]) f[k] = new Array();
+		        		f[k].push(v);
+		        	}else{
+		        		f[k] = v;
+		        	}
+		        }
 		        
 		        return f;
-			}
+			};
 			
 			if(arguments.length == 1) return p(arguments[0]);
 			if(arguments.length >= 2) return (f=p(arguments[1])) && (arguments[0] in f) ? f[arguments[0]] : f;
@@ -110,7 +120,10 @@ var Amslib = my.Amslib = my.Class(
 			
 			for(var n=0;n<name.length;n++){
 				if(Amslib.__loaderReady[name[n]] && checkGroup()) return true;
-				else Amslib.__loaderCallback[name[n]] = checkGroup;
+				else{
+					if(!Amslib.__loaderCallback[name[n]]) Amslib.__loaderCallback[name[n]] = new Array();
+					Amslib.__loaderCallback[name[n]].push(checkGroup);
+				}
 			}
 			
 			return false;
@@ -132,7 +145,11 @@ var Amslib = my.Amslib = my.Class(
 		{
 			Amslib.__loaderReady[name] = true;
 			
-			if(Amslib.__loaderCallback[name]) Amslib.__loaderCallback[name]();
+			if(Amslib.__loaderCallback[name]){
+				for(k in Amslib.__loaderCallback[name]){
+					Amslib.__loaderCallback[name][k]();
+				}
+			}
 		}
 	},	
 	

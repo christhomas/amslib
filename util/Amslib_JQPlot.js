@@ -14,4 +14,11 @@ if(amslib){
 	//if(Amslib.versionIE && Amslib.versionIE < 9) $.getScript(src[1]+"/util/jqplot/excanvas.js");
 	Amslib.loadCSS(amslib+"/util/jqplot/jquery.jqplot.css");
 	Amslib.loadJS("jqplot",amslib+"/util/jqplot/jquery.jqplot.min.js");
+	
+	var p = Amslib.getQuery($("script[src*='Amslib_JQPlot.js']").attr("src"));
+	if(p["plugin[]"] && (p=p["plugin[]"])) Amslib.hasJS("jqplot",function(){
+		$(p).each(function(k,v){
+			Amslib.loadJS("jqplot."+v,amslib+"/util/jqplot/plugins/jqplot."+v+".min.js");
+		});
+	});
 };
