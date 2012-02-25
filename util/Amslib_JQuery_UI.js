@@ -14,7 +14,7 @@ if(amslib){
 	var themeList = {
 		"smoothness":	amslib+"/css/jqueryui/smoothness/jquery-ui-1.8.14.custom.css",
 		"Aristo":		amslib+"/css/jqueryui/Aristo/Aristo.css"
-	}
+	};
 	
 	if(!themeList[theme]) theme = "smoothness";
 
