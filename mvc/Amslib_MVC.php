@@ -24,9 +24,8 @@
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-class Amslib_MVC
+class Amslib_MVC extends Amslib_Mixin
 {
-	protected $__mixins = array();
 	protected $object;
 	protected $view;
 	protected $images;
@@ -63,16 +62,7 @@ class Amslib_MVC
 		$this->value		=	array();
 		$this->viewParams	=	array();
 	}
-
-	public function __call($name,$args)
-	{
-		if(in_array($name,array_keys($this->__mixins))){
-			return call_user_func_array(array($this->__mixins[$name],$name),$args);
-		}
-
-		return false;
-	}
-
+	
 	static public function &getInstance()
 	{
 		static $instance = NULL;
@@ -81,23 +71,12 @@ class Amslib_MVC
 
 		return $instance;
 	}
-
+	
 	public function addMixin($object,$filterOut=array())
 	{
-		if(!is_array($filterOut)) $filterOut = array();
+		if(is_string($object)) $object = $this->getObject($object,true);
 		
-		if(get_class($object)){
-			$list = get_class_methods($object);
-
-			foreach($list as $m){
-				//	Block some requested methods and then some obvious methods from being added to the mixin
-				if(!empty($filterOut) && in_array($m,$filterOut) || in_array($m,array("__construct","getInstance"))){
-					continue;
-				}
-				
-				$this->__mixins[$m] = $object;	
-			}
-		}
+		return parent::addMixin($object,$filterOut);
 	}
 
 	public function setName($name)

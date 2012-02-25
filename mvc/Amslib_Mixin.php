@@ -1,12 +1,12 @@
 <?php 
 class Amslib_Mixin
 {
-	private $mixins = array();
+	private $mixin = array();
 	
 	public function __call($name,$args)
 	{
-		if(in_array($name,array_keys($this->__mixins))){
-			return call_user_func_array(array($this->__mixins[$name],$name),$args);
+		if(in_array($name,array_keys($this->mixin))){
+			return call_user_func_array(array($this->mixin[$name],$name),$args);
 		}
 
 		return false;
@@ -25,7 +25,7 @@ class Amslib_Mixin
 					continue;
 				}
 				
-				$this->__mixins[$m] = $object;
+				$this->mixin[$m] = $object;
 			}
 		}
 		
