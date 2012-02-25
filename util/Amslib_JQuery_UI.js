@@ -7,15 +7,17 @@ if(Amslib == undefined || window.exports == undefined) throw("Amslib_JQuery_UI.j
 var amslib = Amslib.locate();
 
 if(amslib){
-	var selected = Amslib.getQuery("theme",$("script[src*='Amslib_JQuery_UI.js']").attr("src"));
+	//	FIXME: It looks from the method functionality that these two parameters should be swapped over
+	//	NOTE: also logically it makes more sense that they are reversed also.
+	var theme = Amslib.getQuery("theme",Amslib.getJSPath("Amslib_JQuery_UI.js"));
 
-	var theme = {
+	var themeList = {
 		"smoothness":	amslib+"/css/jqueryui/smoothness/jquery-ui-1.8.14.custom.css",
 		"Aristo":		amslib+"/css/jqueryui/Aristo/Aristo.css"
 	}
 	
-	if(!theme[selected]) selected = "smoothness";
+	if(!themeList[theme]) theme = "smoothness";
 
-	Amslib.loadCSS(theme[selected]);
+	Amslib.loadCSS(themeList[theme]);
 	Amslib.loadJS("jqueryui",amslib+"/js/jquery-ui-1.8.14.custom.min.js");
 };
