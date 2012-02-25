@@ -234,66 +234,29 @@ class Amslib
 		self::addIncludePath(dirname(__FILE__));
 		self::addIncludePath(dirname(dirname(__FILE__)));
 
-		function amslib_autoload($class_name)
+		function amslib_autoload($c)
 		{
-			if($class_name == __CLASS__) return false;
+			if($c == __CLASS__) return false;
 
-			//	Special case for the FirePHP library
-			if($class_name == "FirePHP"){
-				$class_name	=	"util/FirePHPCore/$class_name.class";
-			}
-
-			if($class_name == "phpQuery"){
-				$class_name =	"util/phpquery.php";
-			}
-
-			//	Redirect to include the correct path for the translator system
-			if(strpos($class_name,"Amslib_Translator") !== false){
-				$class_name	=	"translator/$class_name";
-			}
-
-			//	Redirect to include the correct path for the router system
-			if(strpos($class_name,"Amslib_Router") !== false){
-				$class_name	=	"router/$class_name";
-			}
-
-			//	Redirect to include the correct path for the database system
-			if(strpos($class_name,"Amslib_Database") !== false){
-				$class_name	=	"database/$class_name";
-			}
-
-			//	Redirect to include the correct path for the xml system
-			if(strpos($class_name,"Amslib_XML") !== false){
-				$class_name =	"xml/$class_name";
-			}
-
-			//	Redirect to include the correct path for the plugin system
-			if(strpos($class_name,"Amslib_Plugin") !== false){
-				$class_name	=	"plugin/$class_name";
-			}
-
-			//	Redirect to include the correct path for the MVC system
-			if(strpos($class_name,"Amslib_MVC") !== false){
-				$class_name	=	"mvc/$class_name";
-			}
-
-			//	Redirect to include the correct path for the File system classes
-			if(strpos($class_name,"Amslib_File") !== false){
-				$class_name	=	"file/$class_name";
-			}
-
+			if(strpos($c,"Amslib_Translator")	!== false)	$c	=	"translator/$c";
+			if(strpos($c,"Amslib_Router")		!== false) 	$c	=	"router/$c";
+			if(strpos($c,"Amslib_Database")		!== false)	$c	=	"database/$c";
+			if(strpos($c,"Amslib_XML")			!== false)	$c	=	"xml/$c";
+			if(strpos($c,"Amslib_Plugin")		!== false)	$c	=	"plugin/$c";
+			if(strpos($c,"Amslib_MVC")			!== false)	$c	=	"mvc/$c";
+			if(strpos($c,"Amslib_Mixin")		!== false)	$c	=	"mvc/$c";
+			if(strpos($c,"Amslib_File")			!== false)	$c	=	"file/$c";
+			if(strpos($c,"CakePHP")				!== false)	$c	=	"util/$c";
+			
 			//	DEPRECATED: unless I can find a way to fix the utf-8 broken characters like ü
-			if(strpos($class_name,"HtmlCutString") !== false){
-				$class_name	=	"util/html_cut_string";
-			}
+			if(strpos($c,"HtmlCutString")		!== false)	$c	=	"util/html_cut_string";
+			
+			if($c == "FirePHP")		$c	=	"util/FirePHPCore/$c.class";
+			if($c == "phpQuery")	$c =	"util/phpquery.php";
 
-			if(strpos($class_name,"CakePHP") !== false){
-				$class_name =	"util/CakePHP";
-			}
+			$f = str_replace("//","/","$c.php");
 
-			$filename = str_replace("//","/","$class_name.php");
-
-			return Amslib::requireFile($filename);
+			return Amslib::requireFile($f);
 		}
 
 		//	register a special autoloader that will include correctly all of the amslib classes
