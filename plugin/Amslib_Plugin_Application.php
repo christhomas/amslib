@@ -93,15 +93,17 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$plugins = Amslib_Plugin_Manager::listPlugins();
 		foreach($plugins as $name) Amslib_Plugin_Manager::getAPI($name)->autoloadResources();
 		
+		$default = Amslib_Plugin_Manager::getAPI(Amslib_Router::getParameter("plugin"));
+		
 		//	hack into place the automatic adding of all the stylesheets and javascripts
 		foreach(Amslib_Array::valid(Amslib_Router::getJavascripts()) as $j){
-			$plugin = isset($j["id"]) ? Amslib_Plugin_Manager::getAPI($j["id"]) : $this->getAPI();
-			$plugin->addJavascript($j["value"]);
+			$plugin = isset($j["id"]) ? Amslib_Plugin_Manager::getAPI($j["id"]) : $default;
+			if($plugin) $plugin->addJavascript($j["value"]);
 		}
 		
 		foreach(Amslib_Array::valid(Amslib_Router::getStylesheets()) as $c){
-			$plugin = isset($c["id"]) ? Amslib_Plugin_Manager::getAPI($c["id"]) : $this->getAPI();
-			$plugin->addStylesheet($c["value"]);
+			$plugin = isset($c["id"]) ? Amslib_Plugin_Manager::getAPI($c["id"]) : $default;
+			if($plugin) $plugin->addStylesheet($c["value"]);
 		}
 	}
 
