@@ -325,9 +325,12 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		if(!is_string($id) && $file) return;
 
-		$this->stylesheet[$id] = array("file"=>$file,"conditional"=>$conditional,"media"=>$media);
-
-		if($autoload) $this->addStylesheet($id);
+		$this->stylesheet[$id] = array(
+			"file"			=>	$file,
+			"conditional"	=>	$conditional,
+			"media"			=>	$media,
+			"autoload"		=>	$autoload
+		);
 	}
 
 	public function addStylesheet($id)
@@ -358,9 +361,11 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		if(!is_string($id) && $file) return;
 
-		$this->javascript[$id] = array("file"=>$file,"conditional"=>$conditional);
-
-		if($autoload) $this->addJavascript($id);
+		$this->javascript[$id] = array(
+			"file"			=>	$file,
+			"conditional"	=>	$conditional,
+			"autoload"		=>	$autoload
+		);
 	}
 
 	public function addJavascript($id)
@@ -381,6 +386,17 @@ class Amslib_MVC extends Amslib_Mixin
 	public function removeJavascript($id)
 	{
 		Amslib_Resource::removeJavascript($id);
+	}
+	
+	public function autoloadResources()
+	{
+		foreach($this->stylesheet as $k=>$s) if($s["autoload"]){
+			$this->addStylesheet($k);
+		}
+		
+		foreach($this->javascript as $k=>$j) if($j["autoload"]){
+			$this->addJavascript($k);
+		}
 	}
 
 	public function setFont($type,$id,$file,$autoload)

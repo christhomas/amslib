@@ -76,6 +76,15 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	We need a valid language for the website, make sure it's valid
 		$langCode = self::getLanguage("website");
 		if(!$langCode) self::setLanguage("website",current(self::getLanguageList("website")));
+		
+		//	We need a default/valid language for the content, make sure it's valid
+		//	FIXME: we probably need to find a way to automatically do this
+		//	NOTE: this is a bit shit tbh, so we definitely need to change this
+		$langCode = self::getLanguage("content");
+		if(!$langCode) self::setLanguage("content",reset(self::getLanguageList("content")));
+		
+		$plugins = Amslib_Plugin_Manager::listPlugins();
+		foreach($plugins as $name) Amslib_Plugin_Manager::getAPI($name)->autoloadResources();
 
 		return true;
 	}
