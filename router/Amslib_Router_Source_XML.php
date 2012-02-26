@@ -28,7 +28,7 @@ class Amslib_Router_Source_XML
 	protected $xpath;
 	protected $routes;
 	protected $url;
-
+	
 	protected function findNodes($name,$parent)
 	{
 		if(!$parent || !$parent->hasChildNodes()) return array();
@@ -48,15 +48,16 @@ class Amslib_Router_Source_XML
 
 		return (!empty($params)) ? explode("/",$params) : array();
 	}
-
-	protected function decodeParameters($path)
+	
+	protected function decodeIdList($path,$name)
 	{
-		$nodes = $this->findNodes("parameter",$path);
+		$nodes = $this->findNodes($name,$path);
 
 		$list = array();
 
 		foreach($nodes as $p){
 			$id = $p->getAttribute("id");
+			
 			if(!$id) continue;
 
 			$list[$id] = $p->nodeValue;
@@ -65,26 +66,36 @@ class Amslib_Router_Source_XML
 		return $list;
 	}
 	
-	protected function decodeStylesheets($path)
+	protected function decodeArray($path,$name)
 	{
-		$nodes = $this->findNodes("stylesheet",$path);
+		$nodes = $this->findNodes($name,$path);
 
 		$list = array();
 
-		foreach($nodes as $p) $list[] = $p->nodeValue;
+		foreach($nodes as $p){
+			$data = array();
+			foreach($p->attributes as $k=>$v) $data[$k] = $v->nodeValue;
+			$data["value"] = $p->nodeValue;
+
+			$list[] = $data;
+		}
 
 		return $list;
+	}
+
+	protected function decodeParameters($path)
+	{
+		return $this->decodeIdList($path,"parameter");
+	}
+	
+	protected function decodeStylesheets($path)
+	{
+		return $this->decodeArray($path,"stylesheet");
 	}
 	
 	protected function decodeJavascripts($path)
 	{
-		$nodes = $this->findNodes("javascript",$path);
-
-		$list = array();
-
-		foreach($nodes as $p) $list[] = $p->nodeValue;
-
-		return $list;
+		return $this->decodeArray($path,"javascript");
 	}
 
 	protected function decodeSources($path)

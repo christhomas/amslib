@@ -132,7 +132,7 @@ var Amslib = my.Amslib = my.Class(
 		getJSPath: function(search)
 		{
 			return $("script[src*='"+search+"']").attr("src");
-		}
+		},
 		
 		loadCSS: function(file)
 		{

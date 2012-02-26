@@ -94,17 +94,14 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		foreach($plugins as $name) Amslib_Plugin_Manager::getAPI($name)->autoloadResources();
 		
 		//	hack into place the automatic adding of all the stylesheets and javascripts
-		$p = Amslib_Router::getParameter("plugin",false);
-
-		if($p){
-			$s = Amslib_Router::getStylesheets();
-			$j = Amslib_Router::getJavascripts();
-			$p = Amslib_Plugin_Manager::getAPI($p);
-
-			if($p){
-				foreach(Amslib_Array::valid($s) as $css) $p->addStylesheet($css);
-				foreach(Amslib_Array::valid($j) as $js) $p->addJavascript($js);
-			}
+		foreach(Amslib_Array::valid(Amslib_Router::getJavascripts()) as $j){
+			$plugin = isset($j["id"]) ? Amslib_Plugin_Manager::getAPI($j["id"]) : $this->getAPI();
+			$plugin->addJavascript($j["value"]);
+		}
+		
+		foreach(Amslib_Array::valid(Amslib_Router::getStylesheets()) as $c){
+			$plugin = isset($c["id"]) ? Amslib_Plugin_Manager::getAPI($c["id"]) : $this->getAPI();
+			$plugin->addStylesheet($c["value"]);
 		}
 	}
 
