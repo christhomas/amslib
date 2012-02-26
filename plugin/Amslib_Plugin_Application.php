@@ -82,11 +82,30 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	NOTE: this is a bit shit tbh, so we definitely need to change this
 		$langCode = self::getLanguage("content");
 		if(!$langCode) self::setLanguage("content",reset(self::getLanguageList("content")));
-		
-		$plugins = Amslib_Plugin_Manager::listPlugins();
-		foreach($plugins as $name) Amslib_Plugin_Manager::getAPI($name)->autoloadResources();
+
+		$this->autoloadResources();
 
 		return true;
+	}
+	
+	protected function autoloadResources()
+	{
+		$plugins = Amslib_Plugin_Manager::listPlugins();
+		foreach($plugins as $name) Amslib_Plugin_Manager::getAPI($name)->autoloadResources();
+		
+		//	hack into place the automatic adding of all the stylesheets and javascripts
+		$p = Amslib_Router::getParameter("plugin",false);
+
+		if($p){
+			$s = Amslib_Router::getStylesheets();
+			$j = Amslib_Router::getJavascripts();
+			$p = Amslib_Plugin_Manager::getAPI($p);
+
+			if($p){
+				foreach(Amslib_Array::valid($s) as $css) $p->addStylesheet($css);
+				foreach(Amslib_Array::valid($j) as $js) $p->addJavascript($js);
+			}
+		}
 	}
 
 	protected function initRouter()
@@ -117,20 +136,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		Amslib_Router::setSource($xml);
 		Amslib_Router::execute();
-
-		//	hack into place the automatic adding of all the stylesheets and javascripts
-		$p = Amslib_Router::getParameter("plugin",false);
-
-		if($p){
-			$s = Amslib_Router::getStylesheets();
-			$j = Amslib_Router::getJavascripts();
-			$p = Amslib_Plugin_Manager::getAPI($p);
-
-			if($p){
-				foreach(Amslib_Array::valid($s) as $css) $p->addStylesheet($css);
-				foreach(Amslib_Array::valid($j) as $js) $p->addJavascript($js);
-			}
-		}
 	}
 
 	public function __construct($name,$location)

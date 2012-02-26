@@ -292,6 +292,7 @@ class Amslib_Plugin
 
 		//	FIXME: omg, it's just a bunch of repeated code, all over the place, ripe for refactoring....
 		//	FIXME: it's actually hilarious how much repeated code I have, yet I didnt refactor it yet :)
+		//	NOTE: ok, I've started to refactor the code as much as I can, but I think I got stuck and can't go further
 
 		//	Process all the import/export/transfer requests on all resources
 		//	NOTE: translators don't support the "move" parameter
@@ -300,49 +301,67 @@ class Amslib_Plugin
 				//	Models are treated slightly differently because they are singular, not plural
 				//	NOTE: maybe in future models will be plural too, perhaps it's better to make it work plurally anyway
 				if(isset($block["import"]) && $block["import"] != $this->getName()){
-					$plugin = Amslib_Plugin_Manager::getPlugin($block["import"]);
-					if($plugin){
-						$this->setConfig($key,$plugin->getConfig($key));
-						if(isset($block["move"])) $plugin->removeConfig($key);
-					}else Amslib_FirePHP::output("AP::transfer(): plugin invalid",$item);
+					$pname	=	$block["import"];
+					$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
+					$src	=	$plugin;
+					$dst	=	$this;
 				}else if(isset($block["export"]) && $block["export"] != $this->getName()){
-					$plugin = Amslib_Plugin_Manager::getPlugin($block["export"]);
-					if($plugin){
-						$plugin->setConfig($key,$this->getConfig($key));
-						if(isset($block["move"])) $this->removeConfig($key);
-					}else Amslib_FirePHP::output("AP::transfer(): plugin invalid",$item);
+					$pname	=	$block["export"];
+					$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
+					$src	=	$this;
+					$dst	=	$plugin;
+				}else $plugin = false;
+				
+				if($plugin){
+					$dst->setConfig($key,$src->getConfig($key));
+					if(isset($block["move"])) $src->removeConfig($key);
 				}
 			}else if($key == "value"){
 				foreach(Amslib_Array::valid($block) as $item){
 					if(isset($item["import"]) && $item["import"] != $this->getName()){
-						$plugin = Amslib_Plugin_Manager::getPlugin($item["import"]);
+						$iname	=	$item["name"];
+						$pname	=	$item["import"];
+						$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
+						$src	=	$plugin;
+						$dst	=	$this;
+						$fkey	=	array($key,$iname);
+						
 						if($plugin){
-							$this->setConfig(array($key,$item["name"]),$plugin->getConfig($key,$item["name"]));
-							if(isset($item["move"])) $plugin->removeConfig($key,$item["name"]);
-						}else Amslib_FirePHP::output("AP::transfer(): plugin invalid",$item);
+							$dst->setConfig($fkey,$src->getConfig($key,$iname));
+							if(isset($item["move"])) $src->removeConfig($key,$iname);
+						}
 					}else if(isset($item["export"]) && $item["export"] != $this->getName()){
-						$plugin = Amslib_Plugin_Manager::getPlugin($item["export"]);
+						$iname	=	$item["name"];
+						$pname	=	$item["export"];
+						$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
+						$src	=	$this;
+						$dst	=	$plugin;
+						$fkey	=	array($key,$iname);
+						
 						if($plugin){
-							$plugin->setConfig(array($key,$item["name"]),$item);
-							if(isset($item["move"])) $this->removeConfig($key,$item["name"]);
-						}else Amslib_FirePHP::output("AP::transfer(): plugin invalid",array($item,$plugin));
+							$dst->setConfig($fkey,$item);
+							if(isset($item["move"])) $src->removeConfig($key,$iname);
+						}
 					}
 				}
 			}else if(in_array($key,array("object","view","layout","service","stylesheet","image","javascript","translator"))){
 				//	TODO: if I used $item["name"] instead of $name as the key, I could merge against the "value" block below
-				foreach(Amslib_Array::valid($block) as $name=>$item){
+				foreach(Amslib_Array::valid($block) as $iname=>$item){
 					if(isset($item["import"]) && $item["import"] != $this->getName()){
-						$plugin = Amslib_Plugin_Manager::getPlugin($item["import"]);
-						if($plugin){
-							$this->setConfig(array($key,$name),$plugin->getConfig($key,$name));
-							if(isset($item["move"])) $plugin->removeConfig($key,$name);
-						}else Amslib_FirePHP::output("AP::transfer(): plugin invalid",$item);
+						$pname	=	$item["import"];
+						$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
+						$src	=	$plugin;
+						$dst	=	$this;
 					}else if(isset($item["export"]) && $item["export"] != $this->getName()){
-						$plugin = Amslib_Plugin_Manager::getPlugin($item["export"]);
-						if($plugin){
-							$plugin->setConfig(array($key,$name),$this->getConfig($key,$name));
-							if(isset($item["move"])) $this->removeConfig($key,$name);
-						}else Amslib_FirePHP::output("AP::transfer(): plugin invalid",$item);
+						$pname	=	$item["export"];
+						$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
+						$src	=	$this;
+						$dst	=	$plugin;
+					}else $plugin = false;
+					
+					if($plugin){
+						$dst->setConfig(array($key,$iname),$src->getConfig($key,$iname));
+						if(isset($item["move"])) $src->removeConfig($key,$iname);
 					}
 				}
 			}
