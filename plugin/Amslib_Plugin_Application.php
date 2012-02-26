@@ -164,6 +164,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	We need to set this before any plugins are touched, because other plugins will depend on it's knowledge
 		//	NOTE: It sounds like I'm setting up a system of "priming" certain values which are important, this might need expanding in the future
 		$this->setLanguageKey();
+		//	Now continue loading the plugin like normal
 		$this->transfer();
 		$this->load();
 
