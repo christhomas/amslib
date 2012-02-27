@@ -178,6 +178,13 @@ class Amslib_Router
 			? self::$route["parameters"][$name]
 			: $default;
 	}
+	
+	static public function setParameter($name,$value)
+	{
+		if(self::$route && isset(self::$route["parameters"])){
+			self::$route["parameters"][$name] = $value;	
+		}
+	}
 
 	static public function hasParameter($name)
 	{

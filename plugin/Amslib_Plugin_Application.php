@@ -76,8 +76,35 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	We need a valid language for the website, make sure it's valid
 		$langCode = self::getLanguage("website");
 		if(!$langCode) self::setLanguage("website",current(self::getLanguageList("website")));
+		
+		//	We need a default/valid language for the content, make sure it's valid
+		//	FIXME: we probably need to find a way to automatically do this
+		//	NOTE: this is a bit shit tbh, so we definitely need to change this
+		$langCode = self::getLanguage("content");
+		if(!$langCode) self::setLanguage("content",reset(self::getLanguageList("content")));
+
+		$this->autoloadResources();
 
 		return true;
+	}
+	
+	protected function autoloadResources()
+	{
+		$plugins = Amslib_Plugin_Manager::listPlugins();
+		foreach($plugins as $name) Amslib_Plugin_Manager::getAPI($name)->autoloadResources();
+		
+		$default = Amslib_Plugin_Manager::getAPI(Amslib_Router::getParameter("plugin"));
+		
+		//	hack into place the automatic adding of all the stylesheets and javascripts
+		foreach(Amslib_Array::valid(Amslib_Router::getJavascripts()) as $j){
+			$plugin = isset($j["id"]) ? Amslib_Plugin_Manager::getAPI($j["id"]) : $default;
+			if($plugin) $plugin->addJavascript($j["value"]);
+		}
+		
+		foreach(Amslib_Array::valid(Amslib_Router::getStylesheets()) as $c){
+			$plugin = isset($c["id"]) ? Amslib_Plugin_Manager::getAPI($c["id"]) : $default;
+			if($plugin) $plugin->addStylesheet($c["value"]);
+		}
 	}
 
 	protected function initRouter()
@@ -108,20 +135,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		Amslib_Router::setSource($xml);
 		Amslib_Router::execute();
-
-		//	hack into place the automatic adding of all the stylesheets and javascripts
-		$p = Amslib_Router::getParameter("plugin",false);
-
-		if($p){
-			$s = Amslib_Router::getStylesheets();
-			$j = Amslib_Router::getJavascripts();
-			$p = Amslib_Plugin_Manager::getAPI($p);
-
-			if($p){
-				foreach(Amslib_Array::valid($s) as $css) $p->addStylesheet($css);
-				foreach(Amslib_Array::valid($j) as $js) $p->addJavascript($js);
-			}
-		}
 	}
 
 	public function __construct($name,$location)
@@ -150,6 +163,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	We need to set this before any plugins are touched, because other plugins will depend on it's knowledge
 		//	NOTE: It sounds like I'm setting up a system of "priming" certain values which are important, this might need expanding in the future
 		$this->setLanguageKey();
+		//	Now continue loading the plugin like normal
 		$this->transfer();
 		$this->load();
 

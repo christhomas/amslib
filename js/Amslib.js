@@ -129,6 +129,11 @@ var Amslib = my.Amslib = my.Class(
 			return false;
 		},
 		
+		getJSPath: function(search)
+		{
+			return $("script[src*='"+search+"']").attr("src");
+		},
+		
 		loadCSS: function(file)
 		{
 			$("head").append($("<link/>").attr({rel:"stylesheet",type:"text/css",href: file}));
