@@ -52,37 +52,37 @@ class Amslib_Plugin_Manager
 	{
 		//	Plugin was already loaded, so return it's Plugin Object directly
 		if(self::isLoaded($name)) return self::$plugins[$name];
-		
+
 		if($location = self::findPlugin($name,$location)){
 			//	Plugin was not present, so create it, load everything required and return it's API
 			self::$plugins[$name] = new Amslib_Plugin();
 			self::$plugins[$name]->config($name,$location.$name);
-		
+
 			return self::$plugins[$name];
 		}
-		
+
 		//	Plugin was not found
 		return false;
 	}
-	
+
 	static public function load($name,$location=NULL)
 	{
 		//	Config a plugin to be "preloaded" and available
 		$p = self::config($name,$location);
-		
+
 		//	Process any import/export directives
 		$p->transfer();
-				
+
 		//	Load the plugin and all it's children and resources
 		$p->load();
-		
+
 		//	Insert the plugin, or remove it if something has failed
 		if(self::insert($name,$p) == false) self::remove($name);
-		
+
 		//	Obtain the API object, or false if it doesn't exist
 		return self::getAPI($name);
 	}
-	
+
 	static public function preload($name,$plugin)
 	{
 		if($name && $plugin) self::$plugins[$name] = $plugin;
@@ -92,11 +92,11 @@ class Amslib_Plugin_Manager
 	{
 		if($name && $plugin){
 			$api = $plugin->getAPI();
-			
+
 			if($api){
 				self::$api[$name]		=	$api;
 				self::$plugins[$name]	=	$plugin;
-			
+
 				return true;
 			}
 		}
@@ -115,24 +115,24 @@ class Amslib_Plugin_Manager
 
 	static public function getAPI($name)
 	{
-		return (isset(self::$api[$name])) ? self::$api[$name] : false;
+		return is_string($name) && isset(self::$api[$name]) ? self::$api[$name] : false;
 	}
-	
+
 	static public function setAPI($name,$api)
 	{
 		self::$api[$name] = $api;
 	}
-	
+
 	static public function getPlugin($name)
 	{
-		return isset(self::$plugins[$name]) ? self::$plugins[$name] : false;
+		return is_string($name) && isset(self::$plugins[$name]) ? self::$plugins[$name] : false;
 	}
-	
+
 	static public function listPlugins()
 	{
 		return array_keys(self::$plugins);
 	}
-	
+
 	static public function isLoaded($name)
 	{
 		return isset(self::$plugins[$name]) ? true : false;
@@ -147,7 +147,7 @@ class Amslib_Plugin_Manager
 	{
 		return self::$location;
 	}
-	
+
 	/*******************************************************************
 	 	HELPER FUNCTIONS
 
@@ -162,11 +162,11 @@ class Amslib_Plugin_Manager
 
 		return $api ? $api->render($view,$parameters) : false;
 	}
-	
+
 	static public function getObject($plugin,$id,$singleton=false)
 	{
 		$api = self::getAPI($plugin);
-		
+
 		return $api ? $api->getObject($id,$singleton) : false;
 	}
 
@@ -183,7 +183,7 @@ class Amslib_Plugin_Manager
 
 		return $api ? $api->getService($service) : false;
 	}
-	
+
 	static public function getServiceURL($plugin,$service)
 	{
 		$api = self::getAPI($plugin);
