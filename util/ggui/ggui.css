@@ -22,7 +22,9 @@ button.ggui,
 	
 	font: bold 11px Helvetica, Arial, sans-serif;
 	color: #444;
-	line-height: 17px;
+	/* chris.thomas@antimatter-studios.com: removed this because it helps fix layout in chrome */
+	/* has no effect on firefox, so I assume it's ok to do this */
+	/*line-height: 17px;*/
 	height: 27px !important;
 	
 	display: inline-block;
@@ -254,7 +256,9 @@ button.red.ggui:active,
 button.ggui span.label, 
 .button.ggui span.label {
 	display: inline-block;
-	height: 15px;
+	/*	chris.thomas@antimatter-studios.com: remove this to fix layout problem in chrome */
+	/*	works ok in firefox mac */
+	/*height: 15px;*/
 	padding: 0 1px;
 	overflow: hidden;
 	color: #444;
