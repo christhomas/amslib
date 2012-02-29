@@ -48,6 +48,8 @@ class Amslib_Router
 			$route["route"]			=	false;
 			$route["parameters"]	=	array();
 			$route["options"]		=	array();
+			$route["stylesheets"]	=	array();
+			$route["javascripts"]	=	array();
 		}
 
 		return $route;
@@ -75,7 +77,7 @@ class Amslib_Router
 	{
 		self::$source = $source;
 	}
-	
+
 	static public function getSource()
 	{
 		return self::$source;
@@ -178,11 +180,11 @@ class Amslib_Router
 			? self::$route["parameters"][$name]
 			: $default;
 	}
-	
+
 	static public function setParameter($name,$value)
 	{
 		if(self::$route && isset(self::$route["parameters"])){
-			self::$route["parameters"][$name] = $value;	
+			self::$route["parameters"][$name] = $value;
 		}
 	}
 
@@ -190,7 +192,7 @@ class Amslib_Router
 	{
 		return in_array($name,self::$route["parameters"]) ? true : false;
 	}
-	
+
 	static public function getURLOption($index=NULL,$default="")
 	{
 		if($default === "") $default = self::$route["options"];
@@ -199,12 +201,12 @@ class Amslib_Router
 				? self::$route["options"][$index]
 				: $default;
 	}
-	
+
 	static public function getStylesheets()
 	{
 		return self::$route["stylesheets"];
 	}
-	
+
 	static public function getJavascripts()
 	{
 		return self::$route["javascripts"];
@@ -237,7 +239,7 @@ class Amslib_Router
 
 		return $instance;
 	}
-	
+
 	static public function dump()
 	{
 		return array("path"=>self::$path,"routes"=>self::$route,"source"=>self::$source->dump());
