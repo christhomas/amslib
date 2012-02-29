@@ -14,7 +14,10 @@ var Amslib_String = my.Amslib_String = my.Class(
 		
 		slugify: function(text)
 		{
-			return Amslib_String.trim(Amslib_String.removeDiacritics(text).replace(/[^-a-zA-Z0-9\.\-]+/ig,'-').toLowerCase(),' -')
+			return Amslib_String.trim(
+				Amslib_String.removeDiacritics(text).replace(/[^-a-zA-Z0-9\.\-\_]+/ig,'-').toLowerCase(),
+				' -_.'
+			);
 		},
 		
 		removeDiacritics: function(text)
