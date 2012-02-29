@@ -76,7 +76,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	We need a valid language for the website, make sure it's valid
 		$langCode = self::getLanguage("website");
 		if(!$langCode) self::setLanguage("website",current(self::getLanguageList("website")));
-		
+
 		//	We need a default/valid language for the content, make sure it's valid
 		//	FIXME: we probably need to find a way to automatically do this
 		//	NOTE: this is a bit shit tbh, so we definitely need to change this
@@ -87,20 +87,20 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		return true;
 	}
-	
+
 	protected function autoloadResources()
 	{
 		$plugins = Amslib_Plugin_Manager::listPlugins();
 		foreach($plugins as $name) Amslib_Plugin_Manager::getAPI($name)->autoloadResources();
-		
+
 		$default = Amslib_Plugin_Manager::getAPI(Amslib_Router::getParameter("plugin"));
-		
+
 		//	hack into place the automatic adding of all the stylesheets and javascripts
 		foreach(Amslib_Array::valid(Amslib_Router::getJavascripts()) as $j){
 			$plugin = isset($j["id"]) ? Amslib_Plugin_Manager::getAPI($j["id"]) : $default;
 			if($plugin) $plugin->addJavascript($j["value"]);
 		}
-		
+
 		foreach(Amslib_Array::valid(Amslib_Router::getStylesheets()) as $c){
 			$plugin = isset($c["id"]) ? Amslib_Plugin_Manager::getAPI($c["id"]) : $default;
 			if($plugin) $plugin->addStylesheet($c["value"]);

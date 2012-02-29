@@ -62,7 +62,7 @@ class Amslib_MVC extends Amslib_Mixin
 		$this->value		=	array();
 		$this->viewParams	=	array();
 	}
-	
+
 	static public function &getInstance()
 	{
 		static $instance = NULL;
@@ -71,11 +71,11 @@ class Amslib_MVC extends Amslib_Mixin
 
 		return $instance;
 	}
-	
+
 	public function addMixin($object,$filterOut=array())
 	{
 		if(is_string($object)) $object = $this->getObject($object,true);
-		
+
 		return parent::addMixin($object,$filterOut);
 	}
 
@@ -113,7 +113,7 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		$this->routes[$name] = $route;
 	}
-	
+
 	public function setPlugin($plugin)
 	{
 		$this->plugin = $plugin;
@@ -218,17 +218,17 @@ class Amslib_MVC extends Amslib_Mixin
 		if(!$id || strlen($id) == 0) $id = $name;
 
 		$this->view[$id] = $name;
-		
+
 		if(!isset($this->view["default"])) $this->view["default"] = $name;
 	}
-	
+
 	public function getView($id)
 	{
 		if($id && isset($this->view[$id])) return $this->view[$id];
 
 		return $this->view;
 	}
-	
+
 	public function render($id="default",$parameters=array())
 	{
 		return $this->renderView($id,$parameters);
@@ -345,6 +345,11 @@ class Amslib_MVC extends Amslib_Mixin
 		}
 	}
 
+	public function listStylesheet($key="file")
+	{
+		return $key !== false ? Amslib_Array::pluck($this->stylesheet,$key) : $this->stylesheet;
+	}
+
 	public function getStylesheet($id,$file=true)
 	{
 		return isset($this->stylesheet[$id])
@@ -376,6 +381,11 @@ class Amslib_MVC extends Amslib_Mixin
 		}
 	}
 
+	public function listJavascript($key="file")
+	{
+		return $key !== false ? Amslib_Array::pluck($this->javascript,$key) : $this->javascript;
+	}
+
 	public function getJavascript($id,$file=true)
 	{
 		return isset($this->javascript[$id])
@@ -387,13 +397,13 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		Amslib_Resource::removeJavascript($id);
 	}
-	
+
 	public function autoloadResources()
 	{
 		foreach($this->stylesheet as $k=>$s) if($s["autoload"]){
 			$this->addStylesheet($k);
 		}
-		
+
 		foreach($this->javascript as $k=>$j) if($j["autoload"]){
 			$this->addJavascript($k);
 		}
