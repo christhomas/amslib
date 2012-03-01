@@ -7,28 +7,44 @@ class Amslib_Mixin
 	{
 		if(in_array($name,array_keys($this->mixin))){
 			return call_user_func_array(array($this->mixin[$name],$name),$args);
+		}else{
+			Amslib_Keystore::add("__call[failure]",array(
+				"class"		=>	get_class($this),
+				"method"	=>	$name,
+				"available"	=>	array_keys($this->mixin)
+			));	
 		}
 
 		return false;
 	}
 	
-	public function addMixin($object,$filterOut=array())
+	public function addMixin($object,$filter=array())
 	{
-		if(!is_array($filterOut)) $filterOut = array();
+		if(!is_array($filter)) $filter = array();
 		
-		if(get_class($object)){
-			$list = get_class_methods($object);
+		if($o = get_class($object)){
+			$filter = array_merge(
+				$filter,
+				get_class_methods("Amslib_Mixin"),
+				array("__construct","getInstance")
+			);
+			
+			$mixin	=	method_exists($object,"getMixin") ? $object->getMixin() : array();
+			$list	=	array_merge(get_class_methods($object),$mixin);
 
 			foreach($list as $m){
 				//	Block some requested methods and then some obvious methods from being added to the mixin
-				if(!empty($filterOut) && in_array($m,$filterOut) || in_array($m,array("__construct","getInstance"))){
-					continue;
-				}
+				if(!empty($filter) && in_array($m,$filter)) continue;
 				
 				$this->mixin[$m] = $object;
 			}
 		}
 		
 		return $object;
+	}
+	
+	public function getMixin()
+	{
+		return array_keys($this->mixin);
 	}
 }
