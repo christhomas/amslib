@@ -81,7 +81,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	FIXME: we probably need to find a way to automatically do this
 		//	NOTE: this is a bit shit tbh, so we definitely need to change this
 		$langCode = self::getLanguage("content");
-		if(!$langCode) self::setLanguage("content",reset(self::getLanguageList("content")));
+		if(!$langCode) self::setLanguage("content",current(self::getLanguageList("content")));
 
 		$this->autoloadResources();
 
