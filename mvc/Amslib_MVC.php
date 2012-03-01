@@ -249,9 +249,7 @@ class Amslib_MVC extends Amslib_Mixin
 			$parameters["_w"]	=	$this->getTranslator("website");
 			$parameters["_c"]	=	$this->getTranslator("content");
 
-			ob_start();
-			Amslib::requireFile($this->view[$id],$parameters);
-			return ob_get_clean();
+			return Amslib::requireFile($this->view[$id],$parameters,true);
 		}
 
 		return "";
