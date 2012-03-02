@@ -108,6 +108,23 @@ class Amslib_Database_MySQL extends Amslib_Database
 			? mysql_real_escape_string($value)
 			: die("unsafe string escape: database not connected, backtrace: ".Amslib::var_dump(Amslib::backtrace(1,3,"file","line"),true));
 	}
+	
+	public function unescape($results,$keys="")
+	{
+		if(Amslib_Array::isMulti($results)){
+			if($keys == "") $keys = array_keys(current($results));
+
+			foreach($results as &$r){
+				$r = Amslib_Array::stripSlashesSingle($r,$keys);
+			}
+		}else{
+			if($keys == "") $keys = array_keys($results);
+
+			$results = Amslib_Array::stripSlashesSingle($results,$keys);
+		}
+
+		return $results;
+	}
 
 	public function fixColumnEncoding($src,$dst,$table,$primaryKey,$column)
 	{
