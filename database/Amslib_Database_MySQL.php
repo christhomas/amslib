@@ -250,6 +250,25 @@ HAS_TABLE;
 
 		return $this->lastResult;
 	}
+	
+	public function query($query)
+	{
+		$this->seq++;
+
+		if($this->getConnectionStatus() == false) return false;
+		
+		$this->setLastQuery($query);
+		$result = mysql_query($query,$this->connection);
+		
+		$this->setDebugOutput($query);
+		
+		if(!$result){
+			$this->setErrors($query);
+			return false;	
+		}
+		
+		return true;
+	}
 
 	public function select($query,$numResults=0,$optimise=false)
 	{

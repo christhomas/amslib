@@ -166,6 +166,41 @@ class Amslib
 
 		return ($preformat) ? "<pre $hiddenOutput>$dump</pre>" : $dump;
 	}
+	
+	//	Website: http://php.net
+	//	User: Levofski
+	//	Link: http://www.php.net/manual/en/function.print-r.php#97901
+	//	Thanks, it works great!
+	static public function var_dump_xml($mixed)
+	{
+	    // capture the output of print_r
+	    $out = print_r($mixed, true);
+	   
+	    // Replace the root item with a struct
+	    // MATCH : '<start>element<newline> ('
+	    $root_pattern = '/[ \t]*([a-z0-9 \t_]+)\n[ \t]*\(/i';
+	    $root_replace_pattern = '<struct name="root" type="\\1">';
+	    $out = preg_replace($root_pattern, $root_replace_pattern, $out, 1);
+	
+	    // Replace array and object items structs
+	    // MATCH : '[element] => <newline> ('
+	    $struct_pattern = '/[ \t]*\[([^\]]+)\][ \t]*\=\>[ \t]*([a-z0-9 \t_]+)\n[ \t]*\(/miU';
+	    $struct_replace_pattern = '<struct name="\\1" type="\\2">';
+	    $out = preg_replace($struct_pattern, $struct_replace_pattern, $out);
+	    // replace ')' on its own on a new line (surrounded by whitespace is ok) with '</var>
+	    $out = preg_replace('/^\s*\)\s*$/m', '</struct>', $out);
+	   
+	    // Replace simple key=>values with vars
+	    // MATCH : '[element] => value<newline>'
+	    $var_pattern = '/[ \t]*\[([^\]]+)\][ \t]*\=\>[ \t]*([a-z0-9 \t_\S]+)/i';
+	    $var_replace_pattern = '<var name="\\1">\\2</var>';
+	    $out = preg_replace($var_pattern, $var_replace_pattern, $out);
+	   
+	    $out =  trim($out);
+	    $out='<?xml version="1.0"?><data>'.$out.'</data>';
+	
+	    return $out;
+	}
 
 	static public function backtrace()
 	{
