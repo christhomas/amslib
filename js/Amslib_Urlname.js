@@ -2,6 +2,7 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 {
 	src:	false,
 	dest:	false,
+	trimcb: false,
 	
 	STATIC: {
 		autoload: function()
@@ -34,12 +35,26 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 	
 	updateFromSrc: function()
 	{
-		this.dest.val(Amslib_String.slugify(this.src.val()));
+		this.dest.val(this.slugify(this.src.val()));
 	},
 	
 	updateFromDest: function()
 	{
-		this.dest.val(Amslib_String.slugify(this.dest.val()));
+		this.dest.val(this.slugify(this.dest.val()));
+	},
+	
+	slugify: function()
+	{
+		var po = this;
+
+		if(this.trimcb) clearTimeout(this.trimcb);
+		
+		this.trimcb = setTimeout(function(){
+			po.dest.val(Amslib_String.trim(po.dest.val(),' -_.'));
+			po.trimcb = false;
+		},2000);
+		
+		return Amslib_String.slugify(this.src.val());
 	}
 });
 

@@ -226,9 +226,10 @@ class Amslib_Array
 		if(is_string($key)) $key = array($key);
 
 		foreach($array as &$element){
-			if(!$key) $key = array_keys($element);
-			foreach($key as $index){
-				$element[$index] = stripslashes($element[$index]);
+			if(!$key){
+				$element = array_map("stripslashes",$element);
+			}else{
+				foreach($key as $index) $element[$index] = stripslashes($element[$index]);
 			}
 		}
 
