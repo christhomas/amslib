@@ -3,6 +3,11 @@ var Amslib = my.Amslib = my.Class(
 	__amslibDefaultName:	"Amslib_Default_Controller",
 	__amslibName:			false,
 	__options:				{},
+	//	we "abuse" jquery dom-data functionality to store groups of data
+	__value:				$("<div/>"),
+	__services:				$("<div/>"),
+	__translation:			$("<div/>"),
+	__images:				$("<div/>"),
 	
 	STATIC: {
 		autoload: function()
@@ -52,7 +57,7 @@ var Amslib = my.Amslib = my.Class(
 		
 		locate: function()
 		{
-			Amslib.__location = $("script[src*='/js/Amslib.js']").attr("src").split("/js/Amslib.js")[0];
+			Amslib.__location = Amslib.getJSPath("/js/Amslib.js").split("/js/Amslib.js")[0];
 			
 			return Amslib.__location || false;
 		},
@@ -129,9 +134,11 @@ var Amslib = my.Amslib = my.Class(
 			return false;
 		},
 		
-		getJSPath: function(search)
+		getJSPath: function(search,path)
 		{
-			return $("script[src*='"+search+"']").attr("src");
+			var s = $("script[src*='"+search+"']").attr("src");
+			
+			return s && path ? s.split(search)[0] : s;
 		},
 		
 		loadCSS: function(file)
@@ -168,11 +175,14 @@ var Amslib = my.Amslib = my.Class(
 		//	Setup the amslib_controller to make this object available on the node it was associated with
 		this.parent.data(this.__amslibName,this);
 		
+		this.initValues();
+		
 		//	Now merge all the specific options from the static parameter "options" into this
 		//	NOTE: Hmm....I can't think how to obtain the name of the parent class.....shit....
 		//	NOTE: perhaps this is why other plugins don't use a static object?
 		//	NOTE: well shit, that means I have to convert all the javascript objects to not using them
 		//	NOTE: yes, well, what do you want? a medal?
+		//	NOTE: what was the point of all this again? (6/03/2012)
 		//this.__options = this.__options.extend()
 		
 		return this;
@@ -186,7 +196,52 @@ var Amslib = my.Amslib = my.Class(
 	getParentNode: function()
 	{
 		return this.parent;
-	}
+	},
+	
+	initValues: function()
+	{
+		var mvc	=	this.parent.find("__amslib_mvc_values");
+		var po	=	this;
+		
+		try{
+			var input = mvc.find("input[type='hidden']");
+			if(input.length){
+				//	interpret input values
+				input.each(function(){
+					var n = $(this).attr("name");
+					var v = $(this).val();
+					
+					if(n.indexOf("service:") >=0){
+						po.setService(n.replace("service:",""),v);
+					}else if(n.indexOf("translation:") >=0){
+						po.setTranslation(n.replace("translation:",""),v);
+					}else if(n.indexOf("image:") >=0){
+						po.setImage(n.replace("image:",""),v);
+					}else{
+						po.setValue(n,v);
+					}
+				});
+			}else{
+				//	interpret json values
+			}	
+		}catch(e){}
+	},
+	
+	//	Getter/Setter for the object values
+	setValue: function(name,value){			this.__value.data(name,value);			},
+	getValue: function(name){				return this.__value.data(name);			},
+	
+	//	Getter/Setter for web services
+	setService: function(name,value){		this.__services.data(name,value);		},
+	getService: function(name){				return this.__services.data(name);		},
+	
+	//	Getter/Setter for text translations
+	setTranslation: function(name,value){	this.__translation.data(name,value);	},
+	getTranslation: function(name){			return this.__translation.data(name);	},
+	
+	//	Getter/Setter for images
+	setImage: function(name,value){			this.__images.data(name,value);			},
+	getImage: function(name){				return this.__images.data(name);		}
 });
 
 $(document).ready(Amslib.autoload);

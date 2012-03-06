@@ -464,6 +464,46 @@ class Amslib_MVC extends Amslib_Mixin
 
 		return "<div class='plugin_parameters'>$list</div>";
 	}
+	
+	public function getValueData($type,$filter=false)
+	{
+		if($filter == false) $filter = array_keys($this->value);
+		
+		$output = false;
+		
+		switch($type){
+			case "json":{
+				$v = array();
+				
+				foreach($filter as $k){
+					if(isset($this->value[$k])) $v[$k] = $this->value[$k];
+				}
+				
+				$output = json_encode($v);
+			}break;
+
+			case "input":{
+				$html = array();
+				foreach($filter as $k){
+					if(isset($this->value[$k])){
+						$v = $this->value[$k];
+						if(is_bool($v)) $v = $v ? "true" : "false";
+
+						//	WARNING:	
+						//	do not change \" for single quote ' or similar, it's done like this to prevent
+						//	certain types of bugs I found with certain combinations of code, it's important
+						//	to prevent future problems to keep \" because it was the only way to prevent strings
+						//	from becoming broken
+						$html[] ="<input type=\"hidden\" name=\"$k\" value=\"$v\" />";
+					}
+				}
+				
+				$output = implode("",$html);
+			}break;
+		}
+		
+		return $output ? "<div class='__amslib_mvc_values'>$output</div>" : "";
+	}
 
 	public function copyService($src,$id,$dest=NULL)
 	{

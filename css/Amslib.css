@@ -563,3 +563,8 @@ input, select {
 	-ms-box-sizing: border-box;
 	box-sizing: border-box;	
 }
+
+/* this is to help with the mvc system, this weird looking class is how we embed mvc data in the page */
+.__amslib_mvc_values{
+	display: none;
+}
