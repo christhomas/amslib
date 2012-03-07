@@ -8,6 +8,8 @@ var Amslib = my.Amslib = my.Class(
 	__services:				$("<div/>"),
 	__translation:			$("<div/>"),
 	__images:				$("<div/>"),
+	//	now we're "abusing" it all over the place, here we use it to store custom events
+	__events:				$("<div/>"),
 	
 	STATIC: {
 		autoload: function()
@@ -200,7 +202,7 @@ var Amslib = my.Amslib = my.Class(
 	
 	initValues: function()
 	{
-		var mvc	=	this.parent.find("__amslib_mvc_values");
+		var mvc	=	this.parent.find(".__amslib_mvc_values");
 		var po	=	this;
 		
 		try{
@@ -210,6 +212,7 @@ var Amslib = my.Amslib = my.Class(
 				input.each(function(){
 					var n = $(this).attr("name");
 					var v = $(this).val();
+					Amslib.firebug(n,v);
 					
 					if(n.indexOf("service:") >=0){
 						po.setService(n.replace("service:",""),v);
@@ -225,6 +228,20 @@ var Amslib = my.Amslib = my.Class(
 				//	interpret json values
 			}	
 		}catch(e){}
+	},
+	
+	bind: function(event,callback,live)
+	{
+		if(live){
+			this.__events.live(event,callback);
+		}else{
+			this.__events.bind(event,callback)
+		}
+	},
+	
+	trigger: function(event,data)
+	{
+		this.__events.trigger(event,data);
 	},
 	
 	//	Getter/Setter for the object values
