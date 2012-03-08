@@ -279,12 +279,22 @@ class Amslib_Plugin
 		$this->setComponent("object",	"objects",	"");
 	}
 	
+	//	Type 1 data transfers
 	protected function transferData($src,$dst,$key,$value,$move)
 	{
 		if(!$dst || !$src) return;
 		
 		$dst->setConfig($key,$value);
 		if($move) $src->removeConfig($key);
+	}
+	
+	//	Type 2 data transfers
+	protected function transferData2($src,$dst,$key,$value,$move)
+	{
+		if(!$dst || !$src) return;
+		
+		$dst->setConfig(array($key,$value),$src->getConfig($key,$value));
+		if($move) $src->removeConfig($key,$value);
 	}
 
 	public function transfer()
@@ -298,76 +308,53 @@ class Amslib_Plugin
 		//	FIXME: omg, it's just a bunch of repeated code, all over the place, ripe for refactoring....
 		//	FIXME: it's actually hilarious how much repeated code I have, yet I didnt refactor it yet :)
 		//	NOTE: ok, I've started to refactor the code as much as I can, but I think I got stuck and can't go further
+		//	NOTE: 08/03/2012: it's getting better :) yeah! finally found a nice way to refactor everything
 
 		//	Process all the import/export/transfer requests on all resources
 		//	NOTE: translators don't support the "move" parameter
 		foreach($this->config as $key=>$block){
 			 if($key == "model"){
-				//	Models are treated slightly differently because they are singular, not plural
+			 	//	Models are treated slightly differently because they are singular, not plural
 				//	NOTE: maybe in future models will be plural too, perhaps it's better to make it work plurally anyway
-				if(isset($block["import"]) && $block["import"] != $this->getName()){
-					$pname	=	$block["import"];
-					$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
-					$src	=	$plugin;
-					$dst	=	$this;
-				}else if(isset($block["export"]) && $block["export"] != $this->getName()){
-					$pname	=	$block["export"];
-					$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
-					$src	=	$this;
-					$dst	=	$plugin;
-				}else $plugin = false;
-				
-				if($plugin){
-					$move	=	isset($block["move"]);
-					$value	=	$src->getConfig($key);
-					$this->transferData($src,$dst,$key,$value,$move);
+			 	$m	=	isset($block["move"]);
+			 	$i	=	isset($block["import"]) && $block["import"] != $this->getName() ? $block["import"] : false;
+			 	$e	=	isset($block["export"]) && $block["export"] != $this->getName() ? $block["export"] : false;
+			 	$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
+			 	if(!$p) continue;
+			 	$v1	=	$p->getConfig($key);
+			 	$v2	=	$this->getConfig($key);
+			 	
+			 	if($i) 			$this->transferData($p,$this,$key,$v1,$m);
+			 	else if($e) 	$this->transferData($this,$p,$key,$v2,$m);
+			}else if(in_array($key,array("object","value","view","stylesheet","image","javascript","translator"))){
+				foreach(Amslib_Array::valid($block) as $iname=>$item)
+				{
+					if($key == "value") $iname = $item["name"];
+					
+					$m	=	isset($item["move"]);
+					$i	=	isset($item["import"]) && $item["import"] != $this->getName() ? $item["import"] : false;
+			 		$e	=	isset($item["export"]) && $item["export"] != $this->getName() ? $item["export"] : false;
+			 		$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
+			 		if(!$p) continue;
+			 		$v	=	$key == "value" ? $item["name"] : $iname;
+			 	
+			 		if($i) 			$this->transferData2($p,$this,$key,$v,$m);
+			 		else if($e) 	$this->transferData2($this,$p,$key,$v,$m);
 				}
-			}else if($key == "value"){
-				foreach(Amslib_Array::valid($block) as $item){
-					if(isset($item["import"]) && $item["import"] != $this->getName()){
-						$iname	=	$item["name"];
-						$pname	=	$item["import"];
-						$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
-						$src	=	$plugin;
-						$dst	=	$this;
-						$fkey	=	array($key,$iname);
-					}else if(isset($item["export"]) && $item["export"] != $this->getName()){
-						$iname	=	$item["name"];
-						$pname	=	$item["export"];
-						$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
-						$src	=	$this;
-						$dst	=	$plugin;
-						$fkey	=	array($key,$iname);
-					}else $plugin = false;
-					
-					if($plugin){
-						$dst->setConfig($fkey,$src->getConfig($key,$iname));
-						if(isset($item["move"])) $src->removeConfig($key,$iname);
-					}
-				}
-			}else if(in_array($key,array("object","view","service","stylesheet","image","javascript","translator"))){
-				//	TODO: if I used $item["name"] instead of $name as the key, I could merge against the "value" block below
-				foreach(Amslib_Array::valid($block) as $iname=>$item){
-					if(isset($item["import"]) && $item["import"] != $this->getName()){
-						$pname	=	$item["import"];
-						$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
-						$src	=	$plugin;
-						$dst	=	$this;
-					}else if(isset($item["export"]) && $item["export"] != $this->getName()){
-						$pname	=	$item["export"];
-						$plugin	=	Amslib_Plugin_Manager::getPlugin($pname);
-						$src	=	$this;
-						$dst	=	$plugin;
-					}else $plugin = false;
-					
-					if($key == "service"){
-						Amslib_FirePHP::output("service",array($key,$iname));
-					}
-					
-					if($plugin){
-						$dst->setConfig(array($key,$iname),$src->getConfig($key,$iname));
-						if(isset($item["move"])) $src->removeConfig($key,$iname);
-					}
+			}else if($key == "service"){
+				foreach(Amslib_Array::valid($block) as $iname=>$item)
+				{
+					$m	=	isset($item["move"]);
+					$i	=	isset($item["import"]) && $item["import"] != $this->getName() ? $item["import"] : false;
+			 		$e	=	isset($item["export"]) && $item["export"] != $this->getName() ? $item["export"] : false;
+			 		$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
+			 		
+			 		if(!$p) continue;
+			 		
+					$v	=	$iname;
+			 		
+			 		if($i) 			$this->transferData2($p,$this,$key,$v,$m);
+			 		else if($e) 	$this->transferData2($this,$p,$key,$v,$m);
 				}
 			}
 		}
@@ -457,7 +444,8 @@ class Amslib_Plugin
 							$p["type"]	=	$font->nodeName;
 							if(!isset($p["autoload"])) $p["autoload"] = NULL;
 
-							$this->config[$node->nodeName][$p["id"]] = $p;
+							//	If a valid id exists, insert the configuration
+							if(isset($p["id"])) $this->config[$node->nodeName][$p["id"]] = $p;
 						}
 					}break;
 
