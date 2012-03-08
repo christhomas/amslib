@@ -264,22 +264,11 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
 
-		//	FIXME: Hmmm.....not sure what to do here....
-		/*if($absolute){
-			$this->service[$id] = $name;
-			$this->setValue("service:$id",$name);
-		}else{*/
-			$this->service[$id] = Amslib_Website::rel($name);
-
-			//	NOTE: I should recognise that now Amslib_MVC is dependant on Amslib_Router's existence
-			//	NOTE: perhaps we should remove this dependency and instead inport the data as opposed to looking it up here
-			//	Attempt to find a routed url for this service
-			$url = Amslib_Router::getURL("Service:$id");
-			if(!$url) $url = $this->service[$id];
-
-			//	Set this as a service url for the javascript to acquire
-			$this->setValue("service:$id",$url);
-		//}
+		$this->service[$id] = $name;
+		
+		//	NOTE: yes, this is a hack, but I'm not sure how else to do it.
+		//	Sometimes javascript needs the urls, so we push it as a "value" here
+		$this->setValue("service:$id",Amslib_Router::getURL("Service:$id"));
 	}
 
 	public function getService($id,$url=false)

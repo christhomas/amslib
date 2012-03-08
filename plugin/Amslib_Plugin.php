@@ -115,7 +115,7 @@ class Amslib_Plugin
 		//	Load all routes into the plugin, so you can identify which plugin is responsible for a route
 		foreach($this->routes as $name=>$route) $this->api->setRoute($name,$route);
 
-		$keys = array("object","value","translator","layout","view","service","font","image","javascript","stylesheet");
+		$keys = array("object","value","translator","view","service","font","image","javascript","stylesheet");
 
 		foreach($keys as $k=>$v){
 			//	Don't process any keys which are not set, empty or the required method to process it is not available
@@ -130,7 +130,7 @@ class Amslib_Plugin
 				//	NOTE: If a parameter is marked for export, don't process it.
 				if(isset($c["export"])) continue;
 
-				if(in_array($v,array("layout","view","service"))){
+				if(in_array($v,array("view","service"))){
 					$params		=	array($name,$c["value"]);
 				}else if($v == "object" && isset($c["file"]	)){
 					$params		=	array($name,$c["file"]);
@@ -261,7 +261,6 @@ class Amslib_Plugin
 	public function __construct()
 	{
 		$this->search = array(
-			"layout",
 			"view",
 			"object",
 			"service",
@@ -276,10 +275,16 @@ class Amslib_Plugin
 		$this->config = array("api"=>false,"model"=>false,"translator"=>false,"requires"=>false,"value"=>false);
 
 		//	This stores where all the types components are stored as part of the application
-		$this->setComponent("layout",	"layouts",	"La_");
 		$this->setComponent("view",		"views",	"Vi_");
 		$this->setComponent("object",	"objects",	"");
-		$this->setComponent("service",	"services",	"Sv_");
+	}
+	
+	protected function transferData($src,$dst,$key,$value,$move)
+	{
+		if(!$dst || !$src) return;
+		
+		$dst->setConfig($key,$value);
+		if($move) $src->removeConfig($key);
 	}
 
 	public function transfer()
@@ -313,8 +318,9 @@ class Amslib_Plugin
 				}else $plugin = false;
 				
 				if($plugin){
-					$dst->setConfig($key,$src->getConfig($key));
-					if(isset($block["move"])) $src->removeConfig($key);
+					$move	=	isset($block["move"]);
+					$value	=	$src->getConfig($key);
+					$this->transferData($src,$dst,$key,$value,$move);
 				}
 			}else if($key == "value"){
 				foreach(Amslib_Array::valid($block) as $item){
@@ -325,11 +331,6 @@ class Amslib_Plugin
 						$src	=	$plugin;
 						$dst	=	$this;
 						$fkey	=	array($key,$iname);
-						
-						if($plugin){
-							$dst->setConfig($fkey,$src->getConfig($key,$iname));
-							if(isset($item["move"])) $src->removeConfig($key,$iname);
-						}
 					}else if(isset($item["export"]) && $item["export"] != $this->getName()){
 						$iname	=	$item["name"];
 						$pname	=	$item["export"];
@@ -337,14 +338,14 @@ class Amslib_Plugin
 						$src	=	$this;
 						$dst	=	$plugin;
 						$fkey	=	array($key,$iname);
-						
-						if($plugin){
-							$dst->setConfig($fkey,$item);
-							if(isset($item["move"])) $src->removeConfig($key,$iname);
-						}
+					}else $plugin = false;
+					
+					if($plugin){
+						$dst->setConfig($fkey,$src->getConfig($key,$iname));
+						if(isset($item["move"])) $src->removeConfig($key,$iname);
 					}
 				}
-			}else if(in_array($key,array("object","view","layout","service","stylesheet","image","javascript","translator"))){
+			}else if(in_array($key,array("object","view","service","stylesheet","image","javascript","translator"))){
 				//	TODO: if I used $item["name"] instead of $name as the key, I could merge against the "value" block below
 				foreach(Amslib_Array::valid($block) as $iname=>$item){
 					if(isset($item["import"]) && $item["import"] != $this->getName()){
@@ -359,6 +360,10 @@ class Amslib_Plugin
 						$dst	=	$plugin;
 					}else $plugin = false;
 					
+					if($key == "service"){
+						Amslib_FirePHP::output("service",array($key,$iname));
+					}
+					
 					if($plugin){
 						$dst->setConfig(array($key,$iname),$src->getConfig($key,$iname));
 						if(isset($item["move"])) $src->removeConfig($key,$iname);
@@ -366,6 +371,13 @@ class Amslib_Plugin
 				}
 			}
 		}
+	}
+	
+	protected function getAttributeArray($node,$array=array())
+	{
+		foreach($node->attributes as $k=>$v) $array[$k] = $v->nodeValue;
+
+		return $array;
 	}
 
 	public function config($name,$location)
@@ -391,17 +403,30 @@ class Amslib_Plugin
 
 			foreach($list as $node){
 				switch($node->nodeName){
-					case "layout":
-					case "view":
+					case "view":{
+						$child = $xpath->query("name",$node);
+
+						foreach($child as $c){
+							$p = array_merge(
+								array("id"=>$c->nodeValue,"value"=>$c->nodeValue),
+								$this->getAttributeArray($c)
+							);
+							
+							$p["value"] = $this->getComponent($node->nodeName,$c->nodeValue);
+							
+							$this->config[$node->nodeName][$p["id"]] = $p;
+						}
+					}break;
+					
 					case "service":{
 						$child = $xpath->query("name",$node);
 
 						foreach($child as $c){
-							$p = array();
-							$p["id"] = $c->nodeValue;
-							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
-							$p["value"] = $this->getComponent($node->nodeName,$c->nodeValue);
-
+							$p = array_merge(
+								array("id"=>$c->nodeValue,"value"=>$c->nodeValue),
+								$this->getAttributeArray($c)
+							);
+							
 							$this->config[$node->nodeName][$p["id"]] = $p;
 						}
 					}break;
@@ -412,8 +437,8 @@ class Amslib_Plugin
 						$child = $xpath->query("file",$node);
 
 						foreach($child as $c){
-							$p = array();
-							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
+							$p = $this->getAttributeArray($c);
+							
 							$absolute	=	isset($p["absolute"]) ? true : false;
 							$p["value"]	=	$this->findResource($c->nodeValue,$absolute);
 
@@ -426,9 +451,8 @@ class Amslib_Plugin
 						$child = $xpath->query("*",$node);
 
 						foreach($child as $font){
-							$p = array();
-
-							foreach($font->attributes as $k=>$v) $p[$k] = $v->nodeValue;
+							$p = $this->getAttributeArray($font);
+							
 							$p["value"]	=	trim($font->nodeValue);
 							$p["type"]	=	$font->nodeName;
 							if(!isset($p["autoload"])) $p["autoload"] = NULL;
@@ -439,10 +463,8 @@ class Amslib_Plugin
 
 					case "translator":{
 						$child = $xpath->query("*",$node);
-						$p = array();
-
 						//	Import all the translator parameters, such as import/export
-						foreach($node->attributes as $k=>$v) $p[$k] = $v->nodeValue;
+						$p = $this->getAttributeArray($node);
 
 						foreach($child as $c){
 							if($c->nodeName == "language") $p[$c->nodeName][] = $c->nodeValue;
@@ -468,11 +490,13 @@ class Amslib_Plugin
 
 					case "value":{
 						$child = $xpath->query("*",$node);
-						$p = array();
-						foreach($node->attributes as $k=>$v) $p[$k] = $v->nodeValue;
+						$p = $this->getAttributeArray($node);
 
 						foreach($child as $c){
-							$this->config[$node->nodeName][] = array_merge(array("name"=>$c->nodeName,"value"=>$c->nodeValue),$p);
+							$this->config[$node->nodeName][] = array_merge(
+								array("name"=>$c->nodeName,"value"=>$c->nodeValue),
+								$p
+							);
 						}
 					}break;
 
@@ -480,8 +504,8 @@ class Amslib_Plugin
 						$child = $xpath->query("*",$node);
 
 						foreach($child as $c){
-							$p = array();
-							foreach($c->attributes as $k=>$v) $p[$k] = $v->nodeValue;
+							$p = $this->getAttributeArray($c);
+
 							$p["value"] = $c->nodeValue;
 
 							$file = $this->getComponent("object",$p["value"]);
