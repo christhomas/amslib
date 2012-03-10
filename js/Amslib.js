@@ -1,15 +1,13 @@
-var Amslib = my.Amslib = my.Class(
-{
+var Amslib = my.Amslib = my.Class({
 	__amslibDefaultName:	"Amslib_Default_Controller",
 	__amslibName:			false,
-	__options:				{},
 	//	we "abuse" jquery dom-data functionality to store groups of data
-	__value:				$("<div/>"),
-	__services:				$("<div/>"),
-	__translation:			$("<div/>"),
-	__images:				$("<div/>"),
+	__value:				false,
+	__services:				false,
+	__translation:			false,
+	__images:				false,
 	//	now we're "abusing" it all over the place, here we use it to store custom events
-	__events:				$("<div/>"),
+	__events:				false,
 	
 	STATIC: {
 		autoload: function()
@@ -178,21 +176,13 @@ var Amslib = my.Amslib = my.Class(
 		this.parent.data(this.__amslibName,this);
 		
 		this.initValues();
-		
-		//	Now merge all the specific options from the static parameter "options" into this
-		//	NOTE: Hmm....I can't think how to obtain the name of the parent class.....shit....
-		//	NOTE: perhaps this is why other plugins don't use a static object?
-		//	NOTE: well shit, that means I have to convert all the javascript objects to not using them
-		//	NOTE: yes, well, what do you want? a medal?
-		//	NOTE: what was the point of all this again? (6/03/2012)
-		//this.__options = this.__options.extend()
-		
+
 		return this;
 	},
 	
 	getAmslibName: function()
 	{
-		return __amslibName;
+		return this.__amslibName;
 	},
 	
 	getParentNode: function()
@@ -205,27 +195,35 @@ var Amslib = my.Amslib = my.Class(
 		var mvc	=	this.parent.find(".__amslib_mvc_values");
 		var po	=	this;
 		
+		this.__value		= $("<div/>");
+		this.__services		= $("<div/>");
+		this.__translation	= $("<div/>");
+		this.__images		= $("<div/>");
+		this.__events		= $("<div/>");
+		
 		try{
-			var input = mvc.find("input[type='hidden']");
+			var input	=	mvc.find("input[type='hidden']");
+			var data	=	{};
+			
 			if(input.length){
 				//	interpret input values
 				input.each(function(){
-					var n = $(this).attr("name");
-					var v = $(this).val();
-					Amslib.firebug(n,v);
-					
-					if(n.indexOf("service:") >=0){
-						po.setService(n.replace("service:",""),v);
-					}else if(n.indexOf("translation:") >=0){
-						po.setTranslation(n.replace("translation:",""),v);
-					}else if(n.indexOf("image:") >=0){
-						po.setImage(n.replace("image:",""),v);
-					}else{
-						po.setValue(n,v);
-					}
+					data[$(this).attr("name")] = $(this).val();
 				});
 			}else{
-				//	interpret json values
+				data = $.parseJSON(mvc.text());
+			}
+			
+			for(k in data){
+				if(k.indexOf("service:") >=0){
+					this.setService(k.replace("service:",""),data[k]);
+				}else if(k.indexOf("translation:") >=0){
+					this.setTranslation(k.replace("translation:",""),data[k]);
+				}else if(k.indexOf("image:") >=0){
+					this.setImage(k.replace("image:",""),data[k]);
+				}else{
+					this.setValue(k,data[k]);
+				}
 			}	
 		}catch(e){}
 	},

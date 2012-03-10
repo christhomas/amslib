@@ -439,19 +439,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 */
 	public function getHiddenParameters()
 	{
-		 $list = "";
-
-		foreach($this->value as $k=>$v){
-			if(is_bool($v)) $v = ($v) ? "true" : "false";
-
-			//	WARNING:	do not change \" for single quote ' or similar, it's done like this to prevent
-			//				certain types of bugs I found with certain combinations of code, it's important
-			//				to prevent future problems to keep \" because it was the only way to prevent strings
-			//				from becoming broken
-			$list.="<input type=\"hidden\" name=\"$k\" value=\"$v\" />";
-		}
-
-		return "<div class='plugin_parameters'>$list</div>";
+		return $this->getValueData("input");
 	}
 	
 	public function getValueData($type,$filter=false)

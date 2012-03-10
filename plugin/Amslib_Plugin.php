@@ -287,13 +287,16 @@ class Amslib_Plugin
 		$dst->setConfig($key,$value);
 		if($move) $src->removeConfig($key);
 	}
-	
+		
 	//	Type 2 data transfers
 	protected function transferData2($src,$dst,$key,$value,$move)
 	{
 		if(!$dst || !$src) return;
 		
-		$dst->setConfig(array($key,$value),$src->getConfig($key,$value));
+		$k = array($key,$value);
+		$v = $src->getConfig($key,$value);
+		
+		$dst->setConfig($k,$v);
 		if($move) $src->removeConfig($key,$value);
 	}
 
@@ -351,7 +354,14 @@ class Amslib_Plugin
 			 		
 			 		if(!$p) continue;
 			 		
-					$v	=	$iname;
+			 		if(Amslib::getGET("debug") && $iname == "CS_Webcam_Save_Image"){
+			 			Amslib_FirePHP::output("service[$iname,{$this->getName()}]",array($i,$e,$p,$item));
+			 			Amslib_FirePHP::output("value",array($iname,isset($item["name"])?$item["name"]:$iname));
+			 			//	This is the correct thing to do, except the setConfig method cannot handle it yet
+			 			$v	=	array($iname,isset($item["name"])?$item["name"]:$iname);
+			 		}else{
+						$v	=	$iname;
+			 		}
 			 		
 			 		if($i) 			$this->transferData2($p,$this,$key,$v,$m);
 			 		else if($e) 	$this->transferData2($this,$p,$key,$v,$m);
@@ -591,6 +601,10 @@ class Amslib_Plugin
 
 	public function setConfig($key,$value)
 	{
+		if(Amslib::getGET("debug")){
+			Amslib_FirePHP::output("setConfig[{$this->getName()}]",array($key,$value,$this->config[$key]));
+		}
+		
 		//	This is important, because otherwise values imported/exported through transfer() will not execute in process()
 		unset($value["import"],$value["export"]);
 
@@ -608,17 +622,17 @@ class Amslib_Plugin
 		}
 	}
 
-	public function getConfig($type,$name=NULL)
+	public function getConfig($key,$name=NULL)
 	{
-		switch($type){
+		switch($key){
 			case "translator":{
-				$this->config[$type][$name]["cache"] = $this->createTranslator($name);
-				return $this->config[$type][$name];
+				$this->config[$key][$name]["cache"] = $this->createTranslator($name);
+				return $this->config[$key][$name];
 			}break;
 
 			case "model":{
-				$this->createObject($this->config[$type]);
-				return $this->config[$type];
+				$this->createObject($this->config[$key]);
+				return $this->config[$key];
 			}break;
 
 			case "value":{
@@ -626,14 +640,17 @@ class Amslib_Plugin
 				//			implementing it's own db_table parameter (for example) this code
 				//			will find the first occurance in EVERY situation, even if you need
 				//			the third block, it'll always return the first.
-				return Amslib_Array::find($this->config[$type], "name", $name);
+				return Amslib_Array::find($this->config[$key], "name", $name);
 			}break;
 
 			default:{
 				if($name === NULL){
-					return isset($this->config[$type]) ? $this->config[$type] : false;
+					return isset($this->config[$key]) ? $this->config[$key] : false;
 				}else{
-					return isset($this->config[$type][$name]) ? $this->config[$type][$name] : false;
+					if(is_array($name)) $name = current($name);
+					$name = (string)$name;
+						
+					return isset($this->config[$key][$name]) ? $this->config[$key][$name] : false;
 				}
 			}break;
 		}

@@ -1,0 +1,71 @@
+@CHARSET "UTF-8";
+
+/**
+Thanks to zurb.com for these really nicely styled buttons!!
+
+link: http://www.zurb.com/article/266/super-awesome-buttons-with-css3-and-rgba
+*/
+
+.awesome_button, .awesome_button:visited {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 5px 5px 5px 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    padding: 5px 10px 3px;
+    position: relative;
+    text-decoration: none;
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+    
+	background-image: -moz-linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+	background-image: -webkit-linear-gradient-webkit-gradient(linear, 0% 0%, 0% 100%, from(rgba(0, 0, 0, 0.1)), to(rgba(0, 0, 0, 0.3)));
+	background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+	background-image: -o-linear-gradient(rgba(0, 0, 0, 0.1)), to(rgba(0, 0, 0, 0.3));
+	background-image: -ms-linear-gradient(rgba(0, 0, 0, 0.1)), to(rgba(0, 0, 0, 0.3));
+	background-image: no-repeat;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+}
+.awesome_button:hover {
+    background-color: #111111;
+    color: #FFFFFF;
+    
+	background-image: -moz-linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.2));
+	background-image: -webkit-linear-gradient-webkit-gradient(linear, 0% 0%, 0% 100%, from(rgba(0, 0, 0, 0)), to(rgba(0, 0, 0, 0.2)));
+	background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
+	background-image: -o-linear-gradient(rgba(0, 0, 0, 0)), to(rgba(0, 0, 0, 0.2));
+	background-image: -ms-linear-gradient(rgba(0, 0, 0, 0)), to(rgba(0, 0, 0, 0.2));
+	background-image: no-repeat;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+}
+.awesome_button:active {
+    top: 1px;
+    
+	background-image: -moz-linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0));
+	background-image: -webkit-linear-gradient-webkit-gradient(linear, 0% 0%, 0% 100%, from(rgba(0, 0, 0, 0,2)), to(rgba(0, 0, 0, 0)));
+	background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
+	background-image: -o-linear-gradient(rgba(0, 0, 0, 0.2)), to(rgba(0, 0, 0, 0));
+	background-image: -ms-linear-gradient(rgba(0, 0, 0, 0.2)), to(rgba(0, 0, 0, 0));
+	background-image: no-repeat;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.awesome_button, .awesome_button:visited{
+    font-size: inherit;
+    font-weight: bold;
+    line-height: 1;
+    text-shadow: 0px 1px 1px #000000;
+}
+
+.green.awesome_button{			background-color: #31BA00;	}
+.green.awesome_button:hover {	background-color: #00F02D;	}
+.blue.awesome_button{			background-color: #2DAEBF;	}
+.blue.awesome_button:hover {		background-color: #007D9A;	}
+.red.awesome_button{				background-color: #E33100;	}
+.red.awesome_button:hover {		background-color: #872300;	}
+.magenta.awesome_button{			background-color: #A9014B;	}
+.magenta.awesome:hover {		background-color: #630030;	}
+.orange.awesome_button{			background-color: #FF5C00;	}
+.orange.awesome_button:hover {	background-color: #CF4900;	}
+.yellow.awesome_button{			background-color: #FFD100;	}
+.yellow.awesome_button:hover {	background-color: #FC9200;	}
