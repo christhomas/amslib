@@ -20,10 +20,10 @@ var _gaq = _gaq || [];
 
 $(document).ready(function(){
 	getTrackerInfo(function(params){
-		_gaq.push(['_setAccount',		params[1]		]);
-		_gaq.push(['_setDomainName',	"."+params[2]	]);
-		_gaq.push(['_setAllowLinker',	true			]);
-		_gaq.push(['_setAllowHash',		false			]);
+		_gaq.push(['_setAccount',		params[1]	]);
+		_gaq.push(['_setDomainName',	params[2]	]);
+		_gaq.push(['_setAllowLinker',	true		]);
+		_gaq.push(['_setAllowHash',		false		]);
 		_gaq.push(['_trackPageview']);
 		
 		var protocol	=	'https:' == document.location.protocol ? 'https://ssl' : 'http://www';

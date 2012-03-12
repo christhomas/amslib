@@ -296,6 +296,60 @@ HAS_TABLE;
 
 		return false;
 	}
+	
+	/**
+	 * method: selectColumn
+	 * 
+	 * Obtain a single column from the result of an SQL query, optionally optimised
+	 * to a single value if there is only one result.
+	 * 
+	 * operations:
+	 * 	-	do the sql query
+	 * 	-	if the column parameter is a string, pluck that column from each result
+	 * 	-	if there is only one result and optimisation was requested, make the first array value as the return value
+	 * 	-	return the final value, either an array of values for that column, or a single variable containing the first value
+	 */
+	public function selectColumn($query,$column=false,$numResults=0,$optimise=false)
+	{
+		$result = $this->select($query,$numResults,$optimise);
+		
+		if(is_string($column)) $result = Amslib_Array::pluck($result,$column);
+		
+		if(count($result) == 1 && $optimise) $result = current($result);
+
+		return $result;
+	}
+	
+	/**
+	 * method: selectRandom
+	 * 
+	 * Select a number of random rows from a table
+	 * 
+	 * I'd like to thank Jay Paroline for this little snippet of SQL
+	 * link: http://forums.mysql.com/read.php?132,185266,194715
+	 * 
+	 * NOTES: this apparently works nicely with large tables
+	 */
+	public function selectRandom($table,$pkName,$count)
+	{
+		$table	=	(string)$this->escape($table);
+		$pkName	=	(string)$this->escape($pkName);
+		$count	=	(int)$count;
+		
+$query=<<<QUERY
+			* 
+		FROM 
+			$table 
+		JOIN 
+			(SELECT FLOOR(MAX($table.$pkName)*RAND()) AS RID FROM $table) AS x 
+			ON $table.$pkName >= x.RID 
+		LIMIT 
+			$count;
+QUERY;
+
+		return $this->select($query); 
+	}
+	
 
 	public function insert($query)
 	{
