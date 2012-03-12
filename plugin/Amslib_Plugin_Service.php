@@ -64,14 +64,14 @@ class Amslib_Plugin_Service
 
 		$this->setSuccessURL(Amslib::rchop(Amslib::postParam("success_url",$return_url),"?"));
 		$this->setFailureURL(Amslib::rchop(Amslib::postParam("failure_url",$return_url),"?"));
-		
+
 		//	Reset the service data and session structures
 		$this->data			=	array();
 		$this->showFeedback();
 		$this->setServiceData(false);
 		$this->setAjax(Amslib::postParam("return_ajax",false));
 	}
-	
+
 	public function setAjax($status)
 	{
 		$this->isAJAX		=	$status;
@@ -98,7 +98,7 @@ class Amslib_Plugin_Service
 	{
 		return $this->failureURL;
 	}
-	
+
 	public function setReturnURL($url)
 	{
 		$this->successURL = $this->failureURL = Amslib_File::reduceSlashes("$url/");
@@ -107,6 +107,16 @@ class Amslib_Plugin_Service
 	public function setServiceData($data)
 	{
 		$_SESSION[self::S3] = $data;
+	}
+
+	public function setTemp($key,$data)
+	{
+		Amslib_Keystore::set($key,$data);
+	}
+
+	public function getTemp($key)
+	{
+		return Amslib_Keystore::get($key);
 	}
 
 	public function showFeedback()
