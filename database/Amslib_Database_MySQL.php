@@ -66,6 +66,8 @@ class Amslib_Database_MySQL extends Amslib_Database
 		$details = $this->getConnectionDetails();
 
 		if($details){
+			$this->databaseName = $details["database"];
+
 			if($c = mysql_connect($details["server"],$details["username"],$details["password"],true))
 			{
 				if(!mysql_select_db($details["database"],$c)){
@@ -244,7 +246,9 @@ HAS_TABLE;
 		if($resultHandle == NULL) $resultHandle = $this->getSearchResultHandle();
 
 		for($a=0;$a<$numResults;$a++){
-			$this->lastResult[] = mysql_fetch_assoc($resultHandle);
+			$r = mysql_fetch_assoc($resultHandle);
+			if(!$r) break;
+			$this->lastResult[] = $r;
 		}
 
 		if($optimise && $numResults == 1) $this->lastResult = current($this->lastResult);
@@ -252,23 +256,23 @@ HAS_TABLE;
 
 		return $this->lastResult;
 	}
-	
+
 	public function query($query)
 	{
 		$this->seq++;
 
 		if($this->getConnectionStatus() == false) return false;
-		
+
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
-		
+
 		$this->setDebugOutput($query);
-		
+
 		if(!$result){
 			$this->setErrors($query);
-			return false;	
+			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -296,13 +300,13 @@ HAS_TABLE;
 
 		return false;
 	}
-	
+
 	/**
 	 * method: selectColumn
-	 * 
+	 *
 	 * Obtain a single column from the result of an SQL query, optionally optimised
 	 * to a single value if there is only one result.
-	 * 
+	 *
 	 * operations:
 	 * 	-	do the sql query
 	 * 	-	if the column parameter is a string, pluck that column from each result
@@ -312,22 +316,22 @@ HAS_TABLE;
 	public function selectColumn($query,$column=false,$numResults=0,$optimise=false)
 	{
 		$result = $this->select($query,$numResults,$optimise);
-		
+
 		if(is_string($column)) $result = Amslib_Array::pluck($result,$column);
-		
+
 		if(count($result) == 1 && $optimise) $result = current($result);
 
 		return $result;
 	}
-	
+
 	/**
 	 * method: selectRandom
-	 * 
+	 *
 	 * Select a number of random rows from a table
-	 * 
+	 *
 	 * I'd like to thank Jay Paroline for this little snippet of SQL
 	 * link: http://forums.mysql.com/read.php?132,185266,194715
-	 * 
+	 *
 	 * NOTES: this apparently works nicely with large tables
 	 */
 	public function selectRandom($table,$pkName,$count)
@@ -335,21 +339,21 @@ HAS_TABLE;
 		$table	=	(string)$this->escape($table);
 		$pkName	=	(string)$this->escape($pkName);
 		$count	=	(int)$count;
-		
+
 $query=<<<QUERY
-			* 
-		FROM 
-			$table 
-		JOIN 
-			(SELECT FLOOR(MAX($table.$pkName)*RAND()) AS RID FROM $table) AS x 
-			ON $table.$pkName >= x.RID 
-		LIMIT 
+			*
+		FROM
+			$table
+		JOIN
+			(SELECT FLOOR(MAX($table.$pkName)*RAND()) AS RID FROM $table) AS x
+			ON $table.$pkName >= x.RID
+		LIMIT
 			$count;
 QUERY;
 
-		return $this->select($query); 
+		return $this->select($query);
 	}
-	
+
 
 	public function insert($query)
 	{
