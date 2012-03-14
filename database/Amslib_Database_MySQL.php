@@ -36,22 +36,6 @@ class Amslib_Database_MySQL extends Amslib_Database
 		}
 	}
 
-	protected function setEncoding($encoding)
-	{
-		if($this->getConnectionStatus() == false) return;
-
-		$allowedEncodings = array("utf8","latin1");
-
-		if(in_array($encoding,$allowedEncodings)){
-			mysql_query("SET NAMES '$encoding'",$this->connection);
-			mysql_query("SET CHARACTER SET $encoding",$this->connection);
-		}else{
-			die(	"(".basename(__FILE__)." / FATAL ERROR): Your encoding ($encoding) is wrong, this can cause database corruption. ".
-					"I'm sorry dave, but I can't allow you to do that<br/>".
-					"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>");
-		}
-	}
-
 	/**
 	 * 	method:	connect
 	 *
@@ -77,7 +61,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 					$this->connection = $c;
 
 					$this->setFetchMethod("mysql_fetch_assoc");
-					$this->setEncoding("utf8");
+					$this->setEncoding(isset($details["encoding"]) ? $details["encoding"] : "utf8");
 				}
 			// Replace these errors with Amslib_Translator codes instead (language translation)
 			}else $this->setError("Failed to connect to database: {$details["database"]}<br/>");
@@ -102,6 +86,22 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 		//	TODO: we should implement a try/catch block to easily catch disconnected databases
 		if($connect) $this->connect();
+	}
+
+	public function setEncoding($encoding)
+	{
+		if($this->getConnectionStatus() == false) return;
+
+		$allowedEncodings = array("utf8","latin1");
+
+		if(in_array($encoding,$allowedEncodings)){
+			mysql_query("SET NAMES '$encoding'",$this->connection);
+			mysql_query("SET CHARACTER SET $encoding",$this->connection);
+		}else{
+			die(	"(".basename(__FILE__)." / FATAL ERROR): Your encoding ($encoding) is wrong, this can cause database corruption. ".
+					"I'm sorry dave, but I can't allow you to do that<br/>".
+					"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>");
+		}
 	}
 
 	public function escape($value)
