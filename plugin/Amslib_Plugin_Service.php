@@ -101,6 +101,7 @@ class Amslib_Plugin_Service
 
 	public function setReturnURL($url)
 	{
+		//	FIXME: you cannot be 100% certain the url should end with a / like I am forcing here
 		$this->successURL = $this->failureURL = Amslib_File::reduceSlashes("$url/");
 	}
 

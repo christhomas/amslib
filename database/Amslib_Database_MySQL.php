@@ -243,7 +243,8 @@ HAS_TABLE;
 	{
 		$this->lastResult = array();
 
-		if($resultHandle == NULL) $resultHandle = $this->getSearchResultHandle();
+		if(!$resultHandle) $resultHandle = $this->getSearchResultHandle();
+		if(!$resultHandle) return false;
 
 		for($a=0;$a<$numResults;$a++){
 			$r = mysql_fetch_assoc($resultHandle);
