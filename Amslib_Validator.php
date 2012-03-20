@@ -380,17 +380,15 @@ class Amslib_Validator
 	{
 		$code = strtoupper($code);
 
-		if(ereg("^[JABCDEFGHI]{1}[0-9]{7}[A-Z0-9]{1}$",$code)){
+		if(preg_match("/[a-wyz][0-9]{7}[0-9a-z]/i",$code)){
 			return $this->__cif($name,$code,$required,$options);
 		}
 
-		//	FIXME:	this regexp looks wrong, can you have letters in the
-		//			middle of a nie? I thought it was identical	to NIF??
-		if(ereg("^[TX]{1}[A-Z0-9]{8}[A-Z]?$",$code)){
+		if(preg_match("/[x][0-9]{7,8}[a-z]/i",$code)){
 			return $this->__nie($name,$code,$required,$options);
 		}
 
-		if(ereg("^[0-9]{8}[A-Z]{1}$",$code)){
+		if(preg_match("/[0-9]{8}[a-z]/i",$code)){
 			return $this->__nif($name,$code,$required,$options);
 		}
 
@@ -418,16 +416,13 @@ class Amslib_Validator
 	 */
 	protected function __nif($name,$code,$required,$options)
 	{
-		$endLetter = substr($code,strlen($code)-1);
-		if(!is_numeric($endLetter)){
+		$endLetter	=	substr($code,strlen($code)-1);
+		$code		=	(int)substr($code,0,-1);
+
+		if(is_numeric($code) && !is_numeric($endLetter)){
 			$source = "TRWAGMYFPDXBNJZSQVHLCKET";
 
-			$code	=	substr($code,0,-1);
-			$sum	=	$code%23;
-
-			$calcLetter = substr($source,$sum,1);
-
-			if($endLetter != $calcLetter) return "NIF_INVALID";
+			if($endLetter != $source[$code%23]) return "NIF_INVALID";
 
 			$this->setValid($name,$code);
 
@@ -519,7 +514,7 @@ class Amslib_Validator
 		if($firstCharacter == "X"){
 			$nif = substr($code,1);
 
-			if($this->__nif($name,$nif,$required,$options)){
+			if($this->__nif($name,$nif,$required,$options) === true){
 				$this->setValid($name,$code);
 
 				return true;
