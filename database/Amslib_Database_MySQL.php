@@ -355,6 +355,22 @@ QUERY;
 		return $this->select($query);
 	}
 
+	public function selectValue($field,$query,$numResults=0,$optimise=false)
+	{
+		$values = $this->select($query,$numResults,$optimise);
+
+		if($numResults == 1 && $optimise){
+			$values = array_shift($values);
+			return isset($values[$field]) ? $values[$field] : NULL;
+		}
+
+		//	TODO: This hasn't been tested yet, it might not return exactly what I want
+		if($numResults != 1 && !$optimise){
+			return Amslib_Array::pluck($values,$field);
+		}
+
+		return $values;
+	}
 
 	public function insert($query)
 	{

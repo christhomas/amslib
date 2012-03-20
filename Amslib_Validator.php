@@ -575,6 +575,10 @@ class Amslib_Validator
 			$bool = (bool)$value;
 		}
 
+		if(isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
+			return "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT";
+		}
+
 		$this->setValid($name,$bool);
 
 		if(!$required) return true;
@@ -993,6 +997,17 @@ class Amslib_Validator
 		$this->__validData[$name]	=	"";
 
 		if($required === true) $this->__setRequiredRules(true);
+	}
+
+	public function addRules($rules)
+	{
+		foreach($rules as $name=>$r){
+			$type		= count($r) ? array_shift($r) : NULL;
+			$required	= count($r) ? array_shift($r) : false;
+			$options	= count($r) ? array_shift($r) : array();
+
+			if($type) $this->add($name,$type,$required,$options);
+		}
 	}
 
 	/**
