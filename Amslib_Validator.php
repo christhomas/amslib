@@ -755,7 +755,9 @@ class Amslib_Validator
 	 */
 	protected function __phone($name,$value,$required,$options)
 	{
-		if(strlen($value) == 0 && $required == true) return "PHONE_EMPTY";
+		$error = false;
+
+		if($error == false && strlen($value) == 0) $error = "PHONE_EMPTY";
 
 		$temp = str_replace("(","",$value);
 		$temp = str_replace(")","",$temp);
@@ -765,16 +767,25 @@ class Amslib_Validator
 		$temp = str_replace(".","",$temp);
 		$temp = str_replace(",","",$temp);
 
-		if(isset($options["minlength"])){
-			if(strlen($temp) < $options["minlength"]) return "PHONE_LENGTH_INVALID";
+		if($error == false && isset($options["minlength"]) && strlen($temp) < $options["minlength"]){
+			$error = "PHONE_LENGTH_INVALID";
 		}
 
 		$temp = preg_replace("/\d/","",$temp);
 		$temp = trim($temp);
 
-		if(strlen($temp)) return "PHONE_INVALID";
+		if($error = false && strlen($temp)) $error = "PHONE_INVALID";
+
+		//	If there was an error
+		if($error !== false)
+		{
+			//	If you require the number to be valid, return the error
+			//	If you don't require a valid number, just return true
+			return ($required) ? $error : true;
+		}
 
 		$this->setValid($name,$value);
+
 		return true;
 	}
 
