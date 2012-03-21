@@ -113,7 +113,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 	public function unescape($results,$keys="")
 	{
-		if(!is_array($results)) return $results;
+		if(!$results || !is_array($results)) return $results;
 
 		if(Amslib_Array::isMulti($results)){
 			if($keys == "") $keys = array_keys(current($results));
