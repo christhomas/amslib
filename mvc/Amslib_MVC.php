@@ -265,7 +265,7 @@ class Amslib_MVC extends Amslib_Mixin
 		if(!$id || strlen($id) == 0) $id = $name;
 
 		$this->service[$id] = $name;
-		
+
 		//	NOTE: yes, this is a hack, but I'm not sure how else to do it.
 		//	Sometimes javascript needs the urls, so we push it as a "value" here
 		$this->setValue("service:$id",Amslib_Router::getURL("Service:$id"));
@@ -441,21 +441,21 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		return $this->getValueData("input");
 	}
-	
+
 	public function getValueData($type,$filter=false)
 	{
 		if($filter == false) $filter = array_keys($this->value);
-		
+
 		$output = false;
-		
+
 		switch($type){
 			case "json":{
 				$v = array();
-				
+
 				foreach($filter as $k){
 					if(isset($this->value[$k])) $v[$k] = $this->value[$k];
 				}
-				
+
 				$output = json_encode($v);
 			}break;
 
@@ -466,7 +466,7 @@ class Amslib_MVC extends Amslib_Mixin
 						$v = $this->value[$k];
 						if(is_bool($v)) $v = $v ? "true" : "false";
 
-						//	WARNING:	
+						//	WARNING:
 						//	do not change \" for single quote ' or similar, it's done like this to prevent
 						//	certain types of bugs I found with certain combinations of code, it's important
 						//	to prevent future problems to keep \" because it was the only way to prevent strings
@@ -474,11 +474,11 @@ class Amslib_MVC extends Amslib_Mixin
 						$html[] ="<input type=\"hidden\" name=\"$k\" value=\"$v\" />";
 					}
 				}
-				
+
 				$output = implode("",$html);
 			}break;
 		}
-		
+
 		return $output ? "<div class='__amslib_mvc_values'>$output</div>" : "";
 	}
 
