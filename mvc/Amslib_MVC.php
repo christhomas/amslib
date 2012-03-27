@@ -501,6 +501,8 @@ class Amslib_MVC extends Amslib_Mixin
 
 	public function getImage($id,$relative=true)
 	{
+		if(!is_string($id)) return false;
+
 		//	Step 1: find the image inside the plugin
 		if(isset($this->images[$id])) return $this->images[$id];
 
