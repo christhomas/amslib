@@ -203,8 +203,8 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 */
 	public function hasTable($database,$table)
 	{
-		$database	=	mysql_real_escape_string($database);
-		$table		=	mysql_real_escape_string($table);
+		$database	=	$this->escape($database);
+		$table		=	$this->escape($table);
 
 $query=<<<HAS_TABLE
 			COUNT(*)
@@ -221,6 +221,51 @@ HAS_TABLE;
 		}
 
 		return false;
+	}
+
+	public function getDBList()
+	{
+		return $this->select("distinct table_schema as database_name from information_schema.tables");
+	}
+
+	public function getDBTables($database_name=NULL)
+	{
+		$filter = "";
+		if($database_name && is_string($database_name)){
+			$database_name = $this->escape($database_name);
+
+			$filter = "where table_schema='$database_name'";
+		}
+
+		return $this->select("distinct table_name,table_schema as database_name from information_schema.tables $filter");
+	}
+
+	public function getDBColumns($database_name=NULL,$table_name=NULL)
+	{
+		$filter = array();
+
+		if($database_name && is_string($database_name)){
+			$database_name = $this->escape($database_name);
+
+			$filter[] = "table_schema='$database_name'";
+		}
+
+		if($table_name && is_string($table_name)){
+			$table_name = $this->escape($table_name);
+
+			$filter[] = "table_name='$table_name'";
+		}
+
+		$filter = count($filter) ? "where ".implode(" AND ",$filter) : "";
+
+$query=<<<QUERY
+		distinct column_name, table_name, table_schema as database_name
+		from information_schema.columns
+		$filter
+		order by database_name,table_name,ordinal_position
+QUERY;
+
+		return $this->select($query);
 	}
 
 	public function getTableFields($table)
