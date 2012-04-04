@@ -268,9 +268,21 @@ QUERY;
 		return $this->select($query);
 	}
 
-	public function getTableFields($table)
+	public function getDBTableFields($table)
 	{
+		$table = $this->escape($table);
+
 		return $this->select("column_name from Information_Schema.Columns where table_name='$table'");
+	}
+
+	public function getDBTableRowCount($database,$table)
+	{
+		$database	=	$this->escape($database);
+		$table		=	$this->escape($table);
+
+		$this->select("SQL_CALC_FOUND_ROWS * from $database.$table limit 1");
+
+		return $this->getRealResultCount();
 	}
 
 	/**
