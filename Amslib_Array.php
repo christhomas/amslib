@@ -74,6 +74,22 @@ class Amslib_Array
 		return $values;
 	}
 
+	static public function unique($array,$field)
+	{
+		if(!self::isMulti($array)) return false;
+
+		$v = $unique = array();
+
+		foreach(self::valid($array) as $k=>$a){
+			if(isset($a[$field]) && !in_array($a[$field],$v)){
+				$v[] = $a[$field];
+				$unique[$k] = $a;
+			}
+		}
+
+		return $unique;
+	}
+
 	static public function removeValue(array $array,$value,$strict=false)
 	{
 	    return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));

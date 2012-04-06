@@ -94,72 +94,72 @@ class Amslib_Validator
 	 * return false
 	 */
 	protected $__hasRequiredRules;
-	
+
 	//	NOTE: we ignore the name, it's not used here
 	protected function __require_one($name,$value,$required,$options)
 	{
 		unset($options["__vobject"]);
-		
+
 		$dest	=	array_pop($options);
 		$valid	=	$this->getValid();
 		$keys	=	array_keys($valid);
-		
+
 		foreach($options as $o){
 			//	Make sure the key exists in the array
 			if(in_array($o,$keys)){
 				//	If the key is a string, makes sure it's not empty
 				if(is_string($valid[$o]) && strlen($valid[$o]) == 0) continue;
-				
+
 				$this->setValid($dest,$valid[$o]);
 
 				return true;
 			}
 		}
-		
+
 		if(!$required) return true;
-		
+
 		$this->setError($name,"REQUIRE_ONE_FAILED");
 
 		return false;
 	}
-	
+
 	protected function __array($name,$value,$required,$options)
 	{
 		if(!isset($options["type"])) return "ARRAY_REQUIRE_TYPE_PARAM";
-		
+
 		if(!is_array($value)) return "ARRAY_INVALID";
-		
+
 		$arrayValidator = new self($value);
 		foreach($value as $k=>$v) $arrayValidator->add($k,$options["type"],$required,$options);
-		
+
 		$data = array(
 			"success"	=>	$arrayValidator->execute(),
 			"valid"		=>	$arrayValidator->getValid(),
 			"errors"	=>	$arrayValidator->getErrors()
 		);
-		
+
 		$this->setValid($name,$data);
 		return true;
 	}
-	
+
 	protected function __isbn($name,$value,$required,$options)
 	{
 		//	strip out some characters we know might be present, but have to be removed
 		$options["original_value"] = $value;
 		$value = str_replace(array("isbn","-"," ",".",","),"",strtolower($value));
-		
+
 		if(is_string($value)){
 			if(strlen($value) == 10)	return $this->__isbn10($name,$value,$required,$options);
 			if(strlen($value) == 13)	return $this->__isbn13($name,$value,$required,$options);
-			
+
 			if($required) return "ISBN_INVALID";
 		}
-		
+
 		if($required) return "ISBN_NOT_STRING";
-		
+
 		return true;
 	}
-	
+
 	protected function __isbn10($name,$value,$required,$options)
 	{
 		//	Disclaimer, I took this code from the isbn wikipedia article
@@ -167,26 +167,26 @@ class Amslib_Validator
     	for ($i = 0; $i < 9; $i++) $check += (10 - $i) * substr($value, $i, 1);
     	$t = substr($value, 9, 1); // tenth digit (aka checksum or check digit)
     	$check += ($t == 'x' || $t == 'X') ? 10 : $t;
-    	
+
     	if($check % 11 == 0) $this->setValid($name,$options["original_value"]);
     	else if($required) return "ISBN_10_INVALID";
-    	
+
     	return true;
 	}
-	
+
 	protected function __isbn13($name,$value,$required,$options)
 	{
 		//	Disclaimer, I took this code from the isbn wikipedia article
 		$check = 0;
     	for ($i = 0; $i < 13; $i+=2) $check += substr($value, $i, 1);
     	for ($i = 1; $i < 12; $i+=2) $check += 3 * substr($value, $i, 1);
-    	
+
     	if($check % 10 == 0) $this->setValid($name,$options["original_value"]);
     	else if($required) return "ISBN_13_INVALID";
-    	
+
     	return true;
 	}
-	
+
 	/**
 	 * method:	__text
 	 *
@@ -218,32 +218,32 @@ class Amslib_Validator
 	protected function __text($name,$value,$required,$options)
 	{
 		$len = strlen(trim($value));
-		
+
 		$error = false;
 
 		if($len == 0 && !isset($options["permit-empty"])){
 			$error = "TEXT_LENGTH_ZERO";
 		}
-		
+
 		if(isset($options["minlength"]) && $len < $options["minlength"]){
 			$error = "TEXT_LENGTH_IS_BELOW_MINIMUM";
 		}
-		
+
 		if(isset($options["maxlength"]) && $len > $options["maxlength"]){
 			$error = "TEXT_LENGTH_IS_ABOVE_MAXIMUM";
 		}
-		
+
 		if(isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
 			$error = "TEXT_CANNOT_MATCH_AGAINST_LIMIT";
 		}
-		
+
 		//	NOTE: maybe "invalid" should change to "exclude-input" to be closer to the syntax of "limit-input" ?
 		if(isset($options["invalid"]) && in_array($value,$options["invalid"])){
 			$error = "TEXT_INVALID_INPUT";
 		}
 
 		if($required == true && $error !== false) return $error;
-		
+
 		if($error === false) $this->setValid($name,$value);
 
 		return true;
@@ -339,7 +339,7 @@ class Amslib_Validator
 
 				return "PASSWORDS_NO_MATCH";
 			}
-			
+
 			//	If the password is empty, there is an error
 			if(strlen($p1) == 0){
 				//	password is not required, so just return true or "EMPTY" if required is true
@@ -351,7 +351,7 @@ class Amslib_Validator
 			//	Make the password to test through the __text validator equal to one of the fields
 			$value = $p1;
 		}
-		
+
 		return $this->__text($name,$value,$required,$options);
 	}
 
@@ -379,37 +379,35 @@ class Amslib_Validator
 	protected function __dni($name,$code,$required,$options)
 	{
 		$code = strtoupper($code);
-		
-		if(ereg("^[JABCDEFGHI]{1}[0-9]{7}[A-Z0-9]{1}$",$code)){
+
+		if(preg_match("/[a-wyz][0-9]{7}[0-9a-z]/i",$code)){
 			return $this->__cif($name,$code,$required,$options);
 		}
-		
-		//	FIXME:	this regexp looks wrong, can you have letters in the 
-		//			middle of a nie? I thought it was identical	to NIF??
-		if(ereg("^[TX]{1}[A-Z0-9]{8}[A-Z]?$",$code)){
+
+		if(preg_match("/[x][0-9]{7,8}[a-z]/i",$code)){
 			return $this->__nie($name,$code,$required,$options);
 		}
-		
-		if(ereg("^[0-9]{8}[A-Z]{1}$",$code)){
+
+		if(preg_match("/[0-9]{8}[a-z]/i",$code)){
 			return $this->__nif($name,$code,$required,$options);
 		}
 
 		return "DNI_INVALID";
 	}
-	
+
 	/**
 	 * function: __nif
-	 * 
+	 *
 	 * Validate a Spanish NIF identication code
-	 * 
+	 *
 	 * parameters:
 	 * 	$code	-	The NIF DNI code to check
-	 * 
+	 *
 	 * returns:
 	 * 	If failed because the end character did not match the correct calculated one, return "NIF_INVALID
 	 * 	If failed because the last letter was not a alpha character, return "NIF_ENDCHAR_NOT_ALPHA"
 	 * 	If successful, will set the valid data array and return true
-	 * 
+	 *
 	 * operations:
 	 * 	-	Check the end character is a letter
 	 * 	-	obtain the numerical part and modulus against 23
@@ -418,40 +416,37 @@ class Amslib_Validator
 	 */
 	protected function __nif($name,$code,$required,$options)
 	{
-		$endLetter = substr($code,strlen($code)-1); 
-		if(!is_numeric($endLetter)){
+		$endLetter	=	substr($code,strlen($code)-1);
+		$code		=	(int)substr($code,0,-1);
+
+		if(is_numeric($code) && !is_numeric($endLetter)){
 			$source = "TRWAGMYFPDXBNJZSQVHLCKET";
-			
-			$code	=	substr($code,0,-1);
-			$sum	=	$code%23;
-	
-			$calcLetter = substr($source,$sum,1);
-	
-			if($endLetter != $calcLetter) return "NIF_INVALID";
-			
+
+			if($endLetter != $source[$code%23]) return "NIF_INVALID";
+
 			$this->setValid($name,$code);
-			
+
 			return true;
 		}
-		
+
 		if(!$required) return true;
-	
+
 		return "NIF_ENDCHAR_NOT_ALPHA";
 	}
-	
-	
+
+
 	/**
 	 * function: __cif
-	 * 
+	 *
 	 * Validate a Spanish CIF identification code
-	 * 
+	 *
 	 * parameters:
 	 * 	$code	-	The CIF to check
-	 * 
+	 *
 	 * returns:
 	 *	If failed, will return a string "CIF_INVALID"
 	 * 	If successful, will set the valid data array and return true
-	 * 
+	 *
 	 * operations:
 	 * 	-	grab the last value, this is the checksum value
 	 * 	-	sum all the odd numbers together
@@ -462,19 +457,19 @@ class Amslib_Validator
 	protected function __cif($name,$code,$required,$options)
 	{
 		$lastLetter = array("J", "A", "B", "C", "D", "E", "F", "G", "H", "I");
-	
+
 		$numeric = substr($code,1);
-		
-		$last = substr($numeric,strlen($numeric)-1);	
+
+		$last = substr($numeric,strlen($numeric)-1);
 		$sum = 0;
-		
+
 		//	Sum up all the even numbers
 		for($pos=1;$pos<7;$pos+=2){
 			$sum += (int)(substr($numeric,$pos,1));
 		}
-		
+
 		//	Sum up all the odd numbers (but differently)
-		//	This uses the Luhn Algorithm: 
+		//	This uses the Luhn Algorithm:
 		//		Any value greater than 10, comprises two numbers (etc: 15 is [1, 5] )
 		//		Add both together, this is the value to sum
 		for($pos=0;$pos<8;$pos+=2){
@@ -482,33 +477,33 @@ class Amslib_Validator
 			$val = str_pad($val,2,"0",STR_PAD_LEFT);
 			$sum += (int)$val[0]+(int)$val[1];
 		}
-			
+
 		//	Obtain the modulus of 10 and subtract it from 10, if the sum was 10, control is 0 (second modulus)
 		$control = (10 - ($sum % 10)) % 10;
-		
+
 		if(($last == $control) || ($last == $lastLetter[$control])){
 			$this->setValid($name,$code);
 
 			return true;
 		}
-		
+
 		if(!$required) return true;
-		
+
 		return "CIF_INVALID";
 	}
-	
+
 	/**
 	 * function: __nie
-	 * 
+	 *
 	 * Validate a Spanish NIE identification code
-	 * 
+	 *
 	 * parameters:
 	 * 	$code	-	The NIE DNI code to check
-	 * 
+	 *
 	 * returns:
 	 * 	If failed, will return a string "NIE_INVALID"
-	 * 	If successful, will set the valid data array and return true 
-	 * 
+	 * 	If successful, will set the valid data array and return true
+	 *
 	 * notes:
 	 * 	-	This is a proxy method for validateNIF, which is identical in calculation, except we need to remove the
 	 * 		X from the front of the NIE and then check the remaining string (which is a valid NIE, or should be)
@@ -518,19 +513,19 @@ class Amslib_Validator
 		$firstCharacter = substr($code,0,1);
 		if($firstCharacter == "X"){
 			$nif = substr($code,1);
-			
-			if($this->__nif($name,$nif,$required,$options)){
+
+			if($this->__nif($name,$nif,$required,$options) === true){
 				$this->setValid($name,$code);
-				
+
 				return true;
 			}
 		}
-		
+
 		if(!$required) return true;
-		
+
 		return "NIE_INVALID";
 	}
-	
+
 	/**
 	 * method:	__boolean
 	 *
@@ -575,6 +570,10 @@ class Amslib_Validator
 			$bool = (bool)$value;
 		}
 
+		if(isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
+			return "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT";
+		}
+
 		$this->setValid($name,$bool);
 
 		if(!$required) return true;
@@ -612,27 +611,27 @@ class Amslib_Validator
 	protected function __number($name,$value,$required,$options)
 	{
 		$error = false;
-		
+
 		if($error == false && $value == NULL && !isset($options["ignorenull"])){
 			$error = "NUMBER_IS_NULL";
 		}
-		
+
 		if($error == false && !is_numeric($value)){
 			$error = "NUMBER_NAN";
 		}
-		
+
 		if($error == false && isset($options["minvalue"]) && $value < $options["minvalue"]){
 			$error = "NUMBER_IS_BELOW_MINIMUM";
 		}
-		
+
 		if($error == false && isset($options["maxvalue"]) && $value > $options["maxvalue"]){
 			$error = "NUMBER_IS_ABOVE_MAXIMUM";
 		}
-		
+
 		if($error == false && isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
 			$error = "NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
 		}
-		
+
 		//	If there was an error
 		if($error !== false)
 		{
@@ -640,9 +639,9 @@ class Amslib_Validator
 			//	If you don't require a valid number, just return true
 			return ($required) ? $error : true;
 		}
-		
+
 		$this->setValid($name,$value);
-		
+
 		return true;
 	}
 
@@ -676,17 +675,18 @@ class Amslib_Validator
 		$value	=	trim($value);
 
 		if(strlen($value) == 0 && $required == true) $error = "EMAIL_EMPTY";
-		
+
 		if(isset($options["invalid"]) && in_array($value,$options["invalid"])) $error = "EMAIL_INVALID_INPUT";
 
 		//	LOL REGEXP
 		$pattern = "^[a-z0-9,!#\$%&'\*\+/=\?\^_`\{\|}~-]+(\.[a-z0-9,!#\$%&'\*\+/=\?\^_`\{\|}~-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*\.([a-z]{2,})$";
-		if(!eregi($pattern,$value)) $error = "EMAIL_INVALID";
-		
+		//	eregi is deprecated, need to swap it for preg_match, when I find out how to convert the regexp :P
+		if(!@eregi($pattern,$value)) $error = "EMAIL_INVALID";
+
 		if($required == true && $error !== false) return $error;
-		
+
 		if($error === false) $this->setValid($name,$value);
-		
+
 		return true;
 	}
 
@@ -755,7 +755,9 @@ class Amslib_Validator
 	 */
 	protected function __phone($name,$value,$required,$options)
 	{
-		if(strlen($value) == 0 && $required == true) return "PHONE_EMPTY";
+		$error = false;
+
+		if($error == false && strlen($value) == 0) $error = "PHONE_EMPTY";
 
 		$temp = str_replace("(","",$value);
 		$temp = str_replace(")","",$temp);
@@ -765,16 +767,25 @@ class Amslib_Validator
 		$temp = str_replace(".","",$temp);
 		$temp = str_replace(",","",$temp);
 
-		if(isset($options["minlength"])){
-			if(strlen($temp) < $options["minlength"]) return "PHONE_LENGTH_INVALID";
+		if($error == false && isset($options["minlength"]) && strlen($temp) < $options["minlength"]){
+			$error = "PHONE_LENGTH_INVALID";
 		}
 
 		$temp = preg_replace("/\d/","",$temp);
 		$temp = trim($temp);
 
-		if(strlen($temp)) return "PHONE_INVALID"; 
+		if($error = false && strlen($temp)) $error = "PHONE_INVALID";
+
+		//	If there was an error
+		if($error !== false)
+		{
+			//	If you require the number to be valid, return the error
+			//	If you don't require a valid number, just return true
+			return ($required) ? $error : true;
+		}
 
 		$this->setValid($name,$value);
+
 		return true;
 	}
 
@@ -853,7 +864,7 @@ class Amslib_Validator
 		}
 
 		if($required == false) return true;
-		
+
 		if($value){
 			//	Return some alternative errors to FILE_NOT_FOUND
 			if($value["error"] == UPLOAD_ERR_INI_SIZE)		return "FILE_EXCEED_INI_SIZE";
@@ -863,28 +874,28 @@ class Amslib_Validator
 			if($value["error"] == UPLOAD_ERR_NO_TMP_DIR)	return "FILE_NO_TMP_DIRECTORY";
 			if($value["error"] == UPLOAD_ERR_CANT_WRITE)	return "FILE_CANNOT_WRITE";
 			if($value["error"] == UPLOAD_ERR_EXTENSION)		return "FILE_BANNED_EXTENSION";
-			
+
 			//	Unknown error, just comment it here so I can't lose the info
 			return "FILE_UNKNOWN_ERROR[{$value["error"]}]";
 		}
-		
+
 		return "FILE_NOT_FOUND[{$value["error"]}]";
 	}
-	
+
 	protected function __file_exists($name,$value,$required,$options)
 	{
 		if($options["absolute"] == true) $value = Amslib_File::absolute($value);
-		
+
 		if(is_file($value)){
 			$this->setValid("{$options["key"]}$name",$value);
 			return true;
 		}
-		
+
 		if($required == false) return true;
-		
+
 		return "FILE_EXISTS_FAILED";
 	}
-	
+
 	/**
 	 * For description: read the member variables related to this method, they explain all
 	 */
@@ -940,17 +951,17 @@ class Amslib_Validator
 		$this->register("cif",				array($this,"__cif"));
 		$this->register("nif",				array($this,"__nif"));
 		$this->register("nie",				array($this,"__nie"));
-		
+
 		//	Register some popular alternative spellings which keep cropping up to make life easier
 		$this->register("string",			array($this,"__text"));
 		$this->register("numeric",			array($this,"__number"));
 		$this->register("alpha-relaxed",	array($this,"__alpha_relaxed"));
 
-		//	Custom validation methods which do things we all want, but don't 
+		//	Custom validation methods which do things we all want, but don't
 		//	conform to obvious rules like "number", "text", "date", etc
 		$this->register("require_one",		array($this,"__require_one"));
 	}
-	
+
 	public function setValid($name,$value)
 	{
 		$this->__validData[$name] = $value;
@@ -992,6 +1003,17 @@ class Amslib_Validator
 		$this->__validData[$name]	=	"";
 
 		if($required === true) $this->__setRequiredRules(true);
+	}
+
+	public function addRules($rules)
+	{
+		foreach($rules as $name=>$r){
+			$type		= count($r) ? array_shift($r) : NULL;
+			$required	= count($r) ? array_shift($r) : false;
+			$options	= count($r) ? array_shift($r) : array();
+
+			if($type) $this->add($name,$type,$required,$options);
+		}
 	}
 
 	/**
@@ -1099,8 +1121,8 @@ class Amslib_Validator
 	 */
 	public function getErrors($field=NULL)
 	{
-		return ($field && isset($this->__error[$field])) 
-					? $this->__error[$field] 
+		return ($field && isset($this->__error[$field]))
+					? $this->__error[$field]
 					: $this->__error;
 	}
 
@@ -1138,7 +1160,7 @@ class Amslib_Validator
 		$validData = is_array($this->__validData) ? $this->__validData : array();
 		return ($mergeSource) ? array_merge($mergeSource, $validData) : $validData;
 	}
-	
+
 	/**
 	 * method:	getStatus
 	 *
@@ -1179,7 +1201,7 @@ class Amslib_Validator
 	{
 		return $this->__hasExecuted;
 	}
-	
+
 	/** DEPRECATED METHOD: use getErrors instead */
 	public function getErrorsByFieldName(){ return $this->getErrors(); }
 	/**	DEPRECATED METHOD: use getValid instead */

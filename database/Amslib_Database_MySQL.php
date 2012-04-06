@@ -36,22 +36,6 @@ class Amslib_Database_MySQL extends Amslib_Database
 		}
 	}
 
-	protected function setEncoding($encoding)
-	{
-		if($this->getConnectionStatus() == false) return;
-
-		$allowedEncodings = array("utf8","latin1");
-
-		if(in_array($encoding,$allowedEncodings)){
-			mysql_query("SET NAMES '$encoding'",$this->connection);
-			mysql_query("SET CHARACTER SET $encoding",$this->connection);
-		}else{
-			die(	"(".basename(__FILE__)." / FATAL ERROR): Your encoding ($encoding) is wrong, this can cause database corruption. ".
-					"I'm sorry dave, but I can't allow you to do that<br/>".
-					"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>");
-		}
-	}
-
 	/**
 	 * 	method:	connect
 	 *
@@ -66,6 +50,8 @@ class Amslib_Database_MySQL extends Amslib_Database
 		$details = $this->getConnectionDetails();
 
 		if($details){
+			$this->databaseName = $details["database"];
+
 			if($c = mysql_connect($details["server"],$details["username"],$details["password"],true))
 			{
 				if(!mysql_select_db($details["database"],$c)){
@@ -75,7 +61,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 					$this->connection = $c;
 
 					$this->setFetchMethod("mysql_fetch_assoc");
-					$this->setEncoding("utf8");
+					$this->setEncoding(isset($details["encoding"]) ? $details["encoding"] : "utf8");
 				}
 			// Replace these errors with Amslib_Translator codes instead (language translation)
 			}else $this->setError("Failed to connect to database: {$details["database"]}<br/>");
@@ -102,6 +88,22 @@ class Amslib_Database_MySQL extends Amslib_Database
 		if($connect) $this->connect();
 	}
 
+	public function setEncoding($encoding)
+	{
+		if($this->getConnectionStatus() == false) return;
+
+		$allowedEncodings = array("utf8","latin1");
+
+		if(in_array($encoding,$allowedEncodings)){
+			mysql_query("SET NAMES '$encoding'",$this->connection);
+			mysql_query("SET CHARACTER SET $encoding",$this->connection);
+		}else{
+			die(	"(".basename(__FILE__)." / FATAL ERROR): Your encoding ($encoding) is wrong, this can cause database corruption. ".
+					"I'm sorry dave, but I can't allow you to do that<br/>".
+					"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>");
+		}
+	}
+
 	public function escape($value)
 	{
 		return $this->getConnectionStatus()
@@ -111,7 +113,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 	public function unescape($results,$keys="")
 	{
-		if(!is_array($results)) return $results;
+		if(!$results || !is_array($results)) return $results;
 
 		if(Amslib_Array::isMulti($results)){
 			if($keys == "") $keys = array_keys(current($results));
@@ -201,8 +203,8 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 */
 	public function hasTable($database,$table)
 	{
-		$database	=	mysql_real_escape_string($database);
-		$table		=	mysql_real_escape_string($table);
+		$database	=	$this->escape($database);
+		$table		=	$this->escape($table);
 
 $query=<<<HAS_TABLE
 			COUNT(*)
@@ -219,6 +221,51 @@ HAS_TABLE;
 		}
 
 		return false;
+	}
+
+	public function getDBList()
+	{
+		return $this->select("distinct table_schema as database_name from information_schema.tables");
+	}
+
+	public function getDBTables($database_name=NULL)
+	{
+		$filter = "";
+		if($database_name && is_string($database_name)){
+			$database_name = $this->escape($database_name);
+
+			$filter = "where table_schema='$database_name'";
+		}
+
+		return $this->select("distinct table_name,table_schema as database_name from information_schema.tables $filter");
+	}
+
+	public function getDBColumns($database_name=NULL,$table_name=NULL)
+	{
+		$filter = array();
+
+		if($database_name && is_string($database_name)){
+			$database_name = $this->escape($database_name);
+
+			$filter[] = "table_schema='$database_name'";
+		}
+
+		if($table_name && is_string($table_name)){
+			$table_name = $this->escape($table_name);
+
+			$filter[] = "table_name='$table_name'";
+		}
+
+		$filter = count($filter) ? "where ".implode(" AND ",$filter) : "";
+
+$query=<<<QUERY
+		distinct column_name, table_name, table_schema as database_name
+		from information_schema.columns
+		$filter
+		order by database_name,table_name,ordinal_position
+QUERY;
+
+		return $this->select($query);
 	}
 
 	public function getTableFields($table)
@@ -241,10 +288,13 @@ HAS_TABLE;
 	{
 		$this->lastResult = array();
 
-		if($resultHandle == NULL) $resultHandle = $this->getSearchResultHandle();
+		if(!$resultHandle) $resultHandle = $this->getSearchResultHandle();
+		if(!$resultHandle) return false;
 
 		for($a=0;$a<$numResults;$a++){
-			$this->lastResult[] = mysql_fetch_assoc($resultHandle);
+			$r = mysql_fetch_assoc($resultHandle);
+			if(!$r) break;
+			$this->lastResult[] = $r;
 		}
 
 		if($optimise && $numResults == 1) $this->lastResult = current($this->lastResult);
@@ -252,23 +302,23 @@ HAS_TABLE;
 
 		return $this->lastResult;
 	}
-	
+
 	public function query($query)
 	{
 		$this->seq++;
 
 		if($this->getConnectionStatus() == false) return false;
-		
+
 		$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
-		
+
 		$this->setDebugOutput($query);
-		
+
 		if(!$result){
 			$this->setErrors($query);
-			return false;	
+			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -296,13 +346,13 @@ HAS_TABLE;
 
 		return false;
 	}
-	
+
 	/**
 	 * method: selectColumn
-	 * 
+	 *
 	 * Obtain a single column from the result of an SQL query, optionally optimised
 	 * to a single value if there is only one result.
-	 * 
+	 *
 	 * operations:
 	 * 	-	do the sql query
 	 * 	-	if the column parameter is a string, pluck that column from each result
@@ -312,22 +362,22 @@ HAS_TABLE;
 	public function selectColumn($query,$column=false,$numResults=0,$optimise=false)
 	{
 		$result = $this->select($query,$numResults,$optimise);
-		
+
 		if(is_string($column)) $result = Amslib_Array::pluck($result,$column);
-		
+
 		if(count($result) == 1 && $optimise) $result = current($result);
 
 		return $result;
 	}
-	
+
 	/**
 	 * method: selectRandom
-	 * 
+	 *
 	 * Select a number of random rows from a table
-	 * 
+	 *
 	 * I'd like to thank Jay Paroline for this little snippet of SQL
 	 * link: http://forums.mysql.com/read.php?132,185266,194715
-	 * 
+	 *
 	 * NOTES: this apparently works nicely with large tables
 	 */
 	public function selectRandom($table,$pkName,$count)
@@ -335,21 +385,37 @@ HAS_TABLE;
 		$table	=	(string)$this->escape($table);
 		$pkName	=	(string)$this->escape($pkName);
 		$count	=	(int)$count;
-		
+
 $query=<<<QUERY
-			* 
-		FROM 
-			$table 
-		JOIN 
-			(SELECT FLOOR(MAX($table.$pkName)*RAND()) AS RID FROM $table) AS x 
-			ON $table.$pkName >= x.RID 
-		LIMIT 
+			*
+		FROM
+			$table
+		JOIN
+			(SELECT FLOOR(MAX($table.$pkName)*RAND()) AS RID FROM $table) AS x
+			ON $table.$pkName >= x.RID
+		LIMIT
 			$count;
 QUERY;
 
-		return $this->select($query); 
+		return $this->select($query);
 	}
-	
+
+	public function selectValue($field,$query,$numResults=0,$optimise=false)
+	{
+		$values = $this->select($query,$numResults,$optimise);
+
+		if($numResults == 1 && $optimise){
+			$values = array_shift($values);
+			return isset($values[$field]) ? $values[$field] : NULL;
+		}
+
+		//	TODO: This hasn't been tested yet, it might not return exactly what I want
+		if($numResults != 1 && !$optimise){
+			return Amslib_Array::pluck($values,$field);
+		}
+
+		return $values;
+	}
 
 	public function insert($query)
 	{

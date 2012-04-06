@@ -182,7 +182,7 @@ class Amslib_Plugin
 		if(!$object || empty($object)) return false;
 
 		if(isset($object["cache"])) return $object["cache"];
-		if(isset($object["file"]))	Amslib::requireFile($object["file"]);
+		if(isset($object["file"]))	Amslib::requireFile($object["file"],array("require_once"=>true));
 
 		$error =  "FATAL ERROR(".__METHOD__.") Could not __ERROR__ for plugin '{$this->name}'<br/>";
 
@@ -278,25 +278,26 @@ class Amslib_Plugin
 		$this->setComponent("view",		"views",	"Vi_");
 		$this->setComponent("object",	"objects",	"");
 	}
-	
+
 	//	Type 1 data transfers
 	protected function transferData($src,$dst,$key,$value,$move)
 	{
 		if(!$dst || !$src) return;
-		
+
 		$dst->setConfig($key,$value);
 		if($move) $src->removeConfig($key);
 	}
-		
+
 	//	Type 2 data transfers
 	protected function transferData2($src,$dst,$key,$value,$move)
 	{
 		if(!$dst || !$src) return;
-		
+
 		$k = array($key,$value);
 		$v = $src->getConfig($key,$value);
-		
+
 		$dst->setConfig($k,$v);
+
 		if($move) $src->removeConfig($key,$value);
 	}
 
@@ -326,21 +327,21 @@ class Amslib_Plugin
 			 	if(!$p) continue;
 			 	$v1	=	$p->getConfig($key);
 			 	$v2	=	$this->getConfig($key);
-			 	
+
 			 	if($i) 			$this->transferData($p,$this,$key,$v1,$m);
 			 	else if($e) 	$this->transferData($this,$p,$key,$v2,$m);
 			}else if(in_array($key,array("object","value","view","stylesheet","image","javascript","translator"))){
 				foreach(Amslib_Array::valid($block) as $iname=>$item)
 				{
 					if($key == "value") $iname = $item["name"];
-					
+
 					$m	=	isset($item["move"]);
 					$i	=	isset($item["import"]) && $item["import"] != $this->getName() ? $item["import"] : false;
 			 		$e	=	isset($item["export"]) && $item["export"] != $this->getName() ? $item["export"] : false;
 			 		$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
 			 		if(!$p) continue;
 			 		$v	=	$key == "value" ? $item["name"] : $iname;
-			 	
+
 			 		if($i) 			$this->transferData2($p,$this,$key,$v,$m);
 			 		else if($e) 	$this->transferData2($this,$p,$key,$v,$m);
 				}
@@ -351,9 +352,9 @@ class Amslib_Plugin
 					$i	=	isset($item["import"]) && $item["import"] != $this->getName() ? $item["import"] : false;
 			 		$e	=	isset($item["export"]) && $item["export"] != $this->getName() ? $item["export"] : false;
 			 		$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
-			 		
+
 			 		if(!$p) continue;
-			 		
+
 			 		if(Amslib::getGET("debug") && $iname == "CS_Webcam_Save_Image"){
 			 			Amslib_FirePHP::output("service[$iname,{$this->getName()}]",array($i,$e,$p,$item));
 			 			Amslib_FirePHP::output("value",array($iname,isset($item["name"])?$item["name"]:$iname));
@@ -362,14 +363,14 @@ class Amslib_Plugin
 			 		}else{
 						$v	=	$iname;
 			 		}
-			 		
+
 			 		if($i) 			$this->transferData2($p,$this,$key,$v,$m);
 			 		else if($e) 	$this->transferData2($this,$p,$key,$v,$m);
 				}
 			}
 		}
 	}
-	
+
 	protected function getAttributeArray($node,$array=array())
 	{
 		foreach($node->attributes as $k=>$v) $array[$k] = $v->nodeValue;
@@ -408,13 +409,13 @@ class Amslib_Plugin
 								array("id"=>$c->nodeValue,"value"=>$c->nodeValue),
 								$this->getAttributeArray($c)
 							);
-							
+
 							$p["value"] = $this->getComponent($node->nodeName,$c->nodeValue);
-							
+
 							$this->config[$node->nodeName][$p["id"]] = $p;
 						}
 					}break;
-					
+
 					case "service":{
 						$child = $xpath->query("name",$node);
 
@@ -423,7 +424,7 @@ class Amslib_Plugin
 								array("id"=>$c->nodeValue,"value"=>$c->nodeValue),
 								$this->getAttributeArray($c)
 							);
-							
+
 							$this->config[$node->nodeName][$p["id"]] = $p;
 						}
 					}break;
@@ -435,7 +436,7 @@ class Amslib_Plugin
 
 						foreach($child as $c){
 							$p = $this->getAttributeArray($c);
-							
+
 							$absolute	=	isset($p["absolute"]) ? true : false;
 							$p["value"]	=	$this->findResource($c->nodeValue,$absolute);
 
@@ -449,7 +450,7 @@ class Amslib_Plugin
 
 						foreach($child as $font){
 							$p = $this->getAttributeArray($font);
-							
+
 							$p["value"]	=	trim($font->nodeValue);
 							$p["type"]	=	$font->nodeName;
 							if(!isset($p["autoload"])) $p["autoload"] = NULL;
@@ -604,7 +605,7 @@ class Amslib_Plugin
 		if(Amslib::getGET("debug")){
 			Amslib_FirePHP::output("setConfig[{$this->getName()}]",array($key,$value,$this->config[$key]));
 		}
-		
+
 		//	This is important, because otherwise values imported/exported through transfer() will not execute in process()
 		unset($value["import"],$value["export"]);
 
@@ -649,7 +650,7 @@ class Amslib_Plugin
 				}else{
 					if(is_array($name)) $name = current($name);
 					$name = (string)$name;
-						
+
 					return isset($this->config[$key][$name]) ? $this->config[$key][$name] : false;
 				}
 			}break;

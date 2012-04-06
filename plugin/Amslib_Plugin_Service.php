@@ -56,6 +56,14 @@ class Amslib_Plugin_Service
 		Amslib_Website::outputJSON($this->data,true);
 	}
 
+	protected function sanitiseURL($url)
+	{
+		//	Capture the http:// part so you can replace it afterwards
+		$http = strpos($url,"http://") !== false ? "http://" : "";
+		//	strip away the http:// part first, because it won't survive the reduceSlashes otherwise
+		return $http.Amslib_File::reduceSlashes(str_replace("http://","",$url));
+	}
+
 	public function __construct()
 	{
 		//	FIXME: we are hardcoding a route "home" which might not exist, this could be a bad idea
@@ -81,7 +89,7 @@ class Amslib_Plugin_Service
 
 	public function setSuccessURL($url)
 	{
-		$this->successURL = Amslib_File::reduceSlashes("$url/");
+		$this->successURL = $this->sanitiseURL($url);
 	}
 
 	public function getSuccessURL()
@@ -91,7 +99,7 @@ class Amslib_Plugin_Service
 
 	public function setFailureURL($url)
 	{
-		$this->failureURL = Amslib_File::reduceSlashes("$url/");
+		$this->failureURL = $this->sanitiseURL($url);
 	}
 
 	public function getFailureURL()
@@ -101,7 +109,8 @@ class Amslib_Plugin_Service
 
 	public function setReturnURL($url)
 	{
-		$this->successURL = $this->failureURL = Amslib_File::reduceSlashes("$url/");
+		$this->setSuccessURL($url);
+		$this->setFailureURL($url);
 	}
 
 	public function setServiceData($data)
