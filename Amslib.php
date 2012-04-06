@@ -283,12 +283,13 @@ class Amslib
 			if(strpos($c,"Amslib_File")			!== false)	$c	=	"file/$c";
 			if(strpos($c,"CakePHP")				!== false)	$c	=	"util/$c";
 			if(strpos($c,"PiwikTracker")		!== false)	$c	=	"util/$c";
+			if(strpos($c,"phpQuery")			!== false)	$c	=	"util/$c/$c";
+			if(strpos($c,"QueryPath")			!== false)	$c	=	"util/$c/$c";
 
 			//	DEPRECATED: unless I can find a way to fix the utf-8 broken characters like ü
 			if(strpos($c,"HtmlCutString")		!== false)	$c	=	"util/html_cut_string";
 
 			if($c == "FirePHP")		$c	=	"util/FirePHPCore/$c.class";
-			if($c == "phpQuery")	$c =	"util/phpquery";
 
 			$f = str_replace("//","/","$c.php");
 
