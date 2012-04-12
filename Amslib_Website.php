@@ -55,7 +55,7 @@ class Amslib_Website
 	{
 		return Amslib_File::absolute(self::$location.$file);
 	}
-	
+
 	//	Return a relative url for the file to the website location
 	//	NOTE: what??? does this function even work correctly?
 	//	NOTE: I'm 99% sure this function doesn't do what it's supposed to do
@@ -82,7 +82,7 @@ class Amslib_Website
 	static public function redirect($location,$block=true)
 	{
 		$message = "waiting to redirect";
-		
+
 		$location = rtrim($location,"/");
 		if($location == "") $location = "/";
 
@@ -97,9 +97,13 @@ class Amslib_Website
 
 	static public function outputJSON($array,$block=true)
 	{
+		header("Cache-Control: no-cache");
 		header("Content-Type: application/json");
 
 		$json = json_encode($array);
+		//	if there is a callback specified, wrap up the json into a jsonp format
+		$jsonp = Amslib::getGET("callback");
+		if($jsonp) $json = "$jsonp($json)";
 
 		if($block) die($json);
 
