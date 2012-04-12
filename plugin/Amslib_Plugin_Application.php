@@ -95,15 +95,21 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		$default = Amslib_Plugin_Manager::getAPI(Amslib_Router::getParameter("plugin"));
 
-		//	hack into place the automatic adding of all the stylesheets and javascripts
+		//	hack into place the adding or removing of all the stylesheets and javascripts
 		foreach(Amslib_Array::valid(Amslib_Router::getJavascripts()) as $j){
 			$plugin = isset($j["id"]) ? Amslib_Plugin_Manager::getAPI($j["id"]) : $default;
-			if($plugin) $plugin->addJavascript($j["value"]);
+			if($plugin){
+				if(isset($j["remove"])) Amslib_Resource::removeJavascript($j["value"]);
+				else $plugin->addJavascript($j["value"]);
+			}
 		}
 
 		foreach(Amslib_Array::valid(Amslib_Router::getStylesheets()) as $c){
 			$plugin = isset($c["id"]) ? Amslib_Plugin_Manager::getAPI($c["id"]) : $default;
-			if($plugin) $plugin->addStylesheet($c["value"]);
+			if($plugin){
+				if(isset($c["remove"])) Amslib_Resource::removeStylesheet($c["value"]);
+				else $plugin->addStylesheet($c["value"]);
+			}
 		}
 	}
 
