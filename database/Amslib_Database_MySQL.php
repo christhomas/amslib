@@ -95,8 +95,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 		$allowedEncodings = array("utf8","latin1");
 
 		if(in_array($encoding,$allowedEncodings)){
-			mysql_query("SET NAMES '$encoding'",$this->connection);
-			mysql_query("SET CHARACTER SET $encoding",$this->connection);
+			mysql_set_charset($encoding,$this->connection);
 		}else{
 			die(	"(".basename(__FILE__)." / FATAL ERROR): Your encoding ($encoding) is wrong, this can cause database corruption. ".
 					"I'm sorry dave, but I can't allow you to do that<br/>".

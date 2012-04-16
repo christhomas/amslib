@@ -564,6 +564,9 @@ input, select {
 	box-sizing: border-box;	
 }
 
+/* reset all the font weights because by default I think it should not be bolded */
+h1,h2,h3,h4,h5,h6{ font-weight: normal; }
+
 /* this is to help with the mvc system, this weird looking class is how we embed mvc data in the page */
 .__amslib_mvc_values{
 	display: none;
