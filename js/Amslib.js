@@ -96,15 +96,22 @@ var Amslib = my.Amslib = my.Class({
 		
 		loadJS: function(name,file,onReady)
 		{
-			if(typeof require == 'function'){
-				Amslib.loader[name] = require(file);
+			if(typeof(require) != 'function') return;
 			
-				if(typeof onReady == "function") scope(onReady,Amslib.loader[name]);
-				
-				scope(function(){
-					Amslib.__waitJS(name);
-				},Amslib.loader[name]);
+			if(typeof(Amslib.loader[name]) == "undefined"){
+				Amslib.__lready[name]	=	false;
+				Amslib.loader[name]		=	require(file);
 			}
+		
+			if(typeof onReady == "function") scope(onReady,Amslib.loader[name]);
+			
+			scope(function(){
+				Amslib.__lready[name] = true;
+				
+				if(Amslib.__lcback[name]) for(k in Amslib.__lcback[name]){
+					Amslib.__lcback[name][k]();
+				}
+			},Amslib.loader[name]);
 		},
 		
 		hasJS: function(name,callback)
@@ -112,23 +119,22 @@ var Amslib = my.Amslib = my.Class({
 			if(typeof name == "string") name = new Array(name);
 			
 			var checkGroup = function(){
-				var loaded = true;
-				
 				for(n=0;n<name.length;n++){
-					if(!Amslib.__loaderReady[name[n]]) return false;
+					if(!Amslib.__lready[name[n]]) return false;
 				}
 
-				if(callback) callback();
+				if(callback) scope.ready(callback);
 				
 				return true;
 			};
 			
 			for(var n=0;n<name.length;n++){
-				if(Amslib.__loaderReady[name[n]] && checkGroup()) return true;
-				else{
-					if(!Amslib.__loaderCallback[name[n]]) Amslib.__loaderCallback[name[n]] = new Array();
-					Amslib.__loaderCallback[name[n]].push(checkGroup);
-				}
+				try{
+					if(Amslib.__lready[name[n]] && checkGroup()) return true;
+				}catch(e){}
+				
+				if(typeof(Amslib.__lcback[name[n]]) == "undefined") Amslib.__lcback[name[n]] = new Array();
+				Amslib.__lcback[name[n]].push(checkGroup);
 			}
 			
 			return false;
@@ -146,23 +152,11 @@ var Amslib = my.Amslib = my.Class({
 			$("head").append($("<link/>").attr({rel:"stylesheet",type:"text/css",href: file}));
 		},
 		
-		loader: {},
-		__loaderReady:		{},
-		__loaderCallback:	{},
-		__urlParams:		[],
-		__location:			false,
-		
-		//	Support asynchronous loading a provides a "notification callback" system
-		__waitJS: function(name)
-		{
-			Amslib.__loaderReady[name] = true;
-			
-			if(Amslib.__loaderCallback[name]){
-				for(k in Amslib.__loaderCallback[name]){
-					Amslib.__loaderCallback[name][k]();
-				}
-			}
-		}
+		loader:			{},
+		__lready:		{},
+		__lcback:		{},
+		__urlParams:	[],
+		__location:		false
 	},	
 	
 	constructor: function(parent,name)
