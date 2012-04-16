@@ -5,14 +5,12 @@
 
 if(Amslib == undefined || window.exports == undefined) throw("Amslib_NicEditor.js: requires amslib/my.common to be loaded first");
 
-var path = Amslib.getPath("/util/Amslib_NicEditor.js");
+var amslib = Amslib.locate();
 
-if(path){
-	var defaultNicEditorGIFPath = path+"/util/nicEditorIcons.gif";
+if(amslib){
+	var defaultNicEditorGIFPath = amslib+"/util/nicEditorIcons.gif";
 	
-	Amslib.loader.nicEdit = require(path+"/util/nicEdit.js");
-	
-	scope(function(){
+	Amslib.loadJS("nicedit",amslib+"/util/nicEdit.js",function(){
 		var list = $(".nicedit");
 		
 		list.each(function(){
@@ -22,5 +20,5 @@ if(path){
 				new nicEditor().panelInstance(this);
 			}
 		});
-	},Amslib.loader.nicEdit);
+	});
 };
