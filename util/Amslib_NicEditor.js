@@ -8,17 +8,19 @@ if(Amslib == undefined || window.exports == undefined) throw("Amslib_NicEditor.j
 var amslib = Amslib.locate();
 
 if(amslib){
-	var defaultNicEditorGIFPath = amslib+"/util/nicEditorIcons.gif";
-	
-	Amslib.loadJS("nicedit",amslib+"/util/nicEdit.js",function(){
+	Amslib.loadJS("nicedit",amslib+"/util/nicEdit/nicEdit.js",function(){
+		nicEditorConfig.iconsPath = amslib+"/util/nicEdit/nicEditorIcons.gif";
 		var list = $(".nicedit");
 		
 		list.each(function(){
 			if($(this).hasClass("simple1")){
 				//	An example of how we could configure with different options, does nothing for now
+				var p = new nicEditor({fullPanel : true}).panelInstance('myArea1',{hasPanel : true})
 			}else{
-				new nicEditor().panelInstance(this);
+				var p = new nicEditor().panelInstance(this);
 			}
+			
+			$(this).data("nicedit",p);
 		});
 	});
 };

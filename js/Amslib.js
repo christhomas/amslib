@@ -123,7 +123,7 @@ var Amslib = my.Amslib = my.Class({
 					if(!Amslib.__lready[name[n]]) return false;
 				}
 
-				if(callback) scope.ready(callback);
+				if(callback) $(document).ready(callback);
 				
 				return true;
 			};
