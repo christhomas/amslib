@@ -392,6 +392,8 @@ class Amslib_Validator
 			return $this->__nif($name,$code,$required,$options);
 		}
 
+		if(!$required) return true;
+
 		return "DNI_INVALID";
 	}
 
