@@ -204,12 +204,12 @@ class Amslib_Router
 
 	static public function getStylesheets()
 	{
-		return self::$route["stylesheets"];
+		return isset(self::$route["stylesheets"]) ? self::$route["stylesheets"] : array();
 	}
 
 	static public function getJavascripts()
 	{
-		return self::$route["javascripts"];
+		return isset(self::$route["javascripts"]) ? self::$route["javascripts"] : array();
 	}
 
 	/**
