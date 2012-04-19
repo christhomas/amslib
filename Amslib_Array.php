@@ -176,6 +176,16 @@ class Amslib_Array
 		return $counts;
 	}
 
+	//	This method allows me to batch fix missing keys in arrays in broken code quickly and easily.
+	static public function missingKeys($array,$key,$value=NULL)
+	{
+		if(is_string($key)) $index = array($key);
+
+		foreach($key as $k) if(!isset($array[$k])) $array[$k] = $value;
+
+		return $array;
+	}
+
 	static public function find($array,$key,$value)
 	{
 		$result = NULL;
