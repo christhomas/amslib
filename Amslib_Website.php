@@ -83,13 +83,14 @@ class Amslib_Website
 	{
 		$message = "waiting to redirect";
 
-		$location = rtrim($location,"/");
-		if($location == "") $location = "/";
-
 		if(is_string($location) && strlen($location)){
+			$location = rtrim($location,"/");
+			if($location == "") $location = "/";
+
 			header("Location: $location");
 		}else{
-			$message = __CLASS__."::redirect-> The \$location parameter was an invalid string: '$location'";
+			$message = __METHOD__."-> The \$location parameter was an invalid string: '$location'";
+			//print(Amslib::var_dump(Amslib::exceptionBacktrace(),true));
 		}
 
 		if($block) die($message);

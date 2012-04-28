@@ -61,7 +61,7 @@ var Amslib = my.Amslib = my.Class({
 			
 			return Amslib.__location || false;
 		},
-		
+
 		getQuery: function()
 		{
 			var p = function(s){

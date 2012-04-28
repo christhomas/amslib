@@ -83,6 +83,7 @@ class Amslib
 	}
 
 	//	FIXME: I have two methods to cut a string, wtf....which do I use??
+	//	NOTE: I think this one is the version I should use in the future??
 	static public function truncateString($string,$length)
 	{
 		return CakePHP::truncate($string,$length);
@@ -216,6 +217,12 @@ class Amslib
 		return Amslib_Array::filterKey($bt,Amslib_Array::filterType($args,"is_string"));
 	}
 
+	static public function exceptionBacktrace($string=false)
+	{
+		$e = new Exception();
+		return $string ? $e->getTraceAsString() : $e->getTrace();
+	}
+
 	//	NOTE: This method has weird parameter names to make it harder to clash with extract()'d parameters from the $__p parameter
 	static public function __importFile($__r,$__f,$__p=array(),$__b=false)
 	{
@@ -281,10 +288,10 @@ class Amslib
 			if(strpos($c,"Amslib_MVC")			!== false)	$c	=	"mvc/$c";
 			if(strpos($c,"Amslib_Mixin")		!== false)	$c	=	"mvc/$c";
 			if(strpos($c,"Amslib_File")			!== false)	$c	=	"file/$c";
+			if(strpos($c,"Amslib_QueryPath")	!== false)	$c	=	"util/$c";
 			if(strpos($c,"CakePHP")				!== false)	$c	=	"util/$c";
 			if(strpos($c,"PiwikTracker")		!== false)	$c	=	"util/$c";
 			if(strpos($c,"phpQuery")			!== false)	$c	=	"util/$c/$c";
-			if(strpos($c,"QueryPath")			!== false)	$c	=	"util/$c/$c";
 
 			//	DEPRECATED: unless I can find a way to fix the utf-8 broken characters like ü
 			if(strpos($c,"HtmlCutString")		!== false)	$c	=	"util/html_cut_string";

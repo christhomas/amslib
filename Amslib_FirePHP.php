@@ -9,36 +9,39 @@ class Amslib_FirePHP extends FirePHP
 	{
 		parent::__construct();
 	}
-	
+
 	public static function backtrace($levels=false)
 	{
 		$e = new Exception();
-		
-		$trace = (is_numeric($levels) && $levels > 0) 
-			? array_slice($e->getTrace(),0,(int)$levels) 
+
+		$trace = (is_numeric($levels) && $levels > 0)
+			? array_slice($e->getTrace(),0,(int)$levels)
 			: $e->getTrace();
-		
+
 		self::output("backtrace",$trace);
 	}
-	
+
 	public static function output($name,$data){
+		$a=func_get_args();
+
 		try{
-			self::$instance->log($data,$name);
+			$n = array_shift($a);
+			self::$instance->log($a,$n);
 		}catch(Exception $e){
 			print("Amslib_FirePHP::output(), exception occured, output has already started? backtrace = ".Amslib::var_dump(debug_backtrace(),true));
 		}
 	}
-	
+
 	public static function init()
 	{
 		parent::init();
-		
+
 		$options = array(	'maxObjectDepth'		=>	5,
 							'maxArrayDepth'			=>	10,
 							'maxDepth'				=>	10,
 							'useNativeJsonEncode'	=>	true,
 							'includeLineNumbers'	=>	true);
-		
+
 		self::$instance->setOptions($options);
 	}
 }

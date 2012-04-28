@@ -1,10 +1,11 @@
 RewriteEngine On
 RewriteBase /
 
-#RewriteCond %{REQUEST_URI} (gif|png|jpg|jpeg|css|js)$ [NC]
-#RewriteRule ^(.*)$ - [L]
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteCond %{REQUEST_URI} (gif|png|jpg|jpeg|css|js)$ [NC]
+RewriteRule ^(.*)$ - [L]
 
 #	Perhaps you need to remove -d from here or not, depends on your website
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ amslib_router.php?resource=router&router_path=%{REQUEST_URI} [L,QSA]
+RewriteRule ^(.*)$ amslib_router.php?router_path=%{REQUEST_URI} [L,QSA]
