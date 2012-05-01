@@ -416,12 +416,13 @@ QUERY;
 		$values = $this->select($query,$numResults,$optimise);
 
 		if($numResults == 1 && $optimise){
-			$values = array_shift($values);
 			return isset($values[$field]) ? $values[$field] : NULL;
 		}
 
 		//	TODO: This hasn't been tested yet, it might not return exactly what I want
 		if($numResults != 1 && !$optimise){
+			//	FIXME? Why am I optimising the array, when optimise is being tested for false?
+			//	NOTE: I think the reason I never found this issue before was I always using 1,true for numResults/optimise
 			return Amslib_Array::pluck($values,$field);
 		}
 
@@ -514,4 +515,7 @@ QUERY;
 	{
 		return $this->errors;
 	}
+
+	public function setDBErrors($query){ $this->setErrors($query); }
+	public function getDBErrors(){ return $this->getErrors(); }
 }

@@ -33,14 +33,17 @@ var Amslib_String = my.Amslib_String = my.Class(
 		 
 		ltrim: function(str, chars)
 		{
-			chars = chars || "\\s";
-			return str.replace(new RegExp("^[" + chars + "]+", "g"), "");
+			return str.replace(new RegExp("^[" + (chars || "\\s") + "]+", "g"), "");
 		},
 		 
 		rtrim: function(str, chars)
 		{
-			chars = chars || "\\s";
-			return str.replace(new RegExp("[" + chars + "]+$", "g"), "");
+			return str.replace(new RegExp("[" + (chars || "\\s") + "]+$", "g"), "");
+		},
+		
+		replace: function(str, chars, replace)
+		{
+			return str.replace(new RegExp(chars, "g"), replace || "");
 		}
 	}
 });
