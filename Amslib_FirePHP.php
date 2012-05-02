@@ -26,6 +26,7 @@ class Amslib_FirePHP extends FirePHP
 		$a = func_get_args();
 		$name = array_shift($a);
 		try{
+			if(count($a) == 1) $a = array_shift($a);
 			self::$instance->log($a,$name);
 		}catch(Exception $e){
 			print("Amslib_FirePHP::output(), exception occured, output has already started? backtrace = ".Amslib::var_dump(debug_backtrace(),true));
