@@ -48,8 +48,7 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	{
 		if($this->language)
 		{
-			$this->database = Amslib_File::relative("$this->location/{$this->language}.xml");
-			$this->database = Amslib_File::absolute($this->database);
+			$this->database = Amslib_Website::abs("$this->location/{$this->language}.xml");
 
 			if(!file_exists($this->database)) $this->database = Amslib_File::find($this->database,true);
 
@@ -64,7 +63,7 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 
 				return true;
 			}else{
-				$this->setError(get_class($this)."::load() LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
+				$this->setError(get_class($this)."::load(), LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
 			}
 		}
 
