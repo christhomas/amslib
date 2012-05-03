@@ -251,6 +251,8 @@ class Amslib_Array
 	{
 		if(is_string($key)) $key = array($key);
 
+		$array = self::valid($array);
+
 		foreach($array as &$element){
 			if(!$key){
 				$element = array_map("stripslashes",$element);

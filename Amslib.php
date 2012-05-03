@@ -216,6 +216,12 @@ class Amslib
 		return Amslib_Array::filterKey($bt,Amslib_Array::filterType($args,"is_string"));
 	}
 
+	static public function exceptionBacktrace($string=false)
+	{
+		$e = new Exception();
+		return $string ? $e->getTraceAsString() : $e->getTrace();
+	}
+
 	//	NOTE: This method has weird parameter names to make it harder to clash with extract()'d parameters from the $__p parameter
 	static public function __importFile($__r,$__f,$__p=array(),$__b=false)
 	{
