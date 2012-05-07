@@ -44,7 +44,8 @@ class Amslib_Database
 
 	protected $lastQuery = array();
 
-	protected $debug = false;
+	protected $debug		=	false;
+	protected $errorState	=	true;
 
 	protected $selectResult = false;
 
@@ -105,6 +106,15 @@ class Amslib_Database
 	public function setDebug($state)
 	{
 		$this->debug = $state;
+	}
+
+	public function setErrorState($state)
+	{
+		$e = $this->errorState;
+
+		$this->errorState = $state ? true : false;
+
+		return $e;
 	}
 
 	public function getLastQuery()
