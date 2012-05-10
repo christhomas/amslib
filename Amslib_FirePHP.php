@@ -26,7 +26,7 @@ class Amslib_FirePHP extends FirePHP
 
 		try{
 			$n = array_shift($a);
-			self::$instance->log($a,$n);
+			self::$instance->log(count($a) > 1 ? $a : current($a),$n);
 		}catch(Exception $e){
 			print("Amslib_FirePHP::output(), exception occured, output has already started? backtrace = ".Amslib::var_dump(debug_backtrace(),true));
 		}
