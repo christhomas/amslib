@@ -26,133 +26,167 @@
 
 class Amslib_Router
 {
-	static protected $source;
-	static protected $location;
-	static protected $path;
-	static protected $route;
+	static protected $emptyRoute = array(
+		"name"			=>	false,
+		"resource"		=>	false,
+		"src"			=>	array(),
+		"route"			=>	false,
+		"route_param"	=>	array(),
+		"url_param"		=>	array(),
+		"stylesheet"	=>	array(),
+		"javascript"	=>	array()
+	);
 
-	/**
-	 * method: sanitise
-	 *
-	 * If the route was invalid, set a false "fake" array of data
-	 * to stop you from having to do all kinds of crazy test by default
-	 * in other methods
-	 */
-	static protected function sanitise($route)
+	static protected $base	=	false;
+	static protected $path	=	false;
+	static protected $route	=	false;
+	static protected $cache	=	array();
+	static protected $name	=	array();
+	static protected $url	=	array();
+
+	static public function initialise()
 	{
-		if(!$route){
-			//	This just makes sure the information returned has the valid indexes, I'm not sure why I do this here
-			//	and not inside the source object......maybe this method is a mistake...
-			$route["name"]			=	false;
-			$route["resource"]		=	false;
-			$route["route"]			=	false;
-			$route["parameters"]	=	array();
-			$route["options"]		=	array();
-			$route["stylesheets"]	=	array();
-			$route["javascripts"]	=	array();
-		}
-
-		return $route;
-	}
-
-	public function __construct()
-	{
-		//	IMPORTANT: This method might be full of information which doesnt need to be here!!!
-		//	TODO: Analyse who uses the information set here to determine whether it's safe to "move" this somewhere else.
-
-		self::$location	=	Amslib_Website::set();
-
 		//	Setup the router path in order to obtain the correct path information
-		$router_path	=	Amslib::getParam("router_path");
-		self::$path		=	NULL;
+		self::$base	=	$_SERVER["AMSLIB_WEBSITE"];
+		self::$path	=	Amslib::lchop($_SERVER["REQUEST_URI"],self::$base);
+		self::$path	=	Amslib_File::reduceSlashes("/".self::$path."/");;
+	}
 
-		if($router_path){
-			self::$path = Amslib::lchop($router_path,self::$location);
-			self::$path = Amslib_File::reduceSlashes("/".self::$path."/");
+	static public function finalise()
+	{
+		if(!self::$path) return false;
+
+		self::$route = self::getRouteByURL(self::$path);
+	}
+
+	static public function getPath()
+	{
+		return self::$path;
+	}
+
+	static public function getBase()
+	{
+		return self::$base;
+	}
+
+	static public function load($source,$type,$group)
+	{
+		try{
+			switch($type){
+				case "xml":{		$s = new Amslib_Router_Source_XML($source);			}break;
+				case "database":{	$s = new Amslib_Router_Source_Database($source);	}break;
+			}
+
+			foreach(Amslib_Array::valid($s->getRoutes()) as $route){
+				self::setRoute($route["name"],$group,$route);
+			}
+		}catch(Exception $e){
+			return false;
 		}
 
+		return true;
 	}
 
-	static public function setSource($source)
+	static public function setLanguage($lang)
 	{
-		self::$source = $source;
+		//	TODO: write how this would work
 	}
 
-	static public function getSource()
+	static public function changeLanguage($lang,$fullRoute=NULL,$key=NULL)
 	{
-		return self::$source;
+		//	NOTE: what does fullRoute mean??
+		//	NOTE: what does key mean??
+		//	NOTE: what if we are processing languages like /es_ES/route ?
+
+		return self::getURL(NULL,NULL,$lang);
 	}
 
-	/**
-	 * method:	getObject
-	 *
-	 * It's hard to know when a router source object is compatible or not
-	 * this method eliminates that doubt by putting the onus on this object
-	 * to create the appropriate object for you, depending on the type you
-	 * requested.
-	 */
-	static public function getObject($type,$file=NULL)
+	static public function getURL($name=NULL,$group=NULL,$lang="default")
 	{
-		switch($type){
-			case "source:xml":{
-				return Amslib_Router_Source_XML::getInstance();
-			}break;
+		$route = self::getRoute($name,$group);
 
-			case "source:database":{
-				return Amslib_Router_Source_Database::getInstance();
-			}break;
-
-			case "language":{
-				return Amslib_Router_Language::getInstance();
-			}break;
-		}
-
-		return false;
-	}
-
-	static public function execute()
-	{
-		if(self::$source && self::$path){
-			self::$path		=	Amslib_Router_Language::extract(self::$path);
-			self::$route	=	self::getRouteByURL(self::$path);
-		}
-	}
-
-	/**
-	 * method: getURL
-	 *
-	 * Return a url based on the name,version,lang being requested
-	 *
-	 * parameters:
-	 * 	$name		-	The name of the route, defined in each route declaration
-	 * 	$version	-	The version of the route (not 100% sure what this is for anymore, old code?)
-	 * 	$lang		-	The language of the route to return
-	 */
-	static public function getURL($name=NULL,$version=NULL,$lang=NULL)
-	{
-		$route = self::getRoute($name,$version,$lang);
-
-		//	TODO: Support passing the $lang parameter and have it override the language setup
-		$lang = Amslib_Router_Language::getName();
-		if($lang) $lang = "/$lang/";
-
-		return Amslib_Website::rel($lang.$route["route"]);
-	}
-
-	static public function getRoute($name=NULL,$version=NULL,$lang=NULL)
-	{
-		if($name == NULL) return self::$route;
-
-		if($lang == NULL) $lang = Amslib_Router_Language::getCode();
-
-		return self::sanitise(self::$source->getRoute($name,$version,$lang));
+		return Amslib_Website::rel(isset($route["src"][$lang]) ? $route["src"][$lang] : "");
 	}
 
 	static public function getRouteByURL($url=NULL)
 	{
 		if($url == NULL) return self::$route;
 
-		return self::sanitise(self::$source->getRouteByURL($url));
+		$result = "";
+		foreach(self::$url as $u=>$d){
+			if($url != "/" && strpos($url,$u) !== false && strlen($u) >= strlen($result)){
+				$result = $u;
+			}else if($url == $u){
+				$result = $u;
+			}
+		}
+
+		if(strlen($result) && isset(self::$url[$result])){
+			$r = self::$url[$result];
+			$r["url_param"] = Amslib_Array::valid(explode("/",trim(str_replace($result,"",$url),"/ ")));
+
+			return $r;
+		}
+
+		return self::$emptyRoute;
+	}
+
+	static public function getRoute($name=NULL,$group=NULL)
+	{
+		//	if there was no name, surely you mean return the current route
+		if($name == NULL) return self::$route;
+
+		//	if you specify a group, look in the name array specifically for that group
+		if($group && is_string($group) && isset(self::$cache[$group]) && isset(self::$cache[$group][$name])){
+			return self::$cache[$group][$name];
+		}
+
+		//	if the group wasn't requested or didn't exist, or failed to find the route by name,
+		//	look in the mixed/global cache for the last registered route with that name instead
+		if($name && is_string($name) && isset(self::$name[$name])) return self::$name[$name];
+
+		//	default to an empty route, to make sure the data returned is the right format, just empty
+		return self::$emptyRoute;
+	}
+
+	static public function getServiceURL($name,$group=NULL,$lang="default")
+	{
+		return self::getURL("service:$name",$group,$lang);
+	}
+
+	static public function getService($name,$group=NULL)
+	{
+		return self::getRoute("service:$name",$group);
+	}
+
+	static public function setRoute($name,$group,$route,$updateURLCache=true)
+	{
+		//	test if the group is valid or not
+		if(!$group || !is_string($group)) return false;
+		//	test if the name is valid or not
+		if(!$name || !is_string($name)) return false;
+		//	Obviously if the data is not valid, you can't process it anyway
+		if(!$route || !is_array($route)) return false;
+		//	test if the src value is valid
+		if(!isset($route["src"]) || !is_array($route["src"]) || count($route["src"]) == 0) return false;
+
+		//	Automatically prepend service route names with "service:" so you can easily distinguish them
+		//	This also enabled the getServiceURL,getService methods on the Amslib_Router object
+		if($route["type"] == "service") $name = "service:".$name;
+
+		//	NOTE: we "reset" the values here because if you are
+		//	importing/renaming a service, this will do it for free without complexity
+		$route["name"]	=	$name;
+		$route["group"]	=	$group;
+
+		//	store the route data underneath the name so you can explicitly search for it
+		self::$cache[$group][$name]	=	&$route;
+		self::$name[$name]			=	&$route;
+
+		//	store the route data referencing it by url, so you can build a request url cache
+		if($updateURLCache) foreach($route["src"] as $s){
+			self::$url[$s] = &$route;
+		}
 	}
 
 	static public function getName()
@@ -165,83 +199,75 @@ class Amslib_Router
 		return self::$path !== NULL ? true : false;
 	}
 
+	static public function isService()
+	{
+		return self::$route && isset(self::$route["type"]) && self::$route["type"] == "service"
+			? true
+			: false;
+	}
+
 	static public function getResource($name=NULL)
 	{
 		$r = ($name == NULL) ? self::$route : self::getRoute($name);
 
-		return $r["resource"];
+		return $r && isset($r["resource"]) ? $r["resource"] : false;
 	}
 
-	static public function getParameter($name=NULL,$default="")
+	static public function getRouteParam($name=NULL,$default="")
 	{
-		if($default === "") $default = self::$route["parameters"];
+		if(isset(self::$route["route_param"])){
+			if($default === "") $default = self::$route["route_param"];
 
-		return $name !== NULL && isset(self::$route["parameters"][$name])
-			? self::$route["parameters"][$name]
-			: $default;
+			return $name !== NULL && isset(self::$route["route_param"][$name])
+				? self::$route["route_param"][$name]
+				: $default;
+		}
+
+		return $default;
 	}
 
-	static public function setParameter($name,$value)
+	static public function setRouteParam($name,$value)
 	{
-		if(self::$route && isset(self::$route["parameters"])){
-			self::$route["parameters"][$name] = $value;
+		if(self::$route && isset(self::$route["route_param"])){
+			self::$route["route_param"][$name] = $value;
 		}
 	}
 
-	static public function hasParameter($name)
+	static public function hasRouteParam($name)
 	{
-		return in_array($name,self::$route["parameters"]) ? true : false;
+		return in_array($name,self::$route["route_param"]) ? true : false;
 	}
 
-	static public function getURLOption($index=NULL,$default="")
+	static public function getURLParam($index=NULL,$default="")
 	{
-		if($default === "") $default = self::$route["options"];
+		//	if there are no url options, return the default
+		if(!isset(self::$route["url_param"])) return $default;
+		//	if the default was an empty string, set the default to the entire options array
+		if($default === "") $default = self::$route["url_param"];
 
-		return $index !== NULL && isset(self::$route["options"][$index])
-				? self::$route["options"][$index]
+		return $index !== NULL && isset(self::$route["url_param"][$index])
+				? self::$route["url_param"][$index]
 				: $default;
 	}
 
-	static public function getStylesheets()
+	static public function getStylesheet()
 	{
-		return isset(self::$route["stylesheets"]) ? self::$route["stylesheets"] : array();
+		return isset(self::$route["stylesheet"]) ? self::$route["stylesheet"] : array();
 	}
 
-	static public function getJavascripts()
+	static public function getJavascript()
 	{
-		return isset(self::$route["javascripts"]) ? self::$route["javascripts"] : array();
-	}
-
-	/**
-	 * method: changeLang
-	 *
-	 * Create a url for the current route that will change the language into the other one
-	 * this is completely application specific in how this happens, per application, requires perhaps
-	 * a different way to change languages, as long as the url scheme for languages remains the same
-	 */
-	static public function changeLang($langName)
-	{
-		Amslib_Router_Language::push();
-		Amslib_Router_Language::set($langName);
-
-		$u = self::getURL();
-
-		Amslib_Router_Language::pop();
-
-		return $u;
-	}
-
-	static public function &getInstance()
-	{
-		static $instance = NULL;
-
-		if($instance === NULL) $instance = new self();
-
-		return $instance;
+		return isset(self::$route["javascript"]) ? self::$route["javascript"] : array();
 	}
 
 	static public function dump()
 	{
-		return array("path"=>self::$path,"routes"=>self::$route,"source"=>self::$source->dump());
+		return array(
+			"path"		=>	self::$path,
+			"current"	=>	self::$route,
+			"cache"		=>	self::$cache,
+			"url"		=>	self::$url,
+			"name"		=>	self::$name
+		);
 	}
 }

@@ -108,13 +108,6 @@ class Amslib_Plugin
 		//	If the API object is not valid, don't continue to process
 		if(!$this->api) return false;
 
-		//	Load the router, if one is present
-		$source = Amslib_Router::getObject("source:xml");
-		$this->routes = $source->load($this->filename);
-
-		//	Load all routes into the plugin, so you can identify which plugin is responsible for a route
-		foreach($this->routes as $name=>$route) $this->api->setRoute($name,$route);
-
 		$keys = array("object","value","translator","view","service","font","image","javascript","stylesheet");
 
 		foreach($keys as $k=>$v){
@@ -130,7 +123,7 @@ class Amslib_Plugin
 				//	NOTE: If a parameter is marked for export, don't process it.
 				if(isset($c["export"])) continue;
 
-				if(in_array($v,array("view","service"))){
+				if(in_array($v,array("view"))){
 					$params		=	array($name,$c["value"]);
 				}else if($v == "object" && isset($c["file"]	)){
 					$params		=	array($name,$c["file"]);
@@ -346,26 +339,27 @@ class Amslib_Plugin
 			 		else if($e) 	$this->transferData2($this,$p,$key,$v,$m);
 				}
 			}else if($key == "service"){
-				foreach(Amslib_Array::valid($block) as $iname=>$item)
+				foreach(Amslib_Array::valid($block) as $item)
 				{
-					$m	=	isset($item["move"]);
-					$i	=	isset($item["import"]) && $item["import"] != $this->getName() ? $item["import"] : false;
-			 		$e	=	isset($item["export"]) && $item["export"] != $this->getName() ? $item["export"] : false;
-			 		$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
+					//	import means take "name" route from "plugin" and install it under the "local_name" route
+					if($item["action"] == "import"){
+						$r = $item["service"] == "true"
+							? Amslib_Router::getService($item["name"],$item["plugin"])
+							: Amslib_Router::getRoute($item["name"],$item["plugin"]);
 
-			 		if(!$p) continue;
+						Amslib_Router::setRoute($item["rename"],$this->getName(),$r,false);
 
-			 		if(Amslib::getGET("debug") && $iname == "CS_Webcam_Save_Image"){
-			 			Amslib_FirePHP::output("service[$iname,{$this->getName()}]",array($i,$e,$p,$item));
-			 			Amslib_FirePHP::output("value",array($iname,isset($item["name"])?$item["name"]:$iname));
-			 			//	This is the correct thing to do, except the setConfig method cannot handle it yet
-			 			$v	=	array($iname,isset($item["name"])?$item["name"]:$iname);
-			 		}else{
-						$v	=	$iname;
-			 		}
-
-			 		if($i) 			$this->transferData2($p,$this,$key,$v,$m);
-			 		else if($e) 	$this->transferData2($this,$p,$key,$v,$m);
+						//	the following parameters are available
+						//
+						//	plugin, name, service, rename
+						//		plugin => src plugin to obtain service from
+						//		name => the service to obtain
+						//		service => whether it's a service or path route
+						//		rename => the local name to store the copy in
+					}else{
+						Amslib_FirePHP::output("export",$item);
+						//	Hmmm, I need a test case cause otherwise I won't know if this works
+					}
 				}
 			}
 		}
@@ -395,6 +389,9 @@ class Amslib_Plugin
 
 		if(!$xpath) return $this->isReady;
 
+		//	Load the router, if one is present
+		Amslib_Router::load($this->filename,"xml",$this->getName());
+
 		//	Search each path and store all the configuration data
 		foreach($this->search as $p){
 			$list = $xpath->query("//package/$p");
@@ -417,15 +414,21 @@ class Amslib_Plugin
 					}break;
 
 					case "service":{
-						$child = $xpath->query("name",$node);
+						$child = $xpath->query("import|export",$node);
 
 						foreach($child as $c){
-							$p = array_merge(
-								array("id"=>$c->nodeValue,"value"=>$c->nodeValue),
-								$this->getAttributeArray($c)
-							);
+							$p				=	$this->getAttributeArray($c);
+							$p["action"]	=	$c->nodeName;
+							$p["rename"]	=	$c->nodeValue;
 
-							$this->config[$node->nodeName][$p["id"]] = $p;
+							//	You require at minimum these two attributes, or cannot accept it
+							if(!isset($p["plugin"]) || !isset($p["name"])) continue;
+							//	If the rename attribute doesn't exist or is empty, replace it with the name attribute
+							if(!isset($p["rename"]) || !$p["rename"] || strlen($p["rename"])){
+								$p["rename"] = $p["name"];
+							}
+
+							$this->config[$node->nodeName][] = $p;
 						}
 					}break;
 

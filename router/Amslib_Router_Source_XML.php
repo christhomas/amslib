@@ -25,298 +25,107 @@
  *******************************************************************************/
 class Amslib_Router_Source_XML
 {
-	protected $xpath;
-	protected $routes;
-	protected $url;
-	
-	protected function findNodes($name,$parent)
+	protected $matches;
+
+	protected function toArray($node,$recursive=true)
 	{
-		if(!$parent || !$parent->hasChildNodes()) return array();
+		if(!$node || $node->count() == 0) return false;
 
-		$results = array();
+		$data			=	array();
+		$data["attr"]	=	$node->attr();
+		$data["tag"]	=	$node->tag();
+		$childNodes		=	$node->branch()->children();
 
-		foreach($parent->childNodes as $p){
-			if($p->nodeName == $name) $results[] = $p;
+		//	recurse to decode the child or merely store the child to process later
+		foreach($childNodes as $c){
+			$data["child"][] = $recursive
+				? $this->toArray($c,$recursive)
+				: array("tag"=>$c->tag(),"child"=>$c);
 		}
 
-		return $results;
+		//	If the node doesn't have children, obtain the text and store as it's value
+		if(count($childNodes) == 0) $data["value"] = $node->text();
+
+		return $data;
 	}
 
-	protected function decodeOptions($url,$route)
+	protected function processNode($node)
 	{
-		$params = trim(Amslib::lchop($url,$route),"/");
+		$path	=	$this->toArray($node);
+		$child	=	isset($path["child"]) ? $path["child"] : false;
 
-		return (!empty($params)) ? explode("/",$params) : array();
-	}
-	
-	protected function decodeIdList($path,$name)
-	{
-		$nodes = $this->findNodes($name,$path);
+		if(!$path) return false;
 
-		$list = array();
+		$data = array("javascript"=>array(),"stylesheet"=>array());
+		$data["name"] = $path["attr"]["name"];
+		$data["type"] = $path["tag"];
 
-		foreach($nodes as $p){
-			$id = $p->getAttribute("id");
-			
-			if(!$id) continue;
+		foreach(Amslib_Array::valid($child) as $c){
+			//	we array_merge the tag with the attributes here because they don't collide, plus if they do
+			//	it's probably because the attribute is to override the tag information anyway
+			$c = array_merge($c,$c["attr"]);
+			$t = $c["tag"];
+			//	remove unwanted indexes so we can assign $c directly if we want to
+			unset($c["attr"],$c["tag"]);
 
-			$list[$id] = $p->nodeValue;
-		}
+			switch($t){
+				case "src":{
+					$lang = isset($c["lang"]) ? $c["lang"] : "default";
+					$data[$t][$lang] = $c["value"];
 
-		return $list;
-	}
-	
-	protected function decodeArray($path,$name)
-	{
-		$nodes = $this->findNodes($name,$path);
+					//	if there is no default, create one, all routers require a "default source"
+					if(!isset($data[$t]["default"])) $data[$t]["default"] = $c["value"];
+				}break;
 
-		$list = array();
+				case "resource":{
+					$data[$t] = $c["value"];
+				}break;
 
-		foreach($nodes as $p){
-			$data = array();
-			foreach($p->attributes as $k=>$v) $data[$k] = $v->nodeValue;
-			$data["value"] = $p->nodeValue;
+				case "parameter":{
+					if(!isset($c["id"])) continue;
 
-			$list[] = $data;
-		}
+					$data["route_param"][$c["id"]] = $c["value"];
+				}break;
 
-		return $list;
-	}
+				case "handler":{
+					unset($c["value"]);
 
-	protected function decodeParameters($path)
-	{
-		return $this->decodeIdList($path,"parameter");
-	}
-	
-	protected function decodeStylesheets($path)
-	{
-		return $this->decodeArray($path,"stylesheet");
-	}
-	
-	protected function decodeJavascripts($path)
-	{
-		return $this->decodeArray($path,"javascript");
-	}
+					$data[$t][] = $c;
+				}break;
 
-	protected function decodeSources($path)
-	{
-		$nodes = $this->findNodes("src",$path);
+				case "stylesheet":
+				case "javascript":{
+					if(!isset($c["plugin"])) $c["plugin"] = "__CURRENT_PLUGIN__";
 
-		$list = array();
-
-		foreach($nodes as $s){
-			$version = $s->getAttribute("version");
-			if(!$version) $version = "default";
-
-			$lang = $s->getAttribute("lang");
-			if(!$lang) $lang = "all";
-
-			$list[$version][$lang] = $s->nodeValue;
-		}
-
-		return $list;
-	}
-
-	protected function decodeResource($path)
-	{
-		$resource = $this->findNodes("resource",$path);
-
-		return ($resource && count($resource) > 0) ? $resource[0]->nodeValue : false;
-	}
-
-	protected function addInversePath($name)
-	{
-		$route = $this->routes[$name];
-
-		foreach($route["src"] as $version=>$src){
-			foreach($src as $lang=>$url){
-				$this->url[$url] = array(
-					"version"		=>	$version,
-					"name"			=>	$name,
-					"resource"		=>	$route["resource"],
-					"route"			=>	$url,
-					"lang"			=>	$lang,
-					"parameters"	=>	$route["parameters"],
-					"stylesheets"	=>	$route["stylesheets"],
-					"javascripts"	=>	$route["javascripts"]
-				);
+					$data[$t][] = $c;
+				}break;
 			}
 		}
+
+		return $data;
 	}
 
-	public function __construct()
+	public function __construct($source)
 	{
-		$this->routes	=	array();
-		$this->url		=	array();
+		try{
+			$qp = Amslib_QueryPath::qp(Amslib_File::find(Amslib_Website::abs($source),true));
+			//	If there is no router, prevent this source from processing anything
+			$this->matches = $qp->find("router > *[name]");
+
+			if($this->matches->length) return $this;
+		}catch(Exception $e){}
+
+		$this->matches = false;
 	}
 
-	public function load($source)
+	public function getRoutes()
 	{
-		//	NOTE:	Added a call to absolute to fix finding the file, because in some cases,
-		//			the file cannot be found. But I am not sure of the side-effects (if any) of doing this
-		$path = Amslib_File::find(Amslib_File::absolute($source),true);
-
-		if(!is_file($path)){
-			//	TODO: Should move to using Amslib_Keystore("error") instead
-			print(get_class($this)."::load(), source = ".Amslib::var_dump($source,true));
-			print(get_class($this)."::load(), path = ".Amslib::var_dump($path,true));
-			die(get_class($this)."::load(), source file does not exist");
-		}
+		if(!$this->matches) return false;
 
 		$routes = array();
 
-		$document = new DOMDocument('1.0', 'UTF-8');
-		if($document->load($path)){
-			$this->xpath = new DOMXPath($document);
-
-			$paths = $this->xpath->query("//router/path | router/path");
-
-			foreach($paths as $p) $this->addPath($p,$routes);
-		}else{
-			//	TODO: Should move to using Amslib_Keystore("error") instead
-			print(get_class($this)."::load(), source[$source], path[$path] FAILED TO OPEN<br/>");
-		}
+		foreach($this->matches as $n) $routes[] = $this->processNode($n);
 
 		return $routes;
-	}
-
-	/**
-	 * method: addPath
-	 *
-	 * A method to add a path to the routes configured by the system, it finds and decodes
-	 * all the appropriate nodes in the xml to find all the configuration information
-	 *
-	 * parameters:
-	 * 	path	-	The XML Node in the amslib_router.xml called "path"
-	 *
-	 * notes:
-	 * 	This method is exposed as public because it is useful sometimes to store the xml configuration
-	 * 	in another document, but "graft" the route onto the main router configuration as if there
-	 * 	was no difference between them.  The administration panel project is a good example of this,
-	 * 	The admin_panel.xml file stores each plugin, plus the router configuration, in this case, we need
-	 * 	to decode that config, but we dont want to duplicate the decoding mechanism.
-	 *
-	 *  IMPORTANT:	Not entirely sure whether this is a good idea, or just exposing a security hole
-	 *
-	 *  TODO:		I actually need this for dynamically allowing widgets to insert their own routes by being installed
-	 *  			you can't expect the installer to know how to update the router xml, so they have to supply their own routes
-	 *  			and be loaded here, so instead, we need to SUPER VALIDATE everything that passes through this method.
-	 *  			Because it's ALL user defined and therefore bullshit, broken and mischevious :)
-	 *  NOTE:		actually, the router xml is defined by the user too, so it should be protected in any situation
-	 */
-	public function addPath($path,&$routes=NULL)
-	{
-		$path = array(
-			"name"			=>	$path->getAttribute("name"),
-			"src"			=>	$this->decodeSources($path),
-			"resource"		=>	$this->decodeResource($path),
-			"parameters"	=>	$this->decodeParameters($path),
-			"stylesheets"	=>	$this->decodeStylesheets($path),
-			"javascripts"	=>	$this->decodeJavascripts($path)
-		);
-
-		return $this->createPath($path,$routes);
-	}
-
-	public function createPath($path,&$routes=NULL)
-	{
-		$name = $path["name"];
-
-		$this->routes[$name] = $path;
-
-		$this->addInversePath($name);
-
-				//	NOTE:	This is so the route can be captured and returned
-		//			We need to do this so plugins can know whether a route belongs to them
-		//			or someone else, this is needed because sometimes we need to identify
-		//			which route is active, based on the url open
-		if(is_array($routes)) $routes[$name] = $this->routes[$name];
-
-		return $this->routes[$name];
-	}
-
-	//	NOTE: What does versions do again?
-	public function getURL($name,$version="default",$lang="all")
-	{
-		//	Protect against NULL values
-		if($version == NULL)	$version	=	"default";
-		if($lang == NULL)		$lang		=	"all";
-
-		if(	isset($this->routes[$name]) &&
-			isset($this->routes[$name]["src"][$version]))
-		{
-			$v = $this->routes[$name]["src"][$version];
-
-			if(!empty($v)){
-				return (isset($v[$lang])) ? $v[$lang] : current($v);
-			}
-		}
-
-		return false;
-	}
-
-	public function getRoute($name,$version="default",$lang="all")
-	{
-		//	Protect against NULL values
-		if($version == NULL)	$version	=	"default";
-		if($lang == NULL)		$lang		=	"all";
-
-		$route = false;
-
-		if(isset($this->routes[$name]["src"][$version])){
-			$v = $this->routes[$name]["src"][$version];
-
-			if(!empty($v)){
-				$url	=	(isset($v[$lang])) ? $v[$lang] : current($v);
-				$route	=	$this->url[$url];
-			}
-		}
-
-		return $route;
-	}
-
-	public function getRouteByURL($url)
-	{
-		$route = false;
-
-		if(isset($this->url[$url])){
-			//	The url exists exactly as it was requested, then do this shortcut
-			$route				=	$this->url[$url];
-			$route["options"]	=	array();
-		}else{
-			$key = array_keys($this->url);
-
-			//	Find the longest route that matches against the requested path
-			$match = "";
-			foreach($key as $k){
-				if(strpos($url,$k) !== false && strlen($k) > strlen($match)){
-					$match = $k;
-				}
-			}
-
-			//	Match is found, is a not zero length string and exists as a key in the url array
-			if($match && is_string($match) && strlen($match) && isset($this->url[$match])){
-				$route				=	$this->url[$match];
-				$route["options"]	=	$this->decodeOptions($url,$route["route"]);
-			}
-		}
-
-		return $route;
-	}
-
-	static public function &getInstance($source=NULL)
-	{
-		static $instance = NULL;
-
-		if($instance === NULL) $instance = new self();
-
-		if($instance && $source) $instance->load($source);
-
-		return $instance;
-	}
-
-	public function dump()
-	{
-		return array("routes"=>$this->routes,"url"=>$this->url);
 	}
 }

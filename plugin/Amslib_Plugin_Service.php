@@ -1,7 +1,7 @@
 <?php
 class Amslib_Plugin_Service
 {
-	const S3 = "amslib/service/validate";
+	const SR = "/amslib/service";
 	const VD = "validation/data";
 	const VE = "validation/errors";
 	const SD = "service/data";
@@ -17,9 +17,11 @@ class Amslib_Plugin_Service
 	protected $failureCB;
 	protected $isAJAX;
 	protected $data;
+	protected $session;
 
 	//	Used in the website to retrieve the session data after processing
 	static protected $serviceData = NULL;
+	static protected $showFeedback;
 
 	static protected function getData($plugin,$default,$key)
 	{
@@ -28,32 +30,36 @@ class Amslib_Plugin_Service
 			: $default;
 	}
 
+	protected function storeData($status)
+	{
+		$this->data[self::SC] = $status;
+		$this->session[] = $this->data;
+
+		$this->data = array();
+	}
+
 	protected function successPOST()
 	{
-		$this->data[self::SC] = true;
-		$this->setServiceData($this->data);
+		$_SESSION[self::SR] = $this->session;
 
 		Amslib_Website::redirect($this->getSuccessURL(),true);
 	}
 
 	protected function failurePOST()
 	{
-		$this->data[self::SC] = false;
-		$this->setServiceData($this->data);
+		$_SESSION[self::SR] = $this->session;
 
 		Amslib_Website::redirect($this->getFailureURL(),true);
 	}
 
 	protected function successAJAX()
 	{
-		$this->data[self::SC] = true;
-		Amslib_Website::outputJSON($this->data,true);
+		Amslib_Website::outputJSON($this->session,true);
 	}
 
 	protected function failureAJAX()
 	{
-		$this->data[self::SC] = false;
-		Amslib_Website::outputJSON($this->data,true);
+		Amslib_Website::outputJSON($this->session,true);
 	}
 
 	protected function sanitiseURL($url)
@@ -67,16 +73,17 @@ class Amslib_Plugin_Service
 	public function __construct()
 	{
 		//	FIXME: we are hardcoding a route "home" which might not exist, this could be a bad idea
-		$default_url		=	Amslib_Router::getURL("home");
-		$return_url			=	Amslib::rchop(Amslib::postParam("return_url",$default_url),"?");
+		$default_url	=	Amslib_Router::getURL("home");
+		$return_url		=	Amslib::rchop(Amslib::postParam("return_url",$default_url),"?");
 
 		$this->setSuccessURL(Amslib::rchop(Amslib::postParam("success_url",$return_url),"?"));
 		$this->setFailureURL(Amslib::rchop(Amslib::postParam("failure_url",$return_url),"?"));
 
 		//	Reset the service data and session structures
-		$this->data			=	array();
+		$this->data		=	array();
+		$this->session	=	array();
+		//	NOTE: this "violates" mixing key types, but it's simpler than not doing it, so I'll "tolerate" it for this situation
 		$this->showFeedback();
-		$this->setServiceData(false);
 		$this->setAjax(Amslib::postParam("return_ajax",false));
 	}
 
@@ -113,11 +120,6 @@ class Amslib_Plugin_Service
 		$this->setFailureURL($url);
 	}
 
-	public function setServiceData($data)
-	{
-		$_SESSION[self::S3] = $data;
-	}
-
 	public function setTemp($key,$data)
 	{
 		Amslib_Keystore::set($key,$data);
@@ -130,27 +132,55 @@ class Amslib_Plugin_Service
 
 	public function showFeedback()
 	{
-		$this->data[self::FB] = true;
+		$this->session[self::FB] = true;
 	}
 
 	public function hideFeedback()
 	{
-		$this->data[self::FB] = false;
+		$this->session[self::FB] = false;
 	}
 
-	public function execute($plugin,$method)
+	public function setHandler($plugin,$object,$method)
 	{
-		if(method_exists($plugin,$method)){
-			$cb = call_user_func(array($plugin,$method),$this,$_POST)
-				? $this->successCB
-				: $this->failureCB;
+		//	here we store handlers before we execute them.
+		/*
+		we need to call the method on the object from the plugin, sending service,source like normal
+		*/
+		$this->handler[] = array("plugin"=>$plugin,"object"=>$object,"method"=>$method);
+	}
 
-			call_user_func(array($this,$cb));
-
-			die("FAILURE[p:".get_class($plugin)."][m:$method]-> All services should terminate with redirect or json");
-		}else{
-			die("FAILURE[p:".get_class($plugin)."][m:$method]-> method did not exist, so could not be called");
+	public function runHandler($object,$method)
+	{
+		if(method_exists($object,$method)){
+			return call_user_func(array($object,$method),$this,$_POST);
 		}
+
+		//	NOTE:	this might seem a little harsh, but it's a critical error, your object doesn't have
+		//			the method you said it would, probably this means something in your code is broken
+		//			and you need to know about it and fix it.
+		die("FAILURE[p:".get_class($object)."][m:$method]-> method did not exist, so could not be called");
+	}
+
+	public function execute()
+	{
+		$state = false;
+
+		foreach($this->handler as $h){
+			//	TODO: investigate why h["plugin"] was returning false??
+			$state = $this->runHandler($h["object"],$h["method"]);
+
+			//	Store the result of the service and make ready to start a new service
+			$this->storeData($state);
+
+			//	OH NOES! we got brokens, have to stop here, cause something failed :(
+			if(!$state) break;
+		}
+
+		//	run the failure or success callback to send data back to the receiver
+		call_user_func(array($this,$state ? $this->successCB : $this->failureCB));
+
+		//	If you arrive here, something very seriously wrong has happened
+		die("FAILURE[p:".get_class($plugin)."][m:$method]-> All services should terminate with redirect or json");
 	}
 
 	public function setValidationData($plugin,$data)
@@ -191,12 +221,17 @@ class Amslib_Plugin_Service
 	*****************************************************************************/
 	static public function displayFeedback()
 	{
-		return self::$serviceData[self::FB];
+		if(self::$showFeedback){
+			self::$showFeedback = self::$serviceData[self::FB];
+			unset(self::$serviceData[self::FB]);
+		}
+
+		return self::$showFeedback;
 	}
 
 	static public function hasData($remove=true)
 	{
-		if(self::$serviceData === NULL) self::$serviceData = Amslib::sessionParam(self::S3,false,$remove);
+		if(self::$serviceData === NULL) self::$serviceData = Amslib::sessionParam(self::SR,false,$remove);
 
 		return self::$serviceData ? true : false;
 	}

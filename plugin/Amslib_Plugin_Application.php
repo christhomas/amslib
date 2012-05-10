@@ -56,14 +56,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		}
 	}
 
-	protected function initialisePlugin()
-	{
-		//	Load the router (need to initialise the router first, but execute it after everything is loaded from the plugins)
-		//	NOTE: This is done because of webservices right? perhaps there is a better way of doing this
-		$this->initRouter();
-
-		return true;
-	}
+	protected function initialisePlugin(){}
 
 	protected function finalisePlugin()
 	{
@@ -93,35 +86,31 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$plugins = Amslib_Plugin_Manager::listPlugins();
 		foreach($plugins as $name) Amslib_Plugin_Manager::getAPI($name)->autoloadResources();
 
-		$default = Amslib_Plugin_Manager::getAPI(Amslib_Router::getParameter("plugin"));
+		$default	=	Amslib_Router::getRouteParam("plugin");
+		$route		=	Amslib_Router::getRoute();
 
 		//	hack into place the adding or removing of all the stylesheets and javascripts
-		foreach(Amslib_Array::valid(Amslib_Router::getJavascripts()) as $j){
-			$plugin = isset($j["id"]) ? Amslib_Plugin_Manager::getAPI($j["id"]) : $default;
+		foreach(Amslib_Array::valid(Amslib_Router::getJavascript()) as $j){
+			$plugin = isset($j["plugin"]) ? str_replace("__CURRENT_PLUGIN__",$route["group"],$j["plugin"]) : $default;
+			//	datatables does't load because it's trying with the wrong plugin
+			$plugin = Amslib_Plugin_Manager::getAPI($plugin);
+
 			if($plugin){
 				if(isset($j["remove"])) Amslib_Resource::removeJavascript($j["value"]);
 				else $plugin->addJavascript($j["value"]);
 			}
 		}
 
-		foreach(Amslib_Array::valid(Amslib_Router::getStylesheets()) as $c){
-			$plugin = isset($c["id"]) ? Amslib_Plugin_Manager::getAPI($c["id"]) : $default;
+		foreach(Amslib_Array::valid(Amslib_Router::getStylesheet()) as $c){
+			$plugin = Amslib_Plugin_Manager::getAPI(isset($c["plugin"])
+				? str_replace("__CURRENT_PLUGIN__",$route["group"],$c["plugin"])
+				: $default);
+
 			if($plugin){
-				if(isset($c["remove"])) Amslib_Resource::removeStylesheet($c["value"]);
+				if(isset($c["remove"])) Amslib_Resource::removeJavascript($c["value"]);
 				else $plugin->addStylesheet($c["value"]);
 			}
 		}
-	}
-
-	protected function initRouter()
-	{
-		//	TODO:	need to get rid of the need to do this constructor
-		//	FIXME:	initialising the router object like this is fucking ugly....
-		//	TODO:	Why are we hardcoding the type of source to XML? what if we chose a DB source instead?
-		//	FIXME:	we have to coordinate code with executeRouter in order to make sure it still works
-		//			perhaps this should be done in one place only?
-		$r = Amslib_Router::getInstance();
-		Amslib_Router::setSource(Amslib_Router::getObject("source:xml"));
 	}
 
 	//	NOTE:	It might be worth noting that in the future, this functionality might be useless
@@ -132,15 +121,13 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	Initialise and execute the router
 		//	FIXME: allow the use of a database source for routes and not just XML
 		//	FIXME: we already load this in the Amslib_Plugin level, why are we doing it twice??
+		//	NOTE: also we upgraded the router system, so probably this is dead code as well
 		$source = !isset($this->config["router_source"])
 			? $this->filename
 			: str_replace("__SELF__",$this->filename,$this->config["router_source"]);
 
-		$xml = Amslib_Router::getObject("source:xml");
-		$xml->load($source);
-
-		Amslib_Router::setSource($xml);
-		Amslib_Router::execute();
+		Amslib_Router::load($source,"xml",$this->getName());
+		Amslib_Router::finalise();
 	}
 
 	public function __construct($name,$location)
@@ -168,6 +155,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->config($name,$location);
 		//	We need to set this before any plugins are touched, because other plugins will depend on it's knowledge
 		//	NOTE: It sounds like I'm setting up a system of "priming" certain values which are important, this might need expanding in the future
+		//	NOTE: I really hate the language setup, I think it's old and clunky, should think about replacing it
 		$this->setLanguageKey();
 		//	Now continue loading the plugin like normal
 		$this->transfer();
@@ -237,43 +225,47 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 					: array();
 	}
 
-	protected function runService()
+	public function runService()
 	{
-		$plugin		=	Amslib_Router::getParameter("plugin",false);
-		$handler	=	Amslib_Router::getParameter("service",false);
+		$route = Amslib_Router::getRoute();
 
-		if($plugin && $handler){
-			$api = Amslib_Plugin_Manager::getAPI($plugin);
+		if(!$route) die(__FILE__.": route is invalid");
 
-			if($api){
-				//	This method is called to setup any special data we might need
-				$this->api->setupService($plugin,$handler);
+		//	check all the route data is valid before using it
+		if(!isset($route["group"]) || !strlen($route["group"])) die(__FILE__.": route/group is invalid");
+		if(!isset($route["name"]) || !strlen($route["name"])) die(__FILE__.": route/name is invalid");
+		if(!isset($route["handler"]) || !is_array($route["handler"]) || empty($route["handler"])) die(__FILE__.": route/handler is invalid or empty");
 
-				$service = new Amslib_Plugin_Service();
-				$service->execute($api,$handler);
-			}
+		$this->api->setupService($route["group"],$route["name"]);
+
+		$service = new Amslib_Plugin_Service();
+		foreach(Amslib_Array::valid($route["handler"]) as $h){
+			$plugin	=	isset($h["plugin"]) ? $h["plugin"] : $route["group"];
+			$api	=	Amslib_Plugin_Manager::getAPI($plugin);
+			$object	=	isset($h["object"]) ? $api->getObject($h["object"],true) : $api;
+			$method	=	isset($h["method"]) ? $h["method"] : "missingServiceMethod";
+
+			$service->setHandler($plugin,$object,$method);
 		}
 
-		//	NOTE: if you arrive here, it's because the service didn't execute, all services terminate with die()
-		//	TODO: we are being a bit hasty in assuming that "home" route even exists?
-		//	NOTE: yes we are, but right now we have no alternative than assume it exists for now
-		Amslib_Website::redirect("home",true);
+		$service->execute();
 	}
 
 	/**
-	 * method: render
+	 * method: execute
 	 *
-	 * Render the application, or process a web service, depending on the resource
+	 * execute the application, or process a web service, depending on the type of the route
 	 *
 	 * NOTE:
-	 * 	-	by standard the "resource" === "Service" means a webservice
+	 * 	-	if the route has type='service' we are going to process a webservice
 	 * 	-	override this default behaviour by overriding this method with a customised version
 	 */
-	public function render()
+	public function execute()
 	{
-		if(Amslib_Router::getResource() === "Service") $this->runService();
+		//	If the url executed belonds to a web service, run the service code
+		if(Amslib_Router::isService()) $this->runService();
 
-		//	Render the default view, which is normally the layout if nothing is specified
+		//	If the url executed belongs to a page, render the default view of the application
 		print($this->api->render("default"));
 	}
 }

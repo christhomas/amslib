@@ -170,34 +170,6 @@ class Amslib_Plugin_Manager
 		return $api ? $api->getObject($id,$singleton) : false;
 	}
 
-	static public function setService($plugin,$id,$service)
-	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->setService($id,$service) : false;
-	}
-
-	static public function getService($plugin,$service)
-	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->getService($service) : false;
-	}
-
-	static public function getServiceURL($plugin,$service)
-	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->getServiceURL($service) : false;
-	}
-
-	static public function callService($plugin,$service)
-	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->callService($service) : false;
-	}
-
 	static public function setStylesheet($plugin,$id,$file,$conditional=NULL)
 	{
 		$api = self::getAPI($plugin);

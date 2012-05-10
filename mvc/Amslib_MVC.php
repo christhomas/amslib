@@ -29,7 +29,6 @@ class Amslib_MVC extends Amslib_Mixin
 	protected $object;
 	protected $view;
 	protected $images;
-	protected $service;
 	protected $stylesheet;
 	protected $javascript;
 	protected $translator;
@@ -54,7 +53,6 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		$this->object		=	array();
 		$this->view			=	array();
-		$this->service		=	array();
 		$this->stylesheet	=	array();
 		$this->javascript	=	array();
 		$this->translator	=	array();
@@ -109,11 +107,6 @@ class Amslib_MVC extends Amslib_Mixin
 		return $this->model;
 	}
 
-	public function setRoute($name,$route)
-	{
-		$this->routes[$name] = $route;
-	}
-
 	public function setPlugin($plugin)
 	{
 		$this->plugin = $plugin;
@@ -122,6 +115,11 @@ class Amslib_MVC extends Amslib_Mixin
 	public function getPlugin()
 	{
 		return $this->plugin;
+	}
+
+	/*public function setRoute($name,$route)
+	{
+		$this->routes[$name] = $route;
 	}
 
 	public function getRoute($name=NULL)
@@ -136,7 +134,7 @@ class Amslib_MVC extends Amslib_Mixin
 	public function hasRoute($name)
 	{
 		return (isset($this->routes[$name])) ? true : false;
-	}
+	}*/
 
 	public function setValue($name,$value)
 	{
@@ -260,34 +258,6 @@ class Amslib_MVC extends Amslib_Mixin
 		return array_keys($this->view);
 	}
 
-	public function setService($id,$name)
-	{
-		if(!$id || strlen($id) == 0) $id = $name;
-
-		$this->service[$id] = $name;
-
-		//	NOTE: yes, this is a hack, but I'm not sure how else to do it.
-		//	Sometimes javascript needs the urls, so we push it as a "value" here
-		$this->setValue("service:$id",Amslib_Router::getURL("Service:$id"));
-	}
-
-	public function getService($id,$url=false)
-	{
-		if($url) return $this->getValue("service:$id");
-
-		return (isset($this->service[$id])) ? $this->service[$id] : NULL;
-	}
-
-	public function listServices()
-	{
-		return array_keys($this->service);
-	}
-
-	public function getServiceURL($id)
-	{
-		return $this->getValue("service:$id");
-	}
-
 	public function setTranslator($name,$translator)
 	{
 		$this->translator[$name] = $translator;
@@ -296,16 +266,6 @@ class Amslib_MVC extends Amslib_Mixin
 	public function getTranslator($name)
 	{
 		return (isset($this->translator[$name])) ? $this->translator[$name] : reset($this->translator);
-	}
-
-	public function callService($id)
-	{
-		$service = $this->getService($id);
-		$service = Amslib_File::absolute($service);
-
-		$parameters["api"] = $this;
-
-		return Amslib::requireFile($service,$parameters);
 	}
 
 	public function setStylesheet($id,$file,$conditional=NULL,$autoload=NULL,$media=NULL)
@@ -482,16 +442,6 @@ class Amslib_MVC extends Amslib_Mixin
 		return $output ? "<div class='__amslib_mvc_values'>$output</div>" : "";
 	}
 
-	public function copyService($src,$id,$dest=NULL)
-	{
-		if($dest === NULL) $dest = $id;
-
-		//	FIXME:	previously this used the old setService, but now it's upgraded
-		//			to use the code from setService2, perhaps this code won't work anymore.
-		$api = Amslib_Plugin_Manager::getAPI($src);
-		$this->setService($dest,$api->getService($id));
-	}
-
 	public function setImage($id,$file)
 	{
 		$this->images[$id] = $file;
@@ -515,6 +465,26 @@ class Amslib_MVC extends Amslib_Mixin
 
 		//	Step 3: return false, image was not found
 		return false;
+	}
+
+	public function getRoute($name=NULL)
+	{
+		return Amslib_Router::getRoute($name,$this->getName());
+	}
+
+	public function getURL($name=NULL)
+	{
+		return Amslib_Router::getURL($name,$this->getName());
+	}
+
+	public function getService($name)
+	{
+		return Amslib_Router::getService($name,$this->getName());
+	}
+
+	public function getServiceURL($name)
+	{
+		return Amslib_Router::getServiceURL($name,$this->getName());
 	}
 
 	//	FIXME: we have to formalise what this slot code is supposed to do, opposed to what the view system already does.
