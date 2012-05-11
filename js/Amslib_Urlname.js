@@ -43,7 +43,7 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 		this.dest.val(this.slugify(this.dest.val()));
 	},
 	
-	slugify: function()
+	slugify: function(string)
 	{
 		var po = this;
 
@@ -51,10 +51,11 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 		
 		this.trimcb = setTimeout(function(){
 			po.dest.val(Amslib_String.trim(po.dest.val(),' -_.'));
+			po.dest.blur();
 			po.trimcb = false;
 		},2000);
 		
-		return Amslib_String.slugify(this.src.val());
+		return Amslib_String.slugify(string);
 	}
 });
 
