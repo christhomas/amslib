@@ -56,7 +56,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			{
 				if(!mysql_select_db($details["database"],$c)){
 					$this->disconnect();
-					$this->setError("Failed to open database requested '{$details["database"]}'");
+					$this->setDBError("Failed to open database requested '{$details["database"]}'");
 				}else{
 					$this->connection = $c;
 
@@ -64,9 +64,9 @@ class Amslib_Database_MySQL extends Amslib_Database
 					$this->setEncoding(isset($details["encoding"]) ? $details["encoding"] : "utf8");
 				}
 			// Replace these errors with Amslib_Translator codes instead (language translation)
-			}else $this->setError("Failed to connect to database: {$details["database"]}<br/>");
+			}else $this->setDBError("Failed to connect to database: {$details["database"]}<br/>");
 		// Replace these errors with Amslib_Translator codes instead (language translation)
-		}else $this->setError("Failed to find the database connection details, check this information<br/>");
+		}else $this->setDBError("Failed to find the database connection details, check this information<br/>");
 	}
 
 	/******************************************************************************
@@ -284,6 +284,29 @@ QUERY;
 		return $this->getRealResultCount();
 	}
 
+	public function setDBErrors($query)
+	{
+		$this->errors[] = array(
+			"db_failure"		=>	true,
+			"db_query"			=>	$query,
+			"db_error"			=>	mysql_error($this->connection),
+			"db_error_num"		=>	mysql_errno($this->connection),
+			"db_last_insert"	=>	$this->lastInsertId,
+			"db_insert_id"		=>	mysql_insert_id($this->connection),
+			"db_location"		=>	Amslib_Array::filterKey(array_slice(debug_backtrace(),0,5),array("file","line")),
+		);
+	}
+
+	public function setDBError($error)
+	{
+		$this->errors[] = $error;
+	}
+
+	public function getDBErrors()
+	{
+		return $this->errors;
+	}
+
 	/**
 	 * 	method:	disconnect
 	 *
@@ -326,7 +349,7 @@ QUERY;
 		$this->setDebugOutput($query);
 
 		if(!$result){
-			$this->setErrors($query);
+			$this->setDBErrors($query);
 			return false;
 		}
 
@@ -353,7 +376,7 @@ QUERY;
 			return $this->getResults($numResults,$this->selectResult,$optimise);
 		}
 
-		$this->setErrors($query);
+		$this->setDBErrors($query);
 
 		return false;
 	}
@@ -443,7 +466,7 @@ QUERY;
 
 		if(!$result){
 			$this->lastInsertId = false;
-			$this->setErrors($query);
+			$this->setDBErrors($query);
 			return false;
 		}
 
@@ -465,7 +488,7 @@ QUERY;
 		$this->setDebugOutput($query);
 
 		if(!$result){
-			$this->setErrors($query);
+			$this->setDBErrors($query);
 			return false;
 		}
 
@@ -485,33 +508,10 @@ QUERY;
 		$this->setDebugOutput($query);
 
 		if(!$result){
-			$this->setErrors($query);
+			$this->setDBErrors($query);
 			return false;
 		}
 
 		return mysql_affected_rows($this->connection) >= 0;
-	}
-
-	public function setErrors($query)
-	{
-		$this->errors[] = array(
-			"db_failure"		=>	true,
-			"db_query"			=>	$query,
-			"db_error"			=>	mysql_error($this->connection),
-			"db_error_num"		=>	mysql_errno($this->connection),
-			"db_last_insert"	=>	$this->lastInsertId,
-			"db_insert_id"		=>	mysql_insert_id($this->connection),
-			"db_location"		=>	Amslib_Array::filterKey(array_slice(debug_backtrace(),0,5),array("file","line")),
-		);
-	}
-
-	public function setError($error)
-	{
-		$this->errors[] = $error;
-	}
-
-	public function getErrors()
-	{
-		return $this->errors;
 	}
 }
