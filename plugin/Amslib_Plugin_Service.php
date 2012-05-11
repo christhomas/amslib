@@ -6,9 +6,9 @@ class Amslib_Plugin_Service
 	const VE = "validation/errors";
 	const SD = "service/data";
 	const SE = "service/errors";
-	const FB = "service/feedback";
 	const DB = "database/errors";
-	const PL = "plugins";
+	const HD = "handlers";
+	const FB = "feedback";
 	const SC = "success";
 
 	protected $successURL;
@@ -20,20 +20,25 @@ class Amslib_Plugin_Service
 	protected $session;
 
 	//	Used in the website to retrieve the session data after processing
-	static protected $serviceData = NULL;
-	static protected $showFeedback;
+	static protected $serviceData	=	NULL;
+	static protected $handler		=	NULL;
 
 	static protected function getData($plugin,$default,$key)
 	{
-		return isset(self::$serviceData[$plugin]) && isset(self::$serviceData[$plugin][$key])
-			? Amslib_Array::valid(self::$serviceData[$plugin][$key])
+		if(!self::$handler){
+			trigger_error("** AMSLIB / ".__METHOD__." ** self::$handler was invalid");
+			return NULL;
+		}
+
+		return isset(self::$handler[$plugin]) && isset(self::$handler[$plugin][$key])
+			? Amslib_Array::valid(self::$handler[$plugin][$key])
 			: $default;
 	}
 
 	protected function storeData($status)
 	{
-		$this->data[self::SC] = $status;
-		$this->session[] = $this->data;
+		$this->session[self::SC]	= $status;
+		$this->session[self::HD][]	= $this->data;
 
 		$this->data = array();
 	}
@@ -81,7 +86,7 @@ class Amslib_Plugin_Service
 
 		//	Reset the service data and session structures
 		$this->data		=	array();
-		$this->session	=	array();
+		$this->session	=	array(self::HD=>array());
 		//	NOTE: this "violates" mixing key types, but it's simpler than not doing it, so I'll "tolerate" it for this situation
 		$this->showFeedback();
 		$this->setAjax(Amslib::postParam("return_ajax",false));
@@ -186,13 +191,11 @@ class Amslib_Plugin_Service
 	public function setValidationData($plugin,$data)
 	{
 		$this->data[$plugin][self::VD] = $data;
-		$this->data[self::PL][$plugin] = true;
 	}
 
 	public function setValidationErrors($plugin,$errors)
 	{
 		$this->data[$plugin][self::VE] = $errors;
-		$this->data[self::PL][$plugin] = true;
 	}
 
 	//	NOTE: Be careful with this method, you could be pushing secret data
@@ -200,20 +203,17 @@ class Amslib_Plugin_Service
 	{
 		if(!empty($errors)){
 			$this->data[$plugin][self::DB] = $errors;
-			$this->data[self::PL][$plugin] = true;
 		}
 	}
 
 	public function setData($plugin,$name,$value)
 	{
 		$this->data[$plugin][self::SD][$name] = $value;
-		$this->data[self::PL][$plugin] = true;
 	}
 
 	public function setError($plugin,$name,$value)
 	{
 		$this->data[$plugin][self::SE][$name] = $value;
-		$this->data[self::PL][$plugin] = true;
 	}
 
 	/*****************************************************************************
@@ -221,12 +221,7 @@ class Amslib_Plugin_Service
 	*****************************************************************************/
 	static public function displayFeedback()
 	{
-		if(self::$showFeedback){
-			self::$showFeedback = self::$serviceData[self::FB];
-			unset(self::$serviceData[self::FB]);
-		}
-
-		return self::$showFeedback;
+		return self::$serviceData[self::FB];
 	}
 
 	static public function hasData($remove=true)
@@ -241,6 +236,18 @@ class Amslib_Plugin_Service
 		return self::$serviceData;
 	}
 
+	static public function countHandler()
+	{
+		return count(self::$serviceData[self::HD]);
+	}
+
+	static public function processHandler($id)
+	{
+		self::$handler = isset(self::$serviceData[self::HD][$id]) ? self::$serviceData[self::HD][$id] : NULL;
+
+		return array_keys(Amslib_Array::valid(self::$handler));
+	}
+
 	static public function getStatus()
 	{
 		$success = isset(self::$serviceData[self::SC]) ? self::$serviceData[self::SC] : false;
@@ -248,11 +255,6 @@ class Amslib_Plugin_Service
 		unset(self::$serviceData[self::SC]);
 
 		return $success;
-	}
-
-	static public function listPlugins()
-	{
-		return isset(self::$serviceData[self::PL]) ? array_keys(self::$serviceData[self::PL]) : array();
 	}
 
 	static public function getValidationData($plugin,$default=false)
