@@ -20,7 +20,7 @@ var Amslib_String = my.Amslib_String = my.Class(
 		removeDiacritics: function(text)
 		{
 			for(var i=0; i<Amslib_String.map.length; i++) {
-				text = text.replace(Amslib_String.map[i].letters, Amslib_String.map[i].base);
+				text = text.replace(Amslib_String.map[i].letters, Amslib_String.map[i].base) || text;
 			}
 			
 			return text;
@@ -33,14 +33,17 @@ var Amslib_String = my.Amslib_String = my.Class(
 		 
 		ltrim: function(str, chars)
 		{
-			chars = chars || "\\s";
-			return str.replace(new RegExp("^[" + chars + "]+", "g"), "");
+			return str.replace(new RegExp("^[" + (chars || "\\s") + "]+", "g"), "");
 		},
 		 
 		rtrim: function(str, chars)
 		{
-			chars = chars || "\\s";
-			return str.replace(new RegExp("[" + chars + "]+$", "g"), "");
+			return str.replace(new RegExp("[" + (chars || "\\s") + "]+$", "g"), "");
+		},
+		
+		replace: function(str, chars, replace)
+		{
+			return str.replace(new RegExp(chars, "g"), replace || "");
 		}
 	}
 });

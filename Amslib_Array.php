@@ -179,7 +179,7 @@ class Amslib_Array
 	//	This method allows me to batch fix missing keys in arrays in broken code quickly and easily.
 	static public function missingKeys($array,$key,$value=NULL)
 	{
-		if(is_string($key)) $index = array($key);
+		if(is_string($key)) $key = array($key);
 
 		foreach($key as $k) if(!isset($array[$k])) $array[$k] = $value;
 
@@ -250,6 +250,8 @@ class Amslib_Array
 	static public function stripSlashesMulti($array,$key=NULL)
 	{
 		if(is_string($key)) $key = array($key);
+
+		$array = self::valid($array);
 
 		foreach($array as &$element){
 			if(!$key){

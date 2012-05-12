@@ -1308,6 +1308,7 @@ html: '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.o
 			this.editor.attr("tabindex", $(element).attr("tabindex"));
 
 			this.element = $("<div/>").addClass("wysiwyg");
+			this.element.attr("class",this.element.attr("class")+" "+$(element).attr("class"));
 
 			if (!this.options.iFrameClass) {
 				this.element.css({

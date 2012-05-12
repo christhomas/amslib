@@ -226,7 +226,7 @@ class Amslib_Plugin_Service
 
 	static public function hasData($remove=true)
 	{
-		if(self::$serviceData === NULL) self::$serviceData = Amslib::sessionParam(self::SR,false,$remove);
+		if(self::$serviceData === NULL || $remove == false) self::$serviceData = Amslib::sessionParam(self::SR,false,$remove);
 
 		return self::$serviceData ? true : false;
 	}

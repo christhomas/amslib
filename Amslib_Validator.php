@@ -809,7 +809,13 @@ class Amslib_Validator
 	 */
 	protected function __date($name,$value,$required,$options)
 	{
-		$success = strtotime($value);
+		if(isset($options["format"]) && $options["format"] = "d/m/Y"){
+			//	this idea hasn't been fully tested yet and sometimes fails
+			//sscanf($value,"%d/%d/%d")
+			$success = strtotime($value);
+		}else{
+			$success = strtotime($value);
+		}
 
 		if($required && $success || !$required){
 			$this->setValid($name,$value);

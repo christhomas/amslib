@@ -31,7 +31,7 @@ var Amslib = my.Amslib = my.Class({
 		
 		firebug: function()
 		{
-			if(console && console.log) console.log.apply(null,arguments);
+			if(console && console.log) console.log.apply(console,arguments);
 		},
 		
 		//	DEPRECATED getPath, use Amslib.locate() instead, it does exactly what I was supposed to do here

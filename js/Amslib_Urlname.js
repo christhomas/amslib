@@ -3,6 +3,7 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 	src:	false,
 	dest:	false,
 	trimcb: false,
+	base:	false,
 	
 	STATIC: {
 		autoload: function()
@@ -11,15 +12,24 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 				var src = $(this).find(".amslib_urlname_src");
 				var dst = $(this).find(".amslib_urlname_dst");
 				
-				if(src && dst) $(this).data("amslib_urlname",new Amslib_Urlname(src,dst));
+				if(src.length == 0 || dst.length ==0) return;
+				
+				for(k in src){
+					$(this).data("amslib_urlname",new Amslib_Urlname(this,src[k],dst[k]));
+				}
 			});
 		}
 	},
 	
-	constructor: function(src,dest)
+	constructor: function(parent,src,dest)
 	{
-		this.src	=	src;
-		this.dest	=	dest;
+		this.parent	=	$(parent);
+		this.src	=	$(src);
+		this.dest	=	$(dest);
+		
+		//	find the attribute on either the src node or parent node, or fail
+		this.base = this.src.hasAttr("amslib-urlname-basestring")
+			? this.src : (this.parent.hasAttr("amslib-urlname-basestring") ? this.parent : false);
 		
 		this.src.keyup($.proxy(this,"updateFromSrc"));
 		this.src.change($.proxy(this,"updateFromSrc"));
@@ -35,12 +45,20 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 	
 	updateFromSrc: function()
 	{
-		this.dest.val(this.slugify(this.src.val()));
+		this.update(this.src.val());
 	},
 	
 	updateFromDest: function()
 	{
-		this.dest.val(this.slugify(this.dest.val()));
+		this.update(this.dest.val());
+	},
+	
+	update: function(string)
+	{
+		//	get the string from the data attribute, or return an empty string or an empty string if attribute never existed
+		var baseString = this.base ? (this.base.data("amslib-urlname-basestring") || "") : "";
+		
+		this.dest.val(this.slugify(baseString+string));
 	},
 	
 	slugify: function(string)

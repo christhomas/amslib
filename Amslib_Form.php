@@ -5,10 +5,13 @@ class Amslib_Form
 	{
 		$options = array();
 
-		foreach(Amslib_Array::valid($array) as $item){
+		foreach(Amslib_Array::valid($array) as $arrayKey=>$item){
 			if(is_array($item)){
 				$text	=	$indexText && isset($item[$indexText])		?	$item[$indexText]	:	"";
 				$value	=	$indexValue && isset($item[$indexValue])	?	$item[$indexValue]	:	"";
+			}else if(is_string($item)){
+				$text	=	$item;
+				$value	=	$arrayKey;
 			}else{
 				$text = $value = $item;
 			}

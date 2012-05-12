@@ -31,7 +31,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 	protected function setDebugOutput($query)
 	{
-		if($this->debug){
+		if($this->debug && $this->errorState){
 			Amslib_Keystore::set("db_query[{$this->seq}][".microtime(true)."]",Amslib::var_dump($query,true));
 		}
 	}
@@ -439,12 +439,13 @@ QUERY;
 		$values = $this->select($query,$numResults,$optimise);
 
 		if($numResults == 1 && $optimise){
-			$values = array_shift($values);
 			return isset($values[$field]) ? $values[$field] : NULL;
 		}
 
 		//	TODO: This hasn't been tested yet, it might not return exactly what I want
 		if($numResults != 1 && !$optimise){
+			//	FIXME? Why am I optimising the array, when optimise is being tested for false?
+			//	NOTE: I think the reason I never found this issue before was I always using 1,true for numResults/optimise
 			return Amslib_Array::pluck($values,$field);
 		}
 
