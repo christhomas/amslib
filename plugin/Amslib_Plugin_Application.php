@@ -205,12 +205,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	static public function setLanguage($name,$langCode)
 	{
-		Amslib::insertSessionParam(self::$langKey."/$name",$langCode);
+		Amslib::insertSessionParam(Amslib_File::reduceSlashes(self::$langKey."/$name"),$langCode);
 	}
 
 	static public function getLanguage($name)
 	{
-		return Amslib::sessionParam(self::$langKey."/$name");
+		return Amslib::sessionParam(Amslib_File::reduceSlashes(self::$langKey."/$name"));
 	}
 
 	static public function registerLanguage($name,$langCode)

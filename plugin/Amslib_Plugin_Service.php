@@ -18,6 +18,8 @@ class Amslib_Plugin_Service
 	protected $isAJAX;
 	protected $data;
 	protected $session;
+	protected $source;
+	protected $handlerList;
 
 	//	Used in the website to retrieve the session data after processing
 	static protected $serviceData	=	NULL;
@@ -147,17 +149,14 @@ class Amslib_Plugin_Service
 
 	public function setHandler($plugin,$object,$method)
 	{
-		//	here we store handlers before we execute them.
-		/*
-		we need to call the method on the object from the plugin, sending service,source like normal
-		*/
-		$this->handler[] = array("plugin"=>$plugin,"object"=>$object,"method"=>$method);
+		//	here we store handlers loaded from the service path before we execute them.
+		$this->handlerList[] = array("plugin"=>$plugin,"object"=>$object,"method"=>$method);
 	}
 
 	public function runHandler($object,$method)
 	{
 		if(method_exists($object,$method)){
-			return call_user_func(array($object,$method),$this,$_POST);
+			return call_user_func(array($object,$method),$this,$this->source);
 		}
 
 		//	NOTE:	this might seem a little harsh, but it's a critical error, your object doesn't have
@@ -166,13 +165,60 @@ class Amslib_Plugin_Service
 		die("FAILURE[p:".get_class($object)."][m:$method]-> method did not exist, so could not be called");
 	}
 
+	//	NOTE: the code is ready however the system is not
+	//	NOTE: the problem is that service handlers are not programmed to understand the extra attributes
+	//	NOTE: the other problem is that service import/export definitions are not programmed as well
+	//	NOTE: so the idea will have to stay here until I can dedicate time to implementing those.
+	public function runManagedHandler($rules,$object,$method)
+	{
+		//	This method needs to exist on the object to retrieve the validation rules
+		$getRules = array($object,"getValidationRules");
+
+		//	continue only if the method is available to call
+		if(!method_exists($getRules)) return false;
+
+		$rules = call_user_func($getRules,$rules);
+
+		//	continue only if the rules are valid and a non-empty array
+		if(!$rules || !is_array($rules) || empty($rules)) return false;
+
+		//	Now lets execute the handler!
+		$v = new Amslib_Validator($this->source);
+		$v->addRules($rules);
+
+		$s = $v->execute();
+		$d = $v->getValidData();
+
+		if($s){
+			//	Set the source to the valid data
+			$this->source = $d;
+
+			//	Here we call the handler, this is a SUCCESS only handler, although the data might fail, the data was valid
+			return $this->runHandler($object,$method);
+		}else{
+			$service->setValidationData($object,$d);
+			$service->setValidationErrors($object,$v->getErrors());
+		}
+
+		$service->setDatabaseErrors($object,$object->getDBErrors());
+
+		return false;
+	}
+
 	public function execute()
 	{
 		$state = false;
 
-		foreach($this->handler as $h){
+		foreach($this->handlerList as $h){
 			//	TODO: investigate why h["plugin"] was returning false??
-			$state = $this->runHandler($h["object"],$h["method"]);
+
+			//	Set the source to what was requested, or default in any other case to the $_POST array
+			$this->source = isset($h["source"]) && $h["source"] == "get" ? $_GET : $_POST;
+
+			//	Run the handler, either in managed or unmanaged mode
+			$state = isset($h["managed"])
+				? $this->runManagedHandler($h["managed"],$h["object"],$h["method"])
+				: $this->runHandler($h["object"],$h["method"]);
 
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($state);
@@ -190,17 +236,26 @@ class Amslib_Plugin_Service
 
 	public function setValidationData($plugin,$data)
 	{
+		if(is_object($plugin)) $plugin = get_class($plugin);
+		if(!is_string($plugin) || !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
+
 		$this->data[$plugin][self::VD] = $data;
 	}
 
 	public function setValidationErrors($plugin,$errors)
 	{
+		if(is_object($plugin)) $plugin = get_class($plugin);
+		if(!is_string($plugin) || !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
+
 		$this->data[$plugin][self::VE] = $errors;
 	}
 
 	//	NOTE: Be careful with this method, you could be pushing secret data
 	public function setDatabaseErrors($plugin,$errors)
 	{
+		if(is_object($plugin)) $plugin = get_class($plugin);
+		if(!is_string($plugin) || !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
+
 		if(!empty($errors)){
 			$this->data[$plugin][self::DB] = $errors;
 		}
@@ -208,11 +263,17 @@ class Amslib_Plugin_Service
 
 	public function setData($plugin,$name,$value)
 	{
+		if(is_object($plugin)) $plugin = get_class($plugin);
+		if(!is_string($plugin) || !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
+
 		$this->data[$plugin][self::SD][$name] = $value;
 	}
 
 	public function setError($plugin,$name,$value)
 	{
+		if(is_object($plugin)) $plugin = get_class($plugin);
+		if(!is_string($plugin) || !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
+
 		$this->data[$plugin][self::SE][$name] = $value;
 	}
 

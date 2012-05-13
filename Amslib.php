@@ -217,10 +217,24 @@ class Amslib
 		return Amslib_Array::filterKey($bt,Amslib_Array::filterType($args,"is_string"));
 	}
 
-	static public function exceptionBacktrace($string=false)
+	static public function getStackTrace($index=NULL,$string=NULL,$var_dump=NULL)
 	{
 		$e = new Exception();
-		return $string ? $e->getTraceAsString() : $e->getTrace();
+		$t = false;
+
+		$t = $string ? $e->getTraceAsString() : $e->getTrace();
+
+		if($index && is_numeric($index)){
+			$t = $string
+				? current(array_slice(explode("\n",$t),$index,1))
+				: ($var_dump ? Amslib::var_dump($t[$index]) : $t[$index]);
+
+			if($string || $var_dump){
+				$t = htmlspecialchars($t,ENT_QUOTES,"UTF-8");
+			}
+		}
+
+		return $t;
 	}
 
 	//	NOTE: This method has weird parameter names to make it harder to clash with extract()'d parameters from the $__p parameter
@@ -305,6 +319,40 @@ class Amslib
 
 		//	register a special autoloader that will include correctly all of the amslib classes
 		spl_autoload_register("amslib_autoload");
+	}
+
+	static public function shutdown($url)
+	{
+		function amslib_shutdown($url)
+		{
+			$error = array(
+					"vars"	=>	get_defined_vars(),
+					"fcns"	=>	get_defined_functions(),
+					"clss"	=>	get_declared_classes(),
+					"get"	=>	$_GET,
+					"post"	=>	$_POST,
+					"err"	=>	false
+			);
+
+			//	All the errors I believe to be fatal/non-recoverable/you're fucked/your code is shit
+			$fatal = array(E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,E_COMPILE_WARNING,E_STRICT);
+
+			if (($e = @error_get_last()) && @is_array($e) && @in_array($e["type"],$fatal)) {
+				$error["err"] = array(
+					"code"	=>	isset($e['type']) ? $e['type'] : 0,
+					"msg"	=>	isset($e['message']) ? $e['message'] : '',
+					"file"	=>	isset($e['file']) ? $e['file'] : '',
+					"line"	=>	isset($e['line']) ? $e['line'] : '',
+				);
+
+				//	TODO: write the file to a logging directory
+
+				$_SESSION["/amslib/php/fatal_error/"] = $error;
+				header("Location: $url");
+			}
+		}
+
+		register_shutdown_function("amslib_shutdown",$url);
 	}
 
 	static public function findKey($key,$source)
@@ -533,4 +581,9 @@ class Amslib
 	static public function filesParam($key,$default=NULL,$erase=false){ return self::getFILES($key,$default,$erase);	}
 	static public function cookieParam($key,$default=NULL){ return self::getCOOKIE($key,$default); }
 	static public function sessionParam($key,$default=NULL,$erase=false){ return self::getSESSION($key,$default,$erase); }
+
+	//	DEPRECATED FUNCTION
+	static public function exceptionBacktrace($string=false){
+		return self::getStackTrace(NULL,true);
+	}
 }

@@ -105,9 +105,17 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 	public function escape($value)
 	{
-		return $this->getConnectionStatus()
-			? mysql_real_escape_string($value)
-			: die("unsafe string escape: database not connected, backtrace: ".Amslib::var_dump(Amslib::backtrace(1,3,"file","line"),true));
+		if(!is_string($value)){
+			trigger_error(__METHOD__.": value is not a string ".Amslib::var_dump($value)." in the function ".Amslib::getStackTrace(2,true));
+		}
+
+		if(!$this->getConnectionStatus()){
+			print("unsafe string escape: database not connected<br/>\n");
+			trigger_error(__METHOD__.": backtrace".array_slice(Amslib::getStackTrace(),2,4))."<br/>\n";
+			die("DYING");
+		}
+
+		return @mysql_real_escape_string($value);
 	}
 
 	public function unescape($results,$keys="")
