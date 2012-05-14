@@ -28,7 +28,7 @@ class Amslib_Plugin_Service
 	static protected function getData($plugin,$default,$key)
 	{
 		if(!self::$handler){
-			trigger_error("** AMSLIB / ".__METHOD__." ** self::$handler was invalid");
+			trigger_error("** AMSLIB / ".__METHOD__." ** ".self::$handler." was invalid");
 			return NULL;
 		}
 
