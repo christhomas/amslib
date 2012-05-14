@@ -18,8 +18,8 @@ class Amslib_File
 			//	FIXME: If the docroot and dirname(__FILE__) have a different base path, this code will break
 			/*	NOTE:	this situation happened with dinahosting, although without an example of
 						how to get around it, I dont think I can do it now, but this code is causing
-						problems, so I´m going to delete it, it´ll always be in the GIT repo if I
-						want to look at it again and I´ll just return to doing everything the normal
+						problems, so I am going to delete it, it will always be in the GIT repo if I
+						want to look at it again and I will just return to doing everything the normal
 						way until the point in time where I need to do this again */
 
 			$docroot	=	self::reduceSlashes($dr);
