@@ -262,6 +262,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 */
 	public function execute()
 	{
+		Amslib_firePHP::output('francois'.__CLASS__.'::'.__METHOD__,Amslib_Router::isService());
 		//	If the url executed belonds to a web service, run the service code
 		if(Amslib_Router::isService()) $this->runService();
 

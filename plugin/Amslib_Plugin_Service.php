@@ -237,7 +237,7 @@ class Amslib_Plugin_Service
 	public function setValidationData($plugin,$data)
 	{
 		if(is_object($plugin)) $plugin = get_class($plugin);
-		if(!is_string($plugin) || !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
+		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
 
 		$this->data[$plugin][self::VD] = $data;
 	}
@@ -245,7 +245,7 @@ class Amslib_Plugin_Service
 	public function setValidationErrors($plugin,$errors)
 	{
 		if(is_object($plugin)) $plugin = get_class($plugin);
-		if(!is_string($plugin) || !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
+		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
 
 		$this->data[$plugin][self::VE] = $errors;
 	}
@@ -254,7 +254,7 @@ class Amslib_Plugin_Service
 	public function setDatabaseErrors($plugin,$errors)
 	{
 		if(is_object($plugin)) $plugin = get_class($plugin);
-		if(!is_string($plugin) || !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
+		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
 
 		if(!empty($errors)){
 			$this->data[$plugin][self::DB] = $errors;
@@ -264,17 +264,19 @@ class Amslib_Plugin_Service
 	public function setData($plugin,$name,$value)
 	{
 		if(is_object($plugin)) $plugin = get_class($plugin);
-		if(!is_string($plugin) || !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
+		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
 
 		$this->data[$plugin][self::SD][$name] = $value;
 	}
 
 	public function setError($plugin,$name,$value)
 	{
+		
 		if(is_object($plugin)) $plugin = get_class($plugin);
-		if(!is_string($plugin) || !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
+		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
 
 		$this->data[$plugin][self::SE][$name] = $value;
+
 	}
 
 	/*****************************************************************************
