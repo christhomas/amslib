@@ -152,8 +152,6 @@ class Amslib
 		// remove unwanted characters
 		$text = preg_replace("~[^-\w{$remove}]+~", '', $text);
 
-		if (empty($text)) return 'n-a';
-
 		return $text;
 	}
 
@@ -549,6 +547,7 @@ class Amslib
 	}
 
 	static public function arrayParam(&$source,$key,$default=NULL,$erase=false)
+
 	{
 		if(is_array($key)){
 			$k = array_shift(array_intersect($key,array_keys($source)));
