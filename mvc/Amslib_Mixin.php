@@ -18,13 +18,17 @@ class Amslib_Mixin
 		return false;
 	}
 
-	public function addMixin($object,$filter=array())
+	//	TODO: implement reject+accept, now its just the bare idea
+	public function addMixin($object,$reject=array(),$accept=array())
 	{
-		if(!is_array($filter)) $filter = array();
+		if(!is_array($reject)) $reject = array();
+		if(!is_array($accept)) $accept = array();
 
+		//	FIXME:	this has never happened, but if "object" is not an instance, then does that mean it'll
+		//			all it's functions statically??? that could mean don't work like expected......
 		if(is_object($object) || class_exists($object)){
-			$filter = array_merge(
-				$filter,
+			$reject = array_merge(
+				$reject,
 				get_class_methods("Amslib_Mixin"),
 				array("__construct","getInstance")
 			);
@@ -34,7 +38,7 @@ class Amslib_Mixin
 
 			foreach($list as $m){
 				//	Block some requested methods and then some obvious methods from being added to the mixin
-				if(!empty($filter) && in_array($m,$filter)) continue;
+				if(!empty($reject) && in_array($m,$reject)) continue;
 
 				$this->mixin[$m] = $object;
 			}

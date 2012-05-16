@@ -47,7 +47,8 @@ class Amslib_Database
 	protected $debug		=	false;
 	protected $errorState	=	true;
 
-	protected $selectResult = false;
+	protected $selectResult			= false;
+	protected $storeSearchResult	= false;
 
 	protected $seq = 0;
 
@@ -125,6 +126,18 @@ class Amslib_Database
 	public function getSearchResultHandle()
 	{
 		return $this->selectResult;
+	}
+
+	public function storeSearchHandle()
+	{
+		$this->storeSearchResult = $this->selectResult;
+	}
+
+	public function restoreSearchHandle()
+	{
+		if($this->storeSearchResult) $this->selectResult = $this->storeSearchResult;
+
+		$this->storeSearchResult = false;
 	}
 
 	/**

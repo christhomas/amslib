@@ -472,6 +472,11 @@ class Amslib_MVC extends Amslib_Mixin
 		return Amslib_Router::getRoute($name,$this->getName());
 	}
 
+	public function getFullURL()
+	{
+		return Amslib_Router::getPath();
+	}
+
 	public function getURL($name=NULL)
 	{
 		return Amslib_Router::getURL($name,$this->getName());
