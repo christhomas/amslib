@@ -12,10 +12,13 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 				var src = $(this).find(".amslib_urlname_src");
 				var dst = $(this).find(".amslib_urlname_dst");
 				
-				if(src.length == 0 || dst.length ==0) return;
+				if(src.length == 0 || dst.length == 0) return;
 				
-				for(k in src){
-					$(this).data("amslib_urlname",new Amslib_Urlname(this,src[k],dst[k]));
+				for(var a=0;a<src.length;a++){
+					s = src.eq(a);
+					d = dst.eq(a);
+					
+					if(s && d) $(this).data("amslib_urlname",new Amslib_Urlname(this,s,d));
 				}
 			});
 		}
@@ -28,8 +31,8 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 		this.dest	=	$(dest);
 		
 		//	find the attribute on either the src node or parent node, or fail
-		this.base = this.src.hasAttr("amslib-urlname-basestring")
-			? this.src : (this.parent.hasAttr("amslib-urlname-basestring") ? this.parent : false);
+		this.base = this.src.is("[amslib-urlname-basestring]")
+			? this.src : (this.parent.is("[amslib-urlname-basestring]") ? this.parent : false);
 		
 		this.src.keyup($.proxy(this,"updateFromSrc"));
 		this.src.change($.proxy(this,"updateFromSrc"));
