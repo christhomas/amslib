@@ -28,7 +28,7 @@ class Amslib_Plugin_Service
 	static protected function getData($plugin,$default,$key)
 	{
 		if(!self::$handler){
-			trigger_error("** AMSLIB / ".__METHOD__." ** self::$handler was invalid");
+			trigger_error("** AMSLIB / ".__METHOD__." ** ".self::$handler." was invalid");
 			return NULL;
 		}
 
@@ -234,49 +234,38 @@ class Amslib_Plugin_Service
 		die("FAILURE[p:".get_class($plugin)."][m:$method]-> All services should terminate with redirect or json");
 	}
 
-	public function setValidationData($plugin,$data)
+	public function pluginToName($plugin)
 	{
 		if(is_object($plugin)) $plugin = get_class($plugin);
 		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
 
-		$this->data[$plugin][self::VD] = $data;
+		return $plugin;
+	}
+
+	public function setValidationData($plugin,$data)
+	{
+		$this->data[$this->pluginToName($plugin)][self::VD] = $data;
 	}
 
 	public function setValidationErrors($plugin,$errors)
 	{
-		if(is_object($plugin)) $plugin = get_class($plugin);
-		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
-
-		$this->data[$plugin][self::VE] = $errors;
+		$this->data[$this->pluginToName($plugin)][self::VE] = $errors;
 	}
 
 	//	NOTE: Be careful with this method, you could be pushing secret data
 	public function setDatabaseErrors($plugin,$errors)
 	{
-		if(is_object($plugin)) $plugin = get_class($plugin);
-		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
-
-		if(!empty($errors)){
-			$this->data[$plugin][self::DB] = $errors;
-		}
+		if(!empty($errors)) $this->data[$this->pluginToName($plugin)][self::DB] = $errors;
 	}
 
 	public function setData($plugin,$name,$value)
 	{
-		if(is_object($plugin)) $plugin = get_class($plugin);
-		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
-
-		$this->data[$plugin][self::SD][$name] = $value;
+		$this->data[$this->pluginToName($plugin)][self::SD][$name] = $value;
 	}
 
 	public function setError($plugin,$name,$value)
 	{
-		
-		if(is_object($plugin)) $plugin = get_class($plugin);
-		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
-
-		$this->data[$plugin][self::SE][$name] = $value;
-
+		$this->data[$this->pluginToName($plugin)][self::SE][$name] = $value;
 	}
 
 	/*****************************************************************************
