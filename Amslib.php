@@ -332,6 +332,8 @@ class Amslib
 					"err"	=>	false
 			);
 
+			//	E_PARSE: you cannot catch parse errors without a prepend file.
+
 			//	All the errors I believe to be fatal/non-recoverable/you're fucked/your code is shit
 			$fatal = array(E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,E_COMPILE_WARNING,E_STRICT);
 
