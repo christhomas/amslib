@@ -14,12 +14,17 @@ var Amslib_String = my.Amslib_String = my.Class(
 		
 		slugify: function(text)
 		{
-			return Amslib_String.removeDiacritics(text).replace(/[^a-zA-Z0-9\.\-\_]+/ig,'-').toLowerCase();
+			if(text){
+				text = Amslib_String.removeDiacritics(text);
+				text = text.replace(/[^a-zA-Z0-9\.\-\_]+/ig,'-').toLowerCase();
+			}
+			
+			return text;
 		},
 		
 		removeDiacritics: function(text)
 		{
-			for(var i=0; i<Amslib_String.map.length; i++) {
+			if(text) for(var i=0; i<Amslib_String.map.length; i++) {
 				text = text.replace(Amslib_String.map[i].letters, Amslib_String.map[i].base) || text;
 			}
 			
