@@ -709,10 +709,11 @@ class Amslib_Plugin
 
 	static public function expandPath($path)
 	{
-		$path	=	str_replace("__WEBSITE__",			self::$path["website"],	$path);
-		$path	=	str_replace("__ADMIN__",			self::$path["admin"],	$path);
-		$path	=	str_replace("__AMSLIB__",			self::$path["amslib"],	$path);
-		$path	=	str_replace("__DOCROOT__",			self::$path["docroot"],	$path);
+		$path	=	str_replace("__ROUTER_BASE__",		Amslib_Router::getBase(),	$path);
+		$path	=	str_replace("__WEBSITE__",			self::$path["website"],		$path);
+		$path	=	str_replace("__ADMIN__",			self::$path["admin"],		$path);
+		$path	=	str_replace("__AMSLIB__",			self::$path["amslib"],		$path);
+		$path	=	str_replace("__DOCROOT__",			self::$path["docroot"],		$path);
 
 		return Amslib_File::reduceSlashes($path);
 	}
