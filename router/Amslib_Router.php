@@ -123,7 +123,12 @@ class Amslib_Router
 
 		if(strlen($result) && isset(self::$url[$result])){
 			$r = self::$url[$result];
-			$r["url_param"] = Amslib_Array::valid(explode("/",trim(str_replace($result,"",$url),"/ ")));
+
+			//	Don't replace anything if the string is / because it'll nuke all the separators
+			$replace	=	$result == "/" ? "" : $result;
+			$result		=	str_replace($replace,"",$url);
+
+			$r["url_param"] = Amslib_Array::valid(explode("/",trim($result,"/ ")));
 
 			return $r;
 		}
