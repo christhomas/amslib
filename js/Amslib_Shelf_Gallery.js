@@ -142,7 +142,7 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		if(this.mutex) return;
 		this.mutex = true;
 		
-		var end = $(this.items.get(f))
+		var end = $(this.items.get(f));
 		var left = end.position().left;
 		var time = (f-s)*this.options.clickTimeout;
 
