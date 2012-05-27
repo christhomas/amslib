@@ -187,7 +187,6 @@ var Amslib = my.Amslib = my.Class({
 	initValues: function()
 	{
 		var mvc	=	this.parent.find(".__amslib_mvc_values");
-		var po	=	this;
 		
 		this.__value		= $("<div/>");
 		this.__services		= $("<div/>");
@@ -227,7 +226,7 @@ var Amslib = my.Amslib = my.Class({
 		if(live){
 			this.__events.live(event,callback);
 		}else{
-			this.__events.bind(event,callback)
+			this.__events.bind(event,callback);
 		}
 	},
 	
