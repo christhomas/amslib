@@ -428,9 +428,10 @@ class Amslib
 			);
 
 			//	E_PARSE: you cannot catch parse errors without a prepend file.
+			//	NOTE: I think this has to do with being a different apache request stage
 
 			//	All the errors I believe to be fatal/non-recoverable/you're fucked/your code is shit
-			$fatal = array(E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,E_COMPILE_WARNING,E_STRICT);
+			$fatal = array(E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,E_COMPILE_WARNING,E_STRICT,E_USER_ERROR);
 
 			if (($e = @error_get_last()) && @is_array($e) && @in_array($e["type"],$fatal)) {
 				$error["err"] = array(
@@ -442,7 +443,12 @@ class Amslib
 
 				//	TODO: write the file to a logging directory
 
-				$_SESSION["/amslib/php/fatal_error/"] = $error;
+				$_SESSION["/amslib/php/fatal_error/"]	= $error;
+
+				//	NOTE: perhaps this won't work, but I'm trying to get the trace to the origin of where the error occured
+				$exception = new Exception();
+				$_SESSION["/amslib/php/backtrace/"]		= $exception->getTrace();
+
 				header("Location: $url");
 			}
 		}
