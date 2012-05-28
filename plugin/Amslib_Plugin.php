@@ -709,7 +709,11 @@ class Amslib_Plugin
 
 	static public function expandPath($path)
 	{
-		$path	=	str_replace("__ROUTER_BASE__",		Amslib_Router::getBase(),	$path);
+		//	Loop through all the paths given in the htaccess file and attempt to replace them
+		foreach(Amslib_Router::listPaths() as $key){
+			$path = str_replace($key, Amslib_Router::getPath($key), $path);
+		}
+
 		$path	=	str_replace("__WEBSITE__",			self::$path["website"],		$path);
 		$path	=	str_replace("__ADMIN__",			self::$path["admin"],		$path);
 		$path	=	str_replace("__AMSLIB__",			self::$path["amslib"],		$path);

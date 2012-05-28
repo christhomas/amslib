@@ -37,31 +37,56 @@ class Amslib_Router
 		"javascript"	=>	array()
 	);
 
-	static protected $base	=	false;
-	static protected $path	=	false;
-	static protected $route	=	false;
-	static protected $cache	=	array();
-	static protected $name	=	array();
-	static protected $url	=	array();
+	static protected $base		=	false;
+	static protected $path		=	false;
+	static protected $pathList	=	array();
+	static protected $route		=	false;
+	static protected $cache		=	array();
+	static protected $name		=	array();
+	static protected $url		=	array();
 
 	static public function initialise()
 	{
-		//	Setup the router path in order to obtain the correct path information
-		self::$base	=	$_SERVER["AMSLIB_WEBSITE"];
-		self::$path	=	Amslib::lchop($_SERVER["REQUEST_URI"],self::$base);
-		self::$path	=	Amslib_File::reduceSlashes("/".self::$path."/");;
+		foreach($_SERVER as $k=>$v){
+			if(strpos($k,"AMSLIB_ROUTER") !== false) self::$pathList[$k] = $v;
+		}
+
+		self::$path	=	NULL;
+		self::$base	=	self::getPath("__AMSLIB_ROUTER_ACTIVE__");
+
+		if(self::$base){
+			//	Obtain the path within the website, without the website base
+			//	we use this to calculate the path inside the website, not relative to the document root
+			self::$path	=	Amslib::lchop($_SERVER["REQUEST_URI"],self::$base);
+			self::$path	=	Amslib_File::reduceSlashes("/".self::$path."/");
+		}
 	}
 
 	static public function finalise()
 	{
-		if(!self::$path) return false;
+		if(!self::$path){
+			trigger_error("There was no __AMSLIB_ROUTER_ACTIVE__ definition found, check your .htaccess file",E_USER_ERROR);
+			return false;
+		}
 
 		self::$route = self::getRouteByURL(self::$path);
 	}
 
-	static public function getPath()
+	static public function getPath($key=NULL)
 	{
-		return self::$path;
+		if($key == NULL || !isset(self::$pathList[$key])) return self::$path;
+
+		return self::$pathList[$key];
+	}
+
+	static public function setPath($key,$value)
+	{
+		self::$pathList[$key] = $value;
+	}
+
+	static public function listPaths()
+	{
+		return array_keys(self::$pathList);
 	}
 
 	static public function getBase()

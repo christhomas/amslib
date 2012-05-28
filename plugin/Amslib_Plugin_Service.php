@@ -127,11 +127,14 @@ class Amslib_Plugin_Service
 		$this->setFailureURL($url);
 	}
 
+	//	TODO: stop using the keystore, we don't need to use it
+	//	NOTE: since we already have an object, we can store this locally
 	public function setTemp($key,$data)
 	{
 		Amslib_Keystore::set($key,$data);
 	}
 
+	//	NOTE: is there any benefit to storing temps in a globally accessible location?
 	public function getTemp($key)
 	{
 		return Amslib_Keystore::get($key);
@@ -304,7 +307,8 @@ class Amslib_Plugin_Service
 	{
 		$success = isset(self::$serviceData[self::SC]) ? self::$serviceData[self::SC] : false;
 
-		unset(self::$serviceData[self::SC]);
+		//	WTF: why do I remove this? commenting it out for now
+		//unset(self::$serviceData[self::SC]);
 
 		return $success;
 	}
