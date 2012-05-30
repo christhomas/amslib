@@ -566,7 +566,7 @@ class Amslib_Plugin
 				if($plugin){
 					$this->config["requires"][$node->nodeValue] = $plugin;
 				}else{
-					Amslib_FirePHP::output("AP::config(), child plugin config failed",array($node->nodeValue,$location));
+					//Amslib_FirePHP::output("AP::config(), child plugin config failed",array($node->nodeValue,$location));
 				}
 			}
 		}
