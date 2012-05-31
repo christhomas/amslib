@@ -1,6 +1,11 @@
 <?php
 class Amslib_Array
 {
+	/*
+	 * if you return nothing from a method, then catch that into a parameter
+	 * pass that parameter into this function, you'll freeze the browser
+	 * well done francisco :)
+	 */
 	static public function valid($array=NULL)
 	{
 		//	Invalid values return an empty array
