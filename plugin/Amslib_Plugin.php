@@ -121,8 +121,8 @@ class Amslib_Plugin
 			$func		=	array($this->api,$callback);
 
 			foreach($this->config[$v] as $name=>$c){
-				//	NOTE: If a parameter is marked for export, don't process it.
-				if(isset($c["export"])) continue;
+				//	NOTE: If a parameter is marked for export and has move attribute, don't process it.
+				if(isset($c["export"]) && isset($c["move"])) continue;
 
 				if(in_array($v,array("view"))){
 					$params		=	array($name,$c["value"]);
@@ -566,7 +566,7 @@ class Amslib_Plugin
 				if($plugin){
 					$this->config["requires"][$node->nodeValue] = $plugin;
 				}else{
-					Amslib_FirePHP::output("AP::config(), child plugin config failed",array($node->nodeValue,$location));
+					//Amslib_FirePHP::output("AP::config(), child plugin config failed",array($node->nodeValue,$location));
 				}
 			}
 		}

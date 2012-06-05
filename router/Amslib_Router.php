@@ -112,6 +112,11 @@ class Amslib_Router
 		return true;
 	}
 
+	static public function getLanguage()
+	{
+		return isset(self::$route["lang"]) ? self::$route["lang"] : false;
+	}
+
 	static public function setLanguage($lang)
 	{
 		//	TODO: write how this would work
@@ -137,28 +142,33 @@ class Amslib_Router
 	{
 		if($url == NULL) return self::$route;
 
-		$result = "";
+		$select	=	"";
+		$route	=	self::$emptyRoute;
+
+		//	Obtain the route which is responsible for the url
 		foreach(self::$url as $u=>$d){
-			if($url != "/" && strpos($url,$u) !== false && strlen($u) >= strlen($result)){
-				$result = $u;
+			if($url != "/" && strpos($url,$u) !== false && strlen($u) >= strlen($select)){
+				$select = $u;
 			}else if($url == $u){
-				$result = $u;
+				$select = $u;
 			}
 		}
 
-		if(strlen($result) && isset(self::$url[$result])){
-			$r = self::$url[$result];
+		//	explode the remaining parts of the url into url parameters
+		if(strlen($select) && isset(self::$url[$select])){
+			$route = self::$url[$select];
 
 			//	Don't replace anything if the string is / because it'll nuke all the separators
-			$replace	=	$result == "/" ? "" : $result;
-			$result		=	str_replace($replace,"",$url);
+			$replace	=	$select == "/" ? "" : $select;
+			$params		=	str_replace($replace,"",$url);
 
-			$r["url_param"] = Amslib_Array::valid(explode("/",trim($result,"/ ")));
-
-			return $r;
+			$route["url_param"] = Amslib_Array::valid(explode("/",trim($params,"/ ")));
 		}
 
-		return self::$emptyRoute;
+		//	set the language based on the current route and selected url
+		$route["lang"] = array_search($select,$route["src"]);
+
+		return $route;
 	}
 
 	static public function getRoute($name=NULL,$group=NULL)
