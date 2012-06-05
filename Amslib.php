@@ -665,6 +665,16 @@ class Amslib
 		return $default;
 	}
 
+	//	I wonder if this is true, or it's bullshit? could ask someone to verify whether they think it's safe or not
+	//	TODO: I was told to replace this with a call to crypt()
+	static public function getRandomCode($input=NULL)
+	{
+		$salt = '!@£$%^&*()QIDNFOEWBVIEWM:"|}{>|:|()**^$%(&&£NARVOEIUMCWP*£(£%@%*(}|:<>>fka9fgbqpeg';
+		$input = $input !== NULL ? self::var_dump($input,true) : "";
+
+		return sha1($salt.$input.time().mt_rand(0,21387132987).$salt);
+	}
+
 	//	IDEAS FOR A NEW(ER) SIMPLIFIED API
 	static public function getSuper($type,$key,$default=NULL,$erase=false){}
 	static public function setSuper($type,$key,$value){}
