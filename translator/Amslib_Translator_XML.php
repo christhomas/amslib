@@ -17,6 +17,8 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 
 	public function setError($error)
 	{
+		trigger_error(__METHOD__.": $error");
+
 		$this->error[] = $error;
 	}
 
@@ -53,7 +55,7 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 			if(!file_exists($this->database)) $this->database = Amslib_File::find($this->database,true);
 
 			if(!file_exists($this->database)){
-				$this->setError(get_class($this)."::load(), LOCATION: '$this->location', DATABASE '$this->database' for LANGUAGE '$this->language' DOES NOT EXIST<br/>");
+				$this->setError("LOCATION: '$this->location', DATABASE '$this->database' for LANGUAGE '$this->language' DOES NOT EXIST<br/>");
 			}
 
 			$this->xdoc = new DOMDocument("1.0","UTF-8");
@@ -63,7 +65,7 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 
 				return true;
 			}else{
-				$this->setError(get_class($this)."::load(), LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
+				$this->setError("LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
 			}
 		}
 
@@ -72,6 +74,11 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 
 	public function translate($k,$l=NULL)
 	{
+		if(!$this->xpath){
+			trigger_error(__METHOD__.": xpath was invalid, db[$this->database], loc[$this->location], lang[$this->language]");
+			return $k;
+		}
+
 		$v = parent::translate($k,$l);
 
 		if($v == $k){

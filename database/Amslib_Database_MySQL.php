@@ -105,6 +105,8 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 	public function escape($value)
 	{
+		if($value === NULL) return $value;
+
 		if(!is_string($value)){
 			trigger_error(__METHOD__.": value is not a string ".Amslib::var_dump($value)." in the function ".Amslib::getStackTrace(2,true));
 		}
