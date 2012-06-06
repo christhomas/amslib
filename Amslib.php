@@ -402,6 +402,7 @@ class Amslib
 			if(strpos($c,"Amslib_QueryPath")	!== false)	$c	=	"util/$c";
 			if(strpos($c,"PiwikTracker")		!== false)	$c	=	"util/$c";
 			if(strpos($c,"phpQuery")			!== false)	$c	=	"util/$c/$c";
+			if(strpos($c,"QRcode")			!== false)	$c	=	"util/phpqrcode/phpqrcode";
 
 			if($c == "FirePHP")		$c	=	"util/FirePHPCore/$c.class";
 
