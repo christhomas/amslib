@@ -257,7 +257,7 @@ class AesCtr extends Aes {
    * @param nBits      number of bits to be used in the key (128, 192, or 256)
    * @return           decrypted text
    */
-  public static function decrypt($ciphertext, $password, $nBits) {
+  public static function decrypt($ciphertext, $password, $nBits=256) {
     $blockSize = 16;  // block size fixed at 16 bytes / 128 bits (Nb=4) for AES
     if (!($nBits==128 || $nBits==192 || $nBits==256)) return '';  // standard allows 128/192/256 bit keys
     $ciphertext = base64_decode($ciphertext);
