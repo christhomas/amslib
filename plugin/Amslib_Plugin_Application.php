@@ -129,8 +129,10 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		Amslib_Router::load($source,"xml",$this->getName());
 		Amslib_Router::finalise();
 
-		self::setLanguage("content", Amslib_Router::getLanguage());
-		self::setLanguage("website", Amslib_Router::getLanguage());
+		if(Amslib_Router::isService() == false){
+			self::setLanguage("content", Amslib_Router::getLanguage());
+			self::setLanguage("website", Amslib_Router::getLanguage());
+		}
 	}
 
 	public function __construct($name,$location)
@@ -208,14 +210,18 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	static public function setLanguage($name,$langCode)
 	{
-		if(in_array($langCode,self::getLanguageList($name))){
+		if(is_string($name) && strlen($name) && in_array($langCode,self::getLanguageList($name))){
 			Amslib::insertSessionParam(Amslib_File::reduceSlashes(self::$langKey."/$name"),$langCode);
 		}
 	}
 
 	static public function getLanguage($name)
 	{
-		return Amslib::sessionParam(Amslib_File::reduceSlashes(self::$langKey."/$name"));
+		if(is_string($name) && strlen($name)){
+			return Amslib::sessionParam(Amslib_File::reduceSlashes(self::$langKey."/$name"));
+		}
+
+		return false;
 	}
 
 	static public function registerLanguage($name,$langCode)
