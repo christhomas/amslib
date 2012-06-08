@@ -486,7 +486,7 @@ QUERY;
 		return $this->lastInsertId;
 	}
 
-	public function update($query)
+	public function update($query,$allow_zero=true)
 	{
 		$this->seq++;
 
@@ -503,7 +503,9 @@ QUERY;
 			return false;
 		}
 
-		return mysql_affected_rows($this->connection) >= 0;
+		$affected = mysql_affected_rows($this->connection);
+
+		return $allow_zero ? $affected >= 0 : $affected > 0;
 	}
 
 	public function delete($query)
