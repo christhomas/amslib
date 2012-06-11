@@ -43,6 +43,7 @@ class Amslib_MVC extends Amslib_Mixin
 
 	//	To allow views/html segments to be slotted into an existing layout
 	//	extending their capabilities with customised functionality
+	//	PROBABLY DEPRECATED
 	protected $slots;
 
 	protected $name;
@@ -116,25 +117,6 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		return $this->plugin;
 	}
-
-	/*public function setRoute($name,$route)
-	{
-		$this->routes[$name] = $route;
-	}
-
-	public function getRoute($name=NULL)
-	{
-		//	NOTE:	If name was not passed/NULL return entire routes array,
-		//			otherwise return the route, but if it doesnt exist, return false
-		if($name === NULL) return $this->routes;
-
-		return isset($this->routes[$name]) ? $this->routes[$name] : false;
-	}
-
-	public function hasRoute($name)
-	{
-		return (isset($this->routes[$name])) ? true : false;
-	}*/
 
 	public function setValue($name,$value)
 	{
