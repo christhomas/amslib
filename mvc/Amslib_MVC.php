@@ -125,13 +125,14 @@ class Amslib_MVC extends Amslib_Mixin
 		}
 	}
 
-	public function getValue($name,$default=NULL)
+	public function getValue($name=NULL,$default=NULL)
 	{
 		if(is_string($name) && strlen($name)){
 			return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name,$default);
 		}
 
-		return $default;
+		//	if no value was requested and default is null, return ALL the values
+		return $name == NULL && $default == NULL ? $this->value : $default;
 	}
 
 	public function setFields($name,$value)
