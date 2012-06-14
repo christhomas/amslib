@@ -313,9 +313,9 @@ class Amslib_Plugin_Service
 		return $success;
 	}
 
-	static public function getValidationData($plugin,$default=false)
+	static public function getValidationData($plugin,$default=array())
 	{
-		return self::getData($plugin,$default,self::VD);
+		return Amslib_Array::valid(self::getData($plugin,$default,self::VD));
 	}
 
 	static public function getValidationErrors($plugin,$default=false)
