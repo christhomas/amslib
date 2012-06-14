@@ -109,8 +109,11 @@ class Amslib_Router_Source_XML
 	{
 		try{
 			$qp = Amslib_QueryPath::qp(Amslib_File::find(Amslib_Website::abs($source),true));
+
 			//	If there is no router, prevent this source from processing anything
-			$this->matches = $qp->find("router > *[name]");
+			$this->matches = $qp->branch()->find("router > *[name]");
+			//	Find any callback, if one is provided
+			Amslib_Router::setCallback($qp->find("router")->attr("callback"));
 
 			if($this->matches->length) return $this;
 		}catch(Exception $e){}

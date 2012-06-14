@@ -44,6 +44,37 @@ class Amslib_Router
 	static protected $cache		=	array();
 	static protected $name		=	array();
 	static protected $url		=	array();
+	static protected $callback	=	array();
+
+	static protected function finaliseRoute($route,$select,$url)
+	{
+		//	Don't replace anything if the string is / because it'll nuke all the separators
+		$replace	=	$select == "/" ? "" : $select;
+		$params		=	str_replace($replace,"",$url);
+
+		$route["url_param"] = Amslib_Array::valid(explode("/",trim($params,"/ ")));
+
+		//	set the language based on the current route and selected url
+		$route["lang"] = array_search($select,$route["src"]);
+		$route["src_selected"] = $select;
+
+		return $route;
+	}
+
+	static protected function findLongest($list,$url)
+	{
+		$select = "";
+
+		foreach(self::$url as $u=>$d){
+			if($url != "/" && strpos($url,$u) !== false && strlen($u) >= strlen($select)){
+				$select = $u;
+			}else if($url == $u){
+				$select = $u;
+			}
+		}
+
+		return $select;
+	}
 
 	static public function initialise()
 	{
@@ -69,7 +100,39 @@ class Amslib_Router
 			return false;
 		}
 
-		self::$route = self::getRouteByURL(self::$path);
+		self::$route = false;
+
+		$static = self::getRouteByURL(self::$path);
+		//	Find all the matches and store all the route names here
+		$matches = array($static);
+		foreach(self::$callback as $c){
+			$data = call_user_func($c,self::$path);
+			$route = false;
+
+			if($data) $route = self::getRoute($data["name"]);
+
+			if($route){
+				unset($route["src"]);
+				$route+=$data;
+				$matches[] = $route;
+			}
+		}
+		$matches = array_filter($matches);
+
+		self::$route = self::$emptyRoute;
+
+		if(count($matches) == 1){
+			//	set the only result
+			self::$route = current($matches);
+		}else{
+			$selected = false;
+
+			//	search for the longest match in the array
+			foreach(Amslib_Array::valid($matches) as $r){
+				Amslib_FirePHP::output("match",$r);
+				self::$route = $r;
+			}
+		}
 	}
 
 	static public function getPath($key=NULL)
@@ -98,8 +161,8 @@ class Amslib_Router
 	{
 		try{
 			switch($type){
-				case "xml":{		$s = new Amslib_Router_Source_XML($source);			}break;
-				case "database":{	$s = new Amslib_Router_Source_Database($source);	}break;
+				case "xml":{		$s = new Amslib_Router_Source_XML($source);		}break;
+				case "database":{	$s = new Amslib_Router_Source_Database($source);}break;
 			}
 
 			foreach(Amslib_Array::valid($s->getRoutes()) as $route){
@@ -110,6 +173,13 @@ class Amslib_Router
 		}
 
 		return true;
+	}
+
+	static public function setCallback($callback)
+	{
+		if($callback !== NULL && strlen($callback) && !in_array($callback,self::$callback)){
+			self::$callback[] = $callback;
+		}
 	}
 
 	static public function getLanguage()
@@ -142,31 +212,16 @@ class Amslib_Router
 	{
 		if($url == NULL) return self::$route;
 
-		$select	=	"";
-		$route	=	self::$emptyRoute;
+		$route	=	false;
 
 		//	Obtain the route which is responsible for the url
-		foreach(self::$url as $u=>$d){
-			if($url != "/" && strpos($url,$u) !== false && strlen($u) >= strlen($select)){
-				$select = $u;
-			}else if($url == $u){
-				$select = $u;
-			}
-		}
+		$select = self::findLongest(self::$url,$url);
 
 		//	explode the remaining parts of the url into url parameters
 		if(strlen($select) && isset(self::$url[$select])){
 			$route = self::$url[$select];
-
-			//	Don't replace anything if the string is / because it'll nuke all the separators
-			$replace	=	$select == "/" ? "" : $select;
-			$params		=	str_replace($replace,"",$url);
-
-			$route["url_param"] = Amslib_Array::valid(explode("/",trim($params,"/ ")));
+			$route = self::finaliseRoute($route,$select,$url);
 		}
-
-		//	set the language based on the current route and selected url
-		$route["lang"] = array_search($select,$route["src"]);
 
 		return $route;
 	}

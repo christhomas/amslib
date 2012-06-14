@@ -416,46 +416,52 @@ class Amslib
 		spl_autoload_register("amslib_autoload");
 	}
 
-	static public function shutdown($url)
+	static public function shutdown($url,$callback=NULL,$warnings=false)
 	{
-		function amslib_shutdown($url)
+		function amslib_shutdown($url,$callback,$warnings)
 		{
-			$error = array(
-					"vars"	=>	get_defined_vars(),
-					"fcns"	=>	get_defined_functions(),
-					"clss"	=>	get_declared_classes(),
-					"get"	=>	$_GET,
-					"post"	=>	$_POST,
-					"err"	=>	false
-			);
-
 			//	E_PARSE: you cannot catch parse errors without a prepend file.
 			//	NOTE: I think this has to do with being a different apache request stage
 
 			//	All the errors I believe to be fatal/non-recoverable/you're fucked/your code is shit
 			$fatal = array(E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,E_COMPILE_WARNING,E_STRICT,E_USER_ERROR);
 
+			if($warnings){
+				$fatal+=array(E_WARNING,E_NOTICE,E_CORE_WARNING,E_USER_WARNING,E_RECOVERABLE_ERROR);
+			}
+
 			if (($e = @error_get_last()) && @is_array($e) && @in_array($e["type"],$fatal)) {
-				$error["err"] = array(
-					"code"	=>	isset($e['type']) ? $e['type'] : 0,
-					"msg"	=>	isset($e['message']) ? $e['message'] : '',
-					"file"	=>	isset($e['file']) ? $e['file'] : '',
-					"line"	=>	isset($e['line']) ? $e['line'] : '',
+				$error = array(
+					"err"	=>	array(
+						"code"	=>	isset($e['type']) ? $e['type'] : 0,
+						"msg"	=>	isset($e['message']) ? $e['message'] : '',
+						"file"	=>	isset($e['file']) ? $e['file'] : '',
+						"line"	=>	isset($e['line']) ? $e['line'] : ''),
+					"get"	=>	$_GET,
+					"post"	=>	$_POST,
+					"vars"	=>	get_defined_vars(),
+					"fcns"	=>	get_defined_functions(),
+					"clss"	=>	get_declared_classes()
 				);
 
 				//	TODO: write the file to a logging directory
 
-				$_SESSION["/amslib/php/fatal_error/"]	= $error;
-
-				//	NOTE: perhaps this won't work, but I'm trying to get the trace to the origin of where the error occured
 				$exception = new Exception();
-				$_SESSION["/amslib/php/backtrace/"]		= $exception->getTrace();
+				$exception = $exception->getTrace();
 
-				header("Location: $url");
+				if($url){
+					$_SESSION["/amslib/php/fatal_error/"]	=	$error;
+					//	NOTE: perhaps this won't work, but I'm trying to get the trace to the origin of where the error occured
+					$_SESSION["/amslib/php/backtrace/"]		=	$exception;
+
+					header("Location: $url");
+				}elseif(function_exists($callback)){
+					$callback($error,$exception);
+				}
 			}
 		}
 
-		register_shutdown_function("amslib_shutdown",$url);
+		register_shutdown_function("amslib_shutdown",$url,$callback,$warnings);
 	}
 
 	static public function findKey($key,$source)
