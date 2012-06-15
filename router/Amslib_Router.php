@@ -50,7 +50,7 @@ class Amslib_Router
 	{
 		//	Don't replace anything if the string is / because it'll nuke all the separators
 		$replace	=	$select == "/" ? "" : $select;
-		$params		=	str_replace($replace,"",$url);
+		$params		=	Amslib::lchop($url,$replace);
 
 		$route["url_param"] = Amslib_Array::valid(explode("/",trim($params,"/ ")));
 
@@ -104,34 +104,28 @@ class Amslib_Router
 
 		$static = self::getRouteByURL(self::$path);
 		//	Find all the matches and store all the route names here
-		$matches = array($static);
+		$matches = array($static["src_selected"]=>$static);
 		foreach(self::$callback as $c){
 			$data = call_user_func($c,self::$path);
-			$route = false;
 
-			if($data) $route = self::getRoute($data["name"]);
+			$route = $data ? self::getRoute($data["name"]) : false;
 
-			if($route){
-				unset($route["src"]);
-				$route+=$data;
-				$matches[] = $route;
-			}
+			if($route) $matches[$data["src_selected"]] = array_merge($route,$data);
 		}
 		$matches = array_filter($matches);
-
-		self::$route = self::$emptyRoute;
 
 		if(count($matches) == 1){
 			//	set the only result
 			self::$route = current($matches);
 		}else{
-			$selected = false;
+			$longest = "";
 
 			//	search for the longest match in the array
-			foreach(Amslib_Array::valid($matches) as $r){
-				Amslib_FirePHP::output("match",$r);
-				self::$route = $r;
+			foreach(Amslib_Array::valid($matches) as $k=>$r){
+				if(strlen($k) > strlen($longest)) $longest = $k;
 			}
+
+			self::$route = isset($matches[$longest]) ? $matches[$longest] : self::$emptyRoute;
 		}
 	}
 
