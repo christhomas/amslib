@@ -466,6 +466,11 @@ QUERY;
 		return $values;
 	}
 
+	public function selectRow($query)
+	{
+		return $this->select($query,1,true);
+	}
+
 	public function insert($query)
 	{
 		$this->seq++;
