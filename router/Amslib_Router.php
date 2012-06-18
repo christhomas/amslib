@@ -89,6 +89,7 @@ class Amslib_Router
 			//	Obtain the path within the website, without the website base
 			//	we use this to calculate the path inside the website, not relative to the document root
 			self::$path	=	Amslib::lchop($_SERVER["REQUEST_URI"],self::$base);
+			self::$path =	Amslib::rchop(self::$path,"?");
 			self::$path	=	Amslib_File::reduceSlashes("/".self::$path."/");
 		}
 	}
