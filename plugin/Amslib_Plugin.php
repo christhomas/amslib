@@ -606,10 +606,6 @@ class Amslib_Plugin
 
 	public function setConfig($key,$value)
 	{
-		if(Amslib::getGET("debug")){
-			Amslib_FirePHP::output("setConfig[{$this->getName()}]",array($key,$value,$this->config[$key]));
-		}
-
 		//	This is important, because otherwise values imported/exported through transfer() will not execute in process()
 		unset($value["import"],$value["export"]);
 
