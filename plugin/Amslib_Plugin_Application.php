@@ -107,7 +107,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				: $default);
 
 			if($plugin){
-				if(isset($c["remove"])) Amslib_Resource::removeJavascript($c["value"]);
+				if(isset($c["remove"])) Amslib_Resource::removeStylesheet($c["value"]);
 				else $plugin->addStylesheet($c["value"]);
 			}
 		}
