@@ -209,6 +209,12 @@ class Amslib_MVC extends Amslib_Mixin
 
 		return $this->view;
 	}
+	
+	public function hasView($id)
+	
+	{
+		return ($id && isset($this->view[$id]));
+	}
 
 	public function render($id="default",$parameters=array())
 	{
