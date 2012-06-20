@@ -26,6 +26,11 @@ class Amslib_Form
 		return implode("",$options);
 	}
 
+	static public function numericSelectOptions($start,$stop,$selected=NULL,$pad=NULL)
+	{
+		return self::numberSequenceToSelectOptions($start,$stop,$selected,$pad);
+	}
+
 	static public function numberSequenceToSelectOptions($start,$stop,$selected=NULL,$pad=NULL)
 	{
 		$options = "";

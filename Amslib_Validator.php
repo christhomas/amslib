@@ -825,6 +825,26 @@ class Amslib_Validator
 		return false;
 	}
 
+	protected function __number_array($name,$value,$required,$options)
+	{
+		if((!is_array($name) || empty($array)) && $required == false) return true;
+
+		$error = false;
+
+		foreach($value as $v){
+			if(!is_numeric($v) && !isset($options["allow_invalid"])) $error = true;
+		}
+
+		if($error && !$required) return true;
+
+		if(!$error){
+			$this->setValid($name,$value);
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	 * method:	__file
 	 *
@@ -968,6 +988,7 @@ class Amslib_Validator
 		//	Custom validation methods which do things we all want, but don't
 		//	conform to obvious rules like "number", "text", "date", etc
 		$this->register("require_one",		array($this,"__require_one"));
+		$this->register("number_array",		array($this,"__number_array"));
 	}
 
 	public function setValid($name,$value)
