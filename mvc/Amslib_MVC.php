@@ -209,9 +209,9 @@ class Amslib_MVC extends Amslib_Mixin
 
 		return $this->view;
 	}
-	
+
 	public function hasView($id)
-	
+
 	{
 		return ($id && isset($this->view[$id]));
 	}
@@ -469,6 +469,11 @@ class Amslib_MVC extends Amslib_Mixin
 	public function getURL($name=NULL)
 	{
 		return Amslib_Router::getURL($name,$this->getName());
+	}
+
+	public function getAPI($name)
+	{
+		return Amslib_Plugin_Manager::getAPI($name);
 	}
 
 	public function getService($name)
