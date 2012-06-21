@@ -71,11 +71,11 @@ class Amslib_MVC extends Amslib_Mixin
 		return $instance;
 	}
 
-	public function addMixin($object,$filterOut=array())
+	public function addMixin($object,$reject=array(),$accept=array())
 	{
 		if(is_string($object)) $object = $this->getObject($object,true);
 
-		return parent::addMixin($object,$filterOut);
+		return parent::addMixin($object,$reject,$accept);
 	}
 
 	public function setName($name)
@@ -211,7 +211,6 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	public function hasView($id)
-
 	{
 		return ($id && isset($this->view[$id]));
 	}
