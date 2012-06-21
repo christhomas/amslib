@@ -40,13 +40,19 @@ class Amslib_Website
 		return Amslib_File::absolute(self::$location.$file);
 	}
 
-	static public function redirect($location,$block=true)
+	static public function redirect($location,$block=true,$type=0)
 	{
 		$message = "waiting to redirect";
 
 		if(is_string($location) && strlen($location)){
 			$location = rtrim($location,"/");
 			if($location == "") $location = "/";
+
+			switch($type){
+				case 301:{
+					header("HTTP/1.1 301 Moved Permanently");
+				}break;
+			}
 
 			header("Location: $location");
 		}else{
