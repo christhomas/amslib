@@ -455,6 +455,11 @@ class Amslib_MVC extends Amslib_Mixin
 		return false;
 	}
 
+	public function getAPI($name)
+	{
+		return Amslib_Plugin_Manager::getAPI($name);
+	}
+
 	public function getRoute($name=NULL)
 	{
 		return Amslib_Router::getRoute($name,$this->getName());
@@ -465,24 +470,19 @@ class Amslib_MVC extends Amslib_Mixin
 		return Amslib_Router::getPath();
 	}
 
-	public function getURL($name=NULL)
+	public function getURL($name=NULL,$group=NULL)
 	{
-		return Amslib_Router::getURL($name,$this->getName());
+		return Amslib_Router::getURL($name,$group?$group:$this->getName());
 	}
 
-	public function getAPI($name)
+	public function getService($name,$group=NULL)
 	{
-		return Amslib_Plugin_Manager::getAPI($name);
+		return Amslib_Router::getService($name,$group?$group:$this->getName());
 	}
 
-	public function getService($name)
+	public function getServiceURL($name,$group=NULL)
 	{
-		return Amslib_Router::getService($name,$this->getName());
-	}
-
-	public function getServiceURL($name)
-	{
-		return Amslib_Router::getServiceURL($name,$this->getName());
+		return Amslib_Router::getServiceURL($name,$group?$group:$this->getName());
 	}
 
 	//	FIXME: we have to formalise what this slot code is supposed to do, opposed to what the view system already does.
