@@ -46,6 +46,16 @@ var Amslib_String = my.Amslib_String = my.Class(
 			return str.replace(new RegExp("[" + (chars || "\\s") + "]+$", "g"), "");
 		},
 		
+		padLeft: function(string,pad,length)
+		{
+		    return (new Array(length+1).join(pad)+string).slice(-length);
+		},
+		
+		padRight: function(string,pad,length)
+		{
+		    return (string+new Array(length+1).join(pad)).slice(0,length);
+		},
+		
 		replace: function(str, chars, replace)
 		{
 			return str.replace(new RegExp(chars, "g"), replace || "");
