@@ -117,7 +117,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 		if(!$this->getConnectionStatus()){
 			print("unsafe string escape: database not connected<br/>\n");
-			trigger_error(__METHOD__.": not connected / backtrace-> ".Amslib::var_dump(array_slice(Amslib::getStackTrace(),2,4)),true)."<br/>\n";
+			trigger_error(__METHOD__.": not connected / backtrace-> ".Amslib::var_dump(array_slice(Amslib::getStackTrace(),2,4),true)."<br/>\n");
 			die("DYING");
 		}
 
