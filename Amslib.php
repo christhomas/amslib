@@ -50,12 +50,16 @@ class Amslib
 		return dirname(__FILE__);
 	}
 
-	static public function showErrors()
+	static public function showErrors($state)
 	{
-		//	Enable all error reporting
-		ini_set("display_errors", "On");
 		error_reporting(E_ALL);
-		self::$showErrorTrigger = true;
+
+		if(state){
+			ini_set("display_errors",true);
+			self::$showErrorTrigger = true;
+		}else{
+			ini_set("display_errors",false);
+		}
 	}
 
 	static public function setErrorHandler($handler)
