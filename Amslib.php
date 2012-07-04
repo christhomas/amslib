@@ -54,7 +54,7 @@ class Amslib
 	{
 		error_reporting(E_ALL);
 
-		if(state){
+		if($state){
 			ini_set("display_errors",true);
 			self::$showErrorTrigger = true;
 		}else{
