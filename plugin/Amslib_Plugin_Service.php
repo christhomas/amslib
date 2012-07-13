@@ -296,7 +296,7 @@ class Amslib_Plugin_Service
 		return count(self::$serviceData[self::HD]);
 	}
 
-	static public function processHandler($id)
+	static public function processHandler($id=0)
 	{
 		self::$handler = isset(self::$serviceData[self::HD][$id]) ? self::$serviceData[self::HD][$id] : NULL;
 

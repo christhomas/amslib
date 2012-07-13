@@ -195,7 +195,13 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 */
 	public function getRealResultCount()
 	{
-		return $this->selectValue("c","FOUND_ROWS() as c",1,true);
+		$this->storeSearchHandle();
+
+		$count = $this->selectValue("c","FOUND_ROWS() as c",1,true);
+
+		$this->restoreSearchHandle();
+
+		return $count;
 	}
 
 	/**
@@ -341,12 +347,22 @@ QUERY;
 			$r = mysql_fetch_assoc($resultHandle);
 			if(!$r) break;
 			$this->lastResult[] = $r;
+
+			//	Stop when you've got the number of results you need
+			if(count($this->lastResult) >= $numResults) break;
 		}
 
 		if($optimise && $numResults == 1) $this->lastResult = current($this->lastResult);
 		if(count($this->lastResult) == 0) $this->lastResult = false;
 
 		return $this->lastResult;
+	}
+
+	public function releaseMemory()
+	{
+		$resultHandle = $this->getSearchResultHandle();
+		if(!$resultHandle) trigger_error(__METHOD__.": trying to free an invalid handle");
+		return $resultHandle ? mysql_free_result($resultHandle) : false;
 	}
 
 	public function query($query)
@@ -381,9 +397,35 @@ QUERY;
 		$this->setDebugOutput($query);
 
 		if($this->selectResult){
-			$rowCount = mysql_num_rows($this->selectResult);
+			//	If you don't request a number of results, use the maximum number we could possible accept
+			//	NOTE: you'll run out of memory a long time before you reach this count
+			if($numResults == 0) $numResults = PHP_INT_MAX;
 
-			if($numResults == 0) $numResults = $rowCount;
+			return $this->getResults($numResults,$this->selectResult,$optimise);
+		}
+
+		$this->setDBErrors($query);
+
+		return false;
+	}
+
+	public function select2($query,$numResults=0,$optimise=false)
+	{
+		$this->seq++;
+
+		if($this->getConnectionStatus() == false) return false;
+
+		$query = str_replace("SQL_CALC_FOUND_ROWS","",$query);
+		$query = "select SQL_CALC_FOUND_ROWS $query";
+
+		$this->setLastQuery($query);
+		$this->selectResult = mysql_unbuffered_query($query,$this->connection);
+		$this->setDebugOutput($query);
+
+		if($this->selectResult){
+			//	If you don't request a number of results, use the maximum number we could possible accept
+			//	NOTE: you'll run out of memory a long time before you reach this count
+			if($numResults == 0) $numResults = PHP_INT_MAX;
 
 			return $this->getResults($numResults,$this->selectResult,$optimise);
 		}
