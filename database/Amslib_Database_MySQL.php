@@ -416,10 +416,16 @@ QUERY;
 		if($this->getConnectionStatus() == false) return false;
 
 		$query = str_replace("SQL_CALC_FOUND_ROWS","",$query);
+
+		$numResults = intval($numResults);
+
+		//	These two rows are "dangerous" cause i'm not sure if the final query will be broken or not :(
+		//	NOTE: if you try hard to avoid problems, it should be ok and a lot faster
 		$query = "select SQL_CALC_FOUND_ROWS $query";
+		if($numResults > 0 && strpos(strtolower($query),"limit") === false) $query = "$query limit $numResults";
 
 		$this->setLastQuery($query);
-		$this->selectResult = mysql_unbuffered_query($query,$this->connection);
+		$this->selectResult = mysql_query($query,$this->connection);
 		$this->setDebugOutput($query);
 
 		if($this->selectResult){
