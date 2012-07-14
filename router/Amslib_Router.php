@@ -66,7 +66,7 @@ class Amslib_Router
 		$select = "";
 
 		foreach(self::$url as $u=>$d){
-			if($url != "/" && strpos($url,$u) !== false && strlen($u) >= strlen($select)){
+			if($url != "/" && strpos($url,$u) === 0 && strlen($u) >= strlen($select)){
 				$select = $u;
 			}else if($url == $u){
 				$select = $u;
