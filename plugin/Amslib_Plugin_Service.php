@@ -162,6 +162,8 @@ class Amslib_Plugin_Service
 			return call_user_func(array($object,$method),$this,$this->source);
 		}
 
+		if(!is_object($object)) trigger_error(__METHOD__.": \$object parameter is not an object, ".Amslib::var_dump($object));
+
 		//	NOTE:	this might seem a little harsh, but it's a critical error, your object doesn't have
 		//			the method you said it would, probably this means something in your code is broken
 		//			and you need to know about it and fix it.
