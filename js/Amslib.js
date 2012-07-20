@@ -91,7 +91,7 @@ var Amslib = my.Amslib = my.Class({
 		        a = /\+/g,  // Regex for replacing addition symbol with a space
 		        r = /([^&=]+)=?([^&]*)/g,
 		        d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
-		        f = [];
+		        f = {};
 		        
 		        if(i=s.indexOf("?")) s = s.substring(i+1);
 		        

@@ -96,6 +96,7 @@ class Amslib_Validator
 	protected $__hasRequiredRules;
 
 	//	NOTE: we ignore the name, it's not used here
+	//	NOTE: I hate this function :( it's so "unstructured"
 	protected function __require_one($name,$value,$required,$options)
 	{
 		unset($options["__vobject"]);
@@ -825,11 +826,11 @@ class Amslib_Validator
 		return false;
 	}
 
-	protected function __number_array($name,$value,$required,$options)
+	protected function __array_number($name,$value,$required,$options)
 	{
-		if((!is_array($name) || empty($array)) && $required == false) return true;
+		$error = !is_array($value) || empty($value);
 
-		$error = false;
+		if($error && !$required) return true;
 
 		foreach($value as $v){
 			if(!is_numeric($v) && !isset($options["allow_invalid"])) $error = true;
@@ -842,7 +843,27 @@ class Amslib_Validator
 			return true;
 		}
 
-		return false;
+		return "ARRAY_INVALID";
+	}
+
+	protected function __array_string($name,$value,$required,$options)
+	{
+		$error = !is_array($value) || empty($value);
+
+		if($error && !$required) return true;
+
+		foreach($value as $v){
+			if(!is_string($v) && !isset($options["allow_invalid"])) $error = true;
+		}
+
+		if($error && !$required) return true;
+
+		if(!$error){
+			$this->setValid($name,$value);
+			return true;
+		}
+
+		return "ARRAY_INVALID";
 	}
 
 	/**
@@ -988,7 +1009,8 @@ class Amslib_Validator
 		//	Custom validation methods which do things we all want, but don't
 		//	conform to obvious rules like "number", "text", "date", etc
 		$this->register("require_one",		array($this,"__require_one"));
-		$this->register("number_array",		array($this,"__number_array"));
+		$this->register("array_number",		array($this,"__array_number"));
+		$this->register("array_string",		array($this,"__array_string"));
 	}
 
 	public function setValid($name,$value)
