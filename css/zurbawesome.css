@@ -6,11 +6,12 @@ Thanks to zurb.com for these really nicely styled buttons!!
 link: http://www.zurb.com/article/266/super-awesome-buttons-with-css3-and-rgba
 */
 
-.awesome_button, .awesome_button:visited {
+.awesome_button, 
+.awesome_button:visited{
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
     border-radius: 5px 5px 5px 5px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-    color: #FFFFFF;
+    color: #FFFFFF !important;
     cursor: pointer;
     display: inline-block;
     padding: 5px 10px 3px;
