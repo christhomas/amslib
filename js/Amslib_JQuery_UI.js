@@ -19,5 +19,5 @@ if(amslib){
 	if(!themeList[theme]) theme = "smoothness";
 
 	Amslib.loadCSS(themeList[theme]);
-	Amslib.loadJS("jqueryui",amslib+"/util/jquery-ui-1.8.14.custom.min.js");
+	Amslib.loadJS("jquery.ui",amslib+"/util/jquery-ui-1.8.14.custom.min.js");
 };
