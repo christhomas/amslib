@@ -350,6 +350,27 @@ class Amslib_Router
 		return isset(self::$route["javascript"]) ? self::$route["javascript"] : array();
 	}
 
+	static public function decodeURLPairs()
+	{
+		//	here we decode the url into a series of k/v/k/v pairs => [k,v],[k,v]
+		//	e.g. list/[name]/page/[number] => [list,name],[page,number]
+		$p = array();
+		$k = $v = false;
+		$u = self::getURLParam();
+
+		foreach($u as $value){
+			if($k == false) $k = $value;
+			else if($v == false) $v = $value;
+
+			if($v !== false && $k !== false){
+				$p[$k] = $v;
+				$k = $v = false;
+			}
+		}
+
+		return $p;
+	}
+
 	static public function dump()
 	{
 		return array(
