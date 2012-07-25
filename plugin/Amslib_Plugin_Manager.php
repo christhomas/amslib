@@ -133,6 +133,11 @@ class Amslib_Plugin_Manager
 		return array_keys(self::$plugins);
 	}
 
+	static public function listAPI()
+	{
+		return array_keys(self::$api);
+	}
+
 	static public function isLoaded($name)
 	{
 		return isset(self::$plugins[$name]) ? true : false;
