@@ -832,7 +832,7 @@ class Amslib_Validator
 
 		if($error && !$required) return true;
 
-		foreach($value as $v){
+		foreach(Amslib_Array::valid($value) as $v){
 			if(!is_numeric($v) && !isset($options["allow_invalid"])) $error = true;
 		}
 
@@ -852,7 +852,7 @@ class Amslib_Validator
 
 		if($error && !$required) return true;
 
-		foreach($value as $v){
+		foreach(Amslib_Array::valid($value) as $v){
 			if(!is_string($v) && !isset($options["allow_invalid"])) $error = true;
 		}
 
