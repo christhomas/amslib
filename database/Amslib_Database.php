@@ -150,7 +150,13 @@ class Amslib_Database
 	 */
 	public function getConnectionStatus()
 	{
-		return $this->connection ? true : false;
+		if($this->connection) return true;
+
+		//	This is almost always a good idea!!
+		ini_set("display_errors",false);
+		trigger_error(__METHOD__.": DATABASE IS NOT CONNECTED");
+
+		return false;
 	}
 
 	/**
