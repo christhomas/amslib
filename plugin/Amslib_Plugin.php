@@ -560,6 +560,9 @@ class Amslib_Plugin
 
 		foreach($list as $node){
 			if($this->getName() != $node->nodeValue){
+				$replace = $node->getAttribute("replace");
+				if($replace) Amslib_Plugin_Manager::replacePlugin($replace,$node->nodeValue);
+
 				$plugin = Amslib_Plugin_Manager::config($node->nodeValue,$this->location);
 
 				if($plugin){

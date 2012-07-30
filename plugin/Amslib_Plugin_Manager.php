@@ -30,6 +30,7 @@ class Amslib_Plugin_Manager
 	static protected $plugins	=	array();
 	static protected $api		=	array();
 	static protected $location	=	array();
+	static protected $replace	=	array();
 
 	static protected function findPlugin($name,$location=NULL)
 	{
@@ -48,8 +49,23 @@ class Amslib_Plugin_Manager
 		return false;
 	}
 
+	static public function replacePlugin($plugin1,$plugin2)
+	{
+		//	This function will map plugin1 => plugin2, so any attempt to load plugin1 will result in loading plugin2
+		//	This means you need to be able to load plugin2 AT THE POINT IN TIME that plugin1 is loaded, if you require
+		//	something more, you're going to find trouble.
+
+		if(!is_string($plugin1) && strlen($plugin1) == 0) return false;
+		if(!is_string($plugin2) && strlen($plugin2) == 0) return false;
+
+		self::$replace[$plugin1] = $plugin2;
+	}
+
 	static public function config($name,$location)
 	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
 		//	Plugin was already loaded, so return it's Plugin Object directly
 		if(self::isLoaded($name)) return self::$plugins[$name];
 
@@ -67,6 +83,9 @@ class Amslib_Plugin_Manager
 
 	static public function load($name,$location=NULL)
 	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
 		//	Config a plugin to be "preloaded" and available
 		$p = self::config($name,$location);
 
@@ -85,11 +104,17 @@ class Amslib_Plugin_Manager
 
 	static public function preload($name,$plugin)
 	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
 		if($name && $plugin) self::$plugins[$name] = $plugin;
 	}
 
 	static public function insert($name,$plugin)
 	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
 		if($name && $plugin){
 			$api = $plugin->getAPI();
 
@@ -106,6 +131,9 @@ class Amslib_Plugin_Manager
 
 	static public function remove($name)
 	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
 		$r = self::$plugins[$name];
 
 		unset(self::$plugins[$name],self::$api[$name]);
@@ -115,16 +143,25 @@ class Amslib_Plugin_Manager
 
 	static public function getAPI($name)
 	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
 		return is_string($name) && isset(self::$api[$name]) ? self::$api[$name] : false;
 	}
 
 	static public function setAPI($name,$api)
 	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
 		self::$api[$name] = $api;
 	}
 
 	static public function getPlugin($name)
 	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
 		return is_string($name) && isset(self::$plugins[$name]) ? self::$plugins[$name] : false;
 	}
 
@@ -140,6 +177,9 @@ class Amslib_Plugin_Manager
 
 	static public function isLoaded($name)
 	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
 		return isset(self::$plugins[$name]) ? true : false;
 	}
 
