@@ -9,7 +9,7 @@ class Amslib_Form
 			if(is_array($item)){
 				$text	=	$indexText && isset($item[$indexText])		?	$item[$indexText]	:	"";
 				$value	=	$indexValue && isset($item[$indexValue])	?	$item[$indexValue]	:	"";
-			}else if(is_string($item) && $indexText == "useKey"){
+			}else if(is_string($item) && $indexText == "use_key"){
 				$text	=	$item;
 				$value	=	$arrayKey;
 			}else{
