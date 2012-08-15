@@ -3,11 +3,11 @@ var Amslib_Service_Response = my.Amslib_Service_Response = my.Class(
 	json: false,
 
 	constructor: function(json){
-		this.setJSON(json);											
+		this.setJSON(json);
 	},
 	
 	setJSON: function(json){
-		this.json = json;											
+		this.json = json;
 	},
 	
 	hasSuccess: function(){
