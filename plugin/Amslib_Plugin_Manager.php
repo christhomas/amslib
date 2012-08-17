@@ -89,6 +89,9 @@ class Amslib_Plugin_Manager
 		//	Config a plugin to be "preloaded" and available
 		$p = self::config($name,$location);
 
+		//	If the plugin failed to load, you need to return false to indicate an error
+		if(!$p) return false;
+
 		//	Process any import/export directives
 		$p->transfer();
 

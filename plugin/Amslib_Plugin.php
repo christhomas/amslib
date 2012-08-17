@@ -80,21 +80,22 @@ class Amslib_Plugin
 		//	PREPARE THE STRING: expand any parameters inside the resource name
 		$resource = self::expandPath($resource);
 		$resource = str_replace("__PLUGIN__",$this->location,$resource);
+		$resource = Amslib::rchop($resource,"?");
 
 		//	TEST 1:	look in the package directory for the file
 		$test2 = Amslib_File::reduceSlashes("$this->location/$resource");
-		if(file_exists(Amslib::rchop($test2,"?"))) return Amslib_File::relative($test2);
+		if(file_exists($test2)) return Amslib_File::relative($test2);
 
 		//	TEST 2: Test whether the file "exists" without any assistance
-		if(file_exists(Amslib::rchop($resource,"?"))) return Amslib_File::relative($resource);
+		if(file_exists($resource)) return Amslib_File::relative($resource);
 
 		//	TEST 3: Does the file exists relative to the document root?
 		$test4 = Amslib_File::absolute($resource);
-		if(file_exists(Amslib::rchop($test4,"?"))) return Amslib_File::relative($resource);
+		if(file_exists($test4)) return Amslib_File::relative($resource);
 
 		//	TEST 4:	search the include path for the file
 		$test5 = Amslib_File::find($resource,true);
-		if(file_exists(Amslib::rchop($test5,"?"))) return Amslib_File::relative($test5);
+		if(file_exists($test5)) return Amslib_File::relative($test5);
 
 		//	FAILED: you could not find the file
 		return false;
