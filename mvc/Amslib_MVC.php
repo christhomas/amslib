@@ -176,6 +176,7 @@ class Amslib_MVC extends Amslib_Mixin
 
 	public function getObject($id,$singleton=true)
 	{
+		if(get_class($this) == $id) return $this;
 		if(!isset($this->object[$id])) return false;
 
 		Amslib::requireFile($this->object[$id],array("require_once"=>true));
