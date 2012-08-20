@@ -83,17 +83,20 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	protected function autoloadResources()
 	{
+		//	STEP 1: Autoload all resources from each plugin as they are requested
 		$plugins = Amslib_Plugin_Manager::listPlugins();
 		foreach($plugins as $name) Amslib_Plugin_Manager::getAPI($name)->autoloadResources();
 
 		$default	=	Amslib_Router::getRouteParam("plugin");
 		$route		=	Amslib_Router::getRoute();
 
+		//	STEP 2: Autoload all resources which are bound the current route.
 		//	hack into place the adding or removing of all the stylesheets and javascripts
 		foreach(Amslib_Array::valid(Amslib_Router::getJavascript()) as $j){
-			$plugin = isset($j["plugin"]) ? str_replace("__CURRENT_PLUGIN__",$route["group"],$j["plugin"]) : $default;
 			//	datatables does't load because it's trying with the wrong plugin
-			$plugin = Amslib_Plugin_Manager::getAPI($plugin);
+			$plugin = Amslib_Plugin_Manager::getAPI(isset($j["plugin"])
+				? str_replace("__CURRENT_PLUGIN__",$route["group"],$j["plugin"])
+				: $default);
 
 			if($plugin){
 				if(isset($j["remove"])) Amslib_Resource::removeJavascript($j["value"]);
@@ -271,12 +274,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 * 	-	if the route has type='service' we are going to process a webservice
 	 * 	-	override this default behaviour by overriding this method with a customised version
 	 */
-	public function execute()
+	public function execute($params=array())
 	{
 		//	If the url executed belonds to a web service, run the service code
 		if(Amslib_Router::isService()) $this->runService();
 
 		//	If the url executed belongs to a page, render the default view of the application
-		print($this->api->render("default"));
+		print($this->api->render("default",$params));
 	}
 }
