@@ -634,7 +634,8 @@ class Amslib_Plugin
 
 		if($key == "value"){
 			//	Search and update any existing values
-			foreach($this->config[$key] as $v){
+			$list = Amslib_Array::valid($this->config[$key]);
+			foreach($list as &$v){
 				if($v["name"] == $value["name"] && !isset($v["export"]) && !isset($v["import"])){
 					$v["value"] = $value["value"];
 
