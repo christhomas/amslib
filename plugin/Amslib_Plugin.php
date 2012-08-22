@@ -311,7 +311,8 @@ class Amslib_Plugin
 		//	Process all the import/export/transfer requests on all resources
 		//	NOTE: translators don't support the "move" parameter
 		foreach($this->config as $key=>$block){
-			 if($key == "model"){
+			//	NOTE: perhaps I need to add "object" to here in the future?
+			if(in_array($key,array("model"))){
 			 	//	Models are treated slightly differently because they are singular, not plural
 				//	NOTE: maybe in future models will be plural too, perhaps it's better to make it work plurally anyway
 			 	$m	=	isset($block["move"]);
@@ -324,7 +325,13 @@ class Amslib_Plugin
 
 			 	if($i) 			$this->transferData($p,$this,$key,$v1,$m);
 			 	else if($e) 	$this->transferData($this,$p,$key,$v2,$m);
-			}else if(in_array($key,array("object","value","view","stylesheet","image","javascript","translator"))){
+			}else if(in_array($key,array("object","view","stylesheet","image","javascript","translator"))){
+				//	NOTE:	transferring objects by name won't work because in the other plugin it won't
+				//			know how to autoload the object from it's class because 99.99% sure the object
+				//			being transferred won't be in the path, therefore it won't be autoloadable and
+				//			it'll fail
+				//	NOTE:	perhaps therefore, we need to transfer objects like we do models, create the
+				//			object first and transfer that
 				foreach(Amslib_Array::valid($block) as $iname=>$item)
 				{
 					if($key == "value") $iname = $item["name"];
@@ -339,7 +346,20 @@ class Amslib_Plugin
 			 		if($i) 			$this->transferData2($p,$this,$key,$v,$m);
 			 		else if($e) 	$this->transferData2($this,$p,$key,$v,$m);
 				}
-			}else if($key == "service"){
+			}else if(in_array($key,array("value"))){
+				foreach(Amslib_Array::valid($block) as $item)
+				{
+					$m	=	isset($item["move"]);
+					$i	=	isset($item["import"]) && $item["import"] != $this->getName() ? $item["import"] : false;
+					$e	=	isset($item["export"]) && $item["export"] != $this->getName() ? $item["export"] : false;
+					$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
+					if(!$p) continue;
+					$v	=	$item;
+
+					if($i) 			$this->transferData($p,$this,$key,$v,$m);
+					else if($e) 	$this->transferData($this,$p,$key,$v,$m);
+				}
+			}else if(in_array($key,array("service"))){
 				foreach(Amslib_Array::valid($block) as $item)
 				{
 					//	import means take "name" route from "plugin" and install it under the "local_name" route
@@ -612,15 +632,20 @@ class Amslib_Plugin
 		//	This is important, because otherwise values imported/exported through transfer() will not execute in process()
 		unset($value["import"],$value["export"]);
 
-		if(is_string($key)){
+		if($key == "value"){
+			//	Search and update any existing values
+			foreach($this->config[$key] as $v){
+				if($v["name"] == $value["name"] && !isset($v["export"]) && !isset($v["import"])){
+					$v["value"] = $value["value"];
+
+					return;
+				}
+			}
+
+			//	The value didnt already exist, so we must create it
+			$this->config[$key][] = $value;
+		}else if(is_string($key)){
 			$this->config[$key] = $value;
-		}else if(is_array($key) && isset($key[0]) && $key[0] == "value"){
-			//	NOTE:	I think this is broken, if you have multiple <value> blocks each
-			//			implementing it's own db_table parameter (for example) this code
-			//			will find the first occurance in EVERY situation, even if you need
-			//			the third block, it'll always return the first and perhaps you'll lose data
-			$k = Amslib_Array::findKey($this->config[$key[0]],"name",$key[1]);
-			if($k !== false) $this->config[$key[0]][$k] = $value;
 		}else{
 			$this->config[$key[0]][$key[1]] = $value;
 		}
@@ -637,14 +662,6 @@ class Amslib_Plugin
 			case "model":{
 				$this->createObject($this->config[$key]);
 				return $this->config[$key];
-			}break;
-
-			case "value":{
-				//	NOTE:	I think this is broken, if you have multiple <value> blocks each
-				//			implementing it's own db_table parameter (for example) this code
-				//			will find the first occurance in EVERY situation, even if you need
-				//			the third block, it'll always return the first.
-				return Amslib_Array::find($this->config[$key], "name", $name);
 			}break;
 
 			default:{
