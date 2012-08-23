@@ -310,7 +310,7 @@ class Amslib_Plugin
 
 		//	Process all the import/export/transfer requests on all resources
 		//	NOTE: translators don't support the "move" parameter
-		foreach($this->config as $key=>$block){
+		foreach($this->config as $key=>&$block){
 			//	NOTE: perhaps I need to add "object" to here in the future?
 			if(in_array($key,array("model"))){
 			 	//	Models are treated slightly differently because they are singular, not plural
@@ -343,11 +343,14 @@ class Amslib_Plugin
 			 		if(!$p) continue;
 			 		$v	=	$key == "value" ? $item["name"] : $iname;
 
+			 		//	FIXME: I tried to apply this here too, it broke everything I tried :(
+			 		//if($e) unset($block[$iname]);
+
 			 		if($i) 			$this->transferData2($p,$this,$key,$v,$m);
 			 		else if($e) 	$this->transferData2($this,$p,$key,$v,$m);
 				}
 			}else if(in_array($key,array("value"))){
-				foreach(Amslib_Array::valid($block) as $item)
+				foreach(Amslib_Array::valid($block) as $k=>$item)
 				{
 					$m	=	isset($item["move"]);
 					$i	=	isset($item["import"]) && $item["import"] != $this->getName() ? $item["import"] : false;
@@ -355,6 +358,8 @@ class Amslib_Plugin
 					$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
 					if(!$p) continue;
 					$v	=	$item;
+
+					if($e) unset($block[$k]);
 
 					if($i) 			$this->transferData($p,$this,$key,$v,$m);
 					else if($e) 	$this->transferData($this,$p,$key,$v,$m);
