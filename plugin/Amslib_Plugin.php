@@ -307,6 +307,7 @@ class Amslib_Plugin
 		//	FIXME: it's actually hilarious how much repeated code I have, yet I didnt refactor it yet :)
 		//	NOTE: ok, I've started to refactor the code as much as I can, but I think I got stuck and can't go further
 		//	NOTE: 08/03/2012: it's getting better :) yeah! finally found a nice way to refactor everything
+		//	NOTE: 24/08/2012: actually, I think it has a problem of being too generic, therefore impossible to refactor correctly
 
 		//	Process all the import/export/transfer requests on all resources
 		//	NOTE: translators don't support the "move" parameter
