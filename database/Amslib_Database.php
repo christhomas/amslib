@@ -36,23 +36,25 @@ class Amslib_Database
  *	NOTE: they are not converted to private yet because they are being
  *	explored for possible problems
  *****************************************************************************/
-	private static $sharedConnection = false;
+	private static $sharedConnection	=	false;
 
-	protected $lastResult = array();
+	protected $lastResult				=	array();
 
-	protected $lastInsertId = 0;
+	protected $lastInsertId				=	0;
 
-	protected $lastQuery = array();
+	protected $lastQuery				=	array();
 
-	protected $debug		=	false;
-	protected $errorState	=	true;
+	protected $debug					=	false;
+	protected $errorState				=	true;
 
-	protected $selectResult			= false;
-	protected $storeSearchResult	= false;
+	protected $selectResult				=	false;
+	protected $storeSearchResult		=	false;
 
-	protected $seq = 0;
+	protected $seq						=	0;
 
-	protected $databaseName = false;
+	//	NOTE: do I use this for anything?
+	protected $databaseName				=	false;
+	protected $table					=	array();
 
 /******************************************************************************
  *	PROTECTED MEMBERS
@@ -89,7 +91,8 @@ class Amslib_Database
 
 	public function __construct()
 	{
-		$this->seq = 0;
+		$this->seq		=	0;
+		$this->table	=	array();
 	}
 
 	public function setFetchMethod($method)
@@ -138,6 +141,19 @@ class Amslib_Database
 		if($this->storeSearchResult) $this->selectResult = $this->storeSearchResult;
 
 		$this->storeSearchResult = false;
+	}
+
+	public function setTable()
+	{
+		$args = func_get_args();
+
+		$c = count($args);
+
+		if($c == 1){
+			$this->table = $this->escape($args[0]);
+		}else if($c > 1){
+			$this->table[$this->escape($args[0])] = $this->escape($args[1]);
+		}
 	}
 
 	/**
