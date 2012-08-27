@@ -17,44 +17,66 @@ class Amslib_Status_Code extends Amslib_Database_MySQL
 		return $instance;
 	}
 
-	public function setStatusValueByValue($table,$field,$pkid,$value)
+	public function setStatusValue($table,$field,$pkid,$pkval,$value)
 	{
+		if($this->getConnectionStatus() == false) return false;
+
 		$table	=	$this->escape($table);
 		$field	=	$this->escape($field);
 		$pkid	=	$this->escape($pkid);
+		$pkval	=	$this->escape($pkval);
 		$value	=	$this->escape($value);
 
-		$db->update("$table set $field='$value'")
+		return $this->update("$table set $field='$value' where $pkid='$pkval'");
 	}
 
-	public function setStatusValueByIndent($table,$field,$ident)
+	public function setStatusValueByIndent($table,$field,$pkid,$pkval,$ident)
 	{
-		$table	=	$this->escape($table);
-		$field	=	$this->escape($field);
-		$ident	=	$this->escape($ident);
+		$ident = $this->escape($ident);
+		$value = $this->selectValue("id","id from {$this->table} where ident='$ident' order by id desc",1,true)
+
+		return $this->setStatusValue($table,$field,$pkid,$pkval,$value);
 	}
 
-	public function setStatusIndentByValue($table,$field,$value)
+	public function setStatusIndentByValue($table,$field,$pkid,$pkval,$value)
 	{
-		$table	=	$this->escape($table);
-		$field	=	$this->escape($field);
-		$value	=	$this->escape($value);
-	}
-
-	public function setStatusIdentByIdent($table,$field,$ident)
-	{
-		$table	=	$this->escape($table);
-		$field	=	$this->escape($field);
-		$ident	=	$this->escape($ident);
-	}
-
-	public function getStatusValueByIdent($ident)
-	{
-		$ident	=	$this->escape($ident);
+		$value = $this->escape($value);
+		$ident = $this->selectValue("ident","ident from {$this->table} where id='$value' order by id desc",1,true);
 	}
 
 	public function getStatusIdentByValue($value)
 	{
-		$value	=	$this->escape($value);
+		if($this->getConnectionStatus() == false) return false;
+
+		$value = $this->escape($value);
+
+		return $this->selectValue("ident","ident from {$this->table} where id='$value'",1,true);
+	}
+
+	public function getStatusValueByIdent($ident)
+	{
+		if($this->getConnectionStatus() == false) return false;
+
+		$ident = $this->escape($ident);
+
+		return $this->selectValue("id","id from {$this->table} where ident='$ident'",1,true);
+	}
+
+	public function getStatusByValue($value)
+	{
+		if($this->getConnectionStatus() == false) return false;
+
+		$value = $this->escape($value);
+
+		return $this->select("* from {$this->table} where id='$value'",1,true);
+	}
+
+	public function getStatusByIdent($ident)
+	{
+		if($this->getConnectionStatus() == false) return false;
+
+		$ident = $this->escape($ident);
+
+		return $this->select("* from {$this->table} where ident='$ident'",1,true);
 	}
 }
