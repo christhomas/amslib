@@ -137,7 +137,7 @@ class Amslib_Plugin
 					//	Then we can reenable this code, it'll be simpler, but not ready to work yet.
 					//$params		=	array($this->createObject($c,true,true));
 				}else if($v == "translator"){
-					$translator	=	$this->createTranslator($name);
+					$translator	=	$this->createTranslator($c);
 
 					if(!$translator) continue;
 
@@ -217,34 +217,37 @@ class Amslib_Plugin
 		return $api;
 	}
 
-	protected function createTranslator($name)
+	protected function createTranslator(&$config)
 	{
-		if(!isset($this->config["translator"][$name])) return false;
+		if(isset($config["cache"])) return $config["cache"];
 
-		$t = &$this->config["translator"][$name];
-		if(isset($t["cache"])) return $t["cache"];
+		if(!Amslib_Array::hasKeys($config,array("type","language"))) return false;
 
-		if($t["type"] == "xml"){
-			//	Replace __CURRENT_PLUGIN with plugin location and expand any other paths
-			$location = str_replace("__CURRENT_PLUGIN__",$this->location,$t["location"]);
-			$location = Amslib_Plugin::expandPath($location);
-		}else if($t["type"] == "database"){
-			$database = $this->config["model"]["value"];
-			$location = str_replace("__CURRENT_PLUGIN__",$database,$t["location"]);
+		switch($config["type"]){
+			case "xml":{
+				//	Replace __CURRENT_PLUGIN with plugin location and expand any other paths
+				$location = str_replace("__CURRENT_PLUGIN__",$this->location,$config["location"]);
+				$location = Amslib_Plugin::expandPath($location);
+			}break;
+
+			case "database":{
+				$database = $this->config["model"]["value"];
+				$location = str_replace("__CURRENT_PLUGIN__",$database,$config["location"]);
+			}break;
 		}
 
 		//	Obtain the language the system should use when printing text
-		$language = Amslib_Plugin_Application::getLanguage($name);
-		if(!$language) $language = reset($t["language"]);
+		$language = Amslib_Plugin_Application::getLanguage($config["name"]);
+		if(!$language) $language = reset($config["language"]);
 
 		//	Create the language translator object and insert it into the api
-		$translator = new Amslib_Translator($t["type"],$name);
-		$translator->addLanguage($t["language"]);
+		$translator = new Amslib_Translator($config["type"],$config["name"]);
+		$translator->addLanguage($config["language"]);
 		$translator->setLocation($location);
 		$translator->setLanguage($language);
 		$translator->load();
 
-		$t["cache"] = $translator;
+		$config["cache"] = $translator;
 
 		return $translator;
 	}
@@ -335,14 +338,14 @@ class Amslib_Plugin
 				//			object first and transfer that
 				foreach(Amslib_Array::valid($block) as $iname=>$item)
 				{
-					if($key == "value") $iname = $item["name"];
+					if(in_array($key,array("value","translator"))) $iname = $item["name"];
 
 					$m	=	isset($item["move"]);
 					$i	=	isset($item["import"]) && $item["import"] != $this->getName() ? $item["import"] : false;
 			 		$e	=	isset($item["export"]) && $item["export"] != $this->getName() ? $item["export"] : false;
 			 		$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
 			 		if(!$p) continue;
-			 		$v	=	$key == "value" ? $item["name"] : $iname;
+			 		$v	=	$iname;
 
 			 		//	FIXME: I tried to apply this here too, it broke everything I tried :(
 			 		//if($e) unset($block[$iname]);
@@ -505,7 +508,7 @@ class Amslib_Plugin
 							Amslib_Array::hasKeys($p,array("name","import")) ||
 							Amslib_Array::hasKeys($p,array("name","export")))
 						{
-							$this->config[$node->nodeName][$p["name"]] = $p;
+							$this->config[$node->nodeName][] = $p;
 						}
 					}break;
 
@@ -662,8 +665,12 @@ class Amslib_Plugin
 	{
 		switch($key){
 			case "translator":{
-				$this->config[$key][$name]["cache"] = $this->createTranslator($name);
-				return $this->config[$key][$name];
+				foreach($this->config[$key] as $t){
+					if($t["name"] == $name){
+						if(isset($t["type"]))	$this->createTranslator($t);
+						if(isset($t["cache"]))	return $t;
+					}
+				}
 			}break;
 
 			case "model":{
