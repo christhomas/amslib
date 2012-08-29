@@ -52,7 +52,8 @@ class Amslib_Router
 		$replace	=	$select == "/" ? "" : $select;
 		$params		=	Amslib::lchop($url,$replace);
 
-		$route["url_param"] = Amslib_Array::valid(explode("/",trim($params,"/ ")));
+		//	Filter out NULL or empty elements and return ONLY a valid array of valid components
+		$route["url_param"] = Amslib_Array::valid(array_filter(explode("/",trim($params,"/ "))));
 
 		//	set the language based on the current route and selected url
 		$route["lang"] = array_search($select,$route["src"]);
@@ -328,8 +329,32 @@ class Amslib_Router
 		return in_array($name,self::$route["route_param"]) ? true : false;
 	}
 
+	static public function DEBUG_getURLParam($index=NULL,$default="")
+	{
+		trigger_error(__METHOD__.", index = ".Amslib::var_dump($index,true).", default = ".Amslib::var_dump($default,true));
+
+		//	if there are no url options, return the default
+		if(!isset(self::$route["url_param"])) return $default;
+
+		//	if the default was an empty string, set the default to the entire options array
+		//	FIXME: I don't think it's reasonable to understand that "" => complete array
+		//	NOTE: perhaps we should default to "*" and this can mean "everything" instead?
+		if($default === "") $default = self::$route["url_param"];
+
+		$r = $index !== NULL && isset(self::$route["url_param"][$index])
+			? self::$route["url_param"][$index]
+			: $default;
+
+		trigger_error(__METHOD__.", route = ".Amslib::var_dump(self::$route["url_param"],true));
+		trigger_error(__METHOD__.", r = ".Amslib::var_dump($r,true));
+
+		return $r;
+	}
+
 	static public function getURLParam($index=NULL,$default="")
 	{
+		if($default == "guestlist") return self::DEBUG_getURLParam($index,$default);
+
 		//	if there are no url options, return the default
 		if(!isset(self::$route["url_param"])) return $default;
 
