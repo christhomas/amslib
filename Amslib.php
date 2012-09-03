@@ -409,6 +409,7 @@ class Amslib
 			if(strpos($c,"QRcode")				!== false)	$c	=	"util/phpqrcode/phpqrcode";
 			if(strpos($c,"AesCtr")				!== false)	$c	=	"util/$c";
 
+			if($c == "Logger")		$c	=	"util/apache-log4php/src/main/php/$c";
 			if($c == "FirePHP")		$c	=	"util/FirePHPCore/$c.class";
 
 			$f = str_replace("//","/","$c.php");
