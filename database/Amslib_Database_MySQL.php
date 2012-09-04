@@ -108,6 +108,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 		if($value === NULL)		return $value;
 		//	Simple numeric checks to quickly escape them without using the mysql functionality
 		if(is_int($value))		return intval($value);
+		if(is_bool($value))		return intval($value);
 		if(is_float($value))	return floatval($value);
 
 		//	from this point on, the value must be a string
