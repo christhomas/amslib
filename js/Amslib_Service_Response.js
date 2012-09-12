@@ -30,12 +30,12 @@ var Amslib_Service_Response = my.Amslib_Service_Response = my.Class(
 
 	readData: function(plugin,group,name,handlerindex)
 	{
-		if(handlerindex === undefined) handlerindex = 0;
+		if(handlerindex === undefined || handlerindex === null) handlerindex = 0;
 		
 		try{
 			var data = this.json["handlers"][handlerindex][plugin];
-			if(group != undefined)	data = data[group];
-			if(name != undefined)	data = data[name];
+			if(group != undefined || group != null)	data = data[group];
+			if(name != undefined || group != null)	data = data[name];
 			return data;
 		}catch(e){}
 
