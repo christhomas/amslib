@@ -35,7 +35,7 @@ var Amslib_Service_Response = my.Amslib_Service_Response = my.Class(
 		try{
 			var data = this.json["handlers"][handlerindex][plugin];
 			if(group != undefined || group != null)	data = data[group];
-			if(name != undefined || group != null)	data = data[name];
+			if(name != undefined || name != null)	data = data[name];
 			return data;
 		}catch(e){}
 
