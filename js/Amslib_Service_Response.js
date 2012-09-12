@@ -10,12 +10,22 @@ var Amslib_Service_Response = my.Amslib_Service_Response = my.Class(
 		this.json = json;
 	},
 	
+	getJSON: function()
+	{
+		return this.json;
+	},
+	
 	hasSuccess: function(){
 		return this.json.success ? true : false;
 	},
 
 	hasPlugin: function(plugin){
 		return this.readData(plugin) != undefined ? true : false;
+	},
+	
+	handlerCount: function()
+	{
+		return this.json["handlers"].length;
 	},
 
 	readData: function(plugin,group,name,handlerindex)
