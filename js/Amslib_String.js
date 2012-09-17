@@ -12,11 +12,13 @@ var Amslib_String = my.Amslib_String = my.Class(
 	STATIC: {
 		map: false,
 		
-		slugify: function(text)
+		slugify: function(text,slug)
 		{
+			if(slug == "undefined") slug = '-';
+			
 			if(text){
 				text = Amslib_String.removeDiacritics(text);
-				text = text.replace(/[^a-zA-Z0-9\.\-\_]+/ig,'-').toLowerCase();
+				text = text.replace(/[^a-zA-Z0-9\.\-\_]+/ig,slug).toLowerCase();
 			}
 			
 			return text;
