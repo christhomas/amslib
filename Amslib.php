@@ -50,7 +50,7 @@ class Amslib
 		return dirname(__FILE__);
 	}
 
-	static public function showErrors($state)
+	static public function showErrors($state=true)
 	{
 		error_reporting(E_ALL);
 
