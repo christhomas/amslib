@@ -79,6 +79,7 @@ class Amslib_Router
 
 	static public function initialise()
 	{
+		//	NOTE: what does AMSLIB_ROUTER do now? this isn't explained and not understandable
 		foreach($_SERVER as $k=>$v){
 			if(strpos($k,"AMSLIB_ROUTER") !== false) self::$pathList[$k] = $v;
 		}
