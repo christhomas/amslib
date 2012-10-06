@@ -232,6 +232,10 @@ class Amslib
 				$class_name	=	"file/$class_name";
 			}
 			
+			if(strpos($class_name,"PiwikTracker") !== false){
+				$class_name	=	"util/$class_name";
+			}
+			
 			$filename = str_replace("//","/","$class_name.php");
 			
 			return Amslib::requireFile($filename);
