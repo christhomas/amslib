@@ -1,93 +1,145 @@
-<?php 
-class Amslib_Translator_XML extends Amslib_Translator
+<?php
+class Amslib_Translator_XML extends Amslib_Translator_Keystore
 {
-	protected $xdoc;
+	protected $database;
+	protected $location;
 	protected $xpath;
-	
+	protected $xdoc;
+	protected $error;
+
 	public function __construct()
 	{
 		parent::__construct();
+
+		$this->error = array();
+		$this->xpath = false;
 	}
 
-	/** DEPRECATED: use load() instead **/
-	public function open($database,$readAll=false){ $this->load($database,$readAll); }
-	
-	//	TODO: readAll parameter is ignored for now
-	public function load($database,$readAll=false)
+	public function setError($error)
 	{
-		if(!file_exists($database)) $database = Amslib_Filesystem::find($database,true);
-		
-		if(!file_exists($database)){
-			print("XML TRANSLATION DATABASE: '$database' DOES NOT EXIST<br/>");
-		}
-		
-		$this->xdoc = new DOMDocument('1.0', 'UTF-8');
-		if($this->xdoc->load($database)){
-			$this->xdoc->preserveWhiteSpace = false;
-			$this->xpath = new DOMXPath($this->xdoc);
-	
-			if($readAll){
-				$keys = $this->getKeys();
-				foreach($keys as $k) $this->t($k);
-			}	
-		}else{
-			die("XML TRANSLATION DATABASE: '$database' FAILED TO OPEN<br/>");
-		}
-	}
-	
-	public function loadFromRouter()
-	{
-		//	FIXME:	it's wrong that we should depend on Amslib_Router_Language2 
-		//			here, the value should be passed in and eliminate the dependency
-		$this->load("translations/".Amslib_Router_Language2::getCode().".xml",true);
+		trigger_error(__METHOD__.": $error");
+
+		$this->error[] = $error;
 	}
 
-	public function getKeys()
+	public function getErrors()
 	{
-		$values = $this->xpath->query("//database/translation/attribute::name");
-		
-		$keys = array();
-		foreach($values as $v) $keys[] = $v->value;
-		
+		return $this->error;
+	}
+
+	public function setLocation($location)
+	{
+		$this->location = $location;
+	}
+
+	/**
+	 * method: load
+	 *
+	 * parameters:
+	 * 	$location	-	The location to load the XML database files from
+	 *
+	 * returns:
+	 * 	Boolean true or false depending on whether it succeeded, there are some codepaths which call setError()
+	 * 	this is because of serious errors which can't be handled at the moment
+	 *
+	 * NOTE:
+	 * 	-	if language is false, you need to call setLanguage before you
+	 * 		call load otherwise the source can't load the correct file
+	 */
+	public function load()
+	{
+		if($this->language)
+		{
+			$this->database = Amslib_Website::abs(Amslib_File::reduceSlashes("$this->location/{$this->language}.xml"));
+
+			if(!file_exists($this->database)) $this->database = Amslib_File::find($this->database,true);
+
+			if(!file_exists($this->database)){
+				$this->setError("LOCATION: '$this->location', DATABASE '$this->database' for LANGUAGE '$this->language' DOES NOT EXIST<br/>");
+			}
+
+			$this->xdoc = new DOMDocument("1.0","UTF-8");
+			if(@$this->xdoc->load($this->database)){
+				$this->xdoc->preserveWhiteSpace = false;
+				$this->xpath = new DOMXPath($this->xdoc);
+
+				return true;
+			}else{
+				$this->setError("LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
+			}
+		}
+
+		return false;
+	}
+
+	public function translate($k,$l=NULL)
+	{
+		if(!$this->xpath){
+			trigger_error(__METHOD__.": xpath was invalid, db[$this->database], loc[$this->location], lang[$this->language]");
+			return $k;
+		}
+
+		$v = parent::translate($k,$l);
+
+		if($v == $k){
+			$node = $this->xpath->query("//database/translation[@key='$k'][1]");
+
+			if($node->length > 0){
+				$v = "";
+
+				$node = $node->item(0);
+
+				foreach($node->childNodes as $n) $v .= $this->xdoc->saveXML($n);
+				$v = trim($v);
+
+				//	Now cache the value read from the xml
+				parent::learn($k,$v,$l);
+			}
+		}
+
+		return $v;
+	}
+
+	//	TODO: we need to add the key/value to the xml database on disk
+	public function learn($k,$v,$l=NULL)
+	{
+		return parent::learn($k,$v,$l);
+	}
+
+	//	TODO: do the physical remove the key from the xml database
+	//	TODO: do I remove from just a single language, or all of them?
+	//	TODO: perhaps remove all by default, or specify the language to single a particular xml database out.
+	public function forget($k,$l=NULL)
+	{
+		$cache	=	parent::forget($k,$l);
+		$xml	=	false;
+
+		return $cache && $xml;
+	}
+
+	public function updateKey($k,$nk,$l=NULL)
+	{
+		$this->learn($nk,$this->translate($k,$l),$l);
+		$this->forget($k,$l);
+	}
+
+	public function getKeyList($l=NULL)
+	{
+		$list = $this->xpath->query("//database/translation/attribute::key");
+
+		foreach($list as $k) $keys[] = $k->value;
+
 		return $keys;
 	}
 
-	//	TODO: This method has no way to translate from other languages
-	public function translate($key,$language=NULL)
+	//	TODO: NOT IMPLEMENTED YET
+	public function getValueList($l=NULL)
 	{
-		$t = parent::translate($key);
-		
-		if($t == $key){
-			$node = $this->xpath->query("//database/translation[@name='$key'][1]");
-
-			if($node->length > 0){
-				$t = "";
-				
-				$node = $node->item(0);
-
-				foreach($node->childNodes as $n) $t .= $this->xdoc->saveXML($n);
-				$t = trim($t);
-
-				if(strlen($t)) $this->l($key,$t);
-				else $t = $key;
-			}
-		}
-		
-		return $t;
+		return array();
 	}
-	
-	//	TODO: This method just stores new translations in memory, doesnt write them to xml
-	public function learn($key,$string,$language=NULL)
-	{
-		return parent::learn($key,$string,$language);
-	}
-	
-	static public function &getInstance()
-	{
-		static $instance = NULL;
 
-		if($instance === NULL) $instance = new self();
-
-		return $instance;
+	public function getList($l=NULL)
+	{
+		return array();
 	}
 }

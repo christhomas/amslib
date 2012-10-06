@@ -1,0 +1,425 @@
+My.js can help you build faster classes than with other frameworks. 
+The secret: My.js doesn't add wrappers to your implementation (no apply calls). 
+Mootools classes (search string "var Class"), John Resig classes or recently 
+Ender.js classes all use some kind of wrappers for instantiation and/or inheritance. 
+In other words, with My.js, it's gonna be 100% of your code running, not something 
+like 90% + 10% lost in framework wrappers.
+
+With more and more people creating their micro-frameworks (see T. Fuchs microjs.com 
+or D. Almaer post), it could be useful to have some class "sugar" that comes without 
+the "framework overhead". Creating classes in our framework would be easier and 
+without performance loss.
+
+In this post, I present how My.js classes work and the design elements used to improve 
+perfs. Design elements are more important than the implementation which does almost 
+nothing (my.js class system is only 0.6Kb).
+Create a class with My.js
+
+//use the "my.Class" function to define a class
+var Artist = my.Class({
+
+  //use the "STATIC" field to define static fields
+  STATIC: {
+    ARTWORKS_LIMIT: 500
+  },
+
+  //use the "constructor" field to define the class constructor
+  constructor: function(name, art) {
+    this.name = name;
+    this.art = art;
+    this.artworks = [];
+  },
+
+  //method 1
+  sayHello: function() {
+    console.log('I am ' + this.name + ', ' + this.art + ' is my life!');
+  },
+
+  //method 2
+  addArtwork: function(artwork) {
+    if (this.artworks.length < Artist.ARTWORKS_LIMIT)
+      this.artworks.push(artwork);
+  },
+
+  ...
+
+});
+
+Under the hood, most frameworks uses an init function that wraps your constructor 
+(Mootools, Base...). My.js doesn't. Once my.Class returns, we have 
+Artist === function(name, art)..., not Artist === Wrapper. My.js doesn't add any 
+static field or method that you didn't specify either (no Artist.$name or Artist.extend 
+or Artist.statics). My.js simply generates the same class as the "pure JS" class you 
+would write modifying prototype by hands.
+Extend a class: the this problem
+
+There are many ways to handle inheritance in JS. I find YUI and Ext implem better 
+than Mootools and John Resig implems that use this.parent/this._super. Javascript 
+has no real OOP inheritance like Java, it has prototypes instead. One big difference 
+is that Java class methods have a reference to their class and superclass while JS 
+class methods (functions bind to the prototype) have not. It means that there is no 
+way from inside a method to access its class using the this object or its superclass 
+using the this.superclass object.
+
+Hence, this kind of implem is bad design (at least not robust):
+
+function Person(name) {
+  this.name = name;
+};
+
+function Dreamer(name, dream) {
+  //accessing superclass with this.superclass: DANGEROUS
+  this.superclass.constructor.call(this, name);
+  this.dream = dream;
+}
+
+Dreamer.prototype.superclass = Person.prototype;
+
+Sure this implem shows a way to access superclass with this.superclass and inheritance 
+is gonna work just fine. But if you push your class Dreamer online and someone wants 
+to extend it: BOOM, infinite loop!
+
+function Nightmarer(name, dream) {
+  this.superclass.constructor.call(this, name, dream); //infinite loop
+  this.field = "will never be accessed";
+}
+
+DayDreamer.prototype.superclass = Dreamer.prototype;
+
+If a JS class system uses the this object to do inheritance with something like 
+this.parent, this._super, this.sup..., there are chances that the system can't handle 
+more than 2 inheritance levels or there's an ugly wrapper trick that's gonna slow 
+your code (the more levels of inheritance, the slower it gets). You can see the 
+Mootools trick to do deep level inheritance here (search string "var parent").
+Extend a class: a more efficient way
+
+    Create a static Super field YourClass.Super=YourSuperClass (My.js does it for you)
+    Use YourClass.Super explicitly when calling the super constructor
+    Use a cached version of YourClass.Super.prototype.method when calling a super method
+    Define your class in an independent context to avoid global scope lookups
+    Exit wrappers, don't be afraid to use call
+
+Doing it with My.js:
+
+Classes are created in a global myLib namespace that already contains the class Person
+
+//===================================================================
+//Class definition scoped in an independent context
+(function(myLib) {
+
+  //Class Dreamer extends Person
+  var Dreamer = my.Class(myLib.Person, {
+
+    constructor: function(name, dream) {
+      //Explicit call to Dreamer.Super === Person
+      Dreamer.Super.call(this, name);
+      this.dream = dream;
+    },
+
+    wakeUp: function() {
+      console.log('Wake up! We have to change the world today!');
+    }
+
+  });
+
+  //Exports the class in your lib
+  myLib.Dreamer = Dreamer;
+
+})(myLib);
+
+
+//===================================================================
+(function(myLib) {
+
+  //Class WeedSmoker extends Dreamer
+  var WeedSmoker = myLib.WeedSmoker = my.Class(myLib.Dreamer, {
+
+    constructor: function(name, dream, isAwake) {
+      WeedSmoker.Super.call(this, name, dream);
+      this.isAwake = isAwake;
+    },
+
+    //Override the super method
+    wakeUp: function() {
+      this.isAwake ?
+        console.log('Wake up! You have smoked too much!') :
+        //call a cached version of the super method
+        superWakeUp.call(this);
+    }
+
+  });
+
+  //cache super method in local scope for faster access (less "." lookups)
+  var superWakeUp = WeedSmoker.Super.prototype.wakeUp;
+
+})(myLib);
+
+//===================================================================
+//If you want the cached super method to be out of the class scope,
+//in case there are too many vars in the class scope for example,
+//you can also use a closure to cache the super method:
+(function(myLib) {
+
+  var WeedSmoker = myLib.WeedSmoker = my.Class(myLib.Dreamer, {
+
+    constructor: ...,
+
+    //cache super method with closure
+    wakeUp: function() {
+      var superWakeUp = WeedSmoker.Super.prototype.wakeUp;
+      return function() {
+        this.isAwake ?
+          console.log('Wake up! You have smoked too much!') :
+          superWakeUp.call(this);
+      };
+    }()
+
+  });
+
+})(myLib);
+
+//===================================================================
+
+The above inheritance system is quite robust (it can support many levels of 
+inheritance) and fast (only direct fonction calls + caching ftw). In fact, My.js 
+does almost nothing except handling the prototype chain so that you don't 
+have to and adding little sugar here and there.
+Private fields and methods
+
+There are no such things as private fields & methods in JS core (in Harmony?) 
+but there are easy and efficient ways to emulate them using closures, at least 
+for private methods and private static fields/method. Private fields are more 
+tricky as we'll see at the end of the section.
+
+The center piece of making things private is to define your class in an independent 
+context, private elements are defined in the local scope, your class access them 
+thanks to a closure capture, but from the global scope, they are not accessible.
+
+For more efficient private methods, define "Python-like methods".
+
+(function() {
+
+  window.User = my.Class({
+
+    constructor: function(username, imagesServerUrl) {
+      this.username = username;
+      //call private methods
+      _fetchUserInfo(this);
+      _fetchUserImages(this, imagesServerUrl);
+      //update private static field
+      USER_COUNT++;
+      //call private static method
+      UPDATE_IMAGES_SERVERS_USER_COUNT(imagesServerUrl);
+    },
+
+    ...
+
+  });
+
+  //=====================================================================  
+  //Private methods can be defined like Python methods
+  //with 1st arg "self" referencing the thisObject.
+  //This pattern is better than "privateMethod.call(this, arg0, arg1)"
+
+  //Suppose there is an AJAX function "GET(url, sendData, loadListener)"
+
+  //private method 1
+  var _fetchUserInfo = function(self) {
+    GET(INFO_SERVER_URL, self.username, function(info) {
+      self.info = info;
+    });
+  };
+
+  //private method 2
+  var _fetchUserImages = function(self, imagesServerUrl) {
+    GET(imagesServerUrl, self.username, function(images) {
+      self.images = images;
+    });
+  };
+
+  //=====================================================================
+  //private static fields
+  var USER_COUNT = 0;
+  var IMAGES_SERVERS_USER_COUNT = {};
+  var INFO_SERVER_URL = 'http://info.server.com';
+
+  //private static method
+  var UPDATE_IMAGES_SERVERS_USER_COUNT = function(url) {
+    if (IMAGES_SERVERS_USER_COUNT[url] === undefined)
+      IMAGES_SERVERS_USER_COUNT[url] = 0;
+    IMAGES_SERVERS_USER_COUNT[url]++;
+  }
+
+})();
+
+//=======================================================================
+
+Tricky private fields
+
+There is no efficient way to emulate private fields (using pure JS techniques). 
+You'll have to use tricks and wrappers or per instance closures. Personally, I 
+don't use them, I just prefix my private field with an underscore like this: 
+this._privateField. If you really want to have private fields, you can still 
+do it this way:
+
+var Person = my.Class({
+
+  //The field "name" is private, you can access it with a getter
+  //but you can't modify it
+  constructor: function(name) {
+    this.getName = function() {
+      return name;
+    };
+  },
+
+  ...
+
+});
+
+For more advanced private fields pattern, you can check the interesting work of 
+Irakli Gozalishvili.
+
+The counterpart of the above technique is that you'll generate 1 function & 
+1 closure for every instance and the access to your field "name" will be slower 
+since you always have to use the getter. In fact, the above privacy is a little 
+wrong: usually private fields are private for methods from other classes but 
+they're not private for methods from the same class (in Java, methods from the 
+same class can access "this.privateField" without the getter). With the above 
+pattern, the field is always private, even for methods from the same class.
+
+I also wonder if it's very useful to use private fields (anyone with a good answer?). 
+In C++ & Java, private fields are safe in part because methods that use them are 
+safe. In JS, anyone can dynamically modify/hijack any method of any instance, so 
+you can sweat to add locks on your "private fields doors" (with closures), malicious 
+people can still enter your house through your open windows (methods).
+Protected methods
+
+To protect a method, test if the this object is an instance of the class:
+
+var Person = my.Class({
+
+  constructor: function(name) { this.name = name; },
+
+  //this method can only be called by instances of class Person
+  //or instances of class descending from Person
+  protectedMethod: function() {
+    if (!(this instanceof Person))
+      throw new Error('Access restricted, you are in a protected area!');
+    //do what you wanna do here
+    //...
+  }
+
+  ...
+
+});
+
+Implementing classes
+
+There is only one Superclass per class (the one associated to the prototype and 
+that works with instanceof) but it's very easy to "implement" other classes by 
+copying methods in the prototype.
+
+Doing it with My.js:
+
+var Person = my.Class({
+  constructor: function(name) { this.name = name; },
+  sayHello: function() { console.log('Hello, I am ' + this.name); },
+  ...
+});
+
+var Sleeper = my.Class({
+  fallAsleep: function() { console.log('zzzz'); },
+  ...
+});
+
+var ImaginaryTraveler = my.Class({
+  travel: function() { console.log('I am flying in the sky!'); },
+  ...
+});
+
+
+//Dreamer extends Person implements Sleeper, ImaginaryTraveler
+//1st arg is the extended class, following args are the implemented classes
+var Dreamer = my.Class(Person, Sleeper, ImaginaryTraveler, {
+
+  constructor: function(name, dream) {
+    Dreamer.Super.call(this, name);
+    this.dream = dream;
+  },
+
+  wakeUp: function() {
+    console.log('Wake up! You have to save the world!');
+  }
+
+});
+
+var aladdin = new Dreamer('Aladdin');
+
+aladdin instanceof Person; //true
+aladdin instanceof Sleeper; //false
+
+aladdin.fallAsleep();
+aladdin.travel();
+aladdin.wakeUp();
+aladdin.sayHello();
+
+Adding methods to your class
+
+With most class systems, methods can be added to your class with the static method 
+YourClass.extend. With My.js, methods are added with the my.extendClass function:
+
+my.extendClass(Person, {
+
+  newMethod1: function() {
+    ...
+  },
+
+  newMethod2: function() {
+    ...
+  },
+
+  newMethod3: function() {
+    ...
+  }
+
+});
+
+//You can still add to prototype directly
+Person.prototype.method4 = function() {
+  ...
+}
+
+What if I forget the new operator?
+
+When creating an instance, you have to use the new operator. But when you forget 
+it, no error will be triggered. To avoid this prone-to-error-situation, some 
+proposes to never use the constructor, and use a Person.create static method 
+instead. This a safe approach but it costs 1 wrapper. In My.js, we use another 
+approach to allow users to forget the new operator "safely".
+
+(function() {
+
+  var Person = my.Class({
+
+    //Make you constructor safe to the "new" operator omission
+    //by testing the instance of the "this" object
+    constructor: function(name, city) {
+      if (!(this instanceof Person))
+        return new Person(name, city);
+      this.name = name;
+      this.city = city;
+    },
+
+    ...
+
+  });
+
+  //Using the new operator or not won't impact your code (faster with "new" though)
+  var bob = new Person('Bob'); //OK
+  var alice = Person('Alice'); //also OK
+
+})();
+
+There are 2 minor drawbacks to this approach. 1/ Making your constructor safe adds an 
+instanceof comparison overhead (better than a wrapper though). 2/ Your constructor will 
+be protected, only descending classes can call it (usual expected behavior though).

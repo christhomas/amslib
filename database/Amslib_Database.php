@@ -19,7 +19,7 @@
  * title: Antimatter Database: Base layer
  * description: A low level object to collect shared data and methods that are common
  * 				to all database layers
- * version: 1.5
+ * version: 3.0
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -36,36 +36,29 @@ class Amslib_Database
  *	NOTE: they are not converted to private yet because they are being
  *	explored for possible problems
  *****************************************************************************/
-	private static $sharedConnection = false;
-	
-	protected $lastResult = array();
+	private static $sharedConnection	=	false;
 
-	protected $lastInsertId = 0;
+	protected $lastResult				=	array();
 
-	protected $lastQuery = array();
+	protected $lastInsertId				=	0;
 
-	protected $debug = false;
+	protected $lastQuery				=	array();
 
-	protected $selectResult = false;
-	
-	protected $seq = 0;
+	protected $debug					=	false;
+	protected $errorState				=	true;
+
+	protected $selectResult				=	false;
+	protected $storeSearchResult		=	false;
+
+	protected $seq						=	0;
+
+	//	NOTE: do I use this for anything?
+	protected $databaseName				=	false;
+	protected $table					=	array();
 
 /******************************************************************************
  *	PROTECTED MEMBERS
  *****************************************************************************/
-
-	/**
-	 * 	array: $loginDetails
-	 *
-	 * 	An array of login data which contains the values that you want to connect with
-	 *
-	 * 	values:
-	 * 		server		-	string(url:port)
-	 * 		username	-	string
-	 * 		password	-	string
-	 * 		database	-	string
-	 */
-	protected $loginDetails;
 
 	/**
 	 * 	boolean: connection
@@ -79,11 +72,6 @@ class Amslib_Database
 	 * 	FIXME: The description of this member is incorrect
 	 */
 	protected $connection = false;
-	
-	protected function getDatabaseLogin()
-	{
-		die(get_class($this)."::getDatabaseLogin(), this method is required");
-	}
 
 	protected function setLastQuery($query)
 	{
@@ -103,12 +91,8 @@ class Amslib_Database
 
 	public function __construct()
 	{
-		$this->seq = 0;
-	}
-
-	public function getLastQuery()
-	{
-		return $this->lastQuery;
+		$this->seq		=	0;
+		$this->table	=	array();
 	}
 
 	public function setFetchMethod($method)
@@ -118,33 +102,58 @@ class Amslib_Database
 		}
 	}
 
-	public function getSearchResultHandle()
+	public function getConnectionDetails()
 	{
-		return $this->selectResult;
-	}
-
-	public function connect()
-	{
-		$this->getDatabaseLogin();
-		$this->makeConnection();
-	}
-	
-	public function fatalError($msg)
-	{
-		//	Protect sensitive data
-		$this->loginDetails		=	"*PROTECTED*";
-		$this->__lastResult		=	"*PROTECTED*";
-		$this->__lastQuery		=	"*PROTECTED*";
-		
-		die("	FATAL ERROR: $msg<br/>
-				database error = '".$this->error()."'<br/>
-				location of error = ".Amslib::var_dump(array_slice(debug_backtrace(),1,2),true)
-		);
+		die("(".basename(__FILE__)." / FATAL ERROR): getConnectionDetails was not defined in your database object, so connection attempt will fail");
 	}
 
 	public function setDebug($state)
 	{
 		$this->debug = $state;
+	}
+
+	public function setErrorState($state)
+	{
+		$e = $this->errorState;
+
+		$this->errorState = $state ? true : false;
+
+		return $e;
+	}
+
+	public function getLastQuery()
+	{
+		return $this->lastQuery;
+	}
+
+	public function getSearchResultHandle()
+	{
+		return $this->selectResult;
+	}
+
+	public function storeSearchHandle()
+	{
+		$this->storeSearchResult = $this->selectResult;
+	}
+
+	public function restoreSearchHandle()
+	{
+		if($this->storeSearchResult) $this->selectResult = $this->storeSearchResult;
+
+		$this->storeSearchResult = false;
+	}
+
+	public function setTable()
+	{
+		$args = func_get_args();
+
+		$c = count($args);
+
+		if($c == 1){
+			$this->table = $this->escape($args[0]);
+		}else if($c > 1){
+			$this->table[$this->escape($args[0])] = $this->escape($args[1]);
+		}
 	}
 
 	/**
@@ -157,7 +166,13 @@ class Amslib_Database
 	 */
 	public function getConnectionStatus()
 	{
-		return $this->connection ? true : false;
+		if($this->connection) return true;
+
+		//	This is almost always a good idea!!
+		ini_set("display_errors",false);
+		trigger_error(__METHOD__.": DATABASE IS NOT CONNECTED");
+
+		return false;
 	}
 
 	/**
@@ -173,27 +188,25 @@ class Amslib_Database
 		return $this->connection;
 	}
 
-	public function copy($database)
+	public function setConnection($connection)
+	{
+		$this->connection = $connection;
+	}
+
+	public function copyConnection($database)
 	{
 		if($database && method_exists($database,"getConnection")){
-			$c = $database->getConnection();
-			
-			if($c){
-				$this->connection = $c;
-
-				return true;
-			}
+			$this->setConnection($database->getConnection());
 		}
-		
-		return false;
+
+		return $this->connection ? true : false;
 	}
-	
+
 	/**
 	 * method: setSharedConnection
-	 * 
-	 * Set a shared "application" database connection which can be 
-	 * retrieved from other classes in order to share the "connection" 
-	 * with the application's database
+	 *
+	 * A simple way to share a database connection without
+	 * having to pass the object around
 	 */
 	public static function setSharedConnection($databaseObject)
 	{
@@ -201,13 +214,13 @@ class Amslib_Database
 			self::$sharedConnection = $databaseObject;
 		}
 	}
-	
+
 	/**
 	 * method: getSharedConnection
-	 * 
-	 * Get the shared "application" database connection in order to access 
-	 * the application database, without knowing where the connection comes 
-	 * from (example: the application knows, but the plugin does not)
+	 *
+	 * Retrieve the shared database connection, this is useful
+	 * in scenarios where you need to simply share the object
+	 * but don't want to pass the object around
 	 */
 	public static function getSharedConnection()
 	{

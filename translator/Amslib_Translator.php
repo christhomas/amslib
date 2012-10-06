@@ -17,15 +17,11 @@
  *
  * file: Amslib_Translator.php
  * title: Human Language Translator
- * version: 2.5
+ * version: 3.0
  * description: A translator object which uses a language catalog like gettext but doesnt
  *		really suck by actually doing things cleverly, you can learn, forget, translate
  *		mix catalogues from different parts of projects together, it's much more powerful
  *		and does exactly the same job.
- *
- * Missing features:
- * 	-	Support for "languages" instead of loading databases directly, right now, you have to specify the file on disk
- * 	-	Right now, the last loading translation is not overloading the current one, but being saved, this should reverse
  *
  * Contributors:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -37,88 +33,107 @@
  * Translate strings from between a recognised input and output, it's fast,
  * flexible and easy to use (easier than PO files anyway)
  */
-class Amslib_Translator
+class Amslib_Translator extends Amslib_Translator_Source
 {
-	protected $keyStore;
+	protected	$source;
+	protected	$stackLanguage;
 
-	public function __construct()
+	public function __construct($type,$name=NULL)
 	{
-		$this->keyStore = array();
-	}
-
-	public function open($database)
-	{
-		$this->keyStore = $database;	
-	}
-	
-	public function close()
-	{
-		$this->keyStore = array();
-	}
-
-	//	NOTE: These methods have no purpose in the basic runtime memory translator
-	public function sync(){}
-	public function async(){}
-	
-	//	TODO: missing in the memory interface
-	public function listAll($language=NULL){}
-	
-	public function getKeys()
-	{
-		return array_keys($this->keyStore);
-	}
-
-	public function t($key,$language=NULL)
-	{
-		return $this->translate($key);
-	}
-
-	//	TODO: This method has no way to translate multiple languages
-	public function translate($key,$language=NULL)
-	{
-		if(is_string($key) && isset($this->keyStore[$key])){
-			return $this->keyStore[$key];	
-		}
+		$this->name = $name;
 		
-		return $key;
+		switch($type){
+			case "xml":{		$this->source = new Amslib_Translator_XML();		}break;
+			case "database":{	$this->source = new Amslib_Translator_Database();	}break;
+			case "keystore":{	$this->source = new Amslib_Translator_Keystore();	}break;
+		}
 	}
 	
-	public function l($key,$translation,$language=NULL)
-	{
-		return $this->learn($key,$translation,$language);
-	}
-	
-	//	TODO: This method cannot learn from various languages
-	public function learn($key,$translation,$language=NULL)
-	{
-		$this->keyStore[$key] = $translation;
-	}
-	
-	public function f($key,$database=NULL)
-	{
-		$this->forget($key,$database);
-	}
-
-	//	TODO: This language has no concept of languages, so the parameter is not used
-	//	NOTE: WTF??? was I drunk when I wrote this???
-	public function forget($key,$language=NULL)
-	{
-		unset($this->keyStore[$key]);
-	}
-
-	//	TODO: missing in the memory interface
-	public function getMissing(){}
-
-	//	TODO: missing in the memory interface
-	public function updateKey($old,$new,$deleteOld=true){}
-
-	static public function &getInstance()
+	static public function &getInstance($type)
 	{
 		static $instance = NULL;
-
-		if($instance === NULL) $instance = new self();
-
+		
+		if($instance === NULL) $instance = new self($type);
+		
 		return $instance;
 	}
+
+	/********************************************************************************
+	 *	LANGUAGE METHODS
+	********************************************************************************/
+	public function addLanguage($langCode){		return $this->source->addLanguage($langCode);	}
+	public function setLanguage($langCode){		return $this->source->setLanguage($langCode);	}
+	public function getLanguage(){				return $this->source->getLanguage();			}
+	public function getAllLanguages(){			return $this->source->getAllLanguages();		}
+	public function isLanguage($langCode){		return $this->source->isLanguage($langCode);	}
+	
+	//	NOTE: This method is used to temporarily change the language of the translator, but not lose the original
+	//	NOTE: should change this method to use like a stack of plates
+	public function pushLanguage($langCode)
+	{
+		if(is_string($langCode) && strlen($langCode)){
+			$this->stackLanguage = $this->source->getLanguage();
+			$this->source->setLanguage($langCode);
+		}
+	}
+
+	//	NOTE: Then after you've done your "thing" you can swap it back out.
+	//	NOTE: should change this method to use like a stack of plates
+	public function popLanguage()
+	{
+		if(is_string($this->stackLanguage) && strlen($this->stackLanguage)){
+			$this->source->setLanguage($this->stackLanguage);
+			$this->stackLanguage = false;
+		}
+	}
+
+	/********************************************************************************
+	 *	TRANSLATOR METHODS
+	********************************************************************************/
+	public function setLocation($location){				return $this->source->setLocation($location);	}
+	public function load(){								return $this->source->load();					}
+	public function translate($k,$l=NULL){				return $this->source->translate($k,$l);			}
+	public function learn($k,$v,$l=NULL){				return $this->source->learn($k,$v,$l);			}
+	public function forget($k,$l=NULL){					return $this->source->forget($k,$l);			}
+	public function searchKey($k,$s=false,$l=NULL){		return $this->source->searchKey($k,$s,$l);		}
+	public function searchValue($v,$s=false,$l=NULL){	return $this->source->searchValue($v,$s,$l);	}
+	public function getKeyList($l=NULL){				return $this->source->getKeyList($l);			}
+	public function getValueList($l=NULL){				return $this->source->getValueList($l);			}
+	public function getList($l=NULL){					return $this->source->getList($l);				}
+	public function updateKey($k,$nk,$l=NULL){			return $this->source->updateKey($k,$nk,$l);		}
+	
+	/********************************************************************************
+	 *	IMPORT TRANSLATION METHODS
+	********************************************************************************/
+	public function importKeyedArray($array)
+	{
+		foreach($array as $key=>$string){
+			if(is_string($key) && is_string($value)){
+				$this->learn($key,$string);	
+			}
+		}
+	}
+	
+	public function importArray($array,$keyIndex,$valueIndex)
+	{
+		foreach($array as $translation){
+			if(isset($translation[$keyIndex]) && isset($translation[$valueIndex]))
+			{
+				$this->learn($translation[$keyIndex],$translation[$valueIndex]);
+			}
+		}
+	}
+	
+	public function importSource($source)
+	{
+		$list = $source->getKeyList();
+
+		if(!empty($list)) foreach($list as $key){
+			$value = $source->translate($key);
+
+			if(is_string($key) && is_string($value)){
+				$this->learn($key,$value);
+			}
+		}
+	}
 }
-?>

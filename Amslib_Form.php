@@ -1,24 +1,34 @@
 <?php
 class Amslib_Form
 {
-	static public function arrayToSelectOptions($array,$keyText,$keyValue,$selected=NULL)
+	static public function selectOptions($array,$selected=NULL,$indexText=NULL,$indexValue=NULL)
 	{
-		$options = "";
+		$options = array();
 
-		if(!$array || !is_array($array) || empty($array)) return $options;
+		foreach(Amslib_Array::valid($array) as $arrayKey=>$item){
+			if(is_array($item)){
+				$text	=	$indexText && isset($item[$indexText])		?	$item[$indexText]	:	"";
+				$value	=	$indexValue && isset($item[$indexValue])	?	$item[$indexValue]	:	"";
+			}else if(is_string($item) && $indexText == "use_key"){
+				$text	=	$item;
+				$value	=	$arrayKey;
+			}else{
+				$text = $value = $item;
+			}
 
-		foreach($array as $key=>$value){
-			$text		=	(isset($value[$keyText])) ? $value[$keyText] : "";
-			$value		=	(isset($value[$keyValue])) ? $value[$keyValue] : "";
-			$enabled	=	($value == $selected) ? "selected='selected'" : "";
-
-			//	ignore blank strings
 			if(strlen($text) == 0 || strlen($value) == 0) continue;
 
-			$options .= "<option $enabled value='$value'>$text</option>";
+			$enabled = $value == $selected ? "selected='selected'" : "";
+
+			$options[] = "<option $enabled value='$value'>$text</option>";
 		}
 
-		return $options;
+		return implode("",$options);
+	}
+
+	static public function numericSelectOptions($start,$stop,$selected=NULL,$pad=NULL)
+	{
+		return self::numberSequenceToSelectOptions($start,$stop,$selected,$pad);
 	}
 
 	static public function numberSequenceToSelectOptions($start,$stop,$selected=NULL,$pad=NULL)
@@ -30,7 +40,7 @@ class Amslib_Form
 		for($a=$start;$a<=$stop;$a++){
 			$enabled = ($a == $selected) ? "selected='selected'" : "";
 
-			if($pad !== NULL && is_string($pad)) $a = str_pad($a,strlen($pad),$pad[0],STR_PAD_LEFT); 
+			if($pad !== NULL && is_string($pad)) $a = str_pad($a,strlen($pad),$pad[0],STR_PAD_LEFT);
 
 			$options .= "<option $enabled value='$a'>$a</option>";
 		}
@@ -39,6 +49,11 @@ class Amslib_Form
 	}
 
 	static public function selectRadioButton($value,$compare)
+	{
+		return ($value == $compare) ? "checked='checked'" : "";
+	}
+
+	static public function selectCheckbox($value,$compare)
 	{
 		return ($value == $compare) ? "checked='checked'" : "";
 	}
@@ -55,5 +70,11 @@ class Amslib_Form
 		$file = Amslib::filesParam($name);
 
 		return ($file && isset($file["tmp_name"])) ? $file["tmp_name"] : false;
+	}
+
+	//	DEPRECATED METHOD: use selectOptions() instead
+	static public function arrayToSelectOptions($array,$keyText,$keyValue,$selected=NULL)
+	{
+		return self::selectOptions($array,$selected,$keyText,$keyValue);
 	}
 }

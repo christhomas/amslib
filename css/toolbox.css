@@ -1,6 +1,6 @@
 @CHARSET "UTF-8";
 
-.expand_to_fill{
+.amtb .expand{
 	position: absolute;
 	left: 0;
 	top: 0;
@@ -10,10 +10,5 @@
 	margin: 0;
 }
 
-img{ 
-	border: none;
-}
-
-a{
-	outline: none;
-}
+.amtb img{	border: none;	}
+.amtb a{	outline: none;	}

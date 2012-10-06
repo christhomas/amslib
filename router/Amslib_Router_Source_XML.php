@@ -1,11 +1,11 @@
 <?php
 /*******************************************************************************
- * Copyright (c) {15/03/2008} {Christopher Thomas} 
+ * Copyright (c) {15/03/2008} {Christopher Thomas}
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -14,242 +14,121 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- * 
+ *
  * File: Amslib_Router_Source_XML.php
- * Title: The XML router source reader
- * Version: 1.0
+ * Title: The XML router source reader, version 4.0 of the api/object
+ * Version: 4.0
  * Project: Amslib/Router/Source
- * 
+ *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
-
 class Amslib_Router_Source_XML
 {
-	protected $document;
-	protected $xpath;
-	protected $routes;
-	protected $url;
+	protected $matches;
 
-	//	FIXME: This should move down a layer to a generic part
-	protected function extractParameters($url,$route)
+	protected function toArray($node,$recursive=true)
 	{
-		$params = Amslib::lchop($url,$route);
-		
-		return (!empty($params)) ? explode("/",$params) : array();
-	}
-	
-	protected function findNodes($name,$parent)
-	{
-		if(!$parent || !$parent->hasChildNodes()) return array();
+		if(!$node || $node->count() == 0) return false;
 
-		$results = array();
-		
-		foreach($parent->childNodes as $p){
-			if($p->nodeName == $name) $results[] = $p;
-		}
-		
-		return $results;
-	}
-	
-	protected function decodeParameters($parameters)
-	{
-		$parameter_list = array();
-		
-		foreach($parameters as $p){
-			$id = $p->getAttribute("id");
-			if(!$id) continue;
-			
-			$parameter_list[$id] = $p->nodeValue;
-		}
-		
-		return $parameter_list;
-	}
-	
-	protected function decodeSources($src)
-	{
-		$src_list = array();
-		
-		foreach($src as $s){
-			$version = $s->getAttribute("version");
-			if(!$version) $version = "default";
-			
-			$lang = $s->getAttribute("lang");
-			if(!$lang) $lang = "all";
-			
-			$src_list[$version][$lang] = $s->nodeValue;
+		$data			=	array();
+		$data["attr"]	=	$node->attr();
+		$data["tag"]	=	$node->tag();
+		$childNodes		=	$node->branch()->children();
+
+		//	recurse to decode the child or merely store the child to process later
+		foreach($childNodes as $c){
+			$data["child"][] = $recursive
+				? $this->toArray($c,$recursive)
+				: array("tag"=>$c->tag(),"child"=>$c);
 		}
 
-		return $src_list;
-	}
-	
-	protected function decodeResource($resource)
-	{
-		if($resource && count($resource) > 0){
-			$resource = current($resource);
+		//	If the node doesn't have children, obtain the text and store as it's value
+		if(count($childNodes) == 0) $data["value"] = $node->text();
 
-			return $resource->nodeValue;
-		}
-		
-		return false;
+		return $data;
 	}
 
-	public function __construct()
+	protected function processNode($node)
 	{
-		$this->routes	=	array();
-		$this->url		=	array();
-	}
+		$path	=	$this->toArray($node);
+		$child	=	isset($path["child"]) ? $path["child"] : false;
 
-	public function load($source)
-	{
-		//	TODO:	we added this call to absolute because in some cases, it wouldn't find the file correctly
-		//			so I figured it would be the easiest way to solve the problem, but I wonder if it causes
-		//			problems of it's own?
-		$source = Amslib_Filesystem::absolute($source);
-		$source = Amslib_Filesystem::find($source,true);
-		
-		if(!file_exists($source)){
-			//	TODO: Should move to using Amslib_Keystore("error") instead
-			print("Amslib_Router_Source_XML::load(), source = ".Amslib::var_dump($source,true));
-			die("Amslib_Router_Source_XML::load(), source file does not exist");	
-		}
-		
-		$this->document = new DOMDocument('1.0', 'UTF-8');
-		if($this->document->load($source)){
-			$this->xpath = new DOMXPath($this->document);
+		if(!$path) return false;
 
-			$paths = $this->xpath->query("//router/path");
-			
-			foreach($paths as $p) $this->addPath($p);
-		}else{
-			//	TODO: Should move to using Amslib_Keystore("error") instead
-			print("XML ROUTER DATABASE: '$source' FAILED TO OPEN<br/>");
-		}
-	}
-	
-	/**
-	 * method: addPath
-	 * 
-	 * A method to add a path to the routes configured by the system, it finds and decodes
-	 * all the appropriate nodes in the xml to find all the configuration information
-	 * 
-	 * parameters:
-	 * 	path	-	The XML Node in the amslib_router.xml called "path"
-	 * 
-	 * notes:
-	 * 	This method is exposed as public because it is useful sometimes to store the xml configuration
-	 * 	in another document, but "graft" the route onto the main router configuration as if there 
-	 * 	was no difference between them.  The administration panel project is a good example of this,
-	 * 	The admin_panel.xml file stores each plugin, plus the router configuration, in this case, we need
-	 * 	to decode that config, but we dont want to duplicate the decoding mechanism.
-	 * 
-	 *  IMPORTANT:	Not entirely sure whether this is a good idea, or just exposing a security hole
-	 *  
-	 *  TODO:		I actually need this for dynamically allowing widgets to insert their own routes by being installed
-	 *  			you can't expect the installer to know how to update the router xml, so they have to supply their own routes
-	 *  			and be loaded here, so instead, we need to SUPER VALIDATE everything that passes through this method.
-	 *  			Because it's ALL user defined and therefore bullshit, broken and mischevious :)
-	 *  NOTE:		actually, the router xml is defined by the user too, so it should be protected in any situation
-	 */
-	public function addPath($path)
-	{
-		$name			=	$path->getAttribute("name");
-		
-		$src			=	$this->findNodes("src",$path);
-		$resource		=	$this->findNodes("resource",$path);
-		$parameter		=	$this->findNodes("parameter",$path);
+		$data = array("javascript"=>array(),"stylesheet"=>array());
+		$data["name"] = $path["attr"]["name"];
+		$data["type"] = $path["tag"];
 
-		$src_list 		=	$this->decodeSources($src);
-		$resource		=	$this->decodeResource($resource);
-		$parameter_list	=	$this->decodeParameters($parameter);
-		
-		$this->routes[$name] = array(
-			"src"		=>	$src_list,
-			"resource"	=>	$resource,
-			"data"		=>	$parameter_list
-		);
-		
-		$this->addInversePath($path);
-		
-		return $this->routes[$name];
-	}
-	
-	public function addInversePath($path)
-	{
-		$name	=	$path->getAttribute("name");
-		$route	=	$this->routes[$name];
+		foreach(Amslib_Array::valid($child) as $c){
+			//	we array_merge the tag with the attributes here because they don't collide, plus if they do
+			//	it's probably because the attribute is to override the tag information anyway
+			$c = array_merge($c,$c["attr"]);
+			$t = $c["tag"];
+			//	remove unwanted indexes so we can assign $c directly if we want to
+			unset($c["attr"],$c["tag"]);
 
-		foreach($route["src"] as $version=>$src){
-			foreach($src as $lang=>$url){
-				$this->url[$url] = array(
-					"version"	=>	$version,
-					"name"		=>	$name,
-					"resource"	=>	$route["resource"],
-					"route"		=>	$url,
-					"lang"		=>	$lang,
-					"data"		=>	$route["data"]
-				);
-			}
-		}
-	}
+			switch($t){
+				case "src":{
+					$lang = isset($c["lang"]) ? $c["lang"] : "default";
+					$data[$t][$lang] = $c["value"];
 
-	public function getURL($url)
-	{
-		return (isset($this->url[$url])) ? $this->url[$url] : false;
-	}
+					//	if there is no default, create one, all routers require a "default source"
+					if(!isset($data[$t]["default"])) $data[$t]["default"] = $c["value"];
+				}break;
 
-	public function getRoute($name,$version,$lang="all")
-	{
-		if(	isset($this->routes[$name]) &&
-			isset($this->routes[$name]["src"][$version]))
-		{
-			$v = $this->routes[$name]["src"][$version];
-			
-			if(!empty($v)){
-				return (isset($v[$lang])) ? $v[$lang] : current($v);
+				case "resource":{
+					$data[$t] = $c["value"];
+				}break;
+
+				case "parameter":{
+					if(!isset($c["id"])) continue;
+
+					$data["route_param"][$c["id"]] = $c["value"];
+				}break;
+
+				case "handler":{
+					unset($c["value"]);
+
+					$data[$t][] = $c;
+				}break;
+
+				case "stylesheet":
+				case "javascript":{
+					if(!isset($c["plugin"])) $c["plugin"] = "__CURRENT_PLUGIN__";
+
+					$data[$t][] = $c;
+				}break;
 			}
 		}
 
-		return false;
+		return $data;
 	}
 
-	//	TODO: Move this to a generic shared layer
-	public function getRouteData($url)
+	public function __construct($source)
 	{
-		$route = false;
+		try{
+			$qp = Amslib_QueryPath::qp(Amslib_File::find(Amslib_Website::abs($source),true));
 
-		if(isset($this->url[$url])){
-			$route				=	$this->url[$url];
-			$route["params"]	=	array();
-		}else{
-			$key = array_keys($this->url);
+			//	If there is no router, prevent this source from processing anything
+			$this->matches = $qp->branch()->find("router > *[name]");
+			//	Find any callback, if one is provided
+			Amslib_Router::setCallback($qp->find("router")->attr("callback"));
 
-			//	Find the longest route that matches against the requested path
-			$match = "";
-			foreach($key as $k){
-				if(strpos($url,$k) !== false){
-					if(strlen($k) > strlen($match)) $match = $k;
-				}
-			}
+			if($this->matches->length) return $this;
+		}catch(Exception $e){}
 
-			//	if a match was found, this will be a non-empty string
-			if(strlen($match)){
-				$route				=	$this->url[$match];
-				$route["params"]	=	$this->extractParameters($url,$route["route"]);
-			}
-		}
-
-		return $route;
+		$this->matches = false;
 	}
 
-	static public function &getInstance($source=NULL)
+	public function getRoutes()
 	{
-		static $instance = NULL;
+		if(!$this->matches) return false;
 
-		if($instance === NULL) $instance = new Amslib_Router_Source_XML();
-		
-		if($instance && $source) $instance->load($source);
+		$routes = array();
 
-		return $instance;
+		foreach($this->matches as $n) $routes[] = $this->processNode($n);
+
+		return $routes;
 	}
 }

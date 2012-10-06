@@ -17,334 +17,354 @@
  *
  * File: Amslib_MVC.php
  * Title: Model/View/Controller implementation for use with Amslib projects
- * Version: 2.1
+ * Version: 6.0
  * Project: amslib
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
 
-class Amslib_MVC
+class Amslib_MVC extends Amslib_Mixin
 {
-	/*********************************
-	 * string: $path
-	 *
-	 * The path to the MVC base path within the website filesystem
-	 */
-	protected $path;
-
-	protected $database;
-	protected $controller;
-	protected $layout;
 	protected $object;
 	protected $view;
 	protected $images;
-	protected $service;
 	protected $stylesheet;
 	protected $javascript;
+	protected $translator;
+
+	//	The model object to allow access to the application logic
+	//	NOTE: what if an api requires multiple models??
+	protected $model;
+
 	protected $value;
 	protected $viewParams;
 	protected $routes;
+
+	//	To allow views/html segments to be slotted into an existing layout
+	//	extending their capabilities with customised functionality
+	//	PROBABLY DEPRECATED
 	protected $slots;
 
-	protected $translation;
-	
-	//	MVC Configuration
-	protected $prefix			=	array();
-	protected $dir				=	array();
-	
-	protected $widgetManager;
-	protected $widgetName;
-	protected $widgetPath;
-	
-	protected function getComponentPath($component,$name)
-	{
-		return "{$this->widgetPath}/{$this->dir[$component]}/{$this->prefix[$component]}{$name}.php";
-	}
-	
+	protected $name;
+	protected $location;
+	protected $plugin;
+
 	public function __construct()
 	{
-		$this->path				=	"";
-		$this->controller		=	array();
-		$this->layout			=	array("default"=>false);
-		$this->object			=	array();
-		$this->view				=	array();
-		$this->service			=	array();
-		$this->stylesheet		=	array();
-		$this->javascript		=	array();
-		$this->value			=	array();
-		$this->viewParams		=	array();
-		$this->translation		=	array();
+		$this->object		=	array();
+		$this->view			=	array();
+		$this->stylesheet	=	array();
+		$this->javascript	=	array();
+		$this->translator	=	array();
 
-		//	These three parameters might not exist in every MVC environment
-		//	Not all environments are widgets or have a widget manager, this is 
-		//	something I assumed in the past, but now with the possibility to
-		//	use this with generic projects, I have to think past that
-		$this->widgetManager	=	NULL;
-		$this->widgetPath		=	NULL;
-		$this->widgetName		=	NULL;
-		
-		$this->setupMVC("controller",	"controllers",	"Ct_");
-		$this->setupMVC("layout",		"layouts",		"La_");
-		$this->setupMVC("view",			"views",		"Vi_");
-		$this->setupMVC("object",		"objects",		"");
-		$this->setupMVC("service",		"services",		"Sv_");
+		$this->value		=	array();
+		$this->viewParams	=	array();
 	}
-	
+
+	static public function &getInstance()
+	{
+		static $instance = NULL;
+
+		if($instance === NULL) $instance = new self();
+
+		return $instance;
+	}
+
+	public function addMixin($object,$reject=array(),$accept=array())
+	{
+		if(is_string($object)) $object = $this->getObject($object,true);
+
+		return parent::addMixin($object,$reject,$accept);
+	}
+
+	public function setName($name)
+	{
+		$this->name = $name;
+	}
+
+	public function getName()
+	{
+		return $this->name;
+	}
+
+	public function setLocation($location)
+	{
+		$this->location = $location;
+	}
+
 	public function initialise()
 	{
 		return $this;
 	}
 
-	public function setupMVC($type,$dir,$prefix)
+	public function setModel($model)
 	{
-		$this->prefix[$type]	=	$prefix;
-		$this->dir[$type]		=	$dir;
+		$this->model = $model;
 	}
 
-	public function setDatabase($database)
+	public function getModel()
 	{
-		$this->database = $database;
-	}
-	
-	public function getDatabase()
-	{
-		return $this->database;
+		return $this->model;
 	}
 
-	//	FIXME: Remove dependency on widget manager
-	public function setWidgetManager($widgetManager)
+	public function setPlugin($plugin)
 	{
-		$this->widgetManager	=	$widgetManager;
-		$this->widgetPath		=	$widgetManager->getWidgetPath();
+		$this->plugin = $plugin;
 	}
 
-	public function getWidgetManager()
+	public function getPlugin()
 	{
-		return $this->widgetManager;
-	}
-
-	public function setWidgetName($name)
-	{
-		$this->widgetName = $name;
-		$this->setWidgetPath("{$this->widgetPath}/{$this->widgetName}");
-	}
-
-	public function getWidgetName()
-	{
-		return $this->widgetName;
-	}
-
-	public function setWidgetPath($path)
-	{
-		$this->widgetPath = $path;
-	}
-
-	public function getWidgetPath()
-	{
-		return $this->widgetPath;
+		return $this->plugin;
 	}
 
 	public function setValue($name,$value)
 	{
-		$this->value[$name] = $value;
+		if(is_string($name) && strlen($name)){
+			$this->value[$name] = $value;
+		}
 	}
 
-	public function getValue($name)
+	public function getValue($name=NULL,$default=NULL)
 	{
-		return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name);
+		if(is_string($name) && strlen($name)){
+			return (isset($this->value[$name])) ? $this->value[$name] : $this->getViewParam($name,$default);
+		}
+
+		//	if no value was requested and default is null, return ALL the values
+		return $name == NULL && $default == NULL ? $this->value : $default;
 	}
-	
+
+	public function setFields($name,$value)
+	{
+		$name = "validate/$name";
+
+		$f = $this->getValue($name,array());
+
+		if(!is_array($value)) $value = array();
+
+		$this->setValue($name,array_merge($f,$value));
+	}
+
+	public function getFields($name)
+	{
+		return $this->getValue("validate/$name",array());
+	}
+
+	public function listValues()
+	{
+		return array_keys($this->value);
+	}
+
+	//	TODO: need to explain the difference between a value and a view param
 	public function setViewParam($parameters)
 	{
 		$this->viewParams = $parameters;
 	}
-	
-	public function getViewParam($name)
+
+	public function getViewParam($name,$default=NULL)
 	{
-		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : NULL;
-	}
-
-	public function setController($id,$name)
-	{
-		if(!$id || strlen($id) == 0) $id = $name;
-		
-		$file = $this->getComponentPath("controller",$name);
-		
-		$this->controllers[$id] = $file;
-	}
-
-	public function getController($id)
-	{
-		return $this->controllers[$id];
-	}
-
-	public function setLayout($id,$name)
-	{
-		if(!$id || strlen($id) == 0) $id = $name;
-		
-		$file = $this->getComponentPath("layout",$name);
-
-		$this->layout[$id] = $file;
-
-		if($this->layout["default"] == false) $this->layout["default"] = $this->layout[$id];
-	}
-
-	public function getLayout($id=NULL)
-	{
-		if($id && isset($this->layout[$id])) return $this->layout[$id];
-
-		return $this->layout;
+		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : $default;
 	}
 
 	public function setObject($id,$name)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
-		
-		$file = $this->getComponentPath("object",$name);
 
-		$this->object[$id] = $file;
+		$this->object[$id] = $name;
 	}
 
-	public function getObject($id,$singleton=false)
+	public function getObject($id,$singleton=true)
 	{
-		if(!isset($this->object[$id])) return false;	
-		
-		$status = Amslib::requireFile($this->object[$id],array("require_once"=>true));
+		if(get_class($this) == $id) return $this;
+		if(!isset($this->object[$id])) return false;
+
+		Amslib::requireFile($this->object[$id],array("require_once"=>true));
 
 		if(class_exists($id)){
-			if($singleton) return call_user_func(array($id,"getInstance"));
-				
+			if($singleton && method_exists($id,"getInstance")) return call_user_func(array($id,"getInstance"));
+
 			return new $id;
 		}
 
 		return false;
 	}
 
+	public function listObjects()
+	{
+		return array_keys($this->object);
+	}
+
 	public function setView($id,$name)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
-		
-		$file = $this->getComponentPath("view",$name);
-		
-		$this->view[$id] = $file;
+
+		$this->view[$id] = $name;
+
+		if(!isset($this->view["default"])) $this->view["default"] = $name;
 	}
-	
-	//	TODO: investigate: this method is very similar to render, can refactor??
-	public function getView($id,$parameters=array())
+
+	public function getView($id)
 	{
-		if(isset($this->view[$id]))
+		if($id && isset($this->view[$id])) return $this->view[$id];
+
+		return $this->view;
+	}
+
+	public function hasView($id)
+	{
+		return ($id && isset($this->view[$id]));
+	}
+
+	public function render($id="default",$parameters=array())
+	{
+		return $this->renderView($id,$parameters);
+	}
+
+	public function renderView($id,$parameters=array())
+	{
+		if(is_string($id) && isset($this->view[$id]))
 		{
+			//	What are view parameters for again??
 			if(!empty($parameters)) $this->setViewParam($parameters);
-			
-			$parameters["widget_manager"]	=	$this->widgetManager;
-			$parameters["api"]				=	$this;
-			
-			ob_start();
-			Amslib::requireFile($this->view[$id],$parameters);
-			return ob_get_clean();
+
+			//	TODO: what happens if api, _w and _c are already defined and you just overwrote them?
+			//	NOTE: this shouldn't happen, they are special so nobody should use them
+			//	NOTE: perhaps we can warn people when they do this? or perhaps move our keys to a more unique "namespace"
+			//	FIXME: what if multiple translators of the same type are defined? they would start to clash
+			$parameters["api"]	=	$this;
+			$parameters["_w"]	=	$this->getTranslator("website");
+			$parameters["_c"]	=	$this->getTranslator("content");
+
+			return Amslib::requireFile($this->view[$id],$parameters,true);
 		}
-		
+
 		return "";
 	}
-	
-	public function setService($id,$file)
-	{
-		if(!$id || strlen($id) == 0) $id = $name;
-		
-		$this->service[$id] = $file;
 
-		//	Set this as a service url for the javascript to acquire
-		$this->setValue("service:$id", $file);
+	public function listViews()
+	{
+		return array_keys($this->view);
 	}
 
-	public function getService($id)
+	public function setTranslator($name,$translator)
 	{
-		return (isset($this->service[$id])) ? $this->service[$id] : NULL;
+		$this->translator[$name] = $translator;
 	}
-	
-	public function callService($id)
+
+	public function getTranslator($name)
 	{
-		$service = $this->getService($id);
-		$service = Amslib_Filesystem::absolute($service);
-		
-		$parameters["widget_manager"]	=	$this->widgetManager;
-		$parameters["api"]				=	$this;
-		
-		return Amslib::requireFile($service,$parameters);
+		return (isset($this->translator[$name])) ? $this->translator[$name] : reset($this->translator);
 	}
-	
-	public function setStylesheet($id,$file,$conditional=NULL)
+
+	public function setStylesheet($id,$file,$conditional=NULL,$autoload=NULL,$media=NULL)
 	{
-		$this->stylesheet[$id] = array("file"=>$file,"conditional"=>$conditional);
+		if(!is_string($id) && $file) return;
+
+		$this->stylesheet[$id] = array(
+			"file"			=>	$file,
+			"conditional"	=>	$conditional,
+			"media"			=>	$media,
+			"autoload"		=>	$autoload
+		);
 	}
-	
+
 	public function addStylesheet($id)
 	{
-		Amslib_Resource_Compiler::addStylesheet($id,$this->stylesheet[$id]["file"],$this->stylesheet[$id]["conditional"]);
-	}
-	
-	public function removeStylesheet($id)
-	{
-		Amslib_Resource_Compiler::removeStylesheet($id);
-	}
-	
-	public function setJavascript($id,$file,$conditional=NULL)
-	{
-		$this->javascript[$id] = array("file"=>$file,"conditional"=>$conditional);
-	}
-	
-	public function addJavascript($id)
-	{
-		Amslib_Resource_Compiler::addJavascript($id,$this->javascript[$id]["file"],$this->javascript[$id]["conditional"]);
-	}
-	
-	public function removeJavascript($id)
-	{
-		Amslib_Resource_Compiler::removeJavascript($id);
-	}
-	
-	//	NOTE:	Shouldn't this use the translation system? not reimplement somethign that already exists?
-	//			This is basically what the in-memory translator does
-	public function setTranslation($name,$value)
-	{
-		$this->translation[$name] = $value;
-		
-		$this->setValue("translation:$name",$value);
+		if(isset($this->stylesheet[$id])){
+			Amslib_Resource::addStylesheet(
+				$id,
+				$this->stylesheet[$id]["file"],
+				$this->stylesheet[$id]["conditional"],
+				$this->stylesheet[$id]["media"]
+			);
+		}
 	}
 
-	//	NOTE:	Shouldn't this use the translation system? not reimplement somethign that already exists?
-	//			This is basically what the in-memory translator does
-	public function getTranslation($name)
+	public function listStylesheet($key="file")
 	{
-		return (isset($this->translation[$name])) ? $this->translation[$name] : NULL;
+		return $key !== false ? Amslib_Array::pluck($this->stylesheet,$key) : $this->stylesheet;
 	}
-	
-	public function addRouteByXmlNode($name,$node)
+
+	public function getStylesheet($id,$file=true)
 	{
-		//	NOTE: What happens if a plugin loads AFTERWARDS, which claims the same route names?
-		//	NOTE: We need a way to deregister this plugin because the new one takes control
-		//	NOTE: This situation doesnt happen right now because we don't have enough plugins so never possible to collide
-		$source = Amslib_Router_Source_XML::getInstance();
-		
-		$this->routes[$name] = $source->addPath($node);
+		return isset($this->stylesheet[$id])
+			? $file ? $this->stylesheet[$id]["file"] : $this->stylesheet[$id]
+			: "";
 	}
-	
-	public function removeRoute($name)
+
+	public function removeStylesheet($id)
 	{
-		$source = Amslib_Router_Source_XML::getInstance();
-		
-		//	TODO: we can't actually remove the route yet, because this has never been done before.
+		Amslib_Resource::removeStylesheet($id);
 	}
-	
-	public function hasRoute($name)
+
+	public function setJavascript($id,$file,$conditional=NULL,$autoload=NULL)
 	{
-		return isset($this->routes[$name]);
+		if(!is_string($id) && $file) return;
+
+		$this->javascript[$id] = array(
+			"file"			=>	$file,
+			"conditional"	=>	$conditional,
+			"autoload"		=>	$autoload
+		);
 	}
-	
-	public function getRoute($name)
+
+	public function addJavascript($id)
 	{
-		return isset($this->routes[$name]) ? $this->routes[$name] : false;
+		if(isset($this->javascript[$id])){
+			$j = $this->javascript[$id];
+			Amslib_Resource::addJavascript($id,$j["file"],$j["conditional"]);
+		}
+	}
+
+	public function listJavascript($key="file")
+	{
+		return $key !== false ? Amslib_Array::pluck($this->javascript,$key) : $this->javascript;
+	}
+
+	public function getJavascript($id,$file=true)
+	{
+		return isset($this->javascript[$id])
+			? $file ? $this->javascript[$id]["file"] : $this->javascript[$id]
+			: "";
+	}
+
+	public function removeJavascript($id)
+	{
+		Amslib_Resource::removeJavascript($id);
+	}
+
+	public function autoloadResources()
+	{
+		foreach($this->stylesheet as $k=>$s) if($s["autoload"]){
+			$this->addStylesheet($k);
+		}
+
+		foreach($this->javascript as $k=>$j) if($j["autoload"]){
+			$this->addJavascript($k);
+		}
+	}
+
+	public function setFont($type,$id,$file,$autoload)
+	{
+		//	FIXME: implement the $type field somehow, but atm we only support google webfont
+		if(!is_string($id) && $file) return;
+
+		$this->font[$id] = array("file"=>$file);
+
+		if($autoload) $this->addFont($id);
+	}
+
+	public function addFont($id)
+	{
+		if(!isset($this->font[$id])) return;
+
+		Amslib_Resource::addFont($id,$this->font[$id]["file"]);
+	}
+
+	public function removeFont($id)
+	{
+		Amslib_Resource::removeFont($id);
 	}
 
 	/**
@@ -368,41 +388,105 @@ class Amslib_MVC
 	 */
 	public function getHiddenParameters()
 	{
-		 $list = "";
-
-		foreach($this->value as $k=>$v){
-			if(is_bool($v)) $v = ($v) ? "true" : "false";
-
-			//	WARNING:	do not change \" for single quote ' or similar, it's done like this to prevent
-			//				certain types of bugs I found with certain combinations of code, it's important
-			//				to prevent future problems to keep \" because it was the only way to prevent strings
-			//				from becoming broken
-			$list.="<input type=\"hidden\" name=\"$k\" value=\"$v\" />";
-		}
-
-		return "<div class='widget_parameters'>$list</div>";
+		return $this->getValueData("input");
 	}
 
-	public function copyService($src,$id,$copyAs=NULL)
+	public function getValueData($type,$filter=false)
 	{
-		if($copyAs === NULL) $copyAs = $id;
+		if($filter == false) $filter = array_keys($this->value);
 
-		$api = $this->widgetManager->getAPI($src);
-		$this->setService($copyAs,$api->getService($id));
+		$output = false;
+
+		switch($type){
+			case "json":{
+				$v = array();
+
+				foreach($filter as $k){
+					if(isset($this->value[$k])) $v[$k] = $this->value[$k];
+				}
+
+				$output = json_encode($v);
+			}break;
+
+			case "input":{
+				$html = array();
+				foreach($filter as $k){
+					if(isset($this->value[$k])){
+						$v = $this->value[$k];
+						if(is_bool($v)) $v = $v ? "true" : "false";
+
+						//	WARNING:
+						//	do not change \" for single quote ' or similar, it's done like this to prevent
+						//	certain types of bugs I found with certain combinations of code, it's important
+						//	to prevent future problems to keep \" because it was the only way to prevent strings
+						//	from becoming broken
+						$html[] ="<input type=\"hidden\" name=\"$k\" value=\"$v\" />";
+					}
+				}
+
+				$output = implode("",$html);
+			}break;
+		}
+
+		return $output ? "<div class='__amslib_mvc_values'>$output</div>" : "";
 	}
 
 	public function setImage($id,$file)
 	{
 		$this->images[$id] = $file;
-		
+
 		$this->setValue("image:$id", $file);
 	}
 
-	public function getImage($id)
+	public function getImage($id,$relative=true)
 	{
-		return (isset($this->images[$id])) ? $this->images[$id] : false;
+		if(!is_string($id)) return false;
+
+		//	Step 1: find the image inside the plugin
+		if(isset($this->images[$id])) return $this->images[$id];
+
+		//	Step 2: find the image relative to the website base (perhaps it's a path)
+		$path = Amslib_Website::abs($this->location.$id);
+
+		if(file_exists($path)){
+			return $relative ? Amslib_Website::rel($path) : $path;
+		}
+
+		//	Step 3: return false, image was not found
+		return false;
 	}
-	
+
+	public function getAPI($name)
+	{
+		return Amslib_Plugin_Manager::getAPI($name);
+	}
+
+	public function getRoute($name=NULL)
+	{
+		return Amslib_Router::getRoute($name,$this->getName());
+	}
+
+	public function getFullURL()
+	{
+		return Amslib_Router::getPath();
+	}
+
+	public function getURL($name=NULL,$group=NULL)
+	{
+		return Amslib_Router::getURL($name,$group?$group:$this->getName());
+	}
+
+	public function getService($name,$group=NULL)
+	{
+		return Amslib_Router::getService($name,$group?$group:$this->getName());
+	}
+
+	public function getServiceURL($name,$group=NULL)
+	{
+		return Amslib_Router::getServiceURL($name,$group?$group:$this->getName());
+	}
+
+	//	FIXME: we have to formalise what this slot code is supposed to do, opposed to what the view system already does.
 	public function setSlot($name,$content,$index=NULL)
 	{
 		if($index){
@@ -411,62 +495,36 @@ class Amslib_MVC
 			$this->slots[$name] = $content;
 		}
 	}
-	
+
 	public function getSlot($name,$index=NULL)
 	{
 		if(isset($this->slots[$name])){
 			if(is_array($this->slots[$name])){
 				return ($index) ? $this->slots[$name][$index] : current($this->slots[$name]);
 			}
-			
+
 			return $this->slots[$name];
 		}
-		
+
 		return "";
 	}
 
-	/**************************************************************************
-	 * method: render
+	/**
+	 * method: setupService
 	 *
-	 * render the output from this MVC, the basic version just renders the
-	 * first layout as defined in the XML, without a controller.
+	 * A customisation method which can do "something" based on what service is being called, at the very
+	 * last second before the actual service is run, this might be to setup some static and protected
+	 * data which is only available here and is not convenient to setup elsewhere.
 	 *
-	 * returns:
-	 * 	A string of HTML or empty string which represents the first layout
+	 * parameters:
+	 * 	$plugin		-	The plugin for the service
+	 * 	$service	-	The service being run inside the plugin
 	 *
 	 * notes:
-	 * 	we only render the first layout in the widget, what happens if there are 10 layouts?
+	 * 	-	The parameters are only really used to identify what service is being run
 	 */
-	public function render($id="default",$parameters=array())
+	public function setupService($plugin,$service)
 	{
-		if(isset($this->layout[$id])){
-			$file							=	$this->layout[$id];
-			
-			$parameters["widget_manager"]	=	$this->widgetManager;
-			$parameters["api"]				=	$this;
-
-			ob_start();
-			Amslib::requireFile($file,$parameters);
-			return ob_get_clean();
-		}
-		
-		return "";
-	}
-
-	static public function replyJSON($response)
-	{
-		header("Content-Type: application/json");
-		//	TODO:Can't use die anymore, because I might run child scripts
-		die(json_encode($response));
-	}
-
-	static public function safeRedirect($location)
-	{
-		if(strlen($location)){
-			header("Location: $location");
-			die("waiting to redirect");
-		}else{
-			die("Amslib_MVC::safeRedirect-> The \$location parameter was an empty string");
-		}
+		//	NOTE: by default, we don't setup anything.
 	}
 }

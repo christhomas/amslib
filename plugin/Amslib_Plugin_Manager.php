@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * file: Amslib_Plugin_Manager.php
- * title: Antimatter Plugin: Plugin Manager object
+ * title: Antimatter Plugin: Plugin Manager object version 3
  * description: An object to store all the plugins and provide a central method
  * 				to access them all
- * version: 1.3
+ * version: 3.0
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
@@ -30,6 +30,7 @@ class Amslib_Plugin_Manager
 	static protected $plugins	=	array();
 	static protected $api		=	array();
 	static protected $location	=	array();
+	static protected $replace	=	array();
 
 	static protected function findPlugin($name,$location=NULL)
 	{
@@ -41,61 +42,101 @@ class Amslib_Plugin_Manager
 				//	double check that the location starts and ends with a slash
 				//	something this isn't the case and the programmer forgets
 				//	then the plugin doesnt load, all because of a simple missing slash
-				return Amslib_Filesystem::reduceSlashes("/$location/");
+				return Amslib_File::reduceSlashes("/$location/");
 			}
 		}
 
 		return false;
 	}
 
-	static public function isLoaded($name)
+	static public function replacePlugin($plugin1,$plugin2)
 	{
-		return isset(self::$plugins[$name]) ? true : false;
+		//	This function will map plugin1 => plugin2, so any attempt to load plugin1 will result in loading plugin2
+		//	This means you need to be able to load plugin2 AT THE POINT IN TIME that plugin1 is loaded, if you require
+		//	something more, you're going to find trouble.
+
+		if(!is_string($plugin1) && strlen($plugin1) == 0) return false;
+		if(!is_string($plugin2) && strlen($plugin2) == 0) return false;
+
+		self::$replace[$plugin1] = $plugin2;
 	}
 
-	static public function addLocation($location)
+	static public function config($name,$location)
 	{
-		self::$location[] = Amslib_Website::abs($location);
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
+		//	Plugin was already loaded, so return it's Plugin Object directly
+		if(self::isLoaded($name)) return self::$plugins[$name];
+
+		if($location = self::findPlugin($name,$location)){
+			//	Plugin was not present, so create it, load everything required and return it's API
+			self::$plugins[$name] = new Amslib_Plugin();
+			self::$plugins[$name]->config($name,$location.$name);
+
+			return self::$plugins[$name];
+		}
+
+		//	Plugin was not found
+		return false;
 	}
 
-	static public function getLocation()
+	static public function load($name,$location=NULL)
 	{
-		return self::$location;
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
+		//	Config a plugin to be "preloaded" and available
+		$p = self::config($name,$location);
+
+		//	If the plugin failed to load, you need to return false to indicate an error
+		if(!$p) return false;
+
+		//	Process any import/export directives
+		$p->transfer();
+
+		//	Load the plugin and all it's children and resources
+		$p->load();
+
+		//	Insert the plugin, or remove it if something has failed
+		if(self::insert($name,$p) == false) self::remove($name);
+
+		//	Obtain the API object, or false if it doesn't exist
+		return self::getAPI($name);
 	}
 
-	static public function add($name,$location=NULL)
+	static public function preload($name,$plugin)
 	{
-		$location = self::findPlugin($name,$location);
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
 
-		//	Protect against missing plugins
-		if(!$location) return false;
-
-		//	Plugin was already loaded, so return it's API directly
-		if(self::isLoaded($name)) return self::getAPI($name);
-
-		//	Plugin was not present, so create it, load everything required and return it's API
-		$plugin = new Amslib_Plugin();
-		$plugin->load($name,$location.$name);
-
-		self::import($name,$plugin);
-
-		return $plugin->getAPI();
+		if($name && $plugin) self::$plugins[$name] = $plugin;
 	}
 
-	static public function import($name,$plugin)
+	static public function insert($name,$plugin)
 	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
 		if($name && $plugin){
 			$api = $plugin->getAPI();
 
 			if($api){
-				self::$plugins[$name]	=	$plugin;
 				self::$api[$name]		=	$api;
+				self::$plugins[$name]	=	$plugin;
+
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	static public function remove($name)
 	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
 		$r = self::$plugins[$name];
 
 		unset(self::$plugins[$name],self::$api[$name]);
@@ -103,57 +144,56 @@ class Amslib_Plugin_Manager
 		return $r;
 	}
 
-	/**
-	 * method: setAPI
-	 *
-	 * A way to provide a custom API object that deals with your application specific
-	 * layer and perhaps provides a customised way to deal with the widget in question
-	 * and your qpplication.
-	 *
-	 * parameters:
-	 * 	$name	-	The name of the widget being overriden
-	 * 	$api	-	An object which is to be used to override the default widget api
-	 *
-	 * example:
-	 * 		NOTE: This example is out of date and needs rewriting
-	 *		require_once("CustomApp_Amstudios_Message_Thread_List.php");
-	 *		class CustomApp_Amstudios_Message_Thread_List extends Amstudios_Message_Thread_List{}
-	 *		$api = CustomApp_Amstudios_Message_Thread_List::getInstance();
-	 *		$api->setValue("key","value");
-	 *		$widgetManager->overrideAPI("amstudios_message_thread_list",$api);
-	 *		$widgetManager->render("amstudios_message_thread_list");
-	 */
-	static public function setAPI($name,$api)
-	{
-		if(isset(self::$plugins[$name])){
-			self::$plugins[$name]->setAPI($api);
-			self::$api[$name] = self::$plugins[$name]->getAPI();
-		}
-	}
-
 	static public function getAPI($name)
 	{
-		return (isset(self::$api[$name])) ? self::$api[$name] : false;
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
+		return is_string($name) && isset(self::$api[$name]) ? self::$api[$name] : false;
 	}
-	
+
+	static public function setAPI($name,$api)
+	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
+		self::$api[$name] = $api;
+	}
+
 	static public function getPlugin($name)
 	{
-		return isset(self::$plugins[$name]) ? self::$plugins[$name] : false;
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
+		return is_string($name) && isset(self::$plugins[$name]) ? self::$plugins[$name] : false;
 	}
 
-	static public function getPluginNameByRouteName($routeName)
-	{
-		foreach(self::$api as $pluginName=>$api)
-		{
-			if($api->hasRoute($routeName)) return $pluginName;
-		}
-
-		return false;
-	}
-	
 	static public function listPlugins()
 	{
 		return array_keys(self::$plugins);
+	}
+
+	static public function listAPI()
+	{
+		return array_keys(self::$api);
+	}
+
+	static public function isLoaded($name)
+	{
+		//	If this plugin is configured to be replaced with another, use the replacement
+		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+
+		return isset(self::$plugins[$name]) ? true : false;
+	}
+
+	static public function addLocation($location)
+	{
+		self::$location[] = Amslib_File::absolute($location);
+	}
+
+	static public function getLocation()
+	{
+		return self::$location;
 	}
 
 	/*******************************************************************
@@ -164,39 +204,18 @@ class Amslib_Plugin_Manager
 	 	will find out which appropriate plugin to call to execute
 	 	the functionality
 	********************************************************************/
-	static public function getView($plugin,$view,$parameters=array())
+	static public function render($plugin,$view="default",$parameters=array())
 	{
 		$api = self::getAPI($plugin);
 
-		return $api ? $api->getView($view,$parameters) : false;
+		return $api ? $api->render($view,$parameters) : false;
 	}
 
-	static public function setService($plugin,$id,$service)
+	static public function getObject($plugin,$id,$singleton=false)
 	{
 		$api = self::getAPI($plugin);
 
-		return $api ? $api->setService($id,$service) : false;
-	}
-
-	static public function getService($plugin,$service)
-	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->getService($service) : false;
-	}
-	
-	static public function getServiceURL($plugin,$service)
-	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->getServiceURL($service) : false;
-	}
-
-	static public function callService($plugin,$service)
-	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->callService($service) : false;
+		return $api ? $api->getObject($id,$singleton) : false;
 	}
 
 	static public function setStylesheet($plugin,$id,$file,$conditional=NULL)
@@ -225,12 +244,5 @@ class Amslib_Plugin_Manager
 		$api = self::getAPI($plugin);
 
 		return $api ? $api->addJavascript($javascript) : false;
-	}
-
-	static public function render($plugin,$layout="default",$parameters=array())
-	{
-		$api = self::getAPI($plugin);
-		
-		return $api ? $api->render($layout,$parameters) : false;
 	}
 }

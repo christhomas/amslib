@@ -1,34 +1,53 @@
-<?php 
+<?php
 class Amslib_File
 {
-	static public function documentRoot()
+	static protected $docroot = false;
+
+	static public function documentRoot($docroot=NULL)
 	{
-		if(isset($_SERVER["DOCUMENT_ROOT"]))
+		//	Manually override the document root
+		if($docroot && is_dir($docroot)) self::$docroot = $docroot;
+		//	If the document root was already calculated, return it's cached value
+		if(self::$docroot) return self::$docroot;
+
+		$dr = self::removeWindowsDrive($_SERVER["DOCUMENT_ROOT"]);
+
+		//	If the document root index exists, ues it to calculate the docroot
+		if(isset($dr))
 		{
-			//	Sometimes idiotic webhosts like dinahosting.com have shit setups and we need to deal with them :)
-			//	the base root dir for dirname(__FILE__) and docroot are different, here we fix that situation
-			$missing = Amslib::rchop(dirname(__FILE__),$_SERVER["DOCUMENT_ROOT"]);
-			//	good hosting will have empty string missing, bad hosting will have a prepend string
-			return self::reduceSlashes("$missing/{$_SERVER["DOCUMENT_ROOT"]}");
+			//	FIXME: If the docroot and dirname(__FILE__) have a different base path, this code will break
+			/*	NOTE:	this situation happened with dinahosting, although without an example of
+						how to get around it, I dont think I can do it now, but this code is causing
+						problems, so I am going to delete it, it will always be in the GIT repo if I
+						want to look at it again and I will just return to doing everything the normal
+						way until the point in time where I need to do this again */
+
+			$docroot	=	self::reduceSlashes($dr);
+		}else{
+			//	on IIS, there is no parameter DOCUMENT_ROOT, have to construct it yourself.
+
+			//	Switch the document separators to match windows dumbass separators
+			$phpself	=	str_replace("/","\\",$_SERVER["PHP_SELF"]);
+			//	delete from script filename, the php self, which should reveal the base directory
+			$root		=	str_replace($phpself,"",$_SERVER["SCRIPT_FILENAME"]);
+
+			$docroot	=	self::removeWindowsDrive($root);
 		}
 
-		//	on IIS, there is no parameter DOCUMENT_ROOT, have to construct it yourself.
+		self::$docroot = $docroot;
 
-		//	Switch the document separators to match windows dumbass separators
-		$phpself	=	str_replace("/","\\",$_SERVER["PHP_SELF"]);
-		//	delete from script filename, the php self, which should reveal the base directory
-		$root		=	str_replace($phpself,"",$_SERVER["SCRIPT_FILENAME"]);
-
-		return self::removeWindowsDrive($root);
+		return self::$docroot;
 	}
 
 	static public function removeWindowsDrive($location)
 	{
-		//	exlode on the windows directory separator, then slice off the first parameter
-		$location = array_slice(explode(DIRECTORY_SEPARATOR,$location),1);
+		if(strpos($location,":") !== false && isset($_SERVER["WINDIR"])){
+			$location = array_slice(explode(":",str_replace("\\","/",$location)),1);
 
-		//	we should now have the root (add the / to the beginning to make the path absolute);
-		return "/".implode("/",$location);
+			return implode("/",$location);
+		}
+
+		return $location;
 	}
 
 	static public function dirname($location)
@@ -38,20 +57,21 @@ class Amslib_File
 		return (strpos($dirname,":") !== false) ? self::removeWindowsDrive($dirname) : $dirname;
 	}
 
-	static public function absolute($filename)
+	static public function absolute($path)
 	{
-		$root		=	self::documentRoot();
-		$filename	=	Amslib::lchop($filename,$root);
+		$root	=	self::documentRoot();
+		$path	=	self::removeWindowsDrive($path);
+		$rel	=	Amslib::lchop($path,$root);
 
-		return self::reduceSlashes("$root/$filename");
+		return self::reduceSlashes("$root/$rel");
 	}
 
-	static public function relative($filename)
+	static public function relative($path)
 	{
-		$root		=	self::documentRoot();
-		$filename	=	Amslib::lchop($filename,$root);
+		$root	=	self::documentRoot();
+		$rel	=	Amslib::lchop($path,$root);
 
-		return self::reduceSlashes($filename);
+		return self::reduceSlashes("/$rel");
 	}
 
 	static public function find($filename,$includeFilename=false)
@@ -106,12 +126,47 @@ class Amslib_File
 		return $list;
 	}
 
+	/**
+	 * method: listFiles
+	 *
+	 * List all the files, not directories in the path given.
+	 *
+	 * parameters:
+	 * 		$dir		-	The directory to scan through
+	 * 		$recurse	-	Whether to recurse into subdirectories
+	 * 		$exit		-	Whether or not this is the outside call, therefore we are now "exiting" the method
+	 *
+	 * returns:
+	 * 		An array of files which were found, or an empty array
+	 */
+	static public function listFiles($dir,$recurse=false,$exit=true)
+	{
+		$list = array();
+
+		if(is_dir($dir)){
+			$list = glob(self::reduceSlashes("$dir/*"));
+
+			if($recurse){
+				foreach($list as $l){
+					$list = array_merge($list,self::listFiles($l,$recurse,false));
+				}
+			}
+		}
+
+		//	Remove all the directories from the list
+		if($exit) foreach($list as $k=>$v){
+			if(is_dir($v)) unset($list[$k]);
+		}
+
+		return $list;
+	}
+
 	static public function glob($path,$relative=false)
 	{
-		$list = glob(Amslib_Filesystem::absolute($path));
+		$list = glob(self::absolute($path));
 
 		if($relative && !empty($list)) foreach($list as &$l){
-			$l = Amslib_Filesystem::relative($l);
+			$l = self::relative($l);
 		}
 
 		return $list;
