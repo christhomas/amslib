@@ -202,6 +202,10 @@ class Amslib_Router
 	{
 		$route = self::getRoute($name,$group);
 
+		//	NOTE: I think it's safe to assume sending NULL means you want the default language
+		//	NOTE: otherwise it would never ever match a language and the system would fail worse
+		if($lang == NULL) $lang = "default";
+
 		return Amslib_Website::rel(isset($route["src"][$lang]) ? $route["src"][$lang] : "");
 	}
 

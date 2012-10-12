@@ -1,5 +1,5 @@
 <?php
-class API_URL
+class Amslib_Router_URL
 {
 	static public function getFullURL()
 	{
