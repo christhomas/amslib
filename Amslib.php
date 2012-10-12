@@ -395,22 +395,22 @@ class Amslib
 		{
 			if($c == __CLASS__) return false;
 
-			if(strpos($c,"Amslib_Translator")	!== false)	$c	=	"translator/$c";
-			if(strpos($c,"Amslib_Router")		!== false) 	$c	=	"router/$c";
-			if(strpos($c,"Amslib_Database")		!== false)	$c	=	"database/$c";
-			if(strpos($c,"Amslib_XML")			!== false)	$c	=	"xml/$c";
-			if(strpos($c,"Amslib_Plugin")		!== false)	$c	=	"plugin/$c";
-			if(strpos($c,"Amslib_MVC")			!== false)	$c	=	"mvc/$c";
-			if(strpos($c,"Amslib_Mixin")		!== false)	$c	=	"mvc/$c";
-			if(strpos($c,"Amslib_File")			!== false)	$c	=	"file/$c";
-			if(strpos($c,"Amslib_QueryPath")	!== false)	$c	=	"util/$c";
-			if(strpos($c,"PiwikTracker")		!== false)	$c	=	"util/$c";
-			if(strpos($c,"phpQuery")			!== false)	$c	=	"util/$c/$c";
-			if(strpos($c,"QRcode")				!== false)	$c	=	"util/phpqrcode/phpqrcode";
-			if(strpos($c,"AesCtr")				!== false)	$c	=	"util/$c";
-
-			if($c == "Logger")		$c	=	"util/apache-log4php/src/main/php/$c";
-			if($c == "FirePHP")		$c	=	"util/FirePHPCore/$c.class";
+			if(strpos($c,"Amslib_Translator")	=== 0)	$c	=	"translator/$c";
+			if(strpos($c,"Amslib_Router")		=== 0) 	$c	=	"router/$c";
+			if(strpos($c,"Amslib_Database")		=== 0)	$c	=	"database/$c";
+			if(strpos($c,"Amslib_XML")			=== 0)	$c	=	"xml/$c";
+			if(strpos($c,"Amslib_Plugin")		=== 0)	$c	=	"plugin/$c";
+			if(strpos($c,"Amslib_MVC")			=== 0)	$c	=	"mvc/$c";
+			if(strpos($c,"Amslib_Mixin")		=== 0)	$c	=	"mvc/$c";
+			if(strpos($c,"Amslib_File")			=== 0)	$c	=	"file/$c";
+			if(strpos($c,"Amslib_QueryPath")	=== 0)	$c	=	"util/$c";
+			if(strpos($c,"PiwikTracker")		=== 0)	$c	=	"util/$c";
+			if(strpos($c,"phpQuery")			=== 0)	$c	=	"util/$c/$c";
+			if(strpos($c,"QRcode")				=== 0)	$c	=	"util/phpqrcode/phpqrcode";
+			if(strpos($c,"AesCtr")				=== 0)	$c	=	"util/$c";
+			if(strpos($c,"Facebook")			=== 0)	$c	=	"util/facebook-php-sdk/src/facebook";
+			if(strpos($c,"Logger")				=== 0)	$c	=	"util/apache-log4php/src/main/php/$c";
+			if(strpos($c,"FirePHP")				=== 0)	$c	=	"util/FirePHPCore/$c.class";
 
 			$f = str_replace("//","/","$c.php");
 
