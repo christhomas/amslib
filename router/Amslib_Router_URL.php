@@ -29,21 +29,19 @@ class Amslib_Router_URL
 		return Amslib_Website::redirect($url,true,$type);
 	}
 
-	static public function getParam($name=NULL,$default="")
+	static public function getRouteParam($name=NULL,$default="")
 	{
 		return Amslib_Router::getRouteParam($name,$default);
 	}
 
-	static public function getOption($index=NULL,$default="")
+	static public function getURLParam($index=NULL,$default="")
 	{
-		if(!is_numeric($index) && $index !== NULL) $index = 0;
-
 		return Amslib_Router::getURLParam($index,$default);
 	}
 
-	static public function decodeURLPairs()
+	static public function decodeURLPairs($offset=0)
 	{
-		return Amslib_Router::decodeURLPairs();
+		return Amslib_Router::decodeURLPairs($offset);
 	}
 
 	static public function getDomain($url="")
