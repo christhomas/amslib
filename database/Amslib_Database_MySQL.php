@@ -423,6 +423,11 @@ QUERY;
 		//	These two rows are "dangerous" cause i'm not sure if the final query will be broken or not :(
 		//	NOTE: if you try hard to avoid problems, it should be ok and a lot faster
 		$query = "select SQL_CALC_FOUND_ROWS $query";
+		//	IMPORTANT NOTE:
+		//	****	there is a side effect of using select2 with a $numResults, is that the total result set is now
+		//	****	not "streamable" as in, you can't select 100,000 results, numResults=1000 and get more results afterwards
+		//	****	cause the limit clause will effectively return only 1000 results and the other 99,000 results will
+		//	****	not be accessible
 		if($numResults > 0 && strpos(strtolower($query)," limit ") === false) $query = "$query limit $numResults";
 
 		$this->setLastQuery($query);
