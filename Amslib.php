@@ -410,14 +410,13 @@ class Amslib
 			if(strpos($c,"AesCtr")				!== false)	$c	=	"util/$c";
 			if(strpos($c,"PiwikTracker")		!== false)	$c	=	"util/$c";
 			if(strpos($c,"Logger")				!== false)	$c	=	"util/apache-log4php/src/main/php/$c";
-			if(strpos($c,"FirePHP")				!== false)	$c	=	"util/FirePHPCore/$c.class";
-			if(strpos($c,"Facebook")			!== false)	$c	=	"util/facebook-php-sdk/$c.php";
-				
-			$filename = str_replace("//","/","$class_name.php");
-				
-			return Amslib::requireFile($filename);
+			
+			if($c == "FirePHP")		$c	=	"util/FirePHPCore/FirePHP.class";
+			if($c == "Facebook")	$c	=	"util/facebook-php-sdk/$c.php";
 
 			$f = str_replace("//","/","$c.php");
+			
+			trigger_error(__METHOD__."f = '$f'");
 
 			return Amslib::requireFile($f);
 		}
