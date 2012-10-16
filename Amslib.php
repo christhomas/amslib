@@ -408,9 +408,10 @@ class Amslib
 			if(strpos($c,"phpQuery")			=== 0)	$c	=	"util/$c/$c";
 			if(strpos($c,"QRcode")				=== 0)	$c	=	"util/phpqrcode/phpqrcode";
 			if(strpos($c,"AesCtr")				=== 0)	$c	=	"util/$c";
-			if(strpos($c,"Facebook")			=== 0)	$c	=	"util/facebook-php-sdk/src/facebook";
 			if(strpos($c,"Logger")				=== 0)	$c	=	"util/apache-log4php/src/main/php/$c";
-			if(strpos($c,"FirePHP")				=== 0)	$c	=	"util/FirePHPCore/$c.class";
+
+			if($c == "Facebook")	$c	=	"util/facebook-php-sdk/src/facebook";
+			if($c == "FirePHP") 	$c	=	"util/FirePHPCore/$c.class";
 
 			$f = str_replace("//","/","$c.php");
 

@@ -35,11 +35,14 @@ var Amslib_Dynamic_Grid = my.Amslib_Dynamic_Grid = my.Class(
 			
 			if(row.length){
 				var max = 0;
-				row.each(function(){ if((h=$(this).height()) > max) max = h;});
+				row.each(function(){ 
+					if((h=$(this).outerHeight()) > max) max = h;
+					$(this).attr("data-calc-height",h);
+				});
 				
 				row.each(function(){
-					var h = $(this).height();
-					var m = (max+1) - h;
+					var h = $(this).outerHeight();
+					var m = max - h;
 					
 					if(m > 0) $(this).css("marginBottom",m+"px");
 				});
