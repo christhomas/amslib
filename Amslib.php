@@ -416,8 +416,6 @@ class Amslib
 
 			$f = str_replace("//","/","$c.php");
 			
-			trigger_error(__METHOD__."f = '$f'");
-
 			return Amslib::requireFile($f);
 		}
 
