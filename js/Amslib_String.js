@@ -14,7 +14,7 @@ var Amslib_String = my.Amslib_String = my.Class(
 		
 		slugify: function(text,slug)
 		{
-			if(slug == "undefined") slug = '-';
+			slug = slug || "-";
 			
 			if(text){
 				text = Amslib_String.removeDiacritics(text);

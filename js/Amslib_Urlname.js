@@ -31,6 +31,7 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 		this.dest	=	$(dest);
 		
 		//	find the attribute on either the src node or parent node, or fail
+		//	NOTE: what does the base string do anyway?
 		this.base = this.src.is("[amslib-urlname-basestring]")
 			? this.src : (this.parent.is("[amslib-urlname-basestring]") ? this.parent : false);
 		
