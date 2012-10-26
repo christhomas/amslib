@@ -202,6 +202,10 @@ class Amslib_Router
 	{
 		$route = self::getRoute($name,$group);
 
+		//	NOTE: I think it's safe to assume sending NULL means you want the default language
+		//	NOTE: otherwise it would never ever match a language and the system would fail worse
+		if($lang == NULL) $lang = "default";
+
 		return Amslib_Website::rel(isset($route["src"][$lang]) ? $route["src"][$lang] : "");
 	}
 
@@ -355,13 +359,14 @@ class Amslib_Router
 		return isset(self::$route["javascript"]) ? self::$route["javascript"] : array();
 	}
 
-	static public function decodeURLPairs()
+	static public function decodeURLPairs($offset=0)
 	{
 		//	here we decode the url into a series of k/v/k/v pairs => [k,v],[k,v]
 		//	e.g. list/[name]/page/[number] => [list,name],[page,number]
 		$p = array();
 		$k = $v = false;
-		$u = self::getURLParam();
+		$u = Amslib_Array::valid(self::getURLParam());
+		if($o=intval($offset)) $u = array_slice($u,$o);
 
 		foreach($u as $value){
 			if($k == false) $k = $value;

@@ -44,7 +44,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 * 	todo:
 	 * 		-	Need to move the database details to somewhere more secure (like inside the database!! ROFL!! joke, don't do that!!!!)
 	 */
-	protected function connect()
+	public function connect()
 	{
 		$this->disconnect();
 		$details = $this->getConnectionDetails();
@@ -423,6 +423,11 @@ QUERY;
 		//	These two rows are "dangerous" cause i'm not sure if the final query will be broken or not :(
 		//	NOTE: if you try hard to avoid problems, it should be ok and a lot faster
 		$query = "select SQL_CALC_FOUND_ROWS $query";
+		//	IMPORTANT NOTE:
+		//	****	there is a side effect of using select2 with a $numResults, is that the total result set is now
+		//	****	not "streamable" as in, you can't select 100,000 results, numResults=1000 and get more results afterwards
+		//	****	cause the limit clause will effectively return only 1000 results and the other 99,000 results will
+		//	****	not be accessible
 		if($numResults > 0 && strpos(strtolower($query)," limit ") === false) $query = "$query limit $numResults";
 
 		$this->setLastQuery($query);
@@ -526,14 +531,18 @@ QUERY;
 
 		$query = "insert into $query";
 
-		$this->setLastQuery($query);
+		//	FIXME: there is a memory leak in either setLastQuery,setDebugOutput,setDBErrors
+		//	NOTE: this leak leads to a LOT of memory being leaked on large scripts processing tens of thousands of rows
+		//	NOTE: when the methods are commented out, the leak disappears and it uses 32MB (Approx)
+		//	NOTE: so something bad is happening here
+		//$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
 
-		$this->setDebugOutput($query);
+		//$this->setDebugOutput($query);
 
 		if(!$result){
 			$this->lastInsertId = false;
-			$this->setDBErrors($query);
+			//$this->setDBErrors($query);
 			return false;
 		}
 
