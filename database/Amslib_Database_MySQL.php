@@ -559,12 +559,12 @@ QUERY;
 
 		$query = "update $query";
 
-		$this->setLastQuery($query);
+		//$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
-		$this->setDebugOutput($query);
+		//$this->setDebugOutput($query);
 
 		if(!$result){
-			$this->setDBErrors($query);
+			//$this->setDBErrors($query);
 			return false;
 		}
 
