@@ -40,20 +40,23 @@ class Amslib_Database
 
 	protected $lastResult				=	array();
 
-	protected $lastInsertId				=	0;
+	protected $lastInsertId			=	0;
 
 	protected $lastQuery				=	array();
 
 	protected $debug					=	false;
 	protected $errorState				=	true;
 
-	protected $selectResult				=	false;
+	protected $selectResult			=	false;
 	protected $storeSearchResult		=	false;
 
 	protected $seq						=	0;
+	
+	protected $errors					=	array();
+	protected $maxErrorCount			=	100;
 
 	//	NOTE: do I use this for anything?
-	protected $databaseName				=	false;
+	protected $databaseName			=	false;
 	protected $table					=	array();
 
 /******************************************************************************
@@ -119,6 +122,28 @@ class Amslib_Database
 		$this->errorState = $state ? true : false;
 
 		return $e;
+	}
+	
+	public function setDBErrors($data,$error=NULL,$errno=NULL,$insert_id=NULL)
+	{
+		$this->errors[] = array(
+				"db_failure"		=>	true,
+				"db_query"			=>	preg_replace('/\s+/',' ',$data),
+				"db_error"			=>	$error,
+				"db_error_num"		=>	$errno,
+				"db_last_insert"	=>	$this->lastInsertId,
+				"db_insert_id"		=>	$insert_id,
+				"db_location"		=>	Amslib_Array::filterKey(array_slice(debug_backtrace(),0,5),array("file","line")),
+		);
+	
+		if(count($this->errors) > $this->maxErrorCount){
+			$this->errors = array_slice($this->errors,-($this->maxErrorCount));
+		}
+	}
+	
+	public function getDBErrors()
+	{
+		return $this->errors;
 	}
 
 	public function getLastQuery()
