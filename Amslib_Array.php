@@ -105,7 +105,7 @@ class Amslib_Array
 	 * 
 	 * This method is a wrapper around unset to make it easier and less verbose in your code to remove multiple elements
 	 */
-	static public function remove($array,$keys)
+	static public function removeKeys($array,$keys)
 	{
 		if(is_string($keys)) $keys = array($keys);
 	
@@ -113,6 +113,8 @@ class Amslib_Array
 		$keys	=	self::valid($keys);
 	
 		foreach($keys as $k) unset($array[$k]);
+		
+		return $array;
 	}
 
 	//	NOTE: I dont think "filterType" is a good function name for this, when it takes a callback, perhaps filterCallback instead?
