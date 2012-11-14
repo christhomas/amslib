@@ -99,6 +99,21 @@ class Amslib_Array
 	{
 	    return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));
 	}
+	
+	/**
+	 * method: remove
+	 * 
+	 * This method is a wrapper around unset to make it easier and less verbose in your code to remove multiple elements
+	 */
+	static public function remove($array,$keys)
+	{
+		if(is_string($keys)) $keys = array($keys);
+	
+		$array	=	self::valid($array);
+		$keys	=	self::valid($keys);
+	
+		foreach($keys as $k) unset($array[$k]);
+	}
 
 	//	NOTE: I dont think "filterType" is a good function name for this, when it takes a callback, perhaps filterCallback instead?
 	static public function filterType($array,$callback)
