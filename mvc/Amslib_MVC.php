@@ -468,6 +468,8 @@ class Amslib_MVC extends Amslib_Mixin
 
 	public function getFullURL()
 	{
+		//	NOTE:	I am not 100% convinced that I should have replaced 
+		//			return Amslib_Router::getPath() with a simple getURL
 		return $this->getURL();
 	}
 
