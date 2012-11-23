@@ -5,9 +5,15 @@ class Amslib_Array
 	 * if you return nothing from a method, then catch that into a parameter
 	 * pass that parameter into this function, you'll freeze the browser
 	 * well done francisco :)
+	 * 
+	 * Extended this method to support passing in a variable and then asking for a key instead of passing it directly
+	 * This is useful when you have a variable but not sure whether the key exists or not, if it doesnt, then 
+	 * it'll cause an error to go into the log, but testing it by passing the variable and the key separately means
+	 * we can handle the situation more gracefully
 	 */
-	static public function valid($array=NULL)
+	static public function valid($array=NULL,$key=NULL)
 	{
+		if($key !== NULL && is_string($key)) $array = isset($array[$key]) ? $array[$key] : array();
 		//	Invalid values return an empty array
 		if(empty($array) || !$array || !is_array($array) || is_null($array)) return array();
 		//	cast objects to arrays
@@ -163,6 +169,12 @@ class Amslib_Array
 			//	TODO: I'm sure that there are more situations I could take into account here
 			//	TODO: I should document exactly what this method does, because right now I can't remember
 
+			//	FIXME: there is a bug here if the key doesnt exist in the array
+			//	NOTE:	there is a side effect of the bug, if the key doesnt exist, it'll return NULL, 
+			//			passing $value as true will mean it'll compare either the existing key against 
+			//			true or null against true, so it in effect is a facinatingly cool way to filter 
+			//			by key and only return arrays which have a particular key.  This whilst being very nice
+			//			is still a bug, I either need to codify this to make it official, or fix the bug
 			$search = $key ? $v[$key] : $v;
 
 			if($similar == true && strpos($search,$value) !== false) $found = true;
