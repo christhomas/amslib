@@ -191,6 +191,19 @@ class Amslib_Array
 
 		return $returnFiltered ? $filter : $array;
 	}
+	
+	static public function reindexByKey($array,$key)
+	{
+		if(!is_string($key)) return $array;
+		
+		$copy = array();
+		
+		foreach($array as $item) if(isset($item[$key])){
+			$copy[$item[$key]] = $item;
+		}
+		
+		return $copy;
+	}
 
 	//	TODO: this method is a little open to abuse and in some situations wouldn't do the right thing
 	//	TODO: explain in words what this does and how it should work
