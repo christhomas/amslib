@@ -1462,7 +1462,7 @@ html: '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.o
 
 			if (self.options.plugins.rmFormat.rmMsWordMarkup) {
 				$(self.editorDoc).bind("keyup.wysiwyg", function (event) {
-					if (event.ctrlKey || event.metaKey) {
+					if (event.ctrlKey || event.originalEvent.keyIdentifier == "Meta") {
 						// CTRL + V (paste)
 						if (86 === event.keyCode) {
 							if ($.wysiwyg.rmFormat) {
