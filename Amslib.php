@@ -258,6 +258,7 @@ class Amslib
 		return $text;
 	}
 
+	//	Perhaps $preformat by default should be true ? would make more sense, otherwise why not just use var_dump directly??
 	static public function var_dump($dump,$preformat=false,$hiddenOutput=false)
 	{
 		ob_start();

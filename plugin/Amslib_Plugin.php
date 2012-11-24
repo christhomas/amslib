@@ -141,9 +141,9 @@ class Amslib_Plugin
 
 					if(!$translator) continue;
 
-					$this->installLanguages($name,$c);
+					$this->installLanguages($c["name"],$c);
 
-					$params		=	array($name,$translator);
+					$params		=	array($c["name"],$translator);
 				}else{
 					$value		=	isset($c["value"]) ? $c["value"] : NULL;
 					$condition	=	isset($c["condition"]) ? $c["condition"] : NULL;

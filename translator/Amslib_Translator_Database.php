@@ -41,7 +41,7 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 	}
 	
 	public function translate($k,$l=NULL)
-	{			
+	{
 		$v = parent::translate($k,$l);
 		
 		if($v == $k){

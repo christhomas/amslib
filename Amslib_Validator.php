@@ -574,7 +574,9 @@ class Amslib_Validator
 		}
 
 		if(isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
-			return "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT";
+			return "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT_INPUT";
+		}else if(isset($options["limit-output"]) && !in_array($bool,$options["limit-output"])){
+			return "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT_OUTPUT";
 		}
 
 		$this->setValid($name,$bool);

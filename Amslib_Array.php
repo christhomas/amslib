@@ -5,9 +5,15 @@ class Amslib_Array
 	 * if you return nothing from a method, then catch that into a parameter
 	 * pass that parameter into this function, you'll freeze the browser
 	 * well done francisco :)
+	 * 
+	 * Extended this method to support passing in a variable and then asking for a key instead of passing it directly
+	 * This is useful when you have a variable but not sure whether the key exists or not, if it doesnt, then 
+	 * it'll cause an error to go into the log, but testing it by passing the variable and the key separately means
+	 * we can handle the situation more gracefully
 	 */
-	static public function valid($array=NULL)
+	static public function valid($array=NULL,$key=NULL)
 	{
+		if($key !== NULL && is_string($key)) $array = isset($array[$key]) ? $array[$key] : array();
 		//	Invalid values return an empty array
 		if(empty($array) || !$array || !is_array($array) || is_null($array)) return array();
 		//	cast objects to arrays
@@ -99,7 +105,25 @@ class Amslib_Array
 	{
 	    return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));
 	}
+	
+	/**
+	 * method: remove
+	 * 
+	 * This method is a wrapper around unset to make it easier and less verbose in your code to remove multiple elements
+	 */
+	static public function removeKeys($array,$keys)
+	{
+		if(is_string($keys)) $keys = array($keys);
+	
+		$array	=	self::valid($array);
+		$keys	=	self::valid($keys);
+	
+		foreach($keys as $k) unset($array[$k]);
+		
+		return $array;
+	}
 
+	//	NOTE: I dont think "filterType" is a good function name for this, when it takes a callback, perhaps filterCallback instead?
 	static public function filterType($array,$callback)
 	{
 		return function_exists($callback) ? array_filter(self::valid($array),$callback) : $array;
@@ -115,7 +139,15 @@ class Amslib_Array
 				//	EXAMPLE: foreach($array as &$a) $a = self::FilterKey($a,$filter,$similar);
 				//	NOTE: can we use array_map here??
 				//	NOTE: I don't think array_map will work because this method requires parameters that it can't forward
-				foreach($array as &$a) $a = array_intersect_key($a, array_flip($filter));
+				foreach($array as &$a){
+					if(is_array($filter)){
+						$a = array_intersect_key($a, array_flip($filter));
+					}else if(isset($a[$filter])){
+						$a = $a[$filter];
+					}else{
+						$a = NULL;
+					}
+				}
 			}else{
 				$array = array_intersect_key($array, array_flip($filter));
 			}
@@ -137,6 +169,12 @@ class Amslib_Array
 			//	TODO: I'm sure that there are more situations I could take into account here
 			//	TODO: I should document exactly what this method does, because right now I can't remember
 
+			//	FIXME: there is a bug here if the key doesnt exist in the array
+			//	NOTE:	there is a side effect of the bug, if the key doesnt exist, it'll return NULL, 
+			//			passing $value as true will mean it'll compare either the existing key against 
+			//			true or null against true, so it in effect is a facinatingly cool way to filter 
+			//			by key and only return arrays which have a particular key.  This whilst being very nice
+			//			is still a bug, I either need to codify this to make it official, or fix the bug
 			$search = $key ? $v[$key] : $v;
 
 			if($similar == true && strpos($search,$value) !== false) $found = true;
@@ -164,6 +202,19 @@ class Amslib_Array
 		}
 
 		return $returnFiltered ? $filter : $array;
+	}
+	
+	static public function reindexByKey($array,$key)
+	{
+		if(!is_string($key)) return $array;
+		
+		$copy = array();
+		
+		foreach($array as $item) if(isset($item[$key])){
+			$copy[$item[$key]] = $item;
+		}
+		
+		return $copy;
 	}
 
 	//	TODO: this method is a little open to abuse and in some situations wouldn't do the right thing

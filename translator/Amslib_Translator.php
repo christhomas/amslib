@@ -92,15 +92,15 @@ class Amslib_Translator extends Amslib_Translator_Source
 	********************************************************************************/
 	public function setLocation($location){				return $this->source->setLocation($location);	}
 	public function load(){								return $this->source->load();					}
-	public function translate($k,$l=NULL){				return $this->source->translate($k,$l);			}
-	public function learn($k,$v,$l=NULL){				return $this->source->learn($k,$v,$l);			}
+	public function translate($k,$l=NULL){				return $this->source->translate($k,$l);		}
+	public function learn($k,$v,$l=NULL){					return $this->source->learn($k,$v,$l);			}
 	public function forget($k,$l=NULL){					return $this->source->forget($k,$l);			}
 	public function searchKey($k,$s=false,$l=NULL){		return $this->source->searchKey($k,$s,$l);		}
 	public function searchValue($v,$s=false,$l=NULL){	return $this->source->searchValue($v,$s,$l);	}
-	public function getKeyList($l=NULL){				return $this->source->getKeyList($l);			}
-	public function getValueList($l=NULL){				return $this->source->getValueList($l);			}
-	public function getList($l=NULL){					return $this->source->getList($l);				}
-	public function updateKey($k,$nk,$l=NULL){			return $this->source->updateKey($k,$nk,$l);		}
+	public function getKeyList($l=NULL){					return $this->source->getKeyList($l);			}
+	public function getValueList($l=NULL){				return $this->source->getValueList($l);		}
+	public function getList($l=NULL){						return $this->source->getList($l);				}
+	public function updateKey($k,$nk,$l=NULL){			return $this->source->updateKey($k,$nk,$l);	}
 	
 	/********************************************************************************
 	 *	IMPORT TRANSLATION METHODS

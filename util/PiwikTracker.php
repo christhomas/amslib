@@ -741,10 +741,13 @@ class PiwikTracker
 			ob_start();
 			$response = @curl_exec($ch);
 			ob_end_clean();
+
 			$header = $content = '';
 			if(!empty($response))
 			{
 				list($header,$content) = explode("\r\n\r\n", $response, $limitCount = 2);
+			}else{
+				$content = curl_error($ch);
 			}
 		}
 		else if(function_exists('stream_context_create'))

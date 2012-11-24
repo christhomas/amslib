@@ -27,8 +27,6 @@
 
 class Amslib_Database_MySQL extends Amslib_Database
 {
-	protected $errors;
-
 	protected function setDebugOutput($query)
 	{
 		if($this->debug && $this->errorState){
@@ -44,7 +42,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 * 	todo:
 	 * 		-	Need to move the database details to somewhere more secure (like inside the database!! ROFL!! joke, don't do that!!!!)
 	 */
-	protected function connect()
+	public function connect()
 	{
 		$this->disconnect();
 		$details = $this->getConnectionDetails();
@@ -56,7 +54,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			{
 				if(!mysql_select_db($details["database"],$c)){
 					$this->disconnect();
-					$this->setDBError("Failed to open database requested '{$details["database"]}'");
+					$this->setDBErrors("Failed to open database requested '{$details["database"]}'");
 				}else{
 					$this->connection = $c;
 
@@ -64,9 +62,9 @@ class Amslib_Database_MySQL extends Amslib_Database
 					$this->setEncoding(isset($details["encoding"]) ? $details["encoding"] : "utf8");
 				}
 			// Replace these errors with Amslib_Translator codes instead (language translation)
-			}else $this->setDBError("Failed to connect to database: {$details["database"]}<br/>");
+			}else $this->setDBErrors("Failed to connect to database: {$details["database"]}<br/>");
 		// Replace these errors with Amslib_Translator codes instead (language translation)
-		}else $this->setDBError("Failed to find the database connection details, check this information<br/>");
+		}else $this->setDBErrors("Failed to find the database connection details, check this information<br/>");
 	}
 
 	/******************************************************************************
@@ -303,27 +301,14 @@ QUERY;
 		return $this->getRealResultCount();
 	}
 
-	public function setDBErrors($query)
+	public function setDBErrors($data,$error=NULL,$errno=NULL,$insert_id=NULL)
 	{
-		$this->errors[] = array(
-			"db_failure"		=>	true,
-			"db_query"			=>	$query,
-			"db_error"			=>	mysql_error($this->connection),
-			"db_error_num"		=>	mysql_errno($this->connection),
-			"db_last_insert"	=>	$this->lastInsertId,
-			"db_insert_id"		=>	mysql_insert_id($this->connection),
-			"db_location"		=>	Amslib_Array::filterKey(array_slice(debug_backtrace(),0,5),array("file","line")),
+		parent::setDBErrors(
+			$data,
+			$error ? $error : mysql_error($this->connection),
+			$errno ? $errno : mysql_errno($this->connection),
+			$insert_id ? $insert_id : mysql_insert_id($this->connection)
 		);
-	}
-
-	public function setDBError($error)
-	{
-		$this->errors[] = $error;
-	}
-
-	public function getDBErrors()
-	{
-		return $this->errors;
 	}
 
 	/**
@@ -531,10 +516,14 @@ QUERY;
 
 		$query = "insert into $query";
 
-		$this->setLastQuery($query);
+		//	FIXME: there is a memory leak in either setLastQuery,setDebugOutput,setDBErrors
+		//	NOTE: this leak leads to a LOT of memory being leaked on large scripts processing tens of thousands of rows
+		//	NOTE: when the methods are commented out, the leak disappears and it uses 32MB (Approx)
+		//	NOTE: so something bad is happening here
+		//$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
 
-		$this->setDebugOutput($query);
+		//$this->setDebugOutput($query);
 
 		if(!$result){
 			$this->lastInsertId = false;
@@ -555,9 +544,9 @@ QUERY;
 
 		$query = "update $query";
 
-		$this->setLastQuery($query);
+		//$this->setLastQuery($query);
 		$result = mysql_query($query,$this->connection);
-		$this->setDebugOutput($query);
+		//$this->setDebugOutput($query);
 
 		if(!$result){
 			$this->setDBErrors($query);

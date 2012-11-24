@@ -25,7 +25,11 @@ var Amslib_Service_Response = my.Amslib_Service_Response = my.Class(
 	
 	handlerCount: function()
 	{
-		return this.json["handlers"].length;
+		try{
+			return this.json["handlers"].length;
+		}catch(e){}
+		
+		return 0;
 	},
 
 	readData: function(plugin,group,name,handlerindex)
