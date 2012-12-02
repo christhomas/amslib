@@ -14,4 +14,9 @@ class Amslib_QueryPath
 
 		return self::$qp;
 	}
+
+	static public function get()
+	{
+		return self::$qp;
+	}
 }

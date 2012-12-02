@@ -5,9 +5,9 @@ class Amslib_Array
 	 * if you return nothing from a method, then catch that into a parameter
 	 * pass that parameter into this function, you'll freeze the browser
 	 * well done francisco :)
-	 * 
+	 *
 	 * Extended this method to support passing in a variable and then asking for a key instead of passing it directly
-	 * This is useful when you have a variable but not sure whether the key exists or not, if it doesnt, then 
+	 * This is useful when you have a variable but not sure whether the key exists or not, if it doesnt, then
 	 * it'll cause an error to go into the log, but testing it by passing the variable and the key separately means
 	 * we can handle the situation more gracefully
 	 */
@@ -105,21 +105,21 @@ class Amslib_Array
 	{
 	    return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));
 	}
-	
+
 	/**
 	 * method: remove
-	 * 
+	 *
 	 * This method is a wrapper around unset to make it easier and less verbose in your code to remove multiple elements
 	 */
 	static public function removeKeys($array,$keys)
 	{
 		if(is_string($keys)) $keys = array($keys);
-	
+
 		$array	=	self::valid($array);
 		$keys	=	self::valid($keys);
-	
+
 		foreach($keys as $k) unset($array[$k]);
-		
+
 		return $array;
 	}
 
@@ -170,9 +170,9 @@ class Amslib_Array
 			//	TODO: I should document exactly what this method does, because right now I can't remember
 
 			//	FIXME: there is a bug here if the key doesnt exist in the array
-			//	NOTE:	there is a side effect of the bug, if the key doesnt exist, it'll return NULL, 
-			//			passing $value as true will mean it'll compare either the existing key against 
-			//			true or null against true, so it in effect is a facinatingly cool way to filter 
+			//	NOTE:	there is a side effect of the bug, if the key doesnt exist, it'll return NULL,
+			//			passing $value as true will mean it'll compare either the existing key against
+			//			true or null against true, so it in effect is a facinatingly cool way to filter
 			//			by key and only return arrays which have a particular key.  This whilst being very nice
 			//			is still a bug, I either need to codify this to make it official, or fix the bug
 			$search = $key ? $v[$key] : $v;
@@ -203,17 +203,19 @@ class Amslib_Array
 
 		return $returnFiltered ? $filter : $array;
 	}
-	
+
 	static public function reindexByKey($array,$key)
 	{
+		$array = self::valid($array);
+
 		if(!is_string($key)) return $array;
-		
+
 		$copy = array();
-		
+
 		foreach($array as $item) if(isset($item[$key])){
 			$copy[$item[$key]] = $item;
 		}
-		
+
 		return $copy;
 	}
 
