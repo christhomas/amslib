@@ -411,8 +411,9 @@ class Amslib
 			if(strpos($c,"AesCtr")				=== 0)	$c	=	"util/$c";
 			if(strpos($c,"Logger")				=== 0)	$c	=	"util/apache-log4php/src/main/php/$c";
 
-			if($c == "Facebook")	$c	=	"util/facebook-php-sdk/src/facebook";
-			if($c == "FirePHP") 	$c	=	"util/FirePHPCore/$c.class";
+			if($c == "Facebook")						$c	=	"util/facebook-php-sdk/src/facebook";
+			if($c == "FirePHP") 						$c	=	"util/FirePHPCore/$c.class";
+			if($c == "HTMLPurifier")					$c	=	"util/HTMLPurifier.standalone.php";
 
 			$f = str_replace("//","/","$c.php");
 
