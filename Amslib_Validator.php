@@ -419,13 +419,13 @@ class Amslib_Validator
 	 */
 	protected function __nif($name,$code,$required,$options)
 	{
-		$endLetter	=	substr($code,strlen($code)-1);
-		$code		=	(int)substr($code,0,-1);
+		$letter		=	substr($code,strlen($code)-1);
+		$numbers	=	intval(substr($code,0,-1));
 
-		if(is_numeric($code) && !is_numeric($endLetter)){
+		if(is_numeric($numbers) && !is_numeric($letter)){
 			$source = "TRWAGMYFPDXBNJZSQVHLCKET";
 
-			if($endLetter != $source[$code%23]) return "NIF_INVALID";
+			if($letter != $source[$numbers%23]) return "NIF_INVALID";
 
 			$this->setValid($name,$code);
 
@@ -461,14 +461,14 @@ class Amslib_Validator
 	{
 		$lastLetter = array("J", "A", "B", "C", "D", "E", "F", "G", "H", "I");
 
-		$numeric = substr($code,1);
+		$numbers = substr($code,1);
 
-		$last = substr($numeric,strlen($numeric)-1);
+		$last = substr($numbers,strlen($numbers)-1);
 		$sum = 0;
 
 		//	Sum up all the even numbers
 		for($pos=1;$pos<7;$pos+=2){
-			$sum += (int)(substr($numeric,$pos,1));
+			$sum += (int)(substr($numbers,$pos,1));
 		}
 
 		//	Sum up all the odd numbers (but differently)
@@ -476,7 +476,7 @@ class Amslib_Validator
 		//		Any value greater than 10, comprises two numbers (etc: 15 is [1, 5] )
 		//		Add both together, this is the value to sum
 		for($pos=0;$pos<8;$pos+=2){
-			$val = 2*(int)(substr($numeric,$pos,1));
+			$val = 2*(int)(substr($numbers,$pos,1));
 			$val = str_pad($val,2,"0",STR_PAD_LEFT);
 			$sum += (int)$val[0]+(int)$val[1];
 		}
