@@ -633,8 +633,11 @@ class Amslib_Validator
 			$error = "NUMBER_IS_ABOVE_MAXIMUM";
 		}
 
-		if($error == false && isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
-			$error = "NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
+		if($error == false && isset($options["limit-input"])){
+			$limit = $options["limit-input"];
+			if(is_array($limit) && !in_array($value,$limit) || $value != $limit){
+				$error = "NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
+			}
 		}
 
 		//	If there was an error
