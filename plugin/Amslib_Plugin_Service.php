@@ -242,7 +242,7 @@ class Amslib_Plugin_Service
 	public function pluginToName($plugin)
 	{
 		if(is_object($plugin)) $plugin = get_class($plugin);
-		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN";
+		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN__";
 
 		return $plugin;
 	}
