@@ -8,6 +8,7 @@ class Amslib_Mixin
 		if(in_array($name,array_keys($this->mixin))){
 			return call_user_func_array(array($this->mixin[$name],$name),$args);
 		}else{
+			//	NOTE: I think I should disable this, it might use a lot of memory over time
 			Amslib_Keystore::add("__call[failure]",array(
 				"class"		=>	get_class($this),
 				"method"	=>	$name,
