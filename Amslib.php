@@ -413,7 +413,8 @@ class Amslib
 
 			if($c == "Facebook")						$c	=	"util/facebook-php-sdk/src/facebook";
 			if($c == "FirePHP") 						$c	=	"util/FirePHPCore/$c.class";
-			if($c == "HTMLPurifier")					$c	=	"util/HTMLPurifier.standalone.php";
+			if($c == "HTMLPurifier")					$c	=	"util/HTMLPurifier.standalone";
+			if($c == "mPDF")							$c	=	"util/mpdf-5.4/mpdf";
 
 			$f = str_replace("//","/","$c.php");
 
