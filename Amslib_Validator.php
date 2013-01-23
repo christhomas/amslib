@@ -222,6 +222,7 @@ class Amslib_Validator
 
 		$error = false;
 
+		//	why "permit-empty" when we are using the verb "allow" in other situations? change to allow_empty
 		if($len == 0 && !isset($options["permit-empty"])){
 			$error = "TEXT_LENGTH_ZERO";
 		}
