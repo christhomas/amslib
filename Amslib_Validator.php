@@ -636,7 +636,7 @@ class Amslib_Validator
 
 		if($error == false && isset($options["limit-input"])){
 			$limit = $options["limit-input"];
-			if(is_array($limit) && !in_array($value,$limit) || $value != $limit){
+			if((is_array($limit) && !in_array($value,$limit)) || $value != $limit){
 				$error = "NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
 			}
 		}
