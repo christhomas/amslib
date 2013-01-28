@@ -342,6 +342,7 @@ class Amslib_Router
 		//	if the default was an empty string, set the default to the entire options array
 		//	FIXME: I don't think it's reasonable to understand that "" => complete array
 		//	NOTE: perhaps we should default to "*" and this can mean "everything" instead?
+		//	NOTE: 28/01/2012=> I just ran into this issue again, "" is not a safe assumption at all
 		if($default === "") $default = self::$route["url_param"];
 
 		return $index !== NULL && isset(self::$route["url_param"][$index])
