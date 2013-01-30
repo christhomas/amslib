@@ -24,6 +24,7 @@ class Amslib_Plugin_Service
 	//	Used in the website to retrieve the session data after processing
 	static protected $serviceData	=	NULL;
 	static protected $handler		=	NULL;
+	static protected $temp		=	array();
 
 	static protected function getData($plugin,$default,$key)
 	{
@@ -127,17 +128,16 @@ class Amslib_Plugin_Service
 		$this->setFailureURL($url);
 	}
 
-	//	TODO: stop using the keystore, we don't need to use it
-	//	NOTE: since we already have an object, we can store this locally
 	public function setTemp($key,$data)
 	{
-		Amslib_Keystore::set($key,$data);
+		self::$temp[$key] = $data;
 	}
 
-	//	NOTE: is there any benefit to storing temps in a globally accessible location?
 	public function getTemp($key)
 	{
-		return Amslib_Keystore::get($key);
+		return isset(self::$temp[$key]) 
+			? self::$temp[$key] 
+			: NULL;
 	}
 
 	public function showFeedback()
