@@ -349,6 +349,13 @@ class Amslib_Router
 				? self::$route["url_param"][$index]
 				: $default;
 	}
+	
+	static public function setURLParam($index,$value)
+	{
+		if($index && is_int($index)){
+			self::$route["url_param"][$index] = $value;
+		}
+	}
 
 	static public function getStylesheet()
 	{
