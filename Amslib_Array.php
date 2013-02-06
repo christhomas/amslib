@@ -366,4 +366,47 @@ class Amslib_Array
 
 		return $items;
 	}
+	
+	//	I got this function from here: http://stackoverflow.com/questions/8917039/php-checking-difference-between-two-multidim-arrays
+	//	NOTE: 06/02/2013=> I modified this with the $strict parameter to let me check types as well as values
+	//	NOTE: this method will tell you the missing keys and different values in the second array
+	static public function diff($array1, $array2, $strict=false)
+	{
+		$return = array();
+		
+		if(!is_array($array1) || !is_array($array2)) return $return;
+	
+		foreach($array1 as $key => $value)
+		{
+			if(array_key_exists($key, $array2))
+			{
+				if (is_array($value))
+				{
+					$diff = self::diff($value, $array2[$key],$strict);
+					
+					if(count($diff)){
+						$return[$key] = $diff;
+					}
+				}else{
+					if((!$strict && $value != $array2[$key]) || ($strict && $value !== $array2[$key])){
+						$return[$key] = $value;
+					}
+				}
+			}else{
+				$return[$key] = $value;
+			}
+		}
+	
+		return $return;
+	}
+	
+	//	NOTE: this will give both sets of changes from both arrays compared against each other instead of in one direction only
+	static public function diffBoth($array1,$array2,$strict=false)
+	{
+		return array(
+			"src"	=>	$a=self::diff($array1,$array2,$strict),
+			"dst"	=>	$b=self::diff($array2,$array1,$strict),
+			"equal"	=>	count($a) == 0 && count($b) == 0
+		);
+	}
 }
