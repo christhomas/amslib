@@ -908,9 +908,32 @@ class Amslib_Validator
 	protected function __file($name,$value,$required,$options)
 	{
 		$value = Amslib::filesParam($name);
+		$valid = true;
 
 		if($value !== NULL){
-			if(strlen($value["tmp_name"]) && is_file($value["tmp_name"])){
+			//	Check the file is in the allowed types
+			if(isset($options["approved_types"])){
+				if(is_string($options["approved_types"])){
+					$options["approved_types"] = array($options["approved_types"]);
+				}
+				
+				if(count($options["approved_types"]) && !in_array($value["type"],$options["approved_types"])){
+					$valid = "NOT_APPROVED_TYPE";					
+				}
+			}
+			
+			//	Check the file is not in the disallowed types
+			if(isset($options["rejected_types"])){
+				if(is_string($options["rejected_types"])){
+					$options["rejected_types"] = array($options["rejected_types"]);
+				}
+			
+				if(count($options["rejected_types"]) && in_array($value["type"],$options["rejected_types"])){
+					$valid = "WAS_REJECTED_TYPE";
+				}
+			}
+			
+			if($valid === true && strlen($value["tmp_name"]) && is_file($value["tmp_name"])){
 				$this->setValid($name,$value);
 				return true;
 			}
@@ -927,6 +950,7 @@ class Amslib_Validator
 			if($value["error"] == UPLOAD_ERR_NO_TMP_DIR)	return "FILE_NO_TMP_DIRECTORY";
 			if($value["error"] == UPLOAD_ERR_CANT_WRITE)	return "FILE_CANNOT_WRITE";
 			if($value["error"] == UPLOAD_ERR_EXTENSION)		return "FILE_BANNED_EXTENSION";
+			if($valid !== true)								return "FILE_$valid";
 
 			//	Unknown error, just comment it here so I can't lose the info
 			return "FILE_UNKNOWN_ERROR[{$value["error"]}]";
