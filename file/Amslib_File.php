@@ -171,4 +171,34 @@ class Amslib_File
 
 		return $list;
 	}
+	
+	static public function saveUploadedFile($src_filename,$directory,$dst_filename)
+	{
+		$error = false;
+
+		//	NOTE: Perhaps all this checking and copying or directories etc, should be formalised into the api??
+		//	If the destination directory doesnt exist, attempt to create it
+		if($error == false && !is_dir($directory) && !@mkdir($directory,0755,true)){
+			$error = true;
+		}
+
+		//	It REALLY REALLY should exist now, but lets check just in case
+		if($error == false && !is_dir($directory)){
+			$error = true;
+		}
+
+		$destination = self::reduceSlashes("$directory/$dst_filename");
+
+		//	Try to move the file into the correct destination
+		if($error == false && !rename($src_filename,$destination)){
+			$error = true;
+		}
+
+		//	If there are no errors, you have uploaded the file ok.
+		if($error == false){
+			chmod($destination,0755);
+		}
+		
+		return !$error;
+	}
 }
