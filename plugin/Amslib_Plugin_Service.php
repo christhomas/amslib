@@ -272,6 +272,27 @@ class Amslib_Plugin_Service
 	{
 		$this->data[$this->pluginToName($plugin)][self::SE][$name] = $value;
 	}
+	
+	public function getError($plugin=NULL,$name=NULL)
+	{
+		if($plugin === NULL){
+			$errors = array();
+
+			foreach(array_keys($this->data) as $plugin){
+				$errors[$plugin] = $name !== NULL && isset($this->data[$plugin][self::SE][$name]) 
+					? $this->data[$plugin][self::SE][$name]
+					: $this->data[$plugin][self::SE]; 
+			}
+			
+			return $errors;
+		}
+		
+		if($name === NULL && isset($this->data[$plugin])){
+			return $this->data[$plugin][self::SE];
+		}
+		
+		return $this->data[$plugin][self::SE][$name];
+	}
 
 	/*****************************************************************************
 	 * 	STATIC API TO RETRIEVE SESSION DATA
