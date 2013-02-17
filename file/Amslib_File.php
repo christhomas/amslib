@@ -188,7 +188,7 @@ class Amslib_File
 		}
 
 		$dst_filename	= Amslib::slugify($dst_filename,"","_");
-		$destination	= self::reduceSlashes("$directory/$dst_filename")
+		$destination	= self::reduceSlashes("$directory/$dst_filename");
 
 		//	Try to move the file into the correct destination
 		if($error == false && !rename($src_filename,$destination)){
