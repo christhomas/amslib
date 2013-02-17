@@ -135,8 +135,8 @@ class Amslib_Plugin_Service
 
 	public function getTemp($key)
 	{
-		return isset(self::$temp[$key]) 
-			? self::$temp[$key] 
+		return isset(self::$temp[$key])
+			? self::$temp[$key]
 			: NULL;
 	}
 
@@ -272,25 +272,27 @@ class Amslib_Plugin_Service
 	{
 		$this->data[$this->pluginToName($plugin)][self::SE][$name] = $value;
 	}
-	
+
 	public function getError($plugin=NULL,$name=NULL)
 	{
 		if($plugin === NULL){
 			$errors = array();
 
 			foreach(array_keys($this->data) as $plugin){
-				$errors[$plugin] = $name !== NULL && isset($this->data[$plugin][self::SE][$name]) 
+				if(!isset($this->data[$plugin])) continue;
+
+				$errors[$plugin] = $name !== NULL && isset($this->data[$plugin][self::SE][$name])
 					? $this->data[$plugin][self::SE][$name]
-					: $this->data[$plugin][self::SE]; 
+					: $this->data[$plugin][self::SE];
 			}
-			
+
 			return $errors;
 		}
-		
+
 		if($name === NULL && isset($this->data[$plugin])){
 			return $this->data[$plugin][self::SE];
 		}
-		
+
 		return $this->data[$plugin][self::SE][$name];
 	}
 
