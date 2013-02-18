@@ -172,7 +172,7 @@ class Amslib_File
 		return $list;
 	}
 
-	static public function saveUploadedFile($src_filename,$directory,$dst_filename)
+	static public function saveUploadedFile($src_filename,$directory,&$dst_filename)
 	{
 		$error = false;
 
