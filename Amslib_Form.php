@@ -25,6 +25,27 @@ class Amslib_Form
 
 		return implode("",$options);
 	}
+	
+	static public function monthOptions($start,$stop,$selected=NULL,$pad=NULL)
+	{
+		if($start < 0 || $start > 12) $start = 12;
+		if($end < 0 || $end > 12) $end = 12;
+		
+		$keys = range($start,$stop);
+		
+		$months = array();
+		foreach($keys as $k){
+			$index = $k;
+			
+			if($pad !== NULL && is_string($pad)){
+				$index = str_pad($k,strlen($pad),$pad[0],STR_PAD_LEFT);
+			}
+			
+			$months[$index] = date("F",mktime(0,0,0,$k));
+		}
+
+		return self::selectOptions($months,$selected,"use_key");
+	}
 
 	static public function numericSelectOptions($start,$stop,$selected=NULL,$pad=NULL)
 	{
@@ -37,7 +58,7 @@ class Amslib_Form
 
 		if(!is_numeric($start) || !is_numeric($stop)) return $options;
 
-		for($a=$start;$a<=$stop;$a++){
+		foreach(range($start,$stop) as $a){
 			$enabled = ($a == $selected) ? "selected='selected'" : "";
 
 			if($pad !== NULL && is_string($pad)) $a = str_pad($a,strlen($pad),$pad[0],STR_PAD_LEFT);
