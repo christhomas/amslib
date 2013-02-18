@@ -279,7 +279,9 @@ class Amslib_Plugin_Service
 			$errors = array();
 
 			foreach(array_keys($this->data) as $plugin){
-				if(!isset($this->data[$plugin])) continue;
+				if(!isset($this->data[$plugin]) || !isset($this->data[$plugin][self::SE])){
+					continue;
+				}
 
 				$errors[$plugin] = $name !== NULL && isset($this->data[$plugin][self::SE][$name])
 					? $this->data[$plugin][self::SE][$name]
