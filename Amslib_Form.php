@@ -29,7 +29,7 @@ class Amslib_Form
 	static public function monthOptions($start,$stop,$selected=NULL,$pad=NULL)
 	{
 		if($start < 0 || $start > 12) $start = 12;
-		if($end < 0 || $end > 12) $end = 12;
+		if($stop < 0 || $stop > 12) $stop = 12;
 		
 		$keys = range($start,$stop);
 		
