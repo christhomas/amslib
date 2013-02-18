@@ -626,17 +626,29 @@ class Amslib_Validator
 			$error = "NUMBER_NAN";
 		}
 
-		if($error == false && isset($options["minvalue"]) && $value < $options["minvalue"]){
-			$error = "NUMBER_IS_BELOW_MINIMUM";
+		if($error == false && isset($options["minvalue"]) && is_numeric($options["minvalue"])){
+			if($value < $options["minvalue"]) $error = "NUMBER_IS_BELOW_MINIMUM";
 		}
 
-		if($error == false && isset($options["maxvalue"]) && $value > $options["maxvalue"]){
-			$error = "NUMBER_IS_ABOVE_MAXIMUM";
+		if($error == false && isset($options["maxvalue"]) && is_numeric($options["maxvalue"])){
+			if($value > $options["maxvalue"]) $error = "NUMBER_IS_ABOVE_MAXIMUM";
 		}
 
 		//	TODO: modify this code so it will allow setting the limit-input as a single value and not ONLY as an array
 		if($error == false && isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
 			$error = "NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
+		}
+
+		if($error == false && isset($options["length"]) && is_numeric($options["length"])){
+			if(!strlen($value) != $options["length"]) $error = "NUMBER_CANNOT_MATCH_LENGTH";
+		}
+
+		if($error == false && isset($options["minlength"]) && is_numeric($options["minlength"])){
+			if(!strlen($value) < $options["minlength"]) $error = "NUMBER_CANNOT_MATCH_MINLENGTH";
+		}
+
+		if($error == false && isset($options["maxlength"]) && is_numeric($options["maxlength"])){
+			if(!strlen($value) > $options["maxlength"]) $error = "NUMBER_CANNOT_MATCH_MAXLENGTH";
 		}
 
 		//	If there was an error
@@ -916,23 +928,23 @@ class Amslib_Validator
 				if(is_string($options["approved_types"])){
 					$options["approved_types"] = array($options["approved_types"]);
 				}
-				
+
 				if(count($options["approved_types"]) && !in_array($value["type"],$options["approved_types"])){
-					$valid = "NOT_APPROVED_TYPE";					
+					$valid = "NOT_APPROVED_TYPE";
 				}
 			}
-			
+
 			//	Check the file is not in the disallowed types
 			if(isset($options["rejected_types"])){
 				if(is_string($options["rejected_types"])){
 					$options["rejected_types"] = array($options["rejected_types"]);
 				}
-			
+
 				if(count($options["rejected_types"]) && in_array($value["type"],$options["rejected_types"])){
 					$valid = "WAS_REJECTED_TYPE";
 				}
 			}
-			
+
 			if($valid === true && strlen($value["tmp_name"]) && is_file($value["tmp_name"])){
 				$this->setValid($name,$value);
 				return true;
