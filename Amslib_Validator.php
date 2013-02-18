@@ -603,13 +603,20 @@ class Amslib_Validator
 	 * 	If failed to validate because value is NaN (like "abcdef"), will return string "NUMBER_IS_NAN"
 	 * 	If failed to validate because value is below minimum value will return string "NUMBER_IS_BELOW_MINIMUM"
 	 * 	If failed to validate because value is above maximum value will return string "NUMBER_IS_ABOVE_MAXIMUM"
-	 * 	If successful, will set the validData array and return true
+	 * 	If failed to validate because value is not in the limited input options will return string "NUMBER_CANNOT MATCH AGAINST LIMIT"
+	 *	If failed to validate because value is not the required length of characters will return string "NUMBER_CANNOT_MATCH_LENGTH"
+	 *	If failed to validate because value is shorter than required length of characters will return string "NUMBER_CANNOT_MATCH_MINLENGTH"
+	 *	If failed to validate because value is longer than required length of characters will return string "NUMBER_CANNOT_MATCH_MAXLENGTH" 
+	 * 	If successful, will set the data into the valid data array and return true
 	 *
 	 * operations:
 	 * 	-	use is_numeric to test whether value is a number or not
 	 * 	-	if required is true, but is_numeric returns false, error occurred
 	 * 	-	If value is NaN, return NAN error
 	 *	-	If value is null, return NULL error
+	 *	-	If value is not in limit inputs array of allowed values, return limit error
+	 *	-	If value is not the required number of characters, return length error
+	 *	-	If value is shorter or shorter than the required number of characters, return min or max length error
 	 * 	-	If value is above or below value restrictions, return a "below" or "above" error
 	 * 	-	else set the validData array and return true
 	 *
