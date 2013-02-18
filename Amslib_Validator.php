@@ -800,7 +800,7 @@ class Amslib_Validator
 		$temp = preg_replace("/\d/","",$temp);
 		$temp = trim($temp);
 
-		if($error = false && strlen($temp)) $error = "PHONE_INVALID";
+		if($error == false && strlen($temp)) $error = "PHONE_INVALID";
 
 		//	If there was an error
 		if($error !== false)
