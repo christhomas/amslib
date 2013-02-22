@@ -1197,6 +1197,26 @@ class Amslib_Validator
 
 		return $this->getStatus();
 	}
+	
+	static public function test($value,$type,$required,$options)
+	{
+		$v = new self(array("test"=>$value));
+		$v->add("test",$type,$required,$options);
+		
+		$r = array();
+		$r["status"] = $v->execute();
+		
+		if($r["status"]){
+			$d = $v->getValidData();
+			$r["value"] = $d["test"];
+		}else{
+			$e = $v->getErrors();
+			$r["error"] = $e["test"]["code"];
+			$r["error_value"] = $e["test"]["value"]; 
+		}
+		
+		return $r;
+	}
 
 	/**
 	 * method:	setError
