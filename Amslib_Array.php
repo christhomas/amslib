@@ -292,14 +292,24 @@ class Amslib_Array
 		return $matches;
 	}
 
-	static public function hasKeys($array,$keys)
+	static public function hasKeys($array,$present,$missing=NULL)
 	{
 		if(!is_array($array)) return false;
 
-		if(!is_array($keys)) $keys = array($keys);
+		if(!is_array($present) && is_string($present) && strlen($present)){
+			$present = array($present);
+		}
+		
+		if(!is_array($missing) && is_string($missing) && strlen($missing)){
+			$missing = array($missing);
+		}
 
-		foreach($keys as $k){
+		foreach(self::valid($present) as $k){
 			if(!isset($array[$k])) return false;
+		}
+		
+		foreach(self::valid($missing) as $k){
+			if(isset($array[$k])) return false;
 		}
 
 		return true;
