@@ -432,11 +432,11 @@ class Amslib_Array
 	
 	static public function implodeQuoteSingle($array,$join=",")
 	{
-		return self::implode($array,$join,"'");
+		return self::implodeQuote($array,$join,"'");
 	}
 	
 	static public function implodeQuoteDouble($array,$join=",")
 	{
-		return self::implode($array,$join,"\"");
+		return self::implodeQuote($array,$join,"\"");
 	}
 }
