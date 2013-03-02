@@ -485,6 +485,9 @@ QUERY;
 		return $this->select($query);
 	}
 
+	//	Anxo has explained that perhaps it's unnecessary that in the query to put the field if you are going to put
+	//	the field you want in the first parameter, so in the query you can just put a "$field $query" and it'll
+	//	select only what you want, without duplication.  He's clever sometimes.
 	public function selectValue($field,$query,$numResults=0,$optimise=false)
 	{
 		$values = $this->select($query,$numResults,$optimise);
