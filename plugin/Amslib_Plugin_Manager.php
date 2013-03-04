@@ -27,10 +27,11 @@
 
 class Amslib_Plugin_Manager
 {
-	static protected $plugins	=	array();
-	static protected $api		=	array();
+	static protected $plugins		=	array();
+	static protected $api			=	array();
 	static protected $location	=	array();
-	static protected $replace	=	array();
+	static protected $replace		=	array();
+	static protected $prevent		=	array();
 
 	static protected function findPlugin($name,$location=NULL)
 	{
@@ -48,8 +49,16 @@ class Amslib_Plugin_Manager
 
 		return false;
 	}
+	
+	static public function preventPluginLoad($prevent,$plugin)
+	{
+		if(!is_string($prevent) && strlen($prevent) == 0) return false;
+		if(!is_string($plugin) && strlen($plugin) == 0) return false;
+		
+		self::$prevent[$plugin] = $prevent;
+	}
 
-	static public function replacePlugin($plugin1,$plugin2)
+	static public function replacePluginLoad($plugin1,$plugin2)
 	{
 		//	This function will map plugin1 => plugin2, so any attempt to load plugin1 will result in loading plugin2
 		//	This means you need to be able to load plugin2 AT THE POINT IN TIME that plugin1 is loaded, if you require
@@ -63,6 +72,9 @@ class Amslib_Plugin_Manager
 
 	static public function config($name,$location)
 	{
+		//	If this plugin is configured to not load, return false
+		if(isset(self::$prevent[$name])) return false;
+
 		//	If this plugin is configured to be replaced with another, use the replacement
 		if(isset(self::$replace[$name])) $name = self::$replace[$name];
 
@@ -83,6 +95,9 @@ class Amslib_Plugin_Manager
 
 	static public function load($name,$location=NULL)
 	{
+		//	If this plugin is configured to not load, return false
+		if(isset(self::$prevent[$name])) return false;
+
 		//	If this plugin is configured to be replaced with another, use the replacement
 		if(isset(self::$replace[$name])) $name = self::$replace[$name];
 
