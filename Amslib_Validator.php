@@ -1105,7 +1105,7 @@ class Amslib_Validator
 
 	public function addRules($rules)
 	{
-		foreach($rules as $name=>$r){
+		foreach(Amslib_Array::valid($rules) as $name=>$r){
 			$type		= count($r) ? array_shift($r) : NULL;
 			$required	= count($r) ? array_shift($r) : false;
 			$options	= count($r) ? array_shift($r) : array();
