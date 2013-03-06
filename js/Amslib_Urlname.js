@@ -72,7 +72,7 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 		if(this.trimcb) clearTimeout(this.trimcb);
 		
 		this.trimcb = setTimeout(function(){
-			po.dest.val(Amslib_String.trim(po.dest.val(),' -_.'));
+			po.dest.val(Amslib_String.trim(po.dest.val(),"\\s\\-\\_\\."));
 			po.dest.blur();
 			po.trimcb = false;
 		},2000);
