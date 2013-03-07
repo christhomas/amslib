@@ -1,7 +1,7 @@
 <?php
 class Amslib_Form
 {
-	static public function selectOptions($array,$selected=NULL,$indexText=NULL,$indexValue=NULL)
+	static public function selectOptions($array,$selected=NULL,$indexText=NULL,$indexValue=NULL,$createAttributes=true)
 	{
 		$options = array();
 
@@ -15,12 +15,22 @@ class Amslib_Form
 			}else{
 				$text = $value = $item;
 			}
+			
+			$attributes = array();
+			if($createAttributes && is_array($item) && isset($item[$indexText]) && isset($item[$indexValue])){
+				unset($item[$indexText],$item[$indexValue]);
+				
+				foreach($item as $k=>&$v) $v="$k='$v'";
+				
+				$attributes = $item;
+			}
+			$attributes = implode(" ",$attributes);
 
 			if(strlen($text) == 0 || strlen($value) == 0) continue;
 
 			$enabled = $value == $selected ? "selected='selected'" : "";
 
-			$options[] = "<option $enabled value='$value'>$text</option>";
+			$options[] = "<option $enabled value='$value' $attributes>$text</option>";
 		}
 
 		return implode("",$options);

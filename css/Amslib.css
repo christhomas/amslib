@@ -564,6 +564,16 @@ input, select {
 	box-sizing: border-box;	
 }
 
+.disable_box_sizing,
+.disable_box_sizing_inherit,
+.disable_box_sizing_inherit *,
+.disable_box_sizing_inherit_noself *{
+	-moz-box-sizing: content-box;
+	-webkit-box-sizing: content-box;
+	-ms-box-sizing: content-box;
+	box-sizing: content-box;
+}
+
 /* reset all the font weights because by default I think it should not be bolded */
 h1,h2,h3,h4,h5,h6{ font-weight: normal; }
 

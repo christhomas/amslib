@@ -7,5 +7,6 @@ if(Amslib == undefined || window.exports == undefined) throw("Amslib_DDSlick.js:
 var amslib = Amslib.locate();
 
 if(amslib){
-	Amslib.loadJS("jquery.ddslick",amslib+"/util/jquery.ddslick.min.js");
+	Amslib.loadCSS(amslib+"/util/ddslick/jquery.ddslick.css");
+	Amslib.loadJS("jquery.ddslick",amslib+"/util/ddslick/jquery.ddslick-rem.js");
 };
