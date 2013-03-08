@@ -15,6 +15,13 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		//	TODO: default to an empty object??
 		$this->api = false;
 	}
+	
+	public function isInitialised()
+	{
+		//	FIXME: this is overly simplistic, but quite realiable.
+		
+		return $this->api ? true : false;
+	}
 
 	public function initialiseObject($api)
 	{
