@@ -168,6 +168,16 @@ class Amslib_Database
 		$this->storeSearchResult = false;
 	}
 
+	/**	
+	 * method:	setTable
+	 * 
+	 * Set the table name for this database object, or if there are two parameters, a key=>value arrangement allowing
+	 * you to abstract table names from the names referenced in the code
+	 * 
+	 * parameters:
+	 * 	arg1	-	the name of the table, or the name of the key to use for this table
+	 * 	arg2	-	[optional] or the actual name of the table inside the database references by arg1 as the "key"
+	 */
 	public function setTable()
 	{
 		$args = func_get_args();
