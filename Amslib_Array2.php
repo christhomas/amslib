@@ -48,12 +48,33 @@ class Amslib_Array2
 		$pivot = array_shift($array);
 
 		foreach($array as $k => $v) {
-			if($v[$index] < $pivot[$index])
+			if($v[$index] < $pivot[$index]){
 				$left[$k] = $v;
-			else
+			}else{
 				$right[$k] = $v;
+			}
 		}
 
 		return array_merge(self::sort($left,$index), array($pivot_key => $pivot), self::sort($right,$index));
+	}
+	
+	static public function filterKey($array,$key,$returnFiltered=false)
+	{
+		$filter = array();
+		
+		foreach(self::valid($array) as $k=>$v){
+			$found = false;
+			
+			if($k == $key){
+				$found = true;
+			}
+			
+			if($found){
+				$filter[$k] = $v;
+				unset($array[$k]);
+			}
+		}
+		
+		return $returnFiltered ? $filter : $array;
 	}
 }
