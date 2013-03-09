@@ -427,6 +427,10 @@ class Amslib
 
 	static public function shutdown($url,$callback=NULL,$warnings=false)
 	{
+		//	Clean these parameters each page load, cause they are only useful on the error pages, not everywhere else
+		Amslib::getSESSION("/amslib/php/fatal_error/",NULL,true);
+		Amslib::getSESSION("/amslib/php/backtrace/",NULL,true);
+		
 		function amslib_shutdown($url,$callback,$warnings)
 		{
 			//	E_PARSE: you cannot catch parse errors without a prepend file.
