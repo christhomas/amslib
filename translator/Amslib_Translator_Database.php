@@ -40,108 +40,123 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 		return false;
 	}
 	
-	public function translate($k,$l=NULL)
+	public function translateExtended($n,$i,$l=NULL)
 	{
-		$v = parent::translate($k,$l);
+		$v = parent::translateExtended($n,$i,$l);
 		
-		if($v == $k){
+		if($v == $n){
 			if(!$l) $l = $this->language;
+			$i	=	intval($i);
 			$l	=	$this->database->escape($l);
-			$k	=	$this->database->escape($k);
-			$r	=	$this->database->select("v from {$this->table} where k='$k' and lang='$l'");
+			$n	=	$this->database->escape($n);
+			$r	=	$this->database->select("value from {$this->table} where name='$n' and object_id='$i' and lang='$l'");
 			$v	=	"";
 			
 			if(is_array($r)){
 				if(count($r) > 1){
-					Amslib_Keystore::add("AMSTUDIOS_TRANSLATOR_ERROR","Multiple conflicting translations for key($k) and language($l)");
+					Amslib_Keystore::add(__METHOD__,"Multiple conflicting translations for key($n),object_id($i) and language($l)");
 				}else{
-					if(isset($r[0]["v"])) $v = trim(stripslashes($r[0]["v"]));	
+					if(isset($r[0]["value"])) $v = trim(stripslashes($r[0]["value"]));	
 				}
 				
-				parent::learn($k,$v,$l);
+				parent::learnExtended($n,$i,$v,$l);
 			}else{
-				$v = $k;
+				$v = $n;
 			}
 		}
-		
+
 		return stripslashes($v);
 	}
 	
-	public function learn($k,$v,$l=NULL)
+	public function learnExtended($n,$i,$v,$l=NULL)
 	{			
 		if(!$l) $l = $this->language;
+		$i	=	intval($i);
 		$l	=	$this->database->escape($l);
-		$k	=	$this->database->escape($k);
+		$n	=	$this->database->escape($n);
 		$v	=	$this->database->escape($v);
 		
-		if(strlen($k) == 0) return false;
+		if(strlen($n) == 0) return false;
 		
-		$found = $this->database->select("COUNT(id) as c from {$this->table} where k='$k' and lang='$l'",1,true);
+		$found = $this->database->select("COUNT(id) as c from {$this->table} where name='$n' and lang='$l'",1,true);
 		
 		return $found && $found["c"]
-			? $this->database->update("{$this->table} set v='$v' where k='$k' and lang='$l'")
-			: $this->database->insert("{$this->table} set v='$v', k='$k',lang='$l'");
+			? $this->database->update("{$this->table} set value='$v' where name='$n' and object_id='$i' and lang='$l'")
+			: $this->database->insert("{$this->table} set value='$v',name='$n',object_id='$id',lang='$l'");
 	}
 	
-	public function forget($k,$l=NULL)
+	public function forgetExtended($n,$i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
-		$l = $this->database->escape($l);
 		
-		$k	=	$this->database->escape($k);
-		$f	=	parent::forget($k,$l);
-		$d	=	$this->database->delete("{$this->table} where k='$k' and lang='$l'");
+		$f	=	parent::forgetExtended($n,$i,$l);
+		$i	=	intval($i);
+		$l	=	$this->database->escape($l);
+		$n	=	$this->database->escape($n);
+		$d	=	$this->database->delete("{$this->table} where name='$n' and object_id='$i' and lang='$l'");
 		
 		return $f && $d;
 	}
 	
-	public function searchKey($k,$s=false,$l=NULL)
+	public function searchKeyExtended($k,$i,$s=false,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
+		$i = intval($i);
 		$l = $this->database->escape($l);
-		$k = $this->database->escape($k);
+		$n = $this->database->escape($n);
 		
-		$filter = "where lang='$l' AND ".($s ? "k LIKE '%$k%'" : "k='$k'");
+		$filter = "where lang='$l' and object_id='$i' and ".($s ? "name like '%$n%'" : "name='$n'");
+		
+		$query = "name,object_id,value from {$this->table} $filter";
 
-		$list = Amslib_Array::valid($this->database->select("k,v from {$this->table} $filter"));
-		
-		return Amslib_Array::stripSlashesMulti($list);
+		return Amslib_Array::stripSlashesMulti($this->database->select($query));
 	}
 	
-	public function searchValue($v,$s=false,$l=NULL)
+	public function searchValueExtended($v,$i,$s=false,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
+		$i = intval($i);
 		$l = $this->database->escape($l);
 		$v = $this->database->escape($v);
 		
-		$filter = "where lang='$l' AND ".($s ? "v LIKE '%$v%'" : "v='$v'");
-
-		$list = Amslib_Array::valid($this->database->select("k,v from {$this->table} $filter"));
+		$filter = "where lang='$l' and object_id='$i' and ".($s ? "value like '%$v%'" : "value='$v'");
 		
-		return Amslib_Array::stripSlashesMulti($list);
+		$query = "name,object_id,value from {$this->table} $filter";
+
+		return Amslib_Array::stripSlashesMulti($this->database->select($query));
 	}
 	
-	public function getKeyList($l=NULL)
+	public function getKeyListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
+		$i = intval($i);
 		$l = $this->database->escape($l);
 		
-		return Amslib_Array::valid($this->database->select("k from {$this->table} where lang='$l'"));
+		$query = "name from {$this->table} where lang='$l' and object_id='$i'";
+		
+		return Amslib_Array::valid($this->database->select($query));
 	}
 	
-	public function getValueList($l=NULL)
+	public function getValueListExtended($i,$l=NULL)
 	{				
 		if(!$l) $l = $this->language;
+		$i = intval($i);
 		$l = $this->database->escape($l);
 		
-		return Amslib_Array::valid($this->database->select("v from {$this->table} where lang='$l'"));		
+		$query = "value from {$this->table} where lang='$l' and object_id='$i'";
+		
+		return Amslib_Array::valid($this->database->select($query));		
 	}
 	
-	public function getList($l=NULL)
+	public function getListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
+		
+		$i = intval($i);
 		$l = $this->database->escape($l);
 		
-		return Amslib_Array::valid($this->database->select("k,v from {$this->table} where lang='$l'"));
+		$query = "name,object_id,value from {$this->table} where lang='$l' and object_id='$i'";
+		
+		return Amslib_Array::valid($this->database->select($query));
 	}
 }

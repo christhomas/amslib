@@ -90,17 +90,26 @@ class Amslib_Translator extends Amslib_Translator_Source
 	/********************************************************************************
 	 *	TRANSLATOR METHODS
 	********************************************************************************/
-	public function setLocation($location){				return $this->source->setLocation($location);	}
-	public function load(){								return $this->source->load();					}
-	public function translate($k,$l=NULL){				return $this->source->translate($k,$l);		}
-	public function learn($k,$v,$l=NULL){					return $this->source->learn($k,$v,$l);			}
-	public function forget($k,$l=NULL){					return $this->source->forget($k,$l);			}
-	public function searchKey($k,$s=false,$l=NULL){		return $this->source->searchKey($k,$s,$l);		}
-	public function searchValue($v,$s=false,$l=NULL){	return $this->source->searchValue($v,$s,$l);	}
-	public function getKeyList($l=NULL){					return $this->source->getKeyList($l);			}
-	public function getValueList($l=NULL){				return $this->source->getValueList($l);		}
-	public function getList($l=NULL){						return $this->source->getList($l);				}
-	public function updateKey($k,$nk,$l=NULL){			return $this->source->updateKey($k,$nk,$l);	}
+	public function setLocation($location){						return $this->source->setLocation($location);				}
+	public function load(){										return $this->source->load();								}
+	public function translate($n,$l=NULL){						return $this->source->translate($n,$l);					}
+	public function translateExtended($n,$i,$l=NULL){				return $this->source->translateExtended($n,$i,$l);			}
+	public function learn($n,$v,$l=NULL){							return $this->source->learn($n,$v,$l);						}
+	public function learnExtended($n,$i,$v,$l=NULL){				return $this->source->learnExtended($n,$i,$v,$l);			}
+	public function forget($n,$l=NULL){							return $this->source->forget($n,$l);						}
+	public function forgetExtended($n,$i,$l=NULL){				return $this->source->forgetExtended($n,$i,$l);			}
+	public function searchKey($n,$s=false,$l=NULL){				return $this->source->searchKey($n,$s,$l);					}
+	public function searchKeyExtended($n,$i,$s=false,$l=NULL){	return $this->source->searchKeyExtended($n,$i,$s,$l);		}
+	public function searchValue($v,$s=false,$l=NULL){			return $this->source->searchValue($v,$s,$l);				}
+	public function searchValueExtended($v,$i,$s=false,$l=NULL){	return $this->source->searchValueExtended($v,$i,$s,$l);	}
+	public function getKeyList($l=NULL){							return $this->source->getKeyList($l);						}
+	public function getKeyListExtended($i,$l=NULL){				return $this->source->getKeyListExtended($i,$l);			}
+	public function getValueList($l=NULL){						return $this->source->getValueList($l);					}
+	public function getValueListExtended($i,$l=NULL){				return $this->source->getValueListExtended($i,$l);			}
+	public function getList($l=NULL){								return $this->source->getList($l);							}
+	public function getListExtended($i,$l=NULL){					return $this->source->getListExtended($i,$l);				}
+	public function updateKey($n,$nk,$l=NULL){					return $this->source->updateKey($n,$nk,$l);				}
+	public function updateKeyExtended($n,$i,$nn,$l=NULL){			return $this->source->updateKeyExtended($n,$i,$nn,$l);		}
 	
 	/********************************************************************************
 	 *	IMPORT TRANSLATION METHODS

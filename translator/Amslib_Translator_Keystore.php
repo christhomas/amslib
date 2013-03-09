@@ -2,7 +2,7 @@
 class Amslib_Translator_Keystore extends Amslib_Translator_Source
 {
 	protected $store;
-	protected $permittedLanguage;
+	protected $permittedLanguage;	
 	
 	protected function sanitise($langCode)
 	{
@@ -20,6 +20,7 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		$this->store				=	array();
 		$this->language				=	false;
 		$this->permittedLanguage	=	array();
+		$this->defaultKey			=	0;
 	}
 	
 	//	Set location in the future could mean "set a default set of array information"
@@ -35,12 +36,12 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	{
 		if(is_string($langCode)){
 			$this->permittedLanguage[] = $langCode;
-			$this->store[$langCode] = array();	
+			$this->store[$langCode] = array($this->defaultKey=>array());	
 		}
 		
 		if(is_array($langCode)){
 			$this->permittedLanguage = array_merge($this->permittedLanguage,$langCode);
-			foreach($langCode as $l) $this->store[$l] = array();	
+			foreach($langCode as $l) $this->store[$l] = array($this->defaultKey=>array());	
 		}
 	}
 	
@@ -64,63 +65,65 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		return ($langCode == $this->language);
 	}
 	
-	public function translate($k,$l=NULL)
+	public function translateExtended($n,$i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
 		
-		return (is_string($k) && isset($this->store[$l][$k])) ? $this->store[$l][$k] : $k;	
+		return (is_string($n) && isset($this->store[$l][$i][$n])) ? $this->store[$l][$i][$n] : $n;
 	}
 	
-	public function learn($k,$v,$l=NULL)
+	public function learnExtended($n,$i,$v,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
-		
-		$this->store[$l][$k] = $v;
+	
+		$this->store[$l][$i][$n] = $v;
 	}
 	
-	public function forget($k,$l=NULL)
+	public function forgetExtended($n,$i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
-		
-		unset($this->store[$l][$k]);
+	
+		unset($this->store[$l][$i][$n]);
 	}
 	
-	public function updateKey($k,$nk,$l=NULL)
+	public function updateKeyExtended($n,$i,$nn,$l=NULL)
 	{
-		$this->learn($nk,$this->translate($k,$l),$l);
-		$this->forget($k,$l);
+		$this->learnExtended($nn,$i,$this->translateExtended($n,$i,$l),$l);
+		$this->forgetExtended($n,$i,$l);
 	}
-
-	public function searchKey($k,$s=false,$l=NULL)
+	
+	public function searchKeyExtended($n,$i,$s=false,$l=NULL)
 	{
 		//	TODO: not implemented yet
+		//	TODO: no extended version yet
+		return array();		
+	}
+	
+	public function searchValueExtended($v,$i,$s=false,$l=NULL)
+	{
+		//	TODO: not implemented yet
+		//	TODO: no extended version yet
 		return array();
 	}
 	
-	public function searchValue($v,$s=false,$l=NULL)
-	{
-		//	TODO: not implemented yet
-		return array();
-	}
-	
-	public function getKeyList($l=NULL)
+	public function getKeyListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
 		
-		return array_keys($this->store[$l]);
+		return array_keys($this->store[$l][$i]);
 	}
 	
-	public function getValueList($l=NULL)
+	public function getValueListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
 		
-		return array_values($this->store[$l]);
+		return array_values($this->store[$l][$i]);
 	}
 	
-	public function getList($l=NULL)
+	public function getListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
-		
-		return $this->store[$l];
+	
+		return $this->store[$l][$i];
 	}
 }

@@ -72,28 +72,28 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 		return false;
 	}
 
-	public function translate($k,$l=NULL)
+	public function translateExtended($n,$i,$l=NULL)
 	{
 		if(!$this->xpath){
 			trigger_error(__METHOD__.": xpath was invalid, db[$this->database], loc[$this->location], lang[$this->language]");
-			return $k;
+			return $n;
 		}
 
-		$v = parent::translate($k,$l);
+		$v = parent::translate($n,$l);
 
-		if($v == $k){
-			$node = $this->xpath->query("//database/translation[@key='$k'][1]");
+		if($v == $n){
+			$node = $this->xpath->query("//database/translation[@key='$n'][1]");
 
 			if($node->length > 0){
 				$v = "";
 
 				$node = $node->item(0);
 
-				foreach($node->childNodes as $n) $v .= $this->xdoc->saveXML($n);
+				foreach($node->childNodes as $item) $v .= $this->xdoc->saveXML($item);
 				$v = trim($v);
 
 				//	Now cache the value read from the xml
-				parent::learn($k,$v,$l);
+				parent::learn($n,$i,$v,$l);
 			}
 		}
 
@@ -101,29 +101,29 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	}
 
 	//	TODO: we need to add the key/value to the xml database on disk
-	public function learn($k,$v,$l=NULL)
+	public function learnExtended($n,$i,$v,$l=NULL)
 	{
-		return parent::learn($k,$v,$l);
+		return parent::learnExtended($n,$i,$v,$l);
 	}
 
 	//	TODO: do the physical remove the key from the xml database
 	//	TODO: do I remove from just a single language, or all of them?
 	//	TODO: perhaps remove all by default, or specify the language to single a particular xml database out.
-	public function forget($k,$l=NULL)
+	public function forgetExtended($n,$i,$l=NULL)
 	{
-		$cache	=	parent::forget($k,$l);
+		$cache	=	parent::forgetExtended($n,$i,$l);
 		$xml	=	false;
 
 		return $cache && $xml;
 	}
 
-	public function updateKey($k,$nk,$l=NULL)
+	public function updateKeyExtended($n,$i,$nn,$l=NULL)
 	{
-		$this->learn($nk,$this->translate($k,$l),$l);
-		$this->forget($k,$l);
+		$this->learnExtended($nn,$i,$this->translateExtended($n,$i,$l),$l);
+		$this->forgetExtended($n,$i,$l);
 	}
 
-	public function getKeyList($l=NULL)
+	public function getKeyListExended($i,$l=NULL)
 	{
 		$list = $this->xpath->query("//database/translation/attribute::key");
 
@@ -133,12 +133,13 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	}
 
 	//	TODO: NOT IMPLEMENTED YET
-	public function getValueList($l=NULL)
+	public function getValueListExtended($i,$l=NULL)
 	{
 		return array();
 	}
 
-	public function getList($l=NULL)
+	//	TODO: NOT IMPLEMENTED YET
+	public function getListExtended($i,$l=NULL)
 	{
 		return array();
 	}
