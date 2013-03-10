@@ -79,7 +79,7 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 			return $n;
 		}
 
-		$v = parent::translate($n,$l);
+		$v = parent::translateExtended($n,$i,$l);
 
 		if($v == $n){
 			$node = $this->xpath->query("//database/translation[@key='$n'][1]");
@@ -93,7 +93,7 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 				$v = trim($v);
 
 				//	Now cache the value read from the xml
-				parent::learn($n,$i,$v,$l);
+				parent::learnExtended($n,$i,$v,$l);
 			}
 		}
 
