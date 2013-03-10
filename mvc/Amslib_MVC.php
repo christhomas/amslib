@@ -438,6 +438,7 @@ class Amslib_MVC extends Amslib_Mixin
 		$this->setValue("image:$id", $file);
 	}
 
+	//	NOTE: this function is being abused to be a generic "make relative url for a file" method for pretty much everything
 	public function getImage($id,$relative=true)
 	{
 		if(!is_string($id)) return false;
@@ -468,11 +469,7 @@ class Amslib_MVC extends Amslib_Mixin
 
 	public function getFullURL()
 	{
-		//	NOTE:		I am not 100% convinced that I should have replaced
-		//				return Amslib_Router::getPath() with a simple getURL
-		//	EXAMPLE:	this broke the contacts section of premiumguest, because the delete button would return
-		//				people to the home page and not the contacts home page like I expect
-		return $this->getURL();
+		return Amslib_Router::getPath();
 	}
 
 	public function getURL($name=NULL,$group=NULL)
@@ -491,6 +488,7 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	//	FIXME: we have to formalise what this slot code is supposed to do, opposed to what the view system already does.
+	//	NOTE: 10/03/2013, still have no idea what this code is really supposed to do
 	public function setSlot($name,$content,$index=NULL)
 	{
 		if($index){
