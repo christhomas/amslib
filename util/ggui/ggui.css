@@ -17,20 +17,24 @@
 \*------------------------------------*/
 button.ggui, 
 .button.ggui {
+	position: relative;
+	display: inline-block;
+	
 	text-decoration: none;
 	text-shadow: 0 1px 0 #fff;
 	
 	font: bold 11px Helvetica, Arial, sans-serif;
 	color: #444;
-	/* chris.thomas@antimatter-studios.com: removed this because it helps fix layout in chrome */
-	/* has no effect on firefox, so I assume it's ok to do this */
-	/*line-height: 17px;*/
-	height: 2.3px !important;
 	
-	display: inline-block;
+	/* chris.thomas@antimatter-studios.com: removed this because it helps fix layout in chrome
+	has no effect on firefox, so I assume it's ok to do this
+	line-height: 17px;*/
 	
+	/* disabled this because why do I need to manually set the height? shouldnt the content do that?
+	height: 2.3em !important;*/
+		
 	margin: 0.5em;
-	padding: 0.6em 0.6em 0.5em 0.7em;
+	padding: 0.6em 0.7em;
 	
 	cursor: pointer;
 	

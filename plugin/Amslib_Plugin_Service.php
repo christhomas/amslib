@@ -29,7 +29,8 @@ class Amslib_Plugin_Service
 	static protected function getData($plugin,$default,$key)
 	{
 		if(!self::$handler){
-			trigger_error("** ".__METHOD__." ** ".Amslib::var_dump(self::$handler,true)." was invalid");
+			//	TODO: move into the logging system intead of here
+			//trigger_error("** ".__METHOD__." ** ".Amslib::var_dump(self::$handler,true)." was invalid");
 			return NULL;
 		}
 
@@ -326,7 +327,7 @@ class Amslib_Plugin_Service
 	static public function processHandler($id=0)
 	{
 		self::$handler = isset(self::$serviceData[self::HD][$id]) ? self::$serviceData[self::HD][$id] : array();
-		trigger_error("HANDLERS = ".Amslib::var_dump(self::$handler,true));
+		//trigger_error("HANDLERS = ".Amslib::var_dump(self::$handler,true));
 
 		return array_keys(Amslib_Array::valid(self::$handler));
 	}
