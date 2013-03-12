@@ -19,6 +19,12 @@ class Amslib_Mixin
 		return false;
 	}
 
+	//	NOTE:	There is a potential !!GOTCHA!! here, if you mixin one object into another, 
+	//			then that object into another, the second mixin only searches for native 
+	//			methods in the first object, it won't see the mixed in methods from the original object
+	//			e.g: object2::mixin(object1::mixin(object0))), 
+	//			object2 can only call native methods on object1, object0's methods are invisible
+	
 	//	TODO: implement reject+accept, now its just the bare idea
 	public function addMixin($object,$reject=array(),$accept=array())
 	{
