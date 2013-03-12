@@ -25,12 +25,12 @@ button.ggui,
 	/* chris.thomas@antimatter-studios.com: removed this because it helps fix layout in chrome */
 	/* has no effect on firefox, so I assume it's ok to do this */
 	/*line-height: 17px;*/
-	height: 27px !important;
+	height: 2.3px !important;
 	
 	display: inline-block;
 	
-	margin: 5px;
-	padding: 4px 6px;
+	margin: 0.5em;
+	padding: 0.6em 0.6em 0.5em 0.7em;
 	
 	cursor: pointer;
 	
