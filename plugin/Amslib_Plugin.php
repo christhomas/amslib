@@ -78,29 +78,49 @@ class Amslib_Plugin
 		if($absolute) return $resource;
 
 		//	PREPARE THE STRING: expand any parameters inside the resource name
-		$resource = self::expandPath($resource);
-		$resource = str_replace("__PLUGIN__",$this->location,$resource);
-		$resource = Amslib::rchop($resource,"?");
+		$resource		=	self::expandPath($resource);
+		$resource		=	str_replace("__PLUGIN__",$this->location,$resource);
+		//	NOTE: we have to do this to get around a bug in lchop/rchop
+		$query_string	=	($str=Amslib::lchop($resource,"?")) == $resource ? false : $str;
+		$resource		=	Amslib::rchop($resource,"?");
+		
+		//	LOLOL: this following code is shit....chris is stupid sometimes..but I can't think of a better way to write it
 
 		//	TEST 1:	look in the package directory for the file
 		$test2 = Amslib_File::reduceSlashes("$this->location/$resource");
-		if(file_exists($test2)) return Amslib_File::relative($test2);
+		if(file_exists($test2)){
+			$output = Amslib_File::relative($test2);
 
+			return $query_string ? "$output?$query_string" : $output;
+		}
+		
 		//	TEST 2: Test whether the file "exists" without any assistance
-		if(file_exists($resource)) return Amslib_File::relative($resource);
+		if(file_exists($resource)){
+			$output = Amslib_File::relative($resource);
+
+			return $query_string ? "$output?$query_string" : $output;			
+		}
 
 		//	TEST 3: Does the file exists relative to the document root?
 		$test4 = Amslib_File::absolute($resource);
-		if(file_exists($test4)) return Amslib_File::relative($resource);
+		if(file_exists($test4)){
+			$output = Amslib_File::relative($resource);
+
+			return $query_string ? "$output?$query_string" : $output;	
+		}
 
 		//	TEST 4:	search the include path for the file
 		$test5 = Amslib_File::find($resource,true);
-		if(file_exists($test5)) return Amslib_File::relative($test5);
+		if(file_exists($test5)){
+			$output = Amslib_File::relative($test5);
 
-		//	FAILED: you could not find the file
+			return $query_string ? "$output?$query_string" : $output;			
+		}
+
+		//	FAILED: you could not find the file		
 		return false;
 	}
-
+	
 	protected function process()
 	{
 		$this->api = $this->createAPI();
@@ -152,7 +172,7 @@ class Amslib_Plugin
 
 					$params		=	array($name,$value,$condition,$autoload,$media);
 				}
-
+				
 				call_user_func_array($func,$params);
 			}
 		}
@@ -472,7 +492,7 @@ class Amslib_Plugin
 
 							$absolute	=	isset($p["absolute"]) ? true : false;
 							$p["value"]	=	$this->findResource($c->nodeValue,$absolute);
-
+							
 							//	If a valid id exists, insert the configuration
 							if(isset($p["id"])) $this->config[$node->nodeName][$p["id"]] = $p;
 						}
