@@ -454,7 +454,18 @@ QUERY;
 
 		return $result;
 	}
-
+	
+	public function selectField($table,$value,$field,$count=1,$optimise=true)
+	{
+		$table = $this->escape($table);
+		$field = $this->escape($field);
+		
+		if(is_string($value))	$value = is_string($value);
+		if(is_numeric($value))	$value = intval($value);
+		
+		return $this->selectValue($field,"$field from $table where $field='$value'");
+	}
+	
 	/**
 	 * method: selectRandom
 	 *

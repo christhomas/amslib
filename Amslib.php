@@ -74,16 +74,28 @@ class Amslib
 		}
 	}
 
-	static public function lchop($str,$search)
+	//	FIXME:	there is a bug here in the ppanel has a 500 webserver error when you return "" or false for not finding a string
+	//	NOTE:	I think it makes more sense now to return false, since if you return a string, it's like you've found a result, but
+	//			thats not true
+	static public function lchop($str,$search,$removeSearch=false)
 	{
-		$p = (strlen($search)) ? strpos($str,$search) : false;
-
+		$p = strlen($search) ? strpos($str,$search) : false;
+		
+		//	TODO: fix the bugs and test this next line to optionally remove the search string instead of doing it by default
+		//	NOTE: I didnt want to activate this by default in case it broke things I didnt realise
+		//if($removeSearch) $p+=strlen($search);
+		
 		return ($p) !== false ? substr($str,$p+strlen($search)) : $str;
 	}
 
+	//	FIXME:	there is a bug here in the ppanel has a 500 webserver error when you return "" or false for not finding a string
+	//	NOTE:	I think it makes more sense now to return false, since if you return a string, it's like you've found a result, but
+	//			thats not true
 	static public function rchop($str,$search)
 	{
-		return ($p = strrpos($str,$search)) !== false ? substr($str,0,$p) : $str;
+		$p = strlen($search) ? strrpos($str,$search) : false;
+		
+		return ($p) !== false ? substr($str,0,$p) : $str;
 	}
 
 	//	NOTE: I copied this code from CakePHP::truncate() which was super useful

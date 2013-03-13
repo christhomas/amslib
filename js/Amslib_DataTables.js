@@ -9,16 +9,16 @@ var amslib = Amslib.locate();
 if(amslib){
 	var theme		=	Amslib.getQuery("theme",$("script[src*='Amslib_DataTables.js']").attr("src"));
 	var pagination	=	Amslib.getQuery("pagination",$("script[src*='Amslib_DataTables.js']").attr("src"));
-	var location	=	amslib+"/util/jquery.dataTables/";
+	var datatables	=	amslib+"/util/jquery.dataTables/";
 	
 	var themeList = {
-		"smooth":	location+"theme.dataTables.smooth.css"
+		"smooth":	datatables+"theme.dataTables.smooth.css"
 	};
 	
 	if(!themeList[theme]) theme = "smooth";
 	
 	Amslib.loadCSS(themeList[theme]);
-	Amslib.loadJS("jquery.dataTables",location+"jquery.dataTables.min.js",function(){
-		if(pagination) Amslib.loadJS("jquery.dataTables.pagination",location+"pagination."+pagination+".js");
+	Amslib.loadJS("jquery.dataTables",datatables+"jquery.dataTables.min.js",function(){
+		if(pagination) Amslib.loadJS("jquery.dataTables.pagination",datatables+"pagination."+pagination+".js");
 	});
 };
