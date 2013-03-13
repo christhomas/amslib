@@ -7,6 +7,10 @@ if(Amslib == undefined || window.exports == undefined) throw("Amslib_JWYSIWYG.js
 var amslib = Amslib.locate();
 
 if(amslib){
-	Amslib.loadCSS(amslib+"/util/jwysiwyg/jquery.wysiwyg.css");
-	Amslib.loadJS("jquery.jwysiwyg",amslib+"/util/jwysiwyg/jquery.wysiwyg.js");
+	var jwysiwyg = amslib+"/util/jwysiwyg/";
+	
+	Amslib.loadCSS(jwysiwyg+"jquery.wysiwyg.css");
+	Amslib.loadJS("jwysiwyg",jwysiwyg+"jquery.wysiwyg.js",function(){
+		Amslib.loadJS("jwysiwyg.link",jwysiwyg+"controls/wysiwyg.link.js");
+	});
 };
