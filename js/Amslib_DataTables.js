@@ -18,7 +18,5 @@ if(amslib){
 	if(!themeList[theme]) theme = "smooth";
 	
 	Amslib.loadCSS(themeList[theme]);
-	Amslib.loadJS("jquery.dataTables",datatables+"jquery.dataTables.min.js",function(){
-		if(pagination) Amslib.loadJS("jquery.dataTables.pagination",datatables+"pagination."+pagination+".js");
-	});
+	Amslib.loadJS("jquery.dataTables",datatables+"jquery.dataTables.min.js");
 };
