@@ -272,7 +272,14 @@ button.ggui span.label,
 	-moz-transition: color .20s;
 	-o-transition: color .20s;
 	transition: color .20s;
-} 
+}
+
+.ddm.ggui span.icon+span.label, 
+button.ggui span.icon+span.label, 
+.button.ggui span.icon+span.label{ 
+	margin-left: 7px;
+}
+
 button.ggui span.label {
 	line-height: 15px !important;
 }
@@ -347,7 +354,8 @@ button.ggui span.icon,
 	
 	display: inline-block;
 	/* chris: removed the left margin as this should be controlled by the button */
-	margin: 0 7px 0 0;
+	/* chris: removed the right margin because it should only appear when there is text on the right, moved it there instead */
+	margin: 0;
 	
 	line-height: 18px;
 	height: 18px;
