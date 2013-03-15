@@ -37,6 +37,11 @@ class Amslib_Router_URL
 	{
 		return Amslib_Router::getServiceURL($route,$group);
 	}
+	
+	static public function redirectToRoute($route,$permenant=0)
+	{
+		return self::redirect(self::getURL($route),$permenant);
+	}
 
 	static public function redirect($url,$permenant=0)
 	{
@@ -70,3 +75,8 @@ class Amslib_Router_URL
 		return self::externalURL($url);	
 	}
 }
+
+/* NAUGHTY!! Two classes in one file, but in this case we're breaking the rules cause:
+ * AMS_URL is a "shorthand" way to use Amslib_Router_URL
+*/
+class AMS_URL extends Amslib_Router_URL{}
