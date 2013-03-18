@@ -28,14 +28,14 @@ class Amslib_Website
 	}
 
 	//	Return a relative url for the file to the document root
-	static public function rel($file)
+	static public function rel($file="")
 	{
 		return Amslib_File::relative(self::$location.$file);
 	}
 
 	//	Return an absolute url for the file to the root directory
 	//	FIXME: if you pass an absolute filename into this method, it won't return the correct filename back
-	static public function abs($file)
+	static public function abs($file="")
 	{
 		return Amslib_File::absolute(self::$location.$file);
 	}

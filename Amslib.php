@@ -683,7 +683,6 @@ class Amslib
 	}
 
 	static public function arrayParam(&$source,$key,$default=NULL,$erase=false)
-
 	{
 		if(is_array($key)){
 			$k = array_shift(array_intersect($key,array_keys($source)));

@@ -43,6 +43,7 @@ class Amslib_Image2
 	const ERROR_WRITE_DIRECTORY_NOT_EXIST	= "destination directory does not exist";
 	const ERROR_WRITE_FILE_EXIST			= "file destination exists, delete original file first";
 	const ERROR_CACHE_NOT_FOUND				= "The image could not be found in the cache";
+	const ERROR_MAXDIM_FAILED				= "maxdim method failed to process correctly";
 	
 	protected function getMIMEType($filename)
 	{
@@ -185,6 +186,45 @@ class Amslib_Image2
 		return true;
 	}
 	
+	public function processCommands($commands)
+	{
+		$cache = array_shift($commands);
+
+		if($cache != "cache") return false;
+		
+		$filename = Amslib_Website::abs();
+		$filename = rtrim($filename,"/");
+		
+		$search_file = true;
+		
+		while($commands){
+			$c = array_shift($commands);
+			
+			if($search_file){			
+				$filename .= "/$c";
+	
+				if(is_file($filename)){
+					$this->open($filename);
+					
+					$search_file = false;
+				}
+			}else{
+				switch($c){
+					case "maxdim":{
+						$width	= array_shift($commands);
+						$height	= array_shift($commands);
+						
+						if(!$this->maxdim($width,$height)){
+							return $this->setError(self::ERROR_MAXDIM_FAILED);
+						}
+					}break;
+				};
+			}
+		}
+
+		return true;
+	}
+	
 	public function open($filename)
 	{
 		//	get file extension and if not valid, return false
@@ -318,8 +358,16 @@ class Amslib_Image2
 		return true;
 	}
 	
-	public function readCache($filename,$returnData=false)
+	public function readCache($filename=NULL,$returnData=false)
 	{
+		//	If the filename was not given, attempt to get it from the cache 
+		//	but only if it appears to be a processed image
+		//	NOTE:	if we cannot find the information inside the image params, then we didnt process it
+		//			we are only really interested in working with files we've already processed
+		if($filename == NULL && $this->getCacheParam("filename") == $this->getImageParam("filename")){
+			$filename = $this->getCacheParam("filename");
+		}
+		
 		//	If cache is not enabled, return false
 		if(!$this->cache_dir) return $this->setError(self::ERROR_NO_CACHE_DIR);
 		
