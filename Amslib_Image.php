@@ -31,10 +31,17 @@ class Amslib_Image
 	protected $error;
 
 	const ERROR_PHPGD_NOT_FOUND = "PHP GD not found, cannot continue";
+	const ERROR_NO_CACHE_DIR = "There was no cache directory set";
+	const ERROR_INVALID_IMAGE_OBJECT = "The PHP GD Image Object was invalid";
 	const ERROR_CREATE_IMAGE_OBJECT = "The system could not create an image object to handle your request";
+	const ERROR_IMAGE_OBJECT_CLOSE = "It was not possible to close the image object";
+	const ERROR_IMAGE_DIMENSIONS_INVALID = "The dimensions of this image were not valid";
+	const ERROR_RESIZE_IMAGE_OBJECT_FAILED = "Resizing the image has failed";
 	const ERROR_FILE_EXTENSION_INVALID = "extension was invalid, permitted extensions are jpeg,jpg.png,gif";
+	const ERROR_FILE_NOT_EXIST = "The file requested cannot be found (doesn't exist?)";
 	const ERROR_WRITE_DIRECTORY_NOT_EXIST = "destination directory does not exist";
 	const ERROR_WRITE_FILE_EXIST = "file destination exists, delete original file first";
+	const ERROR_CACHE_NOT_FOUND = "The image could not be found in the cache";
 
 	protected function setError($error)
 	{
@@ -111,8 +118,10 @@ class Amslib_Image
 		$files = glob("$location/*");
 
 		foreach($files as $f){
+			if(strpos($f,"..")) continue;
+			
 			//	Just in case someone managed to write a file with .. in it (back directory)
-			@unlink(str_replace("..","",$f));
+			@unlink($f);
 		}
 	}
 

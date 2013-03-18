@@ -73,6 +73,44 @@ class Amslib_File
 
 		return self::reduceSlashes("/$rel");
 	}
+	
+	/**
+	 * A function to make directories but can handle creating all the parent directories
+	 * this avoids problems with mkdir+recursive which lots of times just fails without reason
+	 * 
+	 * parameters:
+	 * 	$directory	-	The directory to create
+	 * 
+	 * returns:
+	 * 	boolean true or false, depending on the whether creation was successful
+	 */
+	static public function mkdir($directory)
+	{
+		$parent = dirname($directory);
+		
+		if(!is_dir($parent) && !file_exists($parent)){
+			self::mkdir($parent);
+		}
+		
+		return mkdir($directory) && chmod($directory,0777);
+	}
+	
+	/**
+	 * Recursively delete files or directories
+	 * WARNING: You better make double triple quadruple sure you wanna do this, cause it'll nuke a LOT OF FILES
+	 * 
+	 * 
+	 */
+	static public function rdelete($location)
+	{
+		//	NOTE:	not implemented yet because I changed my mind on it's creation, it seems useful, but SOOOOOOOO dangerous..
+		//			I'm not sure I should do this....it could nuke your filesystem and make your system unbootable...	
+	}
+	
+	static public function getFileExtension($filename)
+	{
+		return strtolower(end(explode(".",$filename)));
+	}
 
 	static public function find($filename,$includeFilename=false)
 	{
