@@ -833,9 +833,22 @@ class Amslib_Validator
 	 */
 	protected function __date($name,$value,$required,$options)
 	{
+		//	If a numeric field is asked to validate against a date, it'll first be 
+		//	converted assuming it's a unix timestamp normally I dislike the idea of 
+		//	validators manipulating their data, but in this case, I think it makes sense
+		//	to allow this exception
+		if(is_numeric($value)){
+			if(isset($options["has_milliseconds"])) $value /= 1000;
+			
+			$format = isset($options["format"]) ? $options["format"] : "Y/m/d H:i:s";
+			
+			$value = date($format,$value);
+		}
+		
 		if(isset($options["format"]) && $options["format"] = "d/m/Y"){
-			//	this idea hasn't been fully tested yet and sometimes fails
+			//	this idea hasn't been fully tested yet and sometimes fails, so it's disabled for now
 			//sscanf($value,"%d/%d/%d")
+			
 			$success = strtotime($value);
 		}else{
 			$success = strtotime($value);
