@@ -44,7 +44,7 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 	{
 		$v = parent::translateExtended($n,$i,$l);
 		
-		if($v == $n){
+		if($v == $n && is_numeric($i)){
 			if(!$l) $l = $this->language;
 			$i	=	intval($i);
 			$l	=	$this->database->escape($l);

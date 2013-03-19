@@ -69,21 +69,31 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	{
 		if(!$l) $l = $this->language;
 		
-		return (is_string($n) && isset($this->store[$l][$i][$n])) ? $this->store[$l][$i][$n] : $n;
+		return is_string($n) && is_numeric($i) && isset($this->store[$l][$i][$n]) 
+			? $this->store[$l][$i][$n] 
+			: $n;
 	}
 	
 	public function learnExtended($n,$i,$v,$l=NULL)
 	{
+		if(!is_int($i)) return false;
+		
 		if(!$l) $l = $this->language;
 	
 		$this->store[$l][$i][$n] = $v;
+		
+		return true;
 	}
 	
 	public function forgetExtended($n,$i,$l=NULL)
 	{
+		if(!is_int($i)) return false;
+		
 		if(!$l) $l = $this->language;
 	
 		unset($this->store[$l][$i][$n]);
+		
+		return true;
 	}
 	
 	public function updateKeyExtended($n,$i,$nn,$l=NULL)
