@@ -111,12 +111,12 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 		//	from this point on, the value must be a string
 		if(!is_string($value)){
-			trigger_error(__METHOD__.": value is not a string ".Amslib::var_dump($value)." in the function ".Amslib::getStackTrace(2,true));
+			error_log(__METHOD__.": value is not a string ".Amslib::var_dump($value)." in the function ".Amslib::getStackTrace(2,true));
 		}
 
 		if(!$this->getConnectionStatus()){
 			print("unsafe string escape: database not connected<br/>\n");
-			trigger_error(__METHOD__.": not connected / backtrace-> ".Amslib::var_dump(array_slice(Amslib::getStackTrace(),2,4),true)."<br/>\n");
+			error_log(__METHOD__.": not connected / backtrace-> ".Amslib::var_dump(array_slice(Amslib::getStackTrace(),2,4),true)."<br/>\n");
 			die("DYING");
 		}
 
@@ -347,7 +347,7 @@ QUERY;
 	public function releaseMemory()
 	{
 		$resultHandle = $this->getSearchResultHandle();
-		if(!$resultHandle) trigger_error(__METHOD__.": trying to free an invalid handle");
+		if(!$resultHandle) error_log(__METHOD__.": trying to free an invalid handle");
 		return $resultHandle ? mysql_free_result($resultHandle) : false;
 	}
 

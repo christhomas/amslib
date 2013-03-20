@@ -17,7 +17,7 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 
 	public function setError($error)
 	{
-		trigger_error(__METHOD__.": $error");
+		error_log(__METHOD__.": $error");
 
 		$this->error[] = $error;
 	}

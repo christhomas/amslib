@@ -30,7 +30,7 @@ class Amslib_Plugin_Service
 	{
 		if(!self::$handler){
 			//	TODO: move into the logging system intead of here
-			//trigger_error("** ".__METHOD__." ** ".Amslib::var_dump(self::$handler,true)." was invalid");
+			error_log("** ".__METHOD__." ** ".Amslib::var_dump(self::$handler,true)." was invalid");
 			return NULL;
 		}
 
@@ -163,7 +163,9 @@ class Amslib_Plugin_Service
 			return call_user_func(array($object,$method),$this,$this->source);
 		}
 
-		if(!is_object($object)) trigger_error(__METHOD__.": \$object parameter is not an object, ".Amslib::var_dump($object));
+		if(!is_object($object)){
+			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib::var_dump($object));
+		}
 
 		//	NOTE:	this might seem a little harsh, but it's a critical error, your object doesn't have
 		//			the method you said it would, probably this means something in your code is broken
@@ -327,7 +329,7 @@ class Amslib_Plugin_Service
 	static public function processHandler($id=0)
 	{
 		self::$handler = isset(self::$serviceData[self::HD][$id]) ? self::$serviceData[self::HD][$id] : array();
-		//trigger_error("HANDLERS = ".Amslib::var_dump(self::$handler,true));
+		error_log("HANDLERS = ".Amslib::var_dump(self::$handler,true));
 
 		return array_keys(Amslib_Array::valid(self::$handler));
 	}

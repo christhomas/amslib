@@ -205,7 +205,7 @@ class Amslib_Database
 
 		//	This is almost always a good idea!!
 		ini_set("display_errors",false);
-		trigger_error(__METHOD__.": DATABASE IS NOT CONNECTED");
+		error_log(__METHOD__.": DATABASE IS NOT CONNECTED");
 
 		return false;
 	}
