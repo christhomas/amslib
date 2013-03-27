@@ -111,12 +111,13 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 		//	from this point on, the value must be a string
 		if(!is_string($value)){
-			error_log(__METHOD__.": value is not a string ".Amslib::var_dump($value)." in the function ".Amslib::getStackTrace(2,true));
+			Amslib::errorLog("stack_trace,2,*","value is not a string",$value);
 		}
 
 		if(!$this->getConnectionStatus()){
 			print("unsafe string escape: database not connected<br/>\n");
-			error_log(__METHOD__.": not connected / backtrace-> ".Amslib::var_dump(array_slice(Amslib::getStackTrace(),2,4),true)."<br/>\n");
+			print("it is not safe to continue, corruption might occur<br/>\n");
+			Amslib::errorLog("stack_trace,2","not connected to database");
 			die("DYING");
 		}
 

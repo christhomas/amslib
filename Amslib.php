@@ -359,6 +359,23 @@ class Amslib
 		$data		=	array();
 		$maxlength	=	1024;
 		
+		if(strpos($args[0],"stack_trace") === 0){
+			$command = explode(",",array_shift($args));
+			
+			$stack = Amslib::getStackTrace(NULL,true);
+			$stack = explode("\n",$stack);
+			
+			$c = count($command);
+			
+			if($c == 2){
+				$stack = array_slice($stack,$command[1]);
+			}else if($c == 3 && $command[2] > 0){
+				$stack = array_slice($stack,$command[1],$command[2]);
+			}
+			
+			foreach($stack as $row) error_log("[TRACE] ".Amslib::var_dump($row));
+		}
+		
 		foreach($args as $k=>$a){
 			if(is_array($a)) $a = Amslib::var_dump($a);
 			if(strlen($a) > $maxlength) $a = substr($a,0,$maxlength-50)."...[array too large to display]";
