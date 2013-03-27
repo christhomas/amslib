@@ -353,36 +353,46 @@ class Amslib
 	
 	static public function errorLog()
 	{
-		$function	=	current(array_slice(Amslib::getStackTrace(),2,1));
-		$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}";
-		$args		=	func_get_args();
+		$args		=	func_get_args();	
 		$data		=	array();
 		$maxlength	=	1024;
-		
-		if(strpos($args[0],"stack_trace") === 0){
-			$command = explode(",",array_shift($args));
-			
-			$stack = Amslib::getStackTrace(NULL,true);
-			$stack = explode("\n",$stack);
-			
-			$c = count($command);
-			
-			if($c == 2){
-				$stack = array_slice($stack,$command[1]);
-			}else if($c == 3 && $command[2] > 0){
-				$stack = array_slice($stack,$command[1],$command[2]);
-			}
-			
-			foreach($stack as $row) error_log("[TRACE] ".Amslib::var_dump($row));
-		}
+		$function	=	false;
 		
 		foreach($args as $k=>$a){
-			if(is_array($a)) $a = Amslib::var_dump($a);
-			if(strlen($a) > $maxlength) $a = substr($a,0,$maxlength-50)."...[array too large to display]";
-
-			$a = trim(preg_replace("/\s+/"," ",$a));
-			
-			$data[] = "arg[$k]=> $a";
+			if(strpos($a,"stack_trace") === 0){
+				$command = explode(",",$a);
+					
+				$stack = Amslib::getStackTrace(NULL,true);
+				$stack = explode("\n",$stack);
+					
+				$c = count($command);
+					
+				if($c == 2){
+					$stack = array_slice($stack,$command[1]);
+				}else if($c == 3 && $command[2] > 0){
+					$stack = array_slice($stack,$command[1],$command[2]);
+				}
+					
+				foreach($stack as $row){
+					error_log("[TRACE] ".Amslib::var_dump($row));
+				}
+			}else if(strpos($a,"func_offset") === 0){
+				$command = explode(",",array_shift($args));
+				
+				if(count($command) == 2) $function = $command[1];
+			}else{
+				if(is_array($a)) $a = Amslib::var_dump($a);
+				if(strlen($a) > $maxlength) $a = substr($a,0,$maxlength-50)."...[array too large to display]";
+		
+				$a = trim(preg_replace("/\s+/"," ",$a));
+				
+				$data[] = "arg[$k]=> $a";
+			}
+		}
+		
+		if(!$function && is_numeric($function)){
+			$function	=	current(array_slice(Amslib::getStackTrace(),$function,1));
+			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}";
 		}
 		
 		error_log("[DEBUG] $function, ".implode(", ",$data));
