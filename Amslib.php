@@ -350,6 +350,28 @@ class Amslib
 
 		return $t;
 	}
+	
+	static public function errorLog()
+	{
+		$function	=	current(array_slice(Amslib::getStackTrace(),2,1));
+		$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}";
+		$args		=	func_get_args();
+		$data		=	array();
+		$maxlength	=	1024;
+		
+		foreach($args as $k=>$a){
+			if(is_array($a)) $a = Amslib::var_dump($a);
+			if(strlen($a) > $maxlength) $a = substr($a,0,$maxlength-50)."...[array too large to display]";
+
+			$a = trim(preg_replace("/\s+/"," ",$a));
+			
+			$data[] = "arg[$k]=> $a";
+		}
+		
+		error_log("[DEBUG] $function, ".implode(", ",$data));
+		
+		return array("function"=>$function,"data"=>$data);
+	}
 
 	//	NOTE: This method has weird parameter names to make it harder to clash with extract()'d parameters from the $__p parameter
 	static public function __importFile($__r,$__f,$__p=array(),$__b=false)
