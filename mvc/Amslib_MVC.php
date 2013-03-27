@@ -73,7 +73,11 @@ class Amslib_MVC extends Amslib_Mixin
 
 	public function addMixin($object,$reject=array(),$accept=array())
 	{
-		if(is_string($object)) $object = $this->getObject($object,true);
+		if(is_string($object)){
+			$object = $this->getObject($object,true);
+			
+			if(!$object) $this->getAPI($object);
+		}
 
 		return parent::addMixin($object,$reject,$accept);
 	}
