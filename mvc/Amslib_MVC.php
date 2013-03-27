@@ -76,7 +76,7 @@ class Amslib_MVC extends Amslib_Mixin
 		if(is_string($object)){
 			$object = $this->getObject($object,true);
 			
-			if(!$object) $this->getAPI($object);
+			if(!$object) $object = $this->getAPI($object);
 		}
 
 		return parent::addMixin($object,$reject,$accept);
