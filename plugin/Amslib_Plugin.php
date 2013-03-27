@@ -429,15 +429,23 @@ class Amslib_Plugin
 		$this->location	=	$location;
 		$this->filename	=	$this->getPackageFilename();
 
-		$xpath			=	false;
-		$document		=	new DOMDocument('1.0', 'UTF-8');
+		try{
+			$xpath			=	false;
+			$document		=	new DOMDocument('1.0', 'UTF-8');
 
-		if($document->load($this->filename)){
-			$document->preserveWhiteSpace = false;
-			$xpath = new DOMXPath($document);
+			if($document->load($this->filename)){
+				$document->preserveWhiteSpace = false;
+				$xpath = new DOMXPath($document);
+			}
+	
+			if(!$xpath){
+				Amslib::errorLog("xpath failed to load on filename",$this->filename);
+
+				return $this->isReady;
+			}
+		}catch(Exception $e){
+			Amslib::errorLog("exception caught, message",$e->getMessage());
 		}
-
-		if(!$xpath) return $this->isReady;
 
 		//	Load the router, if one is present
 		Amslib_Router::load($this->filename,"xml",$this->getName());

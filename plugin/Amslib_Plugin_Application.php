@@ -85,7 +85,14 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		//	STEP 1: Autoload all resources from each plugin as they are requested
 		$plugins = Amslib_Plugin_Manager::listPlugins();
-		foreach($plugins as $name) Amslib_Plugin_Manager::getAPI($name)->autoloadResources();
+		foreach($plugins as $name){
+			$p = Amslib_Plugin_Manager::getAPI($name);
+			if($p){
+				$p->autoloadResources();
+			}else{
+				Amslib::errorLog("plugin not found?",$p);
+			}
+		}
 
 		$default	=	Amslib_Router::getRouteParam("plugin");
 		$route		=	Amslib_Router::getRoute();
@@ -94,24 +101,28 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	hack into place the adding or removing of all the stylesheets and javascripts
 		foreach(Amslib_Array::valid(Amslib_Router::getJavascript()) as $j){
 			//	datatables does't load because it's trying with the wrong plugin
-			$plugin = Amslib_Plugin_Manager::getAPI(isset($j["plugin"])
-				? str_replace("__CURRENT_PLUGIN__",$route["group"],$j["plugin"])
-				: $default);
+			$name	=	isset($j["plugin"]) ? str_replace("__CURRENT_PLUGIN__",$route["group"],$j["plugin"]) : $default;
+			$plugin	=	Amslib_Plugin_Manager::getAPI($name);
 
 			if($plugin){
-				if(isset($j["remove"])) Amslib_Resource::removeJavascript($j["value"]);
-				else $plugin->addJavascript($j["value"]);
+				if(isset($j["remove"])){
+					Amslib_Resource::removeJavascript($j["value"]);
+				}else{
+					$plugin->addJavascript($j["value"]);
+				}
 			}
 		}
 
 		foreach(Amslib_Array::valid(Amslib_Router::getStylesheet()) as $c){
-			$plugin = Amslib_Plugin_Manager::getAPI(isset($c["plugin"])
-				? str_replace("__CURRENT_PLUGIN__",$route["group"],$c["plugin"])
-				: $default);
+			$name	=	isset($c["plugin"]) ? str_replace("__CURRENT_PLUGIN__",$route["group"],$c["plugin"]) : $default;
+			$plugin	=	Amslib_Plugin_Manager::getAPI($name);
 
 			if($plugin){
-				if(isset($c["remove"])) Amslib_Resource::removeStylesheet($c["value"]);
-				else $plugin->addStylesheet($c["value"]);
+				if(isset($c["remove"])){
+					Amslib_Resource::removeStylesheet($c["value"]);
+				}else{
+					$plugin->addStylesheet($c["value"]);
+				}
 			}
 		}
 	}
