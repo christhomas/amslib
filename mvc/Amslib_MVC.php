@@ -184,17 +184,31 @@ class Amslib_MVC extends Amslib_Mixin
 
 	public function getObject($id,$singleton=true)
 	{
+		//	If the object requested is this object, return it directly
 		if(get_class($this) == $id) return $this;
+		//	If the object requested doesnt exist as an id in the array, return false
 		if(!isset($this->object[$id])) return false;
 
+		//	otherwise, include that object php object and then check the class exists (so you can create it)
 		Amslib::requireFile($this->object[$id],array("require_once"=>true));
 
 		if(class_exists($id)){
-			if($singleton && method_exists($id,"getInstance")) return call_user_func(array($id,"getInstance"));
-
-			return new $id;
+			//	If it's a singleton, create it, otherwise create a new instance of the object
+			if($singleton && method_exists($id,"getInstance")){
+				$o = call_user_func(array($id,"getInstance"));
+			}else{
+				$o = new $id;
+			}
+			
+			//	if this object was valid and has initialiseObject, call it, then return whatever was created
+			if($o && method_exists($o,"initialiseObject") && !$o->isInitialised()){
+				$o->initialiseObject($this);
+			}
+			
+			return $o;
 		}
 
+		//	oopsie, you done goofed!!
 		return false;
 	}
 
