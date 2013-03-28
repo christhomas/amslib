@@ -390,7 +390,7 @@ class Amslib
 			}
 		}
 		
-		if(!$function && is_numeric($function)){
+		if($function && is_numeric($function)){
 			$function	=	current(array_slice(Amslib::getStackTrace(),$function,1));
 			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}";
 		}
