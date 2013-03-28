@@ -355,7 +355,7 @@ class Amslib
 	{
 		$args		=	func_get_args();	
 		$data		=	array();
-		$maxlength	=	1024;
+		$maxlength	=	8912;
 		$function	=	false;
 		
 		foreach($args as $k=>$a){
@@ -391,10 +391,10 @@ class Amslib
 			}
 		}
 		
-		if($function && is_numeric($function)){
-			$function	=	current(array_slice(Amslib::getStackTrace(),$function,1));
-			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}";
-		}
+		if(!is_numeric($function)) $function = 2;
+		
+		$function	=	current(array_slice(Amslib::getStackTrace(),$function,1));
+		$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}";
 		
 		error_log("[DEBUG] $function, ".implode(", ",$data));
 		
