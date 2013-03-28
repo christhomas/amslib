@@ -382,9 +382,10 @@ class Amslib
 				if(count($command) == 2) $function = $command[1];
 			}else{
 				if(is_array($a)) $a = Amslib::var_dump($a);
-				if(strlen($a) > $maxlength) $a = substr($a,0,$maxlength-50)."...[array too large to display]";
-		
+				
 				$a = trim(preg_replace("/\s+/"," ",$a));
+				
+				if(strlen($a) > $maxlength) $a = substr($a,0,$maxlength-50)."...[array too large to display]";
 				
 				$data[] = "arg[$k]=> $a";
 			}
