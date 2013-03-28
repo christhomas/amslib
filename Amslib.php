@@ -359,7 +359,7 @@ class Amslib
 		$function	=	false;
 		
 		foreach($args as $k=>$a){
-			if(strpos($a,"stack_trace") === 0){
+			if(is_string($a) && strpos($a,"stack_trace") === 0){
 				$command = explode(",",$a);
 					
 				$stack = Amslib::getStackTrace(NULL,true);
@@ -376,12 +376,14 @@ class Amslib
 				foreach($stack as $row){
 					error_log("[TRACE] ".Amslib::var_dump($row));
 				}
-			}else if(strpos($a,"func_offset") === 0){
+			}else if(is_string($a) && strpos($a,"func_offset") === 0){
 				$command = explode(",",array_shift($args));
 				
 				if(count($command) == 2) $function = $command[1];
 			}else{
-				if(is_array($a)) $a = Amslib::var_dump($a);
+				if(is_array($a)) 	$a = Amslib::var_dump($a);
+				if(is_bool($a))		$a = $a ? "true" : "false";
+				if(is_null($a))		$a = "null";
 				
 				$a = trim(preg_replace("/\s+/"," ",$a));
 				
