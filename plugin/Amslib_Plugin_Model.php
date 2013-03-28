@@ -44,7 +44,6 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	
 	public function select($query,$numResults=0,$optimise=false)
 	{
-		error_log(get_class($this)."::".__FUNCTION__.", query = ".preg_replace("/\s+/"," ",$query));
 		if(Amslib::getGET("debug_database",$this->api->getValue("debug_database"))){
 			$log = Amslib::errorLog("func_offset,3",$query,$numResults,$optimise);
 	
