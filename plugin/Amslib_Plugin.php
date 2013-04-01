@@ -214,7 +214,7 @@ class Amslib_Plugin
 			}
 		}else if($dieOnError){
 			$error = str_replace("__ERROR__","find class '{$object["value"]}'",$error);
-			Amslib::errorLog("stack_trace",$error);
+			Amslib::errorLog($error);
 			die($error);
 		}
 
