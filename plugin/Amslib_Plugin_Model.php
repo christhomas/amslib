@@ -31,7 +31,7 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	
 	public function selectValue($field,$query,$numResults=0,$optimise=false)
 	{
-		$dd = $this->api->getValue("debug_database");
+		$dd = $this->api ? $this->api->getValue("debug_database") : false;
 		
 		if(Amslib::getGET("debug_database",$dd)){
 			$log = Amslib::errorLog($query,$numResults,$optimise);
@@ -46,7 +46,7 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	
 	public function select($query,$numResults=0,$optimise=false)
 	{
-		$dd = $this->api->getValue("debug_database");
+		$dd = $this->api ? $this->api->getValue("debug_database") : false;
 		
 		if(Amslib::getGET("debug_database",$dd)){
 			$log = Amslib::errorLog("func_offset,3",$query,$numResults,$optimise);
