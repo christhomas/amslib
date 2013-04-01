@@ -63,4 +63,17 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	
 		return parent::select($query,$numResults,$optimise);
 	}
+	
+	public function select2($query,$numResults=0,$optimise=false)
+	{
+		if($this->enableDebug){
+			$log = Amslib::errorLog("func_offset,3",$query,$numResults,$optimise);
+	
+			if($this->enableDebugLog){
+				$this->api->logDebug("DEBUG_DATABASE: {$log["function"]}",$log["data"]);
+			}
+		}
+	
+		return parent::select2($query,$numResults,$optimise);
+	}
 }
