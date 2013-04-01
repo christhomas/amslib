@@ -213,7 +213,9 @@ class Amslib_Plugin
 				$cache = new $object["value"];
 			}
 		}else if($dieOnError){
-			die(str_replace("__ERROR__","find class '{$object["value"]}'",$error));
+			$error = str_replace("__ERROR__","find class '{$object["value"]}'",$error);
+			Amslib::errorLog("stack_trace",$error);
+			die($error);
 		}
 
 		if($cache) $object["cache"] = $cache;
