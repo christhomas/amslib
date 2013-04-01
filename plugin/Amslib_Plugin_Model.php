@@ -7,6 +7,9 @@
 class Amslib_Plugin_Model extends Amslib_Database_MySQL
 {
 	protected $api;
+	
+	protected $enableDebug;
+	protected $enableDebugLog;
 
 	public function __construct()
 	{
@@ -27,16 +30,20 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	{
 		$this->api = $api;
 		$this->copyConnection($this->api->getModel());
+		
+		$dd		= $this->api ? $this->api->getValue("debug_database") : false;
+		$ddl	= $this->api ? $this->api->getValue("debug_database_log") : false;
+		
+		$this->enableDebug		=	Amslib::getGET("debug_database",$dd);
+		$this->enableDebugLog	=	Amslib::getGET("debug_database_log",$ddl);
 	}
 	
 	public function selectValue($field,$query,$numResults=0,$optimise=false)
 	{
-		$dd = $this->api ? $this->api->getValue("debug_database") : false;
-		
-		if(Amslib::getGET("debug_database",$dd)){
+		if($this->enableDebug){
 			$log = Amslib::errorLog($query,$numResults,$optimise);
 	
-			if(Amslib::getGET("debug_database_log",$dd)){
+			if($this->enableDebugLog){
 				$this->api->logDebug("DEBUG_DATABASE: {$log["function"]}",$log["data"]);
 			}
 		}
@@ -46,12 +53,10 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	
 	public function select($query,$numResults=0,$optimise=false)
 	{
-		$dd = $this->api ? $this->api->getValue("debug_database") : false;
-		
-		if(Amslib::getGET("debug_database",$dd)){
+		if($this->enableDebug){
 			$log = Amslib::errorLog("func_offset,3",$query,$numResults,$optimise);
 	
-			if(Amslib::getGET("debug_database_log",$dd)){
+			if($this->enableDebugLog){
 				$this->api->logDebug("DEBUG_DATABASE: {$log["function"]}",$log["data"]);
 			}
 		}
