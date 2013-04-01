@@ -41,7 +41,7 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	public function selectValue($field,$query,$numResults=0,$optimise=false)
 	{
 		if($this->enableDebug){
-			$log = Amslib::errorLog("func_offset,3",$query,$numResults,$optimise);
+			$log = Amslib::errorLog("func_offset,4",$query,$numResults,$optimise);
 	
 			if($this->enableDebugLog){
 				$this->api->logDebug("DEBUG_DATABASE: {$log["function"]}",$log["data"]);
@@ -75,5 +75,32 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		}
 	
 		return parent::select2($query,$numResults,$optimise);
+	}
+	
+	public function insert($query)
+	{
+		if($this->enableDebug){
+			$log = Amslib::errorLog("func_offset,3",$query);
+		}
+		
+		return parent::insert($query);
+	}
+	
+	public function update($query,$allow_zero=true)
+	{
+		if($this->enableDebug){
+			$log = Amslib::errorLog("func_offset,3",$query,$allow_zero);
+		}
+		
+		return parent::update($query,$allow_zero);
+	}
+	
+	public function delete($query)
+	{
+		if($this->enableDebug){
+			$log = Amslib::errorLog("func_offset,3",$query);
+		}
+		
+		return parent::delete($query);
 	}
 }
