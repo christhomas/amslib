@@ -227,7 +227,7 @@ class Amslib_File
 
 		$parts			= explode(".",$dst_filename);
 		$extension		= array_pop($parts);
-		$dst_filename	= Amslib::slugify(implode(".",$parts),"","_").$extension;
+		$dst_filename	= Amslib::slugify(implode(".",$parts),"","_").".".$extension;
 		$destination	= self::reduceSlashes("$directory/$dst_filename");
 
 		//	Try to move the file into the correct destination
