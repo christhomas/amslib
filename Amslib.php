@@ -396,7 +396,12 @@ class Amslib
 		if(!is_numeric($function)) $function = 2;
 		
 		$function	=	current(array_slice(Amslib::getStackTrace(),$function,1));
-		$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}";
+		if(!isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
+			$function	=	"(ERROR, function invalid: ".Amslib::var_dump($function).")";
+		}else{
+			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}";
+		}
+		
 		
 		error_log("[DEBUG] $function, ".implode(", ",$data));
 		
