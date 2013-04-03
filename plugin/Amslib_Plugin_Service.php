@@ -91,6 +91,8 @@ class Amslib_Plugin_Service
 		//	Reset the service data and session structures
 		$this->data		=	array();
 		$this->session	=	array(self::HD=>array());
+		//	blank the appropriate session key to stop previous sessions overlapping
+		$this->getSESSION(self::SR,false,true);
 		//	NOTE: this "violates" mixing key types, but it's simpler than not doing it, so I'll "tolerate" it for this situation
 		$this->showFeedback();
 		$this->setAjax(Amslib::postParam("return_ajax",false));
@@ -101,6 +103,9 @@ class Amslib_Plugin_Service
 		$this->isAJAX		=	$status;
 		$this->successCB	=	$this->isAJAX ? "successAJAX" : "successPOST";
 		$this->failureCB	=	$this->isAJAX ? "failureAJAX" : "failurePOST";
+		
+		//	When doing ajax calls, you should never show feedback on the next available page
+		if($status) $this->hideFeedback();
 	}
 
 	public function setSuccessURL($url)
