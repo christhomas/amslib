@@ -402,7 +402,6 @@ class Amslib
 			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}";
 		}
 		
-		
 		error_log("[DEBUG] $function, ".implode(", ",$data));
 		
 		return array("function"=>$function,"data"=>$data);
