@@ -378,8 +378,11 @@ button.ggui span.icon,
 	-o-transition: background-image 0.20s linear;
 	transition: background-image 0.20s linear;
 }
+.ddm.ggui.active span.icon,
 .ddm.ggui:hover span.icon, 
+button.ggui.active span.icon,
 button.ggui:hover span.icon, 
+.button.ggui.active span.icon,
 .button.ggui:hover span.icon {
 	background-image: url(google+-ui-sprite-colour.png);
 }
