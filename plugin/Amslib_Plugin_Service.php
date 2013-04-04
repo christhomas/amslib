@@ -92,7 +92,7 @@ class Amslib_Plugin_Service
 		$this->data		=	array();
 		$this->session	=	array(self::HD=>array());
 		//	blank the appropriate session key to stop previous sessions overlapping
-		$this->getSESSION(self::SR,false,true);
+		Amslib::getSESSION(self::SR,false,true);
 		//	NOTE: this "violates" mixing key types, but it's simpler than not doing it, so I'll "tolerate" it for this situation
 		$this->showFeedback();
 		$this->setAjax(Amslib::postParam("return_ajax",false));
