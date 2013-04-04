@@ -278,6 +278,11 @@ button.ggui span.label,
 button.ggui span.icon+span.label, 
 .button.ggui span.icon+span.label{ 
 	margin-left: 7px;
+	/* chris:	this font-size: 100% helps if you set spans inside a parent element to a size, then it'll affect buttons too
+				but in all this times I have done this, I don't want to affect the size of the button text
+				so this stops those changes from affecting buttons
+	*/
+	font-size: 100%;
 }
 
 button.ggui span.label {
