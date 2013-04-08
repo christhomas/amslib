@@ -167,7 +167,7 @@ class Amslib_Plugin_Service
 		if(method_exists($object,$method)){
 			return call_user_func(array($object,$method),$this,$this->source);
 		}
-
+		
 		if(!is_object($object)){
 			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib::var_dump($object));
 		}
@@ -232,7 +232,7 @@ class Amslib_Plugin_Service
 			$state = isset($h["managed"])
 				? $this->runManagedHandler($h["managed"],$h["object"],$h["method"])
 				: $this->runHandler($h["object"],$h["method"]);
-
+			
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($state);
 
