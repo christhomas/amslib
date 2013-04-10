@@ -501,12 +501,12 @@ class Amslib_MVC extends Amslib_Mixin
 
 	public function getService($name,$group=NULL)
 	{
-		return Amslib_Router::getService($name,$group?$group:$this->getName());
+		return Amslib_Router_URL::getService($name,$group?$group:$this->getName());
 	}
 
 	public function getServiceURL($name,$group=NULL)
 	{
-		return Amslib_Router::getServiceURL($name,$group?$group:$this->getName());
+		return Amslib_Router_URL::getServiceURL($name,$group?$group:$this->getName());
 	}
 
 	//	FIXME: we have to formalise what this slot code is supposed to do, opposed to what the view system already does.
