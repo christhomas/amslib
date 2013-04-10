@@ -32,6 +32,11 @@ class Amslib_Router_URL
 
 		return $r;
 	}*/
+	
+	static public function getService($route,$group=NULL)
+	{
+		return Amslib_Router::getService($route,$group);
+	}
 
 	static public function getServiceURL($route,$group=NULL)
 	{
