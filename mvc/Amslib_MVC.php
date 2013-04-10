@@ -496,7 +496,7 @@ class Amslib_MVC extends Amslib_Mixin
 
 	public function getURL($name=NULL,$group=NULL)
 	{
-		return Amslib_Router::getURL($name,$group?$group:$this->getName());
+		return Amslib_Router_URL::getURL($name,$group?$group:$this->getName());
 	}
 
 	public function getService($name,$group=NULL)
