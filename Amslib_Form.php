@@ -1,7 +1,7 @@
 <?php
 class Amslib_Form
 {
-	static public function selectOptions($array,$selected=NULL,$indexText=NULL,$indexValue=NULL,$createAttributes=true)
+	static public function selectOptions($array,$selected=NULL,$indexText=NULL,$indexValue=NULL,$createAttributes=false)
 	{
 		$options = array();
 
