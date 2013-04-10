@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- SECTION: BASIC PLUGIN CONFIGURATION -->
+	<requires>
+		<plugin>admin_panel_base</plugin>
+	</requires>
+	
+	<object>
+		<!-- Update Database_Object to the name of the object in your website which connects to the DB -->
+		<model>Database_Object</model>
+	</object>
+	
+	<!-- SECTION: APPLICATION CONFIGURATION -->
+	
+	<!-- Version of the application, this is automatically inserted into the footer -->
+	<version>
+		<date>25/02/2012</date>
+		<number>18</number>
+		<name>project name</name>
+	</version>
+	
+	<!--	TRANSLATOR CONFIGURATION: Configure a translator with the required configuration
+		<name>
+			a unique name to reference the "translator" through which
+			all the translations for that system will come from and be stored
+		<type>
+			values: 	'xml', 'database'
+		<location>	
+			database:	'Name_Of_Database_Object/db_table_name'
+			xml:		'/directory_to_the_xml_files/'
+		<language>
+			the language code, e.g. en_GB, es_ES, es_CA, fr_FR, etc
+			
+		NOTE:
+			If you are using a database type, the Name_Of_Database_Object must be in the 
+			include path, therefore will invoke the auto_loader from amslib
+	-->
+	<translator>
+		<name>website</name>
+		<type>database</type>
+		<location>Database_Object/translation_table</location>
+		<language>en_GB</language>
+		<language>es_ES</language>
+		<language>de_DE</language>
+		<language>fr_FR</language>
+	</translator>
+	
+	<translator>
+		<name>content</name>
+		<type>database</type>
+		<location>Database_Database/translation_table</location>
+		<language>en_GB</language>
+		<language>es_ES</language>
+		<language>de_DE</language>
+		<language>fr_FR</language>
+	</translator>
+	
+	<!-- WEBSITE / ADMIN PATHS: important for the system to autoconfigure itself -->
+	<!-- INCLUDE PATHS: If you need any include paths on top of the default ones put them here -->
+	<!--
+		IMPORTANT NOTES:
+		__WEBSITE__	=	the path of the website, configured in //path/website of the admin_panel.xml
+		__ADMIN__	=	the path of the admin panel, configured in //path/admin of the admin_panel.xml
+		
+		FIXME: I have to figure out a way to put this into the admin_panel_base plugin and not here
+	-->
+	<path>
+		<!-- OPTIONAL: set if have weird configuration: 
+		<docroot>/mnt/web5/63/54/52397454/htdocs/</docroot> -->
+		<website>/</website>
+		<admin>__WEBSITE__/admin/</admin>
+		<amslib>__WEBSITE__/amslib/</amslib>
+		<plugin>__ADMIN__/plugins/</plugin>
+		<plugin>__WEBSITE__/plugins/</plugin>
+		<include>__WEBSITE__/objects/</include>
+	</path>
+
+	<!-- FIXME: I need to move this somehow into the admin_panel_base plugin -->
+	<value>
+		<lang_key>/amslib/lang/admin/</lang_key>
+	</value>
+
+	<value export="amslib_api_users">
+		<db_user>user_table</db_user>
+		<db_caps>capability_table</db_caps>
+		<db_caps_list>capability_list_table</db_caps_list>
+		
+		<session_key>/amslib/users/admin</session_key>
+		<cookie_path>__ADMIN__</cookie_path>
+	</value>
+
+	<value export="amslib_api_filebank">
+		<!--
+		there is a bug where different value blocks can overwrite the other
+		value, so for now I am putting this under a db_table2 xml node to stop
+		that from happening.
+		
+		FIXME: this is really important!!
+		-->
+		<db_table2>files_table</db_table2>
+	</value>
+	
+	<value export="amslib_api_seo">
+		<!--
+		there is a bug where different value blocks can overwrite the other
+		value, so for now I am putting this under a db_table2 xml node to stop
+		that from happening.
+		
+		FIXME: this is really important!!
+		-->
+		<db_table3>amslib_api_seo</db_table3>
+	</value>
+</package>
