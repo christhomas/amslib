@@ -424,7 +424,7 @@ class Amslib
 
 		if(is_file($__f) && file_exists($__f)){
 			if(is_array($__p) && count($__p)) extract($__p, EXTR_SKIP);
-
+			
 			//	Optional output buffering
 			if($__b) ob_start();
 
