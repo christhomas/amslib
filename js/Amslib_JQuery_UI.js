@@ -22,7 +22,7 @@ var Amslib_JQuery_UI = my.Amslib_JQuery_UI = my.Class(Amslib,{
 		autoload: function(){
 			var jqui = new Amslib_JQuery_UI();
 			
-			$(Amslib_DataTables.options.autoload_datepicker).each(function(){
+			$(Amslib_JQuery_UI.options.autoload_datepicker).each(function(){
 				jqui.setupDatepicker(this);
 			});
 		},
@@ -47,7 +47,7 @@ var Amslib_JQuery_UI = my.Amslib_JQuery_UI = my.Class(Amslib,{
 	{
 		var o = $.extend({}, Amslib_JQuery_UI.datepicker);
 		
-		parent.datepicker(o);
+		$(parent).datepicker(o);
 	}
 });
 
