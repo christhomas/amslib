@@ -35,7 +35,7 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 			//	jquery datatables options
 			bJQueryUI:			true,
 		    sPaginationType:	"full_numbers",
-		    sDom:				'<"top floatfix"lpf>rt<"clear">',
+		    sDom:				"<'top floatfix'lpf>rt",
 		    iDisplayLength:		25,
 		    aaSorting:			[],
 		    bAutoWidth:			false
@@ -44,7 +44,7 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 	
 	constructor: function(parent)
 	{
-		var o = Amslib_DataTables.options;
+		var o = $.extend({}, Amslib_DataTables.options);
 		
 		Amslib_DataTables.Super.call(this,parent,o.amslibName);
 		
@@ -72,10 +72,10 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 		
 		var ajax_source = this.parent.data("dt-ajax-source");
 		if(ajax_source != undefined){
-			o.bProcessing		=	true;
-			o.bServerSide		=	true;
+			o.bProcessing	=	true;
+			o.bServerSide	=	true;
 			o.sServerMethod	=	"POST";
-			o.sAjaxSource		=	ajax_source;
+			o.sAjaxSource	=	ajax_source;
 			o.fnServerData	=	function ( sSource, aoData, fnCallback, oSettings ) {
 				aoData.push({"name": "button_action", "value":oSettings.button_action});
 				
@@ -92,7 +92,7 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 		//	TODO: in future, find a way to know this value, it's for the full number of records in the system
 		var defer_loading = this.parent.data("dt-defer-loading");
 		if(defer_loading != undefined) o.iDeferLoading = 0;
-		
+		console.log(o);
 		var pagination = this.parent.data("dt-pagination");
 		if(pagination != undefined){
 			Amslib.loadJS("jquery.dataTables.pagination",Amslib.locate()+"/util/jquery.dataTables/pagination."+pagination+".js",function(){
