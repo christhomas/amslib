@@ -30,7 +30,7 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 		},
 		
 		options: {
-			autoload:			"[data-enable-amslib-datatables]",
+			autoload:			"[data-autoload-datatables]",
 			amslibName:			"Amslib_DataTables",
 			//	jquery datatables options
 			bJQueryUI:			true,
