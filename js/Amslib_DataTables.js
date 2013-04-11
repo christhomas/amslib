@@ -92,7 +92,7 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 		//	TODO: in future, find a way to know this value, it's for the full number of records in the system
 		var defer_loading = this.parent.data("dt-defer-loading");
 		if(defer_loading != undefined) o.iDeferLoading = 0;
-		console.log(o);
+
 		var pagination = this.parent.data("dt-pagination");
 		if(pagination != undefined){
 			Amslib.loadJS("jquery.dataTables.pagination",Amslib.locate()+"/util/jquery.dataTables/pagination."+pagination+".js",function(){

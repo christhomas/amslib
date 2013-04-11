@@ -43,7 +43,8 @@ var Amslib_JQuery_UI = my.Amslib_JQuery_UI = my.Class(Amslib,{
 		Amslib_JQuery_UI.Super.call(this,$(document),Amslib_JQuery_UI.options.amslibName);
 	},
 	
-	setupDatepicker: function(parent);
+	setupDatepicker: function(parent)
+	{
 		var o = $.extend({}, Amslib_JQuery_UI.datepicker);
 		
 		parent.datepicker(o);
