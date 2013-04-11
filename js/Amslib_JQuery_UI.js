@@ -20,14 +20,19 @@ if(amslib){
 var Amslib_JQuery_UI = my.Amslib_JQuery_UI = my.Class(Amslib,{
 	STATIC:{
 		autoload: function(){
-			$(Amslib_DataTables.options.autoload).each(function(){
-				new Amslib_JQuery_UI(this);
+			var jqui = new Amslib_JQuery_UI();
+			
+			$(Amslib_DataTables.options.autoload_datepicker).each(function(){
+				jqui.setupDatepicker(this);
 			});
 		},
 		
-		options:{
-			autoload:	"[data-autoload-datepicker]",
-			amslibName:	"Amslib_JQuery_UI",
+		options: {
+			autoload_datepicker:	"[data-autoload-datepicker]",
+			amslibName:				"Amslib_JQuery_UI"
+		},
+		
+		datepicker: {
 			dateFormat:	"yy-mm-dd",
 			firstDay:	1
 		}
@@ -35,11 +40,13 @@ var Amslib_JQuery_UI = my.Amslib_JQuery_UI = my.Class(Amslib,{
 	
 	constructor: function(parent)
 	{
-		var o = $.extend({}, Amslib_JQuery_UI.options);
+		Amslib_JQuery_UI.Super.call(this,$(document),Amslib_JQuery_UI.options.amslibName);
+	},
+	
+	setupDatepicker: function(parent);
+		var o = $.extend({}, Amslib_JQuery_UI.datepicker);
 		
-		Amslib_JQuery_UI.Super.call(this,parent,o.amslibName);
-		
-		this.parent.datepicker(o);
+		parent.datepicker(o);
 	}
 });
 
