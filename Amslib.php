@@ -393,13 +393,17 @@ class Amslib
 			}
 		}
 		
+		$stack = Amslib::getStackTrace();
+		
 		if(!is_numeric($function)) $function = 2;
 		
-		$function	=	current(array_slice(Amslib::getStackTrace(),$function,1));
-		if(!isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
+		$line		=	isset($stack[$function-1])	? $stack[$function-1]	:	array("line"=>-1);
+		$function	=	isset($stack[$function])	? $stack[$function] 	:	false;
+		
+		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
 			$function	=	"(ERROR, function invalid: ".Amslib::var_dump($function).")";
 		}else{
-			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}";
+			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}({$line["line"]})";
 		}
 		
 		error_log("[DEBUG] $function, ".implode(", ",$data));
