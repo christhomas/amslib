@@ -782,25 +782,29 @@ class Amslib_Validator
 	protected function __phone($name,$value,$required,$options)
 	{
 		$error = false;
-
-		if($error == false && strlen($value) == 0) $error = "PHONE_EMPTY";
-
-		$temp = str_replace("(","",$value);
-		$temp = str_replace(")","",$temp);
-		$temp = str_replace("+","",$temp);
-		$temp = str_replace("-","",$temp);
-		$temp = str_replace(" ","",$temp);
-		$temp = str_replace(".","",$temp);
-		$temp = str_replace(",","",$temp);
-
-		if($error == false && isset($options["minlength"]) && strlen($temp) < $options["minlength"]){
-			$error = "PHONE_LENGTH_INVALID";
+		
+		if(strlen($value)){
+			$temp = str_replace("(","",$value);
+			$temp = str_replace(")","",$temp);
+			$temp = str_replace("+","",$temp);
+			$temp = str_replace("-","",$temp);
+			$temp = str_replace(" ","",$temp);
+			$temp = str_replace(".","",$temp);
+			$temp = str_replace(",","",$temp);
+			
+			if(isset($options["minlength"]) && strlen($temp) < $options["minlength"]){
+				$error = "PHONE_LENGTH_INVALID";
+			}
+			
+			if($error == false){
+				$temp = preg_replace("/\d/","",$temp);
+				$temp = trim($temp);
+				
+				if(strlen($temp)) $error = "PHONE_INVALID";
+			}
+		}else if(empty($options["allow_empty"])){
+			$error = "PHONE_EMPTY";
 		}
-
-		$temp = preg_replace("/\d/","",$temp);
-		$temp = trim($temp);
-
-		if($error == false && strlen($temp)) $error = "PHONE_INVALID";
 
 		//	If there was an error
 		if($error !== false)
@@ -1194,7 +1198,7 @@ class Amslib_Validator
 			$value = (isset($this->__source[$name])) ? $this->__source[$name] : NULL;
 
 			if(is_string($value)) $value = trim($value);
-
+			
 			$status = call_user_func(
 							$this->__types[$rule["type"]],
 							$name,
@@ -1331,6 +1335,40 @@ class Amslib_Validator
 	public function hasExecuted()
 	{
 		return $this->__hasExecuted;
+	}
+	
+	static public function runTests()
+	{
+		$tests = array(
+			//	Phone number tests
+			//	EMPTY PHONE NUMBER
+			array(false,	"",		"phone",	true,	array()),
+			array(true,	"",		"phone",	false,	array()),
+			array(true,	"",		"phone",	true,	array("allow_empty"=>true)),
+			array(true,	"",		"phone",	false,	array("allow_empty"=>false)),
+			array(false,	"",		"phone",	true,	array("allow_empty"=>false)),
+			array(true,	"",		"phone",	false,	array("allow_empty"=>true)),
+			//	INVALID PHONE NUMBER
+			array(true,	"123",	"phone",	true,	array()),
+			array(true,	"123",	"phone",	false,	array()),
+			array(true,	"123+",	"phone",	true,	array()),
+			array(true,	"123+",	"phone",	false,	array()),
+			array(false,	"1ad+",	"phone",	true,	array()),
+			array(true,	"1ad+",	"phone",	false,	array()),
+			//	INVALID PHONE NUMBER IS LONG ENOUGH
+			array(true,	"123",	"phone",	true,	array("minlength"=>2)),
+			array(true,	"123",	"phone",	false,	array("minlength"=>2)),
+			//	INVALID PHONE NUMBER IS TOO SHORT
+			array(false,	"123",	"phone",	true,	array("minlength"=>5)),
+			array(true,	"123",	"phone",	false,	array("minlength"=>5)),
+		);
+		
+		foreach($tests as &$t){
+			$t[5] = self::test($t[1],$t[2],$t[3],$t[4]);
+			$t[6] = $t[0] == $t[5]["status"];
+		}
+		
+		return $tests;
 	}
 
 	/** DEPRECATED METHOD: use getErrors instead */
