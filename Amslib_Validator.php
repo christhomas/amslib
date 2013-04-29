@@ -1361,6 +1361,7 @@ class Amslib_Validator
 			//	INVALID PHONE NUMBER IS TOO SHORT
 			array(false,	"123",	"phone",	true,	array("minlength"=>5)),
 			array(true,	"123",	"phone",	false,	array("minlength"=>5)),
+			//	TODO: add tests for maxlength
 		);
 		
 		foreach($tests as &$t){
