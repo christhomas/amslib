@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<object>
+		<api>Hello_World</api>
+	</object>
+	
+	<view>
+		<name>Skeleton</name>
+		<name>Hello_World</name>
+	</view>
+
+	<path>
+		<website>__AMSLIB_ROUTER_ACTIVE__</website>
+		<admin>__WEBSITE__</admin>
+		<amslib>__WEBSITE__/amslib/</amslib>
+		<plugin>__WEBSITE__/plugins/</plugin>
+		<include>__WEBSITE__/objects/</include>
+	</path>
+	
+	<stylesheet>
+		<file id="html5" autoload="true">__AMSLIB__/css/Amslib.css</file>
+	</stylesheet>
+	
+	<javascript>
+		<file id="jquery" autoload="true">__AMSLIB__/util/jquery-1.8.3.min.js</file>
+		<file id="modernizr" autoload="true">__AMSLIB__/util/modernizr-2.6.1.full.js</file>
+		<!-- my.* allows you to create object orientated javascript easily -->
+		<file id="my.common" autoload="true">__AMSLIB__/util/my.common.min.js</file>
+		<file id="my.class" autoload="true">__AMSLIB__/util/my.class.min.js</file>
+		<file id="amslib" autoload="true">__AMSLIB__/js/Amslib.js</file>
+	</javascript>
+	
+	<router>
+		<path name="hello_world">
+			<src>/</src>
+			<resource>Hello_World</resource>
+		</path>
+	</router>
+</package>
