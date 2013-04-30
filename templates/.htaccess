@@ -1,0 +1,2 @@
+#	This htaccess prevents amslib from being uploaded to a website and giving access to these templates to visitors who know the URLS
+deny from all
