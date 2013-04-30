@@ -53,6 +53,7 @@ var Amslib = my.Amslib = my.Class({
 		
 		firebug: function()
 		{
+			//	NOTE: This is suspiciously similar to paulirishes window.log method shown above in the autoload method
 			if(console && console.log) console.log.apply(console,arguments);
 		},
 		
@@ -258,19 +259,19 @@ var Amslib = my.Amslib = my.Class({
 	},
 	
 	//	Getter/Setter for the object values
-	setValue: function(name,value){			this.__value.data(name,value);			},
-	getValue: function(name){				return this.__value.data(name);			},
+	setValue: function(name,value){		this.__value.data(name,value);			},
+	getValue: function(name){				return this.__value.data(name);		},
 	
 	//	Getter/Setter for web services
 	setService: function(name,value){		this.__services.data(name,value);		},
-	getService: function(name){				return this.__services.data(name);		},
+	getService: function(name){			return this.__services.data(name);		},
 	
 	//	Getter/Setter for text translations
 	setTranslation: function(name,value){	this.__translation.data(name,value);	},
-	getTranslation: function(name){			return this.__translation.data(name);	},
+	getTranslation: function(name){		return this.__translation.data(name);	},
 	
 	//	Getter/Setter for images
-	setImage: function(name,value){			this.__images.data(name,value);			},
+	setImage: function(name,value){		this.__images.data(name,value);			},
 	getImage: function(name){				return this.__images.data(name);		}
 });
 
