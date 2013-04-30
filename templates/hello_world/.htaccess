@@ -2,7 +2,7 @@
 #
 #	Easy install: search file for "STEP" and follow all instructions
 #	Hard install: don't follow instructions and randomly change things until it works
-#	Very Hard install: Set computer on fire, blame rabbit, even if you don't have one
+#	Very Hard install: Set computer on fire, blame your pet rabbit, even if you don't have one
 #
 #	NOTE:	I should refactor my .htaccess against the extra rules
 #			found in the h5bp .htaccess file, I think it'll help
