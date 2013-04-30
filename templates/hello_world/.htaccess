@@ -27,7 +27,7 @@ RewriteEngine On
 #	Don't attempt to manipulate images, javascripts or stylesheets
 # -----------------------------------------------------------------------
 RewriteCond %{REQUEST_FILENAME} -f
-RewriteCond %{REQUEST_URI} (gif|png|jpg|jpeg|css|js|xml|pdf)$ [NC]
+RewriteCond %{REQUEST_URI} (gif|png|jpg|jpeg|ico|css|js|xml|pdf)$ [NC]
 RewriteRule ^(.*)$ - [L]
 
 # -----------------------------------------------------------------------
