@@ -43,8 +43,15 @@ class Amslib_Router
 	static protected $route		=	false;
 	static protected $cache		=	array();
 	static protected $name		=	array();
-	static protected $url		=	array();
+	static protected $url			=	array();
 	static protected $callback	=	array();
+	
+	/**
+	 * Variable: $domain
+	 * 
+	 * The default domain string to use with routes that do not provide their own
+	 */
+	static protected $domain		=	"__LOCAL_DOMAIN__";
 
 	static protected function finaliseRoute($route,$select,$url)
 	{
@@ -105,6 +112,7 @@ class Amslib_Router
 
 		self::$route = false;
 
+		//	TODO: document better what this code does
 		$static = self::getRouteByURL(self::$path);
 		//	Find all the matches and store all the route names here
 		$matches = array($static["src_selected"]=>$static);
@@ -231,10 +239,10 @@ class Amslib_Router
 	{
 		//	if there was no name, surely you mean return the current route
 		if($name == NULL) return self::$route;
-
+		
 		//	if you specify a group, look in the name array specifically for that group
-		if($group && is_string($group) && isset(self::$cache[$group]) && isset(self::$cache[$group][$name])){
-			return self::$cache[$group][$name];
+		if($group && is_string($group) && isset(self::$cache[self::$domain."/$group/$name"])){
+			return self::$cache[self::$domain."/$group/$name"];
 		}
 
 		//	if the group wasn't requested or didn't exist, or failed to find the route by name,
@@ -274,10 +282,12 @@ class Amslib_Router
 		//	importing/renaming a service, this will do it for free without complexity
 		$route["name"]	=	$name;
 		$route["group"]	=	$group;
+		
+		$key = self::$domain."/$group/$name";
 
 		//	store the route data underneath the name so you can explicitly search for it
-		self::$cache[$group][$name]	=	&$route;
-		self::$name[$name]			=	&$route;
+		self::$cache[$key]	=	&$route;
+		self::$name[$name]	=	&$route;
 
 		//	store the route data referencing it by url, so you can build a request url cache
 		if($updateURLCache) foreach($route["src"] as $s){
