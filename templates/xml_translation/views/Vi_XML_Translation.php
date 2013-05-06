@@ -5,7 +5,12 @@
 <!-- Add your site or application content here -->
 <p>XML Translations! This is HTML5 Boilerplate.</p>
 
-<p>Here are all the strings from the configured xml translation files</p>
+<p>	Here are all the strings from the configured xml translation files
+
+	The XML translator is less flexible than the database one, you can only load a single language in a single page,
+	the database translator is capable of loading and then showing any text in any language.
+</p>
+
 
 <h1>English or Spanish</h1>
 <ul>
