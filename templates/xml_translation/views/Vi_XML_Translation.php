@@ -7,7 +7,7 @@
 
 <p>Here are all the strings from the configured xml translation files</p>
 
-<h1>English</h1>
+<h1>English or Spanish</h1>
 <ul>
 	<li>this_is_some: <?=$_w->t("this_is_some")?></li>
 	<li>you_put_the: <?=$_w->t("you_put_the")?></li>
