@@ -17,7 +17,7 @@
 
 	<!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
 
-	<title>AMSLIB: Hello World Template</title>
+	<title>AMSLIB: XML Translator Template</title>
 
 	<link rel="shortcut icon" href="<?=$api->getImage("favicon")?>" />
 
