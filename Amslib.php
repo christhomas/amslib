@@ -381,6 +381,7 @@ class Amslib
 				
 				if(count($command) == 2) $function = $command[1];
 			}else{
+				if(is_object($a))	$a = array(get_class($a),Amslib::var_dump($a));
 				if(is_array($a)) 	$a = Amslib::var_dump($a);
 				if(is_bool($a))		$a = $a ? "true" : "false";
 				if(is_null($a))		$a = "null";
