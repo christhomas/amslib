@@ -73,8 +73,9 @@ class Amslib_Website
 		$jsonp = Amslib::getGET("callback");
 		if($jsonp) $json = "$jsonp($json)";
 
-		if($block) die($json);
-
-		print($json);
+		if($block === true)		die($json);
+		if($block === false)	print($json);
+		
+		return $json;
 	}
 }
