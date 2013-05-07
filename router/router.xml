@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<router>
+	<service name="framework:export:router:xml">
+		<src>/webservice/framework/router/export/xml/</src>
+		<handler plugin="framework" object="Amslib_Router" method="serviceExportRouterXML" />
+	</service>
+	
+	<service name="framework:export:router:json">
+		<src>/webservice/framework/router/export/json/</src>
+		<handler plugin="framework" object="Amslib_Router" method="serviceExportRouterJSON" />
+	</service>
+</router>

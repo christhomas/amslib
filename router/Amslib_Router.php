@@ -52,7 +52,7 @@ class Amslib_Router
 	 * The default domain string to use with routes that do not provide their own
 	 */
 	static protected $domain		=	"__LOCAL_DOMAIN__";
-
+	
 	static protected function finaliseRoute($route,$select,$url)
 	{
 		//	Don't replace anything if the string is / because it'll nuke all the separators
@@ -101,6 +101,8 @@ class Amslib_Router
 			self::$path =	Amslib::rchop(self::$path,"?");
 			self::$path	=	Amslib_File::reduceSlashes("/".self::$path."/");
 		}
+		
+		self::load(Amslib::locate()."/router/router.xml","xml","framework");
 	}
 
 	static public function finalise()
@@ -162,7 +164,7 @@ class Amslib_Router
 		return self::$base;
 	}
 
-	static public function load($source,$type,$group)
+	static public function load($source,$type,$group,$domain=NULL)
 	{
 		try{
 			switch($type){
@@ -170,8 +172,10 @@ class Amslib_Router
 				case "database":{	$s = new Amslib_Router_Source_Database($source);}break;
 			}
 
+			if($domain == NULL) $domain = self::$domain;
+			
 			foreach(Amslib_Array::valid($s->getRoutes()) as $route){
-				self::setRoute($route["name"],$group,$route);
+				self::setRoute($route["name"],$group,$domain,$route);
 			}
 		}catch(Exception $e){
 			return false;
@@ -206,10 +210,12 @@ class Amslib_Router
 		return self::getURL(NULL,NULL,$lang);
 	}
 
-	static public function getURL($name=NULL,$group=NULL,$lang="default")
+	static public function getURL($name=NULL,$group=NULL,$lang="default",$domain=NULL)
 	{
-		$route = self::getRoute($name,$group);
-
+		if($domain == NULL) $domain = self::$domain;
+		
+		$route = self::getRoute($name,$group,$domain);
+		
 		//	NOTE: I think it's safe to assume sending NULL means you want the default language
 		//	NOTE: otherwise it would never ever match a language and the system would fail worse
 		if($lang == NULL) $lang = "default";
@@ -235,19 +241,28 @@ class Amslib_Router
 		return $route;
 	}
 
-	static public function getRoute($name=NULL,$group=NULL)
+	static public function getRoute($name=NULL,$group=NULL,$domain=NULL)
 	{
 		//	if there was no name, surely you mean return the current route
 		if($name == NULL) return self::$route;
 		
+		//	If the domain parameter was NULL, use the default local domain
+		if($domain == NULL) $domain = self::$domain;
+		
 		//	if you specify a group, look in the name array specifically for that group
-		if($group && is_string($group) && isset(self::$cache[self::$domain."/$group/$name"])){
-			return self::$cache[self::$domain."/$group/$name"];
+		if($group && is_string($group)){
+			$key = "$domain/$group/$name";
+
+			if(isset(self::$cache[$key])) return self::$cache[$key];
 		}
 
 		//	if the group wasn't requested or didn't exist, or failed to find the route by name,
 		//	look in the mixed/global cache for the last registered route with that name instead
-		if($name && is_string($name) && isset(self::$name[$name])) return self::$name[$name];
+		if($name && is_string($name)){
+			$key = "$domain/$name";
+
+			if(isset(self::$name[$key])) return self::$name[$key];
+		}
 
 		//	default to an empty route, to make sure the data returned is the right format, just empty
 		return self::$emptyRoute;
@@ -263,7 +278,7 @@ class Amslib_Router
 		return self::getRoute("service:$name",$group);
 	}
 
-	static public function setRoute($name,$group,$route,$updateURLCache=true)
+	static public function setRoute($name,$group,$domain,$route,$updateURLCache=true)
 	{
 		//	test if the group is valid or not
 		if(!$group || !is_string($group)) return false;
@@ -283,11 +298,12 @@ class Amslib_Router
 		$route["name"]	=	$name;
 		$route["group"]	=	$group;
 		
-		$key = self::$domain."/$group/$name";
-
+		//	If domain was not specified, use the local default domain
+		if($domain == NULL) $domain = self::$domain;
+		
 		//	store the route data underneath the name so you can explicitly search for it
-		self::$cache[$key]	=	&$route;
-		self::$name[$name]	=	&$route;
+		self::$cache[$domain."/$group/$name"]	=	&$route;
+		self::$name[$domain."/$name"]			=	&$route;
 
 		//	store the route data referencing it by url, so you can build a request url cache
 		if($updateURLCache) foreach($route["src"] as $s){
@@ -397,6 +413,27 @@ class Amslib_Router
 		}
 
 		return $p;
+	}
+	
+	static public function serviceExportRouterXML($service,$source)
+	{
+		die("NOT IMPLEMENTED YET");
+	}
+	
+	static public function serviceExportRouterJSON($service,$source)
+	{
+		$data = array(
+			"cache"	=>	self::$cache,
+			"url"	=>	self::$url,
+			"name"	=>	self::$name
+		);
+		
+		$json		=	Amslib_Website::outputJSON($data,"return");
+		$protocol	=	"http".(isset($_SERVER["HTTPS"]) || (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"]) ? "s" : "")."://";
+		$domain		=	$_SERVER["HTTP_HOST"];
+		$json		=	str_replace("__LOCAL_DOMAIN__",$protocol.$domain,$json);
+		
+		die($json);
 	}
 
 	static public function dump()
