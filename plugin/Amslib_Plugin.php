@@ -230,7 +230,7 @@ class Amslib_Plugin
 
 		//	An API Object was not created, so create a default Amslib_MVC object instead
 		if($api == false) $api = new Amslib_MVC();
-
+		
 		//	Setup the api with basic name and filesystem location
 		$api->setLocation($this->getLocation());
 		$api->setName($this->getName());
@@ -399,7 +399,7 @@ class Amslib_Plugin
 							? Amslib_Router::getService($item["name"],$item["plugin"])
 							: Amslib_Router::getRoute($item["name"],$item["plugin"]);
 
-						Amslib_Router::setRoute($item["rename"],$this->getName(),$r,false);
+						Amslib_Router::setRoute($item["rename"],$this->getName(),NULL,$r,false);
 
 						//	the following parameters are available
 						//

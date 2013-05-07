@@ -177,6 +177,10 @@ class Amslib_Router
 			foreach(Amslib_Array::valid($s->getRoutes()) as $route){
 				self::setRoute($route["name"],$group,$domain,$route);
 			}
+			
+			foreach(Amslib_Array::valid($s->getImports()) as $import){
+				self::importRouter($import);
+			}
 		}catch(Exception $e){
 			return false;
 		}
@@ -220,7 +224,11 @@ class Amslib_Router
 		//	NOTE: otherwise it would never ever match a language and the system would fail worse
 		if($lang == NULL) $lang = "default";
 
-		return Amslib_Website::rel(isset($route["src"][$lang]) ? $route["src"][$lang] : "");
+		$url = isset($route["src"][$lang]) ? $route["src"][$lang] : "";
+
+		//	If the url contains a http, don't attempt to make it relative, it's an absolute url
+		//	NOTE: perhaps a better way to solve this is to mark routes as absolute, then I don't have to "best guess"
+		return strpos($url,"http") !== false ? $url : Amslib_Website::rel($url);
 	}
 
 	static public function getRouteByURL($url=NULL)
@@ -268,9 +276,9 @@ class Amslib_Router
 		return self::$emptyRoute;
 	}
 
-	static public function getServiceURL($name,$group=NULL,$lang="default")
+	static public function getServiceURL($name,$group=NULL,$lang="default",$domain=NULL)
 	{
-		return self::getURL("service:$name",$group,$lang);
+		return self::getURL("service:$name",$group,$lang,$domain);
 	}
 
 	static public function getService($name,$group=NULL)
@@ -291,7 +299,9 @@ class Amslib_Router
 
 		//	Automatically prepend service route names with "service:" so you can easily distinguish them
 		//	This also enabled the getServiceURL,getService methods on the Amslib_Router object
-		if($route["type"] == "service") $name = "service:".$name;
+		if($route["type"] == "service" && strpos($name,"service:") === false){
+			$name = "service:".$name;
+		}
 
 		//	NOTE: we "reset" the values here because if you are
 		//	importing/renaming a service, this will do it for free without complexity
@@ -415,6 +425,32 @@ class Amslib_Router
 		return $p;
 	}
 	
+	static public function importRouter($import)
+	{
+		//	acquire the latest route for the export url and construct the url to call the external remote service
+		$route	=	self::getRoute("service:framework:router:export:".$import["attr"]["type"]);
+		$url	=	$import["attr"]["url"].$route["src"]["default"];
+		
+		if($import["attr"]["type"] == "json"){
+			//	We are going to install a router using json as a data transfer medium
+			//	Acquire the json, decode it and obtain the domain
+			$data	= file_get_contents($url);
+			$data	= json_decode($data,true);
+			$domain	= $data["domain"];
+			
+			//	For each route in the cache, create a new route in the local router, giving the name, group, domain and route data
+			//	You are not supposed to update the url cache, imported routes are not accessible through url
+			//	The reason for this is because it doesnt make sense a url from a remote system will be processed by the local system
+			//	All url requests for imported services should goto the remote server directly
+			foreach(Amslib_Array::valid($data["cache"]) as $route){
+				self::setRoute($route["name"],$route["group"],$domain,$route,false);
+			}
+		}else if($import["attr"]["type"] == "xml"){
+			$data = file_get_contents($url);
+			//	TODO: implement the logic to import from XML 
+		}
+	}
+	
 	static public function serviceExportRouterXML($service,$source)
 	{
 		die("NOT IMPLEMENTED YET");
@@ -422,18 +458,28 @@ class Amslib_Router
 	
 	static public function serviceExportRouterJSON($service,$source)
 	{
-		$data = array(
-			"cache"	=>	self::$cache,
-			"url"	=>	self::$url,
-			"name"	=>	self::$name
-		);
-		
-		$json		=	Amslib_Website::outputJSON($data,"return");
+		//	Construct the protocol.domain to prepend all the urls with
 		$protocol	=	"http".(isset($_SERVER["HTTPS"]) || (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"]) ? "s" : "")."://";
 		$domain		=	$_SERVER["HTTP_HOST"];
-		$json		=	str_replace("__LOCAL_DOMAIN__",$protocol.$domain,$json);
 		
-		die($json);
+		//	The raw data source before processing
+		$data = array(
+			"domain"	=>	$protocol.$domain,
+			"cache"		=>	self::$cache
+		);
+		
+		//	For each cache block, remove the javascript, stylesheet and any framework routes
+		//	For each src inside each cache block, prepend the domain to each url making them accessible remotely
+		foreach($data["cache"] as $k=>&$r){
+			unset($r["stylesheet"]);
+			unset($r["javascript"]);
+			
+			foreach($r["src"] as &$s) $s = $data["domain"].$s;
+			
+			if(strpos($k,"framework")) unset($data["cache"][$k]);
+		}
+		
+		Amslib_Website::outputJSON($data);
 	}
 
 	static public function dump()

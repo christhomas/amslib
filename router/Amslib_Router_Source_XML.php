@@ -25,7 +25,8 @@
  *******************************************************************************/
 class Amslib_Router_Source_XML
 {
-	protected $matches;
+	protected $route ;
+	protected $import;
 
 	protected function toArray($node,$recursive=true)
 	{
@@ -49,7 +50,7 @@ class Amslib_Router_Source_XML
 		return $data;
 	}
 
-	protected function processNode($node)
+	protected function processRoute($node)
 	{
 		$path	=	$this->toArray($node);
 		$child	=	isset($path["child"]) ? $path["child"] : false;
@@ -108,27 +109,44 @@ class Amslib_Router_Source_XML
 	public function __construct($source)
 	{
 		try{
-			$qp = Amslib_QueryPath::qp(Amslib_File::find(Amslib_Website::abs($source),true));
+			$qp = Amslib_QueryPath::qp($f=Amslib_File::find(Amslib_Website::abs($source),true));
+			Amslib::errorLog("stack_trace",$f);
 
 			//	If there is no router, prevent this source from processing anything
-			$this->matches = $qp->branch()->find("router > *[name]");
+			$this->route = $qp->branch()->find("router > *[name]");
+
 			//	Find any callback, if one is provided
 			Amslib_Router::setCallback($qp->find("router")->attr("callback"));
+			
+			//	Find any imports and register them for processing later
+			$this->import = $qp->branch()->find("router > import");
 
-			if($this->matches->length) return $this;
+			if($this->route->length) return $this;
 		}catch(Exception $e){}
 
-		$this->matches = false;
+		$this->route	=	false;
+		$this->import	=	false;
 	}
 
 	public function getRoutes()
 	{
-		if(!$this->matches) return false;
+		if(!$this->route) return false;
 
-		$routes = array();
+		$list = array();
 
-		foreach($this->matches as $n) $routes[] = $this->processNode($n);
+		foreach($this->route as $r) $list[] = $this->processRoute($r);
 
-		return $routes;
+		return $list;
+	}
+	
+	public function getImports()
+	{
+		if(!$this->import) return false;
+
+		$list = array();
+		
+		foreach($this->import as $i) $list[] = $this->toArray($i);
+		
+		return $list;
 	}
 }
