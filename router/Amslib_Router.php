@@ -451,12 +451,7 @@ class Amslib_Router
 		}
 	}
 	
-	static public function serviceExportRouterXML($service,$source)
-	{
-		die("NOT IMPLEMENTED YET");
-	}
-	
-	static public function serviceExportRouterJSON($service,$source)
+	static public function exportRouterShared()
 	{
 		//	Construct the protocol.domain to prepend all the urls with
 		$protocol	=	"http".(isset($_SERVER["HTTPS"]) || (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"]) ? "s" : "")."://";
@@ -464,8 +459,8 @@ class Amslib_Router
 		
 		//	The raw data source before processing
 		$data = array(
-			"domain"	=>	$protocol.$domain,
-			"cache"		=>	self::$cache
+				"domain"	=>	$protocol.$domain,
+				"cache"		=>	self::$cache
 		);
 		
 		//	For each cache block, remove the javascript, stylesheet and any framework routes
@@ -473,13 +468,30 @@ class Amslib_Router
 		foreach($data["cache"] as $k=>&$r){
 			unset($r["stylesheet"]);
 			unset($r["javascript"]);
-			
+				
 			foreach($r["src"] as &$s) $s = $data["domain"].$s;
-			
+				
 			if(strpos($k,"framework")) unset($data["cache"][$k]);
 		}
 		
+		return $data;
+	}
+	
+	static public function serviceExportRouterXML($service,$source)
+	{
+		die("NOT IMPLEMENTED YET");
+	}
+	
+	static public function serviceExportRouterJSON($service,$source)
+	{
+		$data = self::exportRouterShared();
+		
 		Amslib_Website::outputJSON($data);
+	}
+	
+	static public function serviceExportRouterList($service,$source)
+	{
+		die(Amslib::var_dump(self::exportRouterShared(),true));
 	}
 
 	static public function dump()

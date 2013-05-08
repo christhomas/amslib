@@ -9,4 +9,9 @@
 		<src>/webservice/framework/router/export/json/</src>
 		<handler plugin="framework" object="Amslib_Router" method="serviceExportRouterJSON" />
 	</service>
+	
+	<service name="framework:router:export:list">
+		<src>/webservice/framework/router/export/list/</src>
+		<handler plugin="framework" object="Amslib_Router" method="serviceExportRouterList" />
+	</service>
 </router>
