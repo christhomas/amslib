@@ -110,7 +110,6 @@ class Amslib_Router_Source_XML
 	{
 		try{
 			$qp = Amslib_QueryPath::qp($f=Amslib_File::find(Amslib_Website::abs($source),true));
-			Amslib::errorLog("stack_trace",$f);
 
 			//	If there is no router, prevent this source from processing anything
 			$this->route = $qp->branch()->find("router > *[name]");

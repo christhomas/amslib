@@ -468,6 +468,7 @@ class Amslib_Router
 		foreach($data["cache"] as $k=>&$r){
 			unset($r["stylesheet"]);
 			unset($r["javascript"]);
+			unset($r["handler"]);
 				
 			foreach($r["src"] as &$s) $s = $data["domain"].$s;
 				
