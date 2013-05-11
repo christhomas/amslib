@@ -20,9 +20,9 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 		}
 	},
 	
-	constructor: function(image,container){
+	constructor: function(parent){
 		console.log("constructed");
-		Amslib_Google_Map.Super.call(this,image,Amslib_Google_Map.options.amslibName);
+		Amslib_Google_Map.Super.call(this,parent,Amslib_Google_Map.options.amslibName);
 		
 		this.marker = new Array();
 		
