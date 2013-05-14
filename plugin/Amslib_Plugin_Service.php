@@ -239,7 +239,7 @@ class Amslib_Plugin_Service
 			//	OH NOES! we got brokens, have to stop here, cause something failed :(
 			if(!$state) break;
 		}
-
+		
 		//	run the failure or success callback to send data back to the receiver
 		call_user_func(array($this,$state ? $this->successCB : $this->failureCB));
 

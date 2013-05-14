@@ -329,7 +329,7 @@ QUERY;
 
 		if(!$resultHandle) $resultHandle = $this->getSearchResultHandle();
 		if(!$resultHandle) return false;
-
+		
 		for($a=0;$a<$numResults;$a++){
 			$r = mysql_fetch_assoc($resultHandle);
 			if(!$r) break;
