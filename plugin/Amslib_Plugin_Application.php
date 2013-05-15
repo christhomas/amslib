@@ -263,7 +263,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		$this->api->setupService($route["group"],$route["name"]);
 
-		$service = new Amslib_Plugin_Service();
+		$service = Amslib_Plugin_Service::getInstance();
 		foreach(Amslib_Array::valid($route["handler"]) as $h){
 			//	Special customisation for framework urls, which normally execute on objects regardless of plugin
 			//	So we just use plugin as the key to trigger this

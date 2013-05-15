@@ -26,15 +26,20 @@
 
 class Amslib_Image2
 {
+	protected $commands		=	false;
 	protected $cache_dir		=	false;
 	protected $cache_params	=	false;
 	protected $image_params	=	false;
 	protected $permit_ext		=	false;
 	
+	protected $error			=	false;
+	protected $errorState		=	false;
+	
+	const COMMAND_SEQUENCE_INVALID			= "The sequence of commands given was not acceptable";
 	const ERROR_PHPGD_NOT_FOUND				= "PHP GD not found, cannot continue";
 	const ERROR_NO_CACHE_DIR				= "There was no cache directory set";
-	const ERROR_INVALID_IMAGE_OBJECT		= "The PHP GD Image Object was invalid";
 	const ERROR_CREATE_IMAGE_OBJECT			= "The system could not create an image object to handle your request";
+	const ERROR_IMAGE_OBJECT_INVALID		= "The PHP GD Image Object was invalid";
 	const ERROR_IMAGE_OBJECT_CLOSE			= "It was not possible to close the image object";
 	const ERROR_IMAGE_DIMENSIONS_INVALID	= "The dimensions of this image were not valid";
 	const ERROR_RESIZE_IMAGE_OBJECT_FAILED	= "Resizing the image has failed";
@@ -62,6 +67,7 @@ class Amslib_Image2
 	protected function getFileExtension($filename)
 	{
 		$extension = Amslib_File::getFileExtension($filename);
+
 		$extension = (in_array($extension,$this->permit_ext)) ? $extension : false;
 	
 		if($extension !== false){
@@ -122,7 +128,7 @@ class Amslib_Image2
 	protected function getDimensions()
 	{
 		if(!$this->getImageParam("handle")){
-			return $this->setError(self::ERROR_INVALID_IMAGE_OBJECT);
+			return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
 		}
 	
 		return array(
@@ -163,7 +169,19 @@ class Amslib_Image2
 	
 	public function getError()
 	{
-		return Amslib::var_dump($this->error);
+		return is_array($this->error) 
+			? Amslib::var_dump($this->error) 
+			: $this->error;
+	}
+	
+	public function setErrorState($state)
+	{
+		$this->errorState = $state;
+	}
+	
+	public function getErrorState()
+	{
+		return $this->errorState;
 	}
 	
 	public function clearCache()
@@ -186,8 +204,23 @@ class Amslib_Image2
 		return true;
 	}
 	
-	public function processCommands($commands)
+	public function setCommands($source)
 	{
+		if(is_array($source)){
+			$this->commands = $source;
+		}elseif(is_string($source)){
+			$this->commands = explode("/",trim(Amslib::rchop($source,"?"),"/"));
+		}else{
+			return $this->setError(self::COMMAND_SEQUENCE_INVALID);
+		}
+		
+		return true;
+	}
+	
+	public function processCommands($commands=NULL)
+	{
+		if(!$commands) $commands = $this->commands;
+		
 		$cache = array_shift($commands);
 
 		if($cache != "cache") return false;
@@ -214,9 +247,13 @@ class Amslib_Image2
 						$width	= array_shift($commands);
 						$height	= array_shift($commands);
 						
-						if(!$this->maxdim($width,$height)){
-							return $this->setError(self::ERROR_MAXDIM_FAILED);
-						}
+						$state = $this->maxdim($width,$height);
+						
+						if(!$state) return $state;
+					}break;
+					
+					case "show_errors":{
+						$this->setErrorState(true);
 					}break;
 				};
 			}
@@ -263,7 +300,7 @@ class Amslib_Image2
 	{
 		$handle = $this->getImageParam("handle");
 		
-		if(!$handle) return $this->setError(self::ERROR_INVALID_IMAGE_OBJECT);
+		if(!$handle) return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
 		
 		imagedestroy($handle);
 		
@@ -275,16 +312,22 @@ class Amslib_Image2
 	public function maxdim($width,$height)
 	{
 		if(!$this->getImageParam("handle")){
-			return $this->setError(self::ERROR_INVALID_IMAGE_OBJECT);
+			return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
 		}
 		
 		$d = $this->getDimensions();
 		
 		$width	=	intval($width);
 		$height	=	intval($height);
+
+		//	If the width and height passed are empty, we can default to the original size, so it at least works, but not optimally
+		if(!$width)		$width = $d["width"];
+		if(!$height)	$height = $d["height"];
 		
 		//	if failed, ERROR_IMAGE_DIMENSIONS_INVALID
-		if(!$d) return $this->setError(self::ERROR_IMAGE_DIMENSIONS_INVALID);
+		if(!$d || !$width || !$height){
+			return $this->setError(self::ERROR_IMAGE_DIMENSIONS_INVALID.", w($width):h($height)");
+		}
 		
 		$a = $d["width"] / $d["height"];
 		
@@ -326,11 +369,16 @@ class Amslib_Image2
 		$handle = $this->getImageParam("handle");
 		
 		if(!$handle){
-			return $this->setError(self::ERROR_INVALID_IMAGE_OBJECT);
+			return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
 		}
 
 		$width		=	intval($width);
 		$height		=	intval($height);
+		
+		if(!$width || !height){
+			return $this->setError(self::ERROR_IMAGE_DIMENSIONS_INVALID);
+		}
+		
 		$tmp_image	=	imagecreatetruecolor($width,$height);
 		
 		//	if failed, ERROR_CREATE_IMAGE_OBJECT

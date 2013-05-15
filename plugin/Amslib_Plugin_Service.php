@@ -97,6 +97,15 @@ class Amslib_Plugin_Service
 		$this->showFeedback();
 		$this->setAjax(Amslib::postParam("return_ajax",false));
 	}
+	
+	static public function &getInstance()
+	{
+		static $instance = NULL;
+	
+		if($instance === NULL) $instance = new self();
+	
+		return $instance;
+	}
 
 	public function setAjax($status)
 	{
@@ -262,6 +271,10 @@ class Amslib_Plugin_Service
 
 	public function setValidationErrors($plugin,$errors)
 	{
+		if(empty($errors)){
+			$errors[] = "No Errors set and array was empty, perhaps validation failed because source was empty?";	
+		}
+		
 		$this->data[$this->pluginToName($plugin)][self::VE] = $errors;
 	}
 
