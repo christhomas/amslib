@@ -45,6 +45,7 @@ class Amslib_Router
 	static protected $name		=	array();
 	static protected $url			=	array();
 	static protected $callback	=	array();
+	static protected $export		=	array();
 	
 	/**
 	 * Variable: $domain
@@ -425,6 +426,16 @@ class Amslib_Router
 		return $p;
 	}
 	
+	static public function setExportRestriction($group,$status)
+	{
+		self::$export[$group] = $status;
+	}
+	
+	static public function getExportRestriction($group)
+	{
+		return !isset(self::$export[$group]) || self::$export[$group];
+	}
+	
 	static public function importRouter($import)
 	{
 		//	acquire the latest route for the export url and construct the url to call the external remote service
@@ -471,8 +482,11 @@ class Amslib_Router
 			unset($r["handler"]);
 				
 			foreach($r["src"] as &$s) $s = $data["domain"].$s;
-				
-			if(strpos($k,"framework")) unset($data["cache"][$k]);
+			
+			Amslib::errorLog("testing",$r["group"]);
+			if(strpos($k,"framework") || !self::getExportRestriction($r["group"])){
+				unset($data["cache"][$k]);
+			}
 		}
 		
 		return $data;
