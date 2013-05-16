@@ -26,7 +26,7 @@ class Amslib_Plugin_Service
 	static protected $handler		=	NULL;
 	static protected $temp		=	array();
 
-	static protected function getData($plugin,$default,$key)
+	static protected function getHandlerData($plugin,$default,$key)
 	{
 		if(!self::$handler){
 			//	TODO: move into the logging system intead of here
@@ -288,6 +288,17 @@ class Amslib_Plugin_Service
 	{
 		$this->data[$this->pluginToName($plugin)][self::SD][$name] = $value;
 	}
+	
+	public function getData($plugin,$name,$default=NULL)
+	{
+		$plugin = isset($this->data[$this->pluginToName($plugin)])
+			? $this->data[$this->pluginToName($plugin)]
+			: false;
+		
+		return $plugin && isset($plugin[self::SD][$name])
+			? $plugin[self::SD][$name]
+			: $default;
+	}
 
 	public function setError($plugin,$name,$value)
 	{
@@ -364,22 +375,22 @@ class Amslib_Plugin_Service
 
 	static public function getValidationData($plugin,$default=array())
 	{
-		return Amslib_Array::valid(self::getData($plugin,$default,self::VD));
+		return Amslib_Array::valid(self::getHandlerData($plugin,$default,self::VD));
 	}
 
 	static public function getValidationErrors($plugin,$default=false)
 	{
-		return self::getData($plugin,$default,self::VE);
+		return self::getHandlerData($plugin,$default,self::VE);
 	}
 
 	static public function getServiceErrors($plugin,$default=false)
 	{
-		return self::getData($plugin,$default,self::SE);
+		return self::getHandlerData($plugin,$default,self::SE);
 	}
 
 	static public function getServiceData($plugin,$default=false,$key=false)
 	{
-		$data = self::getData($plugin,$default,self::SD);
+		$data = self::getHandlerData($plugin,$default,self::SD);
 
 		return $key && $data && isset($data[$key]) ? $data[$key] : $data;
 	}
@@ -387,7 +398,7 @@ class Amslib_Plugin_Service
 	//	NOTE: Be careful with this method, it could leak secret data if you didnt sanitise it properly of sensitive data
 	static public function getDatabaseErrors($plugin,$default=false)
 	{
-		return self::getData($plugin,$default,self::DB);
+		return self::getHandlerData($plugin,$default,self::DB);
 	}
 
 	static public function getDatabaseMessage($plugin,$default=false)
