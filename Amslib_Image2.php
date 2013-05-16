@@ -243,6 +243,10 @@ class Amslib_Image2
 				}
 			}else{
 				switch($c){
+					case "regenerate":{
+						
+					}break;
+					
 					case "maxdim":{
 						$width	= array_shift($commands);
 						$height	= array_shift($commands);
@@ -384,6 +388,15 @@ class Amslib_Image2
 		//	if failed, ERROR_CREATE_IMAGE_OBJECT
 		if(!$tmp_image) return $this->setError(self::ERROR_CREATE_IMAGE_OBJECT);
 		
+		/**	FUTURE IMPROVEMENT, NEEDS TESTING
+		 * // preserve transparency
+			if($type == "gif" or $type == "png"){
+				imagecolortransparent($new, imagecolorallocatealpha($new, 0, 0, 0, 127));
+				imagealphablending($new, false);
+				imagesavealpha($new, true);
+			}
+		 */
+			
 		$success = imagecopyresampled(
 			$tmp_image, 
 			$handle,
@@ -402,8 +415,29 @@ class Amslib_Image2
 		$this->setImageParam("handle",$tmp_image);
 		$this->setImageParam("width",$width);
 		$this->setImageParam("height",$height);
+		
+		$this->sharpen();
 	
 		return true;
+	}
+	
+	public function sharpen()
+	{
+		$handle = $this->getImageParam("handle");
+		
+		if(!$handle){
+			return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
+		}
+		
+		$matrix = array(
+				array(-1, -1, -1),
+				array(-1, 16, -1),
+				array(-1, -1, -1),
+		);
+		
+		$divisor = array_sum(array_map('array_sum', $matrix));
+		$offset = 0;
+		imageconvolution($handle, $matrix, $divisor, $offset);
 	}
 	
 	public function readCache($filename=NULL,$returnData=false)
@@ -433,6 +467,7 @@ class Amslib_Image2
 				return file_get_contents($cache_filename);
 			}
 			
+			//die($cache_filename);
 			header("Content-Type: ".$this->getCacheParam("mime_type"));
 			readfile($cache_filename);
 					
@@ -478,5 +513,59 @@ class Amslib_Image2
 		
 		//	Write the file to a new destination, or to the browser
 		return file_exists($cache) && chmod($cache,0755);
+	}
+	
+	public function imageCopyResampleBicubic($dst_img, $src_img, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h)
+	{
+		$scaleX = ($src_w - 1) / $dst_w;
+		$scaleY = ($src_h - 1) / $dst_h;
+	
+		$scaleX2 = $scaleX / 2.0;
+		$scaleY2 = $scaleY / 2.0;
+	
+		$tc = imageistruecolor($src_img);
+	
+		for ($y = $src_y; $y < $src_y + $dst_h; $y++)
+		{
+			$sY   = $y * $scaleY;
+			$siY  = (int) $sY;
+			$siY2 = (int) $sY + $scaleY2;
+	
+			for ($x = $src_x; $x < $src_x + $dst_w; $x++)
+			{
+				$sX   = $x * $scaleX;
+				$siX  = (int) $sX;
+				$siX2 = (int) $sX + $scaleX2;
+	
+				if ($tc)
+				{
+					$c1 = imagecolorat($src_img, $siX, $siY2);
+					$c2 = imagecolorat($src_img, $siX, $siY);
+					$c3 = imagecolorat($src_img, $siX2, $siY2);
+					$c4 = imagecolorat($src_img, $siX2, $siY);
+		
+					$r = (($c1 + $c2 + $c3 + $c4) >> 2) & 0xFF0000;
+					$g = ((($c1 & 0xFF00) + ($c2 & 0xFF00) + ($c3 & 0xFF00) + ($c4 & 0xFF00)) >> 2) & 0xFF00;
+					$b = ((($c1 & 0xFF)   + ($c2 & 0xFF)   + ($c3 & 0xFF)   + ($c4 & 0xFF))   >> 2);
+		
+					imagesetpixel($dst_img, $dst_x + $x - $src_x, $dst_y + $y - $src_y, $r+$g+$b);
+				}
+				else
+				{
+					$c1 = imagecolorsforindex($src_img, imagecolorat($src_img, $siX, $siY2));
+					$c2 = imagecolorsforindex($src_img, imagecolorat($src_img, $siX, $siY));
+					$c3 = imagecolorsforindex($src_img, imagecolorat($src_img, $siX2, $siY2));
+					$c4 = imagecolorsforindex($src_img, imagecolorat($src_img, $siX2, $siY));
+			
+					$r = ($c1['red']   + $c2['red']   + $c3['red']   + $c4['red']  ) << 14;
+					$g = ($c1['green'] + $c2['green'] + $c3['green'] + $c4['green']) << 6;
+					$b = ($c1['blue']  + $c2['blue']  + $c3['blue']  + $c4['blue'] ) >> 2;
+	
+					imagesetpixel($dst_img, $dst_x + $x - $src_x, $dst_y + $y - $src_y, $r+$g+$b);
+				}
+			}
+		}
+		
+		return true;
 	}
 }
