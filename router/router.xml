@@ -11,7 +11,7 @@
 	</service>
 	
 	<service name="framework:router:export:list">
-		<src>/webservice/framework/router/export/list/</src>
+		<src>/webservice/framework/router/export/debug/</src>
 		<handler plugin="framework" object="Amslib_Router" method="serviceExportRouterList" />
 	</service>
 </router>
