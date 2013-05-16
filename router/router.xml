@@ -12,6 +12,6 @@
 	
 	<service name="framework:router:export:list">
 		<src>/webservice/framework/router/export/debug/</src>
-		<handler plugin="framework" object="Amslib_Router" method="serviceExportRouterList" />
+		<handler plugin="framework" object="Amslib_Router" method="serviceExportRouterDEBUG" />
 	</service>
 </router>

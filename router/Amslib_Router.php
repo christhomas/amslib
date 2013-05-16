@@ -490,7 +490,7 @@ class Amslib_Router
 		Amslib_Website::outputJSON($data);
 	}
 	
-	static public function serviceExportRouterList($service,$source)
+	static public function serviceExportRouterDEBUG($service,$source)
 	{
 		die(Amslib::var_dump(self::exportRouterShared(),true));
 	}
