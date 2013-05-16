@@ -483,7 +483,6 @@ class Amslib_Router
 				
 			foreach($r["src"] as &$s) $s = $data["domain"].$s;
 			
-			Amslib::errorLog("testing",$r["group"]);
 			if(strpos($k,"framework") || !self::getExportRestriction($r["group"])){
 				unset($data["cache"][$k]);
 			}
