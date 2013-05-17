@@ -159,6 +159,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		parent::setPath("plugin",	"__PLUGIN__");
 		parent::setPath("docroot",	Amslib_File::documentRoot());
 
+		//	NOTE: router_source? this is a really old and now deprecated configuration node isnt it?
 		$this->search = array_merge(array("path","router_source","version"),$this->search);
 
 		$this->completionCallback = array();
@@ -173,8 +174,13 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	We can't use Amslib_Plugin_Manager for this, because it's an application plugin
 		$this->config($name,$location);
 		//	We need to set this before any plugins are touched, because other plugins will depend on it's knowledge
-		//	NOTE: It sounds like I'm setting up a system of "priming" certain values which are important, this might need expanding in the future
-		//	NOTE: I really hate the language setup, I think it's old and clunky, should think about replacing it
+		//	NOTE:	It sounds like I'm setting up a system of "priming" certain values which are important, this might need expanding in the future
+		//	NOTE:	I really hate the language setup, I think it's old and clunky, should think about replacing it
+		//	FIXME:	this introduces a problem if a plugin attempts to set a new language key, but we've already set it and now we'll have duplicate language keys
+		//	NOTE:	could this be the reason why the language system doesnt load correctly? I need to create a test case for bpremium to test that
+		//	NOTE:	perhaps what I need to do is write a way to manage the language keys, instead of letting the system 
+		//			do it's own thing and if the key changes, upgrade the old keys to new keys
+		//	NOTE:	I think the problem might be that I have the language API on a plugin object and not the final API object (for the application) therefore could be easier to centralise
 		$this->setLanguageKey();
 		//	Now continue loading the plugin like normal
 		$this->transfer();

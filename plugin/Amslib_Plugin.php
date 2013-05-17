@@ -679,6 +679,7 @@ class Amslib_Plugin
 			$this->config[$key] = Amslib_Array::valid($this->config[$key]);
 			foreach($this->config[$key] as &$v){
 				if($v["name"] == $value["name"] && !isset($v["export"]) && !isset($v["import"])){
+					
 					$v["value"] = $value["value"];
 
 					return;
