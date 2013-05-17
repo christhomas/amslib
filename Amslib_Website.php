@@ -40,6 +40,7 @@ class Amslib_Website
 		return Amslib_File::absolute(self::$location.$file);
 	}
 
+	//	NOTE type=0 means no specific header is given, so it'll default to a 302 redirection
 	static public function redirect($location,$block=true,$type=0)
 	{
 		$message = "waiting to redirect";
