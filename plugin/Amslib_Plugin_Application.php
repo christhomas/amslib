@@ -284,8 +284,19 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				$object	=	isset($h["object"]) ? $api->getObject($h["object"],true) : $api;
 				$method	=	isset($h["method"]) ? $h["method"] : "missingServiceMethod";
 			}
+			
+			$record = true;
+			$global = false;
+			
+			if(isset($h["record"])){
+				$record = false;
+				
+				if(strpos($h["record"],"global")	!== false) 	$global = true;
+				if(strpos($h["record"],"true")		!== false)	$record = true;
+				if(strpos($h["record"],"record")	!==	false)	$record = true;
+			}
 
-			$service->setHandler($plugin,$object,$method);
+			$service->setHandler($plugin,$object,$method,$record,$global);
 		}
 
 		$service->execute();

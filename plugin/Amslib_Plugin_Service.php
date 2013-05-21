@@ -20,11 +20,12 @@ class Amslib_Plugin_Service
 	protected $session;
 	protected $source;
 	protected $handlerList;
+	protected $activeHandler;
 
 	//	Used in the website to retrieve the session data after processing
 	static protected $serviceData	=	NULL;
 	static protected $handler		=	NULL;
-	static protected $temp		=	array();
+	static protected $var			=	array();
 
 	static protected function getHandlerData($plugin,$default,$key)
 	{
@@ -41,8 +42,17 @@ class Amslib_Plugin_Service
 
 	protected function storeData($status)
 	{
-		$this->session[self::SC]	= $status;
-		$this->session[self::HD][]	= $this->data;
+		if($this->activeHandler["record"]){
+			$this->session[self::SC]	= $status;
+			
+			if(!empty($this->data)){
+				$this->session[self::HD][]	= $this->data;
+			}
+		}
+		
+		if($this->activeHandler["global"]){
+			$this->setVar(NULL,$this->data);
+		}
 
 		$this->data = array();
 	}
@@ -143,15 +153,19 @@ class Amslib_Plugin_Service
 		$this->setFailureURL($url);
 	}
 
-	public function setTemp($key,$data)
+	public function setVar($key,$data)
 	{
-		self::$temp[$key] = $data;
+		if($key == NULL && is_array($data)){
+			self::$var = array_merge(self::$var,$data);
+		}else if(is_string($key) && strlen($key)){
+			self::$var[$key] = $data;
+		}
 	}
 
-	public function getTemp($key)
+	public function getVar($key)
 	{
-		return isset(self::$temp[$key])
-			? self::$temp[$key]
+		return isset(self::$var[$key])
+			? self::$var[$key]
 			: NULL;
 	}
 
@@ -165,10 +179,16 @@ class Amslib_Plugin_Service
 		$this->session[self::FB] = false;
 	}
 
-	public function setHandler($plugin,$object,$method)
+	public function setHandler($plugin,$object,$method,$record,$global)
 	{
 		//	here we store handlers loaded from the service path before we execute them.
-		$this->handlerList[] = array("plugin"=>$plugin,"object"=>$object,"method"=>$method);
+		$this->handlerList[] = array(
+			"plugin"	=>	$plugin,
+			"object"	=>	$object,
+			"method"	=>	$method,
+			"record"	=>	$record,
+			"global"	=>	$global
+		);
 	}
 
 	public function runHandler($object,$method)
@@ -233,6 +253,7 @@ class Amslib_Plugin_Service
 
 		foreach($this->handlerList as $h){
 			//	TODO: investigate why h["plugin"] was returning false??
+			$this->activeHandler = $h;
 
 			//	Set the source to what was requested, or default in any other case to the $_POST array
 			$this->source = isset($h["source"]) && $h["source"] == "get" ? $_GET : $_POST;
@@ -286,18 +307,59 @@ class Amslib_Plugin_Service
 
 	public function setData($plugin,$name,$value)
 	{
-		$this->data[$this->pluginToName($plugin)][self::SD][$name] = $value;
+		$plugin = $this->pluginToName($plugin);
+		
+		if($name == NULL && is_array($value)){
+			$this->data[$plugin][self::SD] = $value;	
+		}else{
+			$this->data[$plugin][self::SD][$name] = $value;
+		}
+		Amslib::errorLog($this->data);
 	}
 	
-	public function getData($plugin,$name,$default=NULL)
+	public function getData($plugin,$name=NULL,$default=NULL)
 	{
-		$plugin = isset($this->data[$this->pluginToName($plugin)])
-			? $this->data[$this->pluginToName($plugin)]
-			: false;
+		$plugin = $this->pluginToName($plugin);
 		
-		return $plugin && isset($plugin[self::SD][$name])
-			? $plugin[self::SD][$name]
-			: $default;
+		if(!isset($this->data[$plugin])) return $default;
+		
+		$plugin = $this->data[$plugin];
+					
+		if($name == NULL) return $plugin[self::SD];
+
+		return isset($plugin[self::SD][$name]) ? $plugin[self::SD][$name] : $default;
+	}
+	
+	public function deleteData($plugin,$name=NULL)
+	{
+		$plugin	=	$this->pluginToName($plugin);
+		$copy	=	NULL;
+		
+		if(isset($this->data[$plugin])){
+			if($name && isset($this->data[$plugin][self::SD][$name])){
+				$copy = $this->data[$plugin][self::SD][$name];
+				
+				unset($this->data[$plugin][self::SD][$name]);
+			}else{
+				$copy = $this->data[$plugin][self::SD];
+				
+				unset($this->data[$plugin][self::SD]);
+			}
+			
+			//	clean up empty arrays in the return structure
+			if(empty($this->data[$plugin])) unset($this->data[$plugin]);
+		}
+
+		return $copy;
+	}
+	
+	public function moveData($dst,$src,$name=NULL)
+	{
+		$this->setData(
+			$dst,
+			$name,
+			$this->deleteData($src,$name)
+		);
 	}
 
 	public function setError($plugin,$name,$value)
@@ -405,4 +467,11 @@ class Amslib_Plugin_Service
 	{
 		return Amslib_Array::filterKey(self::getDatabaseErrors($plugin,$default),array("db_error","db_location"));
 	}
+	
+	
+	//////////////////////////////////////////////////////////////////
+	//	DEPRECATED METHODS
+	//////////////////////////////////////////////////////////////////
+	public function setTemp($key,$value){	$this->setVar($key,$value);	}
+	public function getTemp($key){ return $this->getVar($key); }
 }
