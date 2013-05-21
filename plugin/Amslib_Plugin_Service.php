@@ -162,9 +162,11 @@ class Amslib_Plugin_Service
 		}
 	}
 
-	public function getVar($key)
+	public function getVar($key=NULL)
 	{
-		return isset(self::$var[$key])
+		if($key == NULL) return self::$var[$key];
+		
+		return is_string($key) && strlen($key) && isset(self::$var[$key])
 			? self::$var[$key]
 			: NULL;
 	}
