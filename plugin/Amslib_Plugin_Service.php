@@ -164,7 +164,7 @@ class Amslib_Plugin_Service
 
 	public function getVar($key=NULL)
 	{
-		if($key == NULL) return self::$var[$key];
+		if($key == NULL) return self::$var;
 		
 		return is_string($key) && strlen($key) && isset(self::$var[$key])
 			? self::$var[$key]
@@ -316,7 +316,6 @@ class Amslib_Plugin_Service
 		}else{
 			$this->data[$plugin][self::SD][$name] = $value;
 		}
-		Amslib::errorLog($this->data);
 	}
 	
 	public function getData($plugin,$name=NULL,$default=NULL)
