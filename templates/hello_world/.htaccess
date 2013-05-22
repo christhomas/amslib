@@ -36,16 +36,19 @@ RewriteRule ^(.*)$ - [L]
 #	STEP 1: edit the domain and testing domain if you have one
 #	STEP 2: edit the path for the website
 #	STEP 3: you can optionally enable multiple configurations by uncommenting and customising the lines below
+#
+#	NOTE: the path that you install here, MUST END WITH A SLASH (thanks tony tzschek)
+#	EX: /path/to/website == wrong, /path/to/website/ == correct
 # -----------------------------------------------------------------------
 # __AMSLIB_ROUTER_ACTIVE__ equivalent - Production
 RewriteCond %{HTTP_HOST} mydomain.com$
-RewriteRule . - [E=__AMSLIB_ROUTER_ACTIVE__:/path/to/website]
+RewriteRule . - [E=__AMSLIB_ROUTER_ACTIVE__:/path/to/website/]
 
 #RewriteCond %{HTTP_HOST} developer1.local$
-#RewriteRule . - [E=__AMSLIB_ROUTER_ACTIVE__:/somewhere/on/developer/hdd]
+#RewriteRule . - [E=__AMSLIB_ROUTER_ACTIVE__:/somewhere/on/developer/hdd/]
 
 #RewriteCond %{HTTP_HOST} developer2.local$
-#RewriteRule . - [E=__AMSLIB_ROUTER_ACTIVE__:/where/developer/installed/system]
+#RewriteRule . - [E=__AMSLIB_ROUTER_ACTIVE__:/where/developer/installed/system/]
 
 # enable debugging when you're on testing
 #RewriteCond %{HTTP_HOST} testing.mydomain.com$
