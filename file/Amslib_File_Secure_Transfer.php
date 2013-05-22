@@ -24,8 +24,32 @@
 *******************************************************************************/
 class Amslib_File_Secure_Transfer
 {
-	static public $check		=	false;
-	static public $password	=	false;
+	static protected $check		=	false;
+	static protected $password	=	false;
+	
+	static protected function getCheck()
+	{
+		if(self::$check) return self::$check;
+	
+		//	NOTE: At least use something "secure" so it stops stupid eavesdroppers.
+		//	NOTE: however, if you have the source, this isnt secure anymore
+		return "43v023874vn2948723n49b8234difdwd".
+				"3v498vn09v5y4paeurtnadqc4aeadera".
+				"v98437n5vrhewfjsdbfo7awy4nq2423v".
+				"pv5987nournawocfrt30v424b1eqnowu";
+	}
+	
+	static protected function getPassword()
+	{
+		if(self::$password) return self::$password;
+	
+		//	NOTE: At least use something "secure" so it stops stupid eavesdroppers
+		//	NOTE: however, if you have the source, this isnt secure anymore
+		return "76nc575n389475yrjc089h34n07fg30m".
+				"5789y3n4rc87q34x9fng4fn783g4fm07".
+				"978yn4xf8xh3mf074h23fm078z1hfm01".
+				"fuhasdfrgibqwdc84y2bf98uv23bf2fu";
+	}
 
 	static public function setCheck($value)
 	{
@@ -35,30 +59,6 @@ class Amslib_File_Secure_Transfer
 	static public function setPassword($value)
 	{
 		self::$password = sha1($value);
-	}
-
-	static public function getCheck()
-	{
-		if(self::$check) return self::$check;
-
-		//	NOTE: At least use something "secure" so it stops stupid eavesdroppers.
-		//	NOTE: however, if you have the source, this isnt secure anymore
-		return "43v023874vn2948723n49b8234difdwd".
-				"3v498vn09v5y4paeurtnadqc4aeadera".
-				"v98437n5vrhewfjsdbfo7awy4nq2423v".
-				"pv5987nournawocfrt30v424b1eqnowu";
-	}
-
-	static public function getPassword()
-	{
-		if(self::$password) return self::$password;
-
-		//	NOTE: At least use something "secure" so it stops stupid eavesdroppers
-		//	NOTE: however, if you have the source, this isnt secure anymore
-		return "76nc575n389475yrjc089h34n07fg30m".
-				"5789y3n4rc87q34x9fng4fn783g4fm07".
-				"978yn4xf8xh3mf074h23fm078z1hfm01".
-				"fuhasdfrgibqwdc84y2bf98uv23bf2fu";
 	}
 
 	static public function message($status,$message="",$url="")
@@ -97,6 +97,8 @@ class Amslib_File_Secure_Transfer
 		if(!$json || !isset($json["check"])) self::message(false,"invalid data");
 
 		if($json["check"] != self::getCheck()) self::message(false,"compare failed");
+		
+		unset($json["check"]);
 
 		return $json;
 	}
