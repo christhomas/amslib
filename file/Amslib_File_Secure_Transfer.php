@@ -64,18 +64,18 @@ class Amslib_File_Secure_Transfer
 	static public function message($status,$message="",$url="")
 	{
 		die(json_encode(array(
-				"success"	=>	$status,
-				"message"	=>	$message,
-				"url"		=>	$url
+			"success"	=>	$status,
+			"message"	=>	$message,
+			"url"		=>	$url
 		)));
 	}
 
 	static public function encrypt($payload,$post_url)
 	{
 		$data = array(
-				"check"		=>	self::getCheck(),
-				"payload"	=>	$payload,
-				"time"		=>	microtime(true)
+			"check"		=>	self::getCheck(),
+			"payload"	=>	$payload,
+			"time"		=>	microtime(true)
 		);
 
 		$encrypted	= 	AesCtr::encrypt(json_encode($data),self::getPassword());
@@ -92,11 +92,11 @@ class Amslib_File_Secure_Transfer
 
 		$encrypted	=	base64_decode($base64);
 		$decrypted	=	AesCtr::decrypt($encrypted, self::getPassword());
-		$json		=	json_decode($decrypted);
+		$json		=	json_decode($decrypted,true);
 
-		if(!$json || !isset($json->check)) self::message(false,"invalid data");
+		if(!$json || !isset($json["check"])) self::message(false,"invalid data");
 
-		if($json->check != self::getCheck()) self::message(false,"compare failed");
+		if($json["check"] != self::getCheck()) self::message(false,"compare failed");
 
 		return $json;
 	}
