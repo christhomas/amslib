@@ -61,12 +61,12 @@ class Amslib_File_Secure_Transfer
 		self::$password = sha1($value);
 	}
 
-	static public function message($status,$message="",$url="")
+	static public function message($status,$message="",$payload="")
 	{
 		die(json_encode(array(
 			"success"	=>	$status,
 			"message"	=>	$message,
-			"url"		=>	$url
+			"payload"	=>	$payload
 		)));
 	}
 
@@ -81,7 +81,7 @@ class Amslib_File_Secure_Transfer
 		$encrypted	= 	AesCtr::encrypt(json_encode($data),self::getPassword());
 		$remote_url	=	$post_url.base64_encode($encrypted);
 
-		return file_get_contents($remote_url);
+		return json_decode(file_get_contents($remote_url),true);
 	}
 
 	static public function decrypt()
