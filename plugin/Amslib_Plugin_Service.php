@@ -181,7 +181,7 @@ class Amslib_Plugin_Service
 		$this->session[self::FB] = false;
 	}
 
-	public function setHandler($plugin,$object,$method,$record,$global)
+	public function setHandler($plugin,$object,$method,$record,$global,$failure)
 	{
 		//	here we store handlers loaded from the service path before we execute them.
 		$this->handlerList[] = array(
@@ -189,7 +189,8 @@ class Amslib_Plugin_Service
 			"object"	=>	$object,
 			"method"	=>	$method,
 			"record"	=>	$record,
-			"global"	=>	$global
+			"global"	=>	$global,
+			"failure"	=>	$failure
 		);
 	}
 
@@ -269,7 +270,7 @@ class Amslib_Plugin_Service
 			$this->storeData($state);
 
 			//	OH NOES! we got brokens, have to stop here, cause something failed :(
-			if(!$state) break;
+			if($h["failure"] && !$state) break;
 		}
 		
 		//	run the failure or success callback to send data back to the receiver
@@ -365,7 +366,13 @@ class Amslib_Plugin_Service
 
 	public function setError($plugin,$name,$value)
 	{
-		$this->data[$this->pluginToName($plugin)][self::SE][$name] = $value;
+		$plugin = $this->pluginToName($plugin);
+		
+		if($name == NULL && is_array($value)){
+			$this->data[$plugin][self::SE] = $value;
+		}else{
+			$this->data[$plugin][self::SE][$name] = $value;
+		}
 	}
 
 	public function getError($plugin=NULL,$name=NULL)

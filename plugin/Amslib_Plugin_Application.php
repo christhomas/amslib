@@ -285,8 +285,9 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				$method	=	isset($h["method"]) ? $h["method"] : "missingServiceMethod";
 			}
 			
-			$record = true;
-			$global = false;
+			$record		= true;
+			$global		= false;
+			$failure	= true;
 			
 			if(isset($h["record"])){
 				$record = false;
@@ -295,8 +296,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				if(strpos($h["record"],"true")		!== false)	$record = true;
 				if(strpos($h["record"],"record")	!==	false)	$record = true;
 			}
+			
+			if(isset($h["failure"])){
+				if(strpos($h["failure"],"ignore") !== false) $failure = false;
+			}
 
-			$service->setHandler($plugin,$object,$method,$record,$global);
+			$service->setHandler($plugin,$object,$method,$record,$global,$failure);
 		}
 
 		$service->execute();
