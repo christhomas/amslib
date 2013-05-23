@@ -54,6 +54,7 @@ var Amslib = my.Amslib = my.Class({
 		firebug: function()
 		{
 			//	NOTE: This is suspiciously similar to paulirishes window.log method shown above in the autoload method
+			//	NOTE: apparently some people found this function would cause an error in google chrome, dunno why.
 			if(console && console.log) console.log.apply(console,arguments);
 		},
 		
@@ -116,6 +117,15 @@ var Amslib = my.Amslib = my.Class({
 			
 			return false;
 		},
+		
+		////////////////////////////////////////////////////////////////////
+		//	The load/hasJS API
+		//
+		//	This API will allow you to quickly and simply load a javascript
+		//	and apply a function that will wait until it's loaded to execute
+		//
+		//	NOTE: refactor this against the wait API, it's cleaner
+		////////////////////////////////////////////////////////////////////
 		
 		loadJS: function(name,file,onReady)
 		{
@@ -180,6 +190,59 @@ var Amslib = my.Amslib = my.Class({
 		__lcback:		{},
 		__urlParams:	[],
 		__location:		false
+		
+		////////////////////////////////////////////////////////////////////
+		//	The wait object API
+		//
+		//	This object will allow you to set a bunch of string keys and 
+		//	it will create deferred object for each key, when you resolve 
+		//	each key, depending on the combinations requested, it'll trigger
+		//	the done or fail callbacks, allowing you to easily synchronise 
+		//	asychronous actions between objects which are loaded and 
+		//	created dynamically at different times
+		////////////////////////////////////////////////////////////////////
+		waitObject:  false,
+		
+		waitUntil:  function()
+		{
+			if(Amslib.waitObject == false) Amslib.waitObject = {};
+			
+			var deferred = [], done = false, fail = false;
+			
+			for(var a=0,len=arguments.length;a<len;a++){
+				var arg = arguments[a];
+				var type = typeof(arg);
+				
+				if(type == "string"){
+					if(typeof(Amslib.waitObject[arg]) == "object"){
+						var d = Amslib.waitObject[arg];
+					}else{
+						var d = $.Deferred();
+						
+						Amslib.waitObject[arg] = d;
+					}
+					
+					deferred.push(d);
+				}else if(type == "function"){
+					if(!done) done = arg;
+					if(!fail) fail = arg;
+				}
+			}
+			
+			var w = $.when.apply(deferred);
+			
+			if(done) w.done(done);
+			if(fail) w.fail(fail);
+			
+			return w;
+		},
+		
+		waitComplete:  function(name)
+		{
+			if(typeof(Amslib.waitObject[name]) == "object"){
+				Amslib.waitObject[name].resolve();
+			}
+		}
 	},	
 	
 	constructor: function(parent,name)
