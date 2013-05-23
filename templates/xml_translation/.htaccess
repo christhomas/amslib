@@ -58,6 +58,7 @@ RewriteRule . - [E=__AMSLIB_ROUTER_ACTIVE__:/path/to/website/]
 #	Make sure the URL ends with a slash
 # -----------------------------------------------------------------------
 RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} !webservice [NC]
 RewriteRule ^(.*)([^/])$ %{ENV:__AMSLIB_ROUTER_ACTIVE__}$1$2/ [L,R=301]
 
 # ------------------------------------------------------------------------------
