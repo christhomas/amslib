@@ -189,7 +189,7 @@ var Amslib = my.Amslib = my.Class({
 		__lready:		{},
 		__lcback:		{},
 		__urlParams:	[],
-		__location:		false
+		__location:		false,
 		
 		////////////////////////////////////////////////////////////////////
 		//	The wait object API
