@@ -256,6 +256,17 @@ class Amslib_Image2
 						if(!$state) return $state;
 					}break;
 					
+					case "crop":{
+						$x1 = array_shift($commands);
+						$y1 = array_shift($commands);
+						$x2 = array_shift($commands);
+						$y2 = array_shift($commands);
+						
+						$state = $this->crop($x1,$y1,$x2,$y2);
+						
+						if(!$state) return $state;
+					}break;
+					
 					case "show_errors":{
 						$this->setErrorState(true);
 					}break;
@@ -368,6 +379,52 @@ class Amslib_Image2
 		return $this->resize($d["width"],$d["height"]);
 	}
 	
+	public function crop($x1,$y1,$x2,$y2)
+	{
+		$handle = $this->getImageParam("handle");
+		
+		if(!$handle){
+			return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
+		}
+		
+		$x1 = intval($x1);
+		$y1 = intval($y1);
+		$x2 = intval($x2);
+		$y2 = intval($y2);
+		$dx = intval($x2-$x1);
+		$dy = intval($y2-$y1);
+
+		if($dx < 1 || $dy < 1){
+			return $this->setError(self::ERROR_IMAGE_DIMENSIONS_INVALID);
+		}
+		
+		$tmp_image	=	imagecreatetruecolor($dx,$dy);
+		
+		//	if failed, ERROR_CREATE_IMAGE_OBJECT
+		if(!$tmp_image) return $this->setError(self::ERROR_CREATE_IMAGE_OBJECT);
+		//imagecopyresampled($dst_image, $src_image, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h)
+		$success = imagecopyresampled(
+				$tmp_image,
+				$handle,
+				0, 0, 
+				$x1, $y1, 
+				$dx, $dy, 
+				$dx, $dy
+		);
+		
+		//	if failed, ERROR_RESIZE_IMAGE_OBJECT_FAILED
+		if(!$success) return $this->setError(self::ERROR_RESIZE_IMAGE_OBJECT_FAILED);
+		
+		//	if failed, ERROR_CLOSE_IMAGE_OBJECT
+		if(!$this->close()) return $this->setError(self::ERROR_IMAGE_OBJECT_CLOSE);
+		
+		$this->setImageParam("handle",$tmp_image);
+		$this->setImageParam("width",$dx);
+		$this->setImageParam("height",$dy);
+		
+		return true;
+	}
+	
 	public function resize($width,$height)
 	{
 		$handle = $this->getImageParam("handle");
@@ -379,7 +436,7 @@ class Amslib_Image2
 		$width		=	intval($width);
 		$height		=	intval($height);
 		
-		if(!$width || !height){
+		if(!$width || !$height){
 			return $this->setError(self::ERROR_IMAGE_DIMENSIONS_INVALID);
 		}
 		
