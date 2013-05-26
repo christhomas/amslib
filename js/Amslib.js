@@ -51,6 +51,15 @@ var Amslib = my.Amslib = my.Class({
 			{console.log();return window.console;}catch(err){return window.console={};}})());			 	
 		},
 		
+		getController: function(amslib_object)
+		{
+			if(typeof(amslib_object.instances) != "undefined" && amslib_object.instances != false){
+				return amslib_object.instances.data(amslib_object.options.amslibName);
+			}
+			
+			return false;
+		},
+		
 		firebug: function()
 		{
 			//	NOTE: This is suspiciously similar to paulirishes window.log method shown above in the autoload method
@@ -229,15 +238,15 @@ var Amslib = my.Amslib = my.Class({
 				}
 			}
 			
-			var w = $.when.apply(deferred);
-			
+			var w = $.when.apply($,deferred);
+
 			if(done) w.done(done);
 			if(fail) w.fail(fail);
-			
+
 			return w;
 		},
 		
-		waitComplete:  function(name)
+		waitResolve:  function(name)
 		{
 			if(typeof(Amslib.waitObject[name]) == "object"){
 				Amslib.waitObject[name].resolve();
@@ -255,32 +264,22 @@ var Amslib = my.Amslib = my.Class({
 		//	Setup the amslib_controller to make this object available on the node it was associated with
 		this.parent.data(this.__amslibName,this);
 		
-		this.initValues();
-
-		return this;
-	},
-	
-	getAmslibName: function()
-	{
-		return this.__amslibName;
-	},
-	
-	getParentNode: function()
-	{
-		return this.parent;
-	},
-	
-	initValues: function()
-	{
-		var mvc	=	this.parent.find(".__amslib_mvc_values");
-		
 		this.__value		= $("<div/>");
 		this.__services		= $("<div/>");
 		this.__translation	= $("<div/>");
 		this.__images		= $("<div/>");
 		this.__events		= $("<div/>");
 		
+		this.readMVC();
+
+		return this;
+	},
+	
+	readMVC: function()
+	{
 		try{
+			var mvc	=	this.parent.find(".__amslib_mvc_values");
+
 			var input	=	mvc.find("input[type='hidden']");
 			var data	=	{};
 			
@@ -304,37 +303,56 @@ var Amslib = my.Amslib = my.Class({
 					this.setValue(k,data[k]);
 				}
 			}	
-		}catch(e){}
+		}catch(e){
+			console.log("Exception caused whilst reading Amslib.readMVC");
+			console.log(e);
+		}
+	},
+	
+	getAmslibName: function()
+	{
+		return this.__amslibName;
+	},
+	
+	getParentNode: function()
+	{
+		return this.parent;
 	},
 	
 	bind: function(event,callback,live)
 	{
-		if(live){
-			this.__events.live(event,callback);
-		}else{
-			this.__events.bind(event,callback);
-		}
+		this.__events.bind(event,callback);
+	},
+	
+	on: function(event,callback)
+	{
+		this.__events.on(event,callback);
+	},
+	
+	live: function(event,callback)
+	{
+		this.on(event,callback);
 	},
 	
 	trigger: function(event,data)
 	{
-		this.__events.trigger(event,data);
+		this.__events.trigger(event,[data]);
 	},
 	
 	//	Getter/Setter for the object values
-	setValue: function(name,value){		this.__value.data(name,value);			},
-	getValue: function(name){				return this.__value.data(name);		},
+	setValue: function(name,value){			this.__value.data(name,value);			},
+	getValue: function(name){				return this.__value.data(name);			},
 	
 	//	Getter/Setter for web services
 	setService: function(name,value){		this.__services.data(name,value);		},
-	getService: function(name){			return this.__services.data(name);		},
+	getService: function(name){				return this.__services.data(name);		},
 	
 	//	Getter/Setter for text translations
 	setTranslation: function(name,value){	this.__translation.data(name,value);	},
-	getTranslation: function(name){		return this.__translation.data(name);	},
+	getTranslation: function(name){			return this.__translation.data(name);	},
 	
 	//	Getter/Setter for images
-	setImage: function(name,value){		this.__images.data(name,value);			},
+	setImage: function(name,value){			this.__images.data(name,value);			},
 	getImage: function(name){				return this.__images.data(name);		}
 });
 

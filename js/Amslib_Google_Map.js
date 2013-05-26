@@ -1,40 +1,86 @@
 var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 {
-	zoom:		9,
-	mapObject:	false,
-	marker:		false,
-	events:		$("<div/>"),
+	zoom:				9,
+	mapObject:			false,
+	marker:				false,
+	config:				"",
+	currentPosition:	false,
 	
 	STATIC: {
 		autoload: function(){
-			console.log("autoloading");
-			$(Amslib_Google_Map.options.autoload).each(function(){
-				console.log("create new object");
+			Amslib_Google_Map.instances = $(Amslib_Google_Map.options.autoload);
+			
+			Amslib_Google_Map.instances.each(function(){
 				new Amslib_Google_Map(this);
 			});
 		},
 		
 		options: {
 			amslibName:	"Amslib_Google_Map",
-			autoload:	"[data-enable-google-map]"
-		}
+			autoload:	"[data-enable-google-map]",
+		},
+		
+		instances: false
 	},
 	
 	constructor: function(parent){
-		console.log("constructed");
 		Amslib_Google_Map.Super.call(this,parent,Amslib_Google_Map.options.amslibName);
+
+		this.parent = $(parent);
+		this.config = (this.parent.data("enable-google-map") || "").split(",");
 		
-		this.marker = new Array();
-		
-		var latlng = new google.maps.LatLng(-34.397, 150.644);
-		
+		this.clearMarkers();
 		this.createMap();
-		this.centerMap(this.createMarker(latlng));
+		
+		if(this.isEnabled("geolocation")){
+			this.getCurrentPosition();
+		}
+		
+		this.resizeMap();
+		
+		Amslib.waitResolve("Amslib_Google_Map");
 	},
+	
+	isEnabled: function(key)
+	{
+		return this.config.indexOf(key) >= 0;
+	},
+	
+	getCurrentPosition: function()
+	{
+		var $this = this;
+		
+		navigator.geolocation.getCurrentPosition(
+			$.proxy($this,"updateGeolocationPosition"),
+			function(){
+				$this.trigger("error","failed to obtain geolocation data");
+			}
+		);
+	},
+	
+	disableGeolocation: function()
+	{
+		//	NOTE: I am not sure whether I want to, or am able to, disable this
+	},
+	
+	updateGeolocationPosition: function(position)
+	{
+		var marker = this.createMarker(position.coords.latitude,position.coords.longitude);
+		
+		if(!this.currentPosition){
+			this.currentPosition = marker;
+			this.setZoom(15);
+			this.centerMap(marker);
+		}
+		
+		this.trigger("onUpdateGeolocation",{
+			lat: position.coords.latitude,
+			lng: position.coords.longitude
+		});
+	},	
 	
 	createMap: function()
 	{
-		console.log("creating map");
 		this.mapObject = new google.maps.Map(this.parent[0],{
 	   		zoom:		this.zoom,
 	   		mapTypeId:	google.maps.MapTypeId.ROADMAP
@@ -45,12 +91,14 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 	
 	centerMap: function(marker)
 	{
-		console.log("centering map");
+		if(!marker) return false;
+		
 		var p = marker.getPosition();
 		
 		this.mapObject.setCenter(p);
 		
-		//TODO: UPDATE => latlng.val(p.toUrlValue(48)).blur();
+		//	NOTE: what does this mean???
+		//	TODO: UPDATE => latlng.val(p.toUrlValue(48)).blur();
 		
 		this.resizeMap();	
 	},
@@ -60,8 +108,17 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 		google.maps.event.trigger(this.mapObject, "resize");
 	},
 	
-	createMarker: function(position)
+	setZoom: function(level)
 	{
+		this.mapObject.setZoom(level);
+		
+		this.resizeMap();
+	},
+	
+	createMarker: function(lat,lng)
+	{
+		var position = new google.maps.LatLng(lat,lng);
+		
 		var m = new google.maps.Marker({
 			map:		this.mapObject,
 			draggable:	true,
@@ -74,7 +131,7 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 			$this.centerMap(m);
 			
 			var p = marker.getPosition();
-			$this.events.trigger("onDrag",p.toUrlValue(48))
+			$this.trigger("onDrag",p.toUrlValue(48))
 	    });
 		
 		this.marker.push(m);	
@@ -82,11 +139,16 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 		return m;
 	},
 	
-	on: function(event,callback)
+	clearMarkers: function()
 	{
-		this.events.on(event,callback);
+		for(var a=0,len=this.marker.length;a<len;a++){
+			if(typeof(this.marker[a]) == "undefined") continue;
+			
+			this.marker[a].setMap(null);
+		}
+		
+		this.marker = new Array();
 	},
-	
 	
 	/*
 function createMap(node){
