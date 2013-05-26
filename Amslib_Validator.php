@@ -606,7 +606,7 @@ class Amslib_Validator
 	 * 	If failed to validate because value is not in the limited input options will return string "NUMBER_CANNOT MATCH AGAINST LIMIT"
 	 *	If failed to validate because value is not the required length of characters will return string "NUMBER_CANNOT_MATCH_LENGTH"
 	 *	If failed to validate because value is shorter than required length of characters will return string "NUMBER_CANNOT_MATCH_MINLENGTH"
-	 *	If failed to validate because value is longer than required length of characters will return string "NUMBER_CANNOT_MATCH_MAXLENGTH" 
+	 *	If failed to validate because value is longer than required length of characters will return string "NUMBER_CANNOT_MATCH_MAXLENGTH"
 	 * 	If successful, will set the data into the valid data array and return true
 	 *
 	 * operations:
@@ -782,7 +782,7 @@ class Amslib_Validator
 	protected function __phone($name,$value,$required,$options)
 	{
 		$error = false;
-		
+
 		if(strlen($value)){
 			$temp = str_replace("(","",$value);
 			$temp = str_replace(")","",$temp);
@@ -791,15 +791,15 @@ class Amslib_Validator
 			$temp = str_replace(" ","",$temp);
 			$temp = str_replace(".","",$temp);
 			$temp = str_replace(",","",$temp);
-			
+
 			if(isset($options["minlength"]) && strlen($temp) < $options["minlength"]){
 				$error = "PHONE_LENGTH_INVALID";
 			}
-			
+
 			if($error == false){
 				$temp = preg_replace("/\d/","",$temp);
 				$temp = trim($temp);
-				
+
 				if(strlen($temp)) $error = "PHONE_INVALID";
 			}
 		}else if(empty($options["allow_empty"])){
@@ -837,22 +837,22 @@ class Amslib_Validator
 	 */
 	protected function __date($name,$value,$required,$options)
 	{
-		//	If a numeric field is asked to validate against a date, it'll first be 
-		//	converted assuming it's a unix timestamp normally I dislike the idea of 
+		//	If a numeric field is asked to validate against a date, it'll first be
+		//	converted assuming it's a unix timestamp normally I dislike the idea of
 		//	validators manipulating their data, but in this case, I think it makes sense
 		//	to allow this exception
 		if(is_numeric($value)){
 			if(isset($options["has_milliseconds"])) $value /= 1000;
-			
+
 			$format = isset($options["format"]) ? $options["format"] : "Y/m/d H:i:s";
-			
+
 			$value = date($format,$value);
 		}
-		
+
 		if(isset($options["format"]) && $options["format"] = "d/m/Y"){
 			//	this idea hasn't been fully tested yet and sometimes fails, so it's disabled for now
 			//sscanf($value,"%d/%d/%d")
-			
+
 			$success = strtotime($value);
 		}else{
 			$success = strtotime($value);
@@ -1198,7 +1198,7 @@ class Amslib_Validator
 			$value = (isset($this->__source[$name])) ? $this->__source[$name] : NULL;
 
 			if(is_string($value)) $value = trim($value);
-			
+
 			$status = call_user_func(
 							$this->__types[$rule["type"]],
 							$name,
@@ -1214,24 +1214,32 @@ class Amslib_Validator
 
 		return $this->getStatus();
 	}
-	
+
 	static public function test($value,$type,$required,$options)
 	{
 		$v = new self(array("test"=>$value));
 		$v->add("test",$type,$required,$options);
-		
+
 		$r = array();
 		$r["status"] = $v->execute();
-		
+
 		if($r["status"]){
 			$d = $v->getValidData();
 			$r["value"] = $d["test"];
 		}else{
 			$e = $v->getErrors();
 			$r["error"] = $e["test"]["code"];
-			$r["error_value"] = $e["test"]["value"]; 
+			$r["error_value"] = $e["test"]["value"];
 		}
-		
+
+		if(!isset($r["value"]) && isset($options["default_value"])){
+			$r["value"] = $options["default_value"];
+		}
+
+		if(isset($options["return_value"])){
+			$r = isset($r["value"]) ? $r["value"] : $r;
+		}
+
 		return $r;
 	}
 
@@ -1336,7 +1344,7 @@ class Amslib_Validator
 	{
 		return $this->__hasExecuted;
 	}
-	
+
 	static public function runTests()
 	{
 		$tests = array(
@@ -1363,12 +1371,12 @@ class Amslib_Validator
 			array(true,	"123",	"phone",	false,	array("minlength"=>5)),
 			//	TODO: add tests for maxlength
 		);
-		
+
 		foreach($tests as &$t){
 			$t[5] = self::test($t[1],$t[2],$t[3],$t[4]);
 			$t[6] = $t[0] == $t[5]["status"];
 		}
-		
+
 		return $tests;
 	}
 
