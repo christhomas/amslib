@@ -886,7 +886,7 @@ class Amslib_Validator
 		return "ARRAY_INVALID";
 	}
 
-	protected function __array_string($name,$value,$required,$options)
+	protected function __array_text($name,$value,$required,$options)
 	{
 		$error = !is_array($value) || empty($value);
 
@@ -1065,16 +1065,17 @@ class Amslib_Validator
 		$this->register("nif",				array($this,"__nif"));
 		$this->register("nie",				array($this,"__nie"));
 
-		//	Register some popular alternative spellings which keep cropping up to make life easier
-		$this->register("string",			array($this,"__text"));
-		$this->register("numeric",			array($this,"__number"));
-		$this->register("alpha-relaxed",	array($this,"__alpha_relaxed"));
-
 		//	Custom validation methods which do things we all want, but don't
 		//	conform to obvious rules like "number", "text", "date", etc
 		$this->register("require_one",		array($this,"__require_one"));
 		$this->register("array_number",		array($this,"__array_number"));
-		$this->register("array_string",		array($this,"__array_string"));
+		$this->register("array_text",		array($this,"__array_text"));
+		
+		//	Register some popular alternative spellings which keep cropping up to make life easier
+		$this->register("string",			array($this,"__text"));
+		$this->register("numeric",			array($this,"__number"));
+		$this->register("alpha-relaxed",	array($this,"__alpha_relaxed"));
+		$this->register("array_string",		array($this,"__array_text"));
 	}
 
 	public function setValid($name,$value)
