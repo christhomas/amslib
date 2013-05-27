@@ -58,7 +58,7 @@ class Amslib_Website
 			header("Location: $location");
 		}else{
 			$message = __METHOD__."-> The \$location parameter was an invalid string: '$location'";
-			trigger_error($message);
+			Amslib::errorLog($message);
 		}
 
 		if($block) die($message);
