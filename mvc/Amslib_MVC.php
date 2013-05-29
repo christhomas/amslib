@@ -278,6 +278,11 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		return (isset($this->translator[$name])) ? $this->translator[$name] : reset($this->translator);
 	}
+	
+	public function listTranslators($pluckNames=true)
+	{
+		return $pluckNames ? array_keys($this->translator) : $this->translator;
+	}
 
 	public function setStylesheet($id,$file,$conditional=NULL,$autoload=NULL,$media=NULL)
 	{
