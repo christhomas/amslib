@@ -65,6 +65,10 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		//	Load the required router library and execute it to setup everything it needs
 		$this->executeRouter();
+		
+		$this->autoloadResources();
+		
+		//	NOTE: current(getLanguageList) means to default if you do not have a valid language, to the first in the language list
 
 		//	We need a valid language for the website, make sure it's valid
 		$langCode = self::getLanguage("website");
@@ -75,8 +79,34 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	NOTE: this is a bit shit tbh, so we definitely need to change this
 		$langCode = self::getLanguage("content");
 		if(!$langCode) self::setLanguage("content",current(self::getLanguageList("content")));
-
-		$this->autoloadResources();
+		
+		//	We need to set this before any plugins are touched, because other plugins will depend on it's knowledge
+		//	NOTE:	It sounds like I'm setting up a system of "priming" certain values which are important, this might need expanding in the future
+		//	NOTE:	I really hate the language setup, I think it's old and clunky, should think about replacing it
+		//	FIXME:	this introduces a problem if a plugin attempts to set a new language key, but we've already set it and now we'll have duplicate language keys
+		//	NOTE:	could this be the reason why the language system doesnt load correctly? I need to create a test case for bpremium to test that
+		//	NOTE:	perhaps what I need to do is write a way to manage the language keys, instead of letting the system
+		//			do it's own thing and if the key changes, upgrade the old keys to new keys
+		//	NOTE:	I think the problem might be that I have the language API on a plugin object and not the final API object (for the application) therefore could be easier to centralise
+		//	******** IMPORTANT NOTICE: Moved this to here to make sure everything is running ok
+		$this->setLanguageKey();
+		
+		//	Setup all the translators in other plugins with the correct languages
+		foreach(Amslib_Plugin_Manager::listPlugins() as $name){
+			$api = Amslib_Plugin_Manager::getAPI($name);
+				
+			if($api){
+				$translators = $api->listTranslators(false);
+		
+				foreach(Amslib_Array::valid($translators) as $name=>$object){
+					//	Obtain the language the system should use when printing text
+					$object->setLanguage(Amslib_Plugin_Application::getLanguage($name));
+					$object->load();
+				}
+			}else{
+				Amslib::errorLog("plugin not found?",$p);
+			}
+		}
 
 		return true;
 	}
@@ -84,8 +114,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	protected function autoloadResources()
 	{
 		//	STEP 1: Autoload all resources from each plugin as they are requested
-		$plugins = Amslib_Plugin_Manager::listPlugins();
-		foreach($plugins as $name){
+		foreach(Amslib_Plugin_Manager::listPlugins() as $name){
 			$p = Amslib_Plugin_Manager::getAPI($name);
 			if($p){
 				$p->autoloadResources();
@@ -140,9 +169,14 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			? $this->filename
 			: str_replace("__SELF__",$this->filename,$this->config["router_source"]);
 
+		//	FIXME: we are hardcoding the source of this to the xml file, what happens when I change to a db router?
 		Amslib_Router::load($source,"xml",$this->getName());
 		Amslib_Router::finalise();
 
+		//	NOTE:	we do not do it because webservice urls are typically not enabled with languages
+		//			therefore if you run the code which sets the language based on the url here, you might be in spanish
+		//			but then this code will default to setting english and all the language strings processed
+		//			in the webservice will come out in english instead of spanish like the website url might be dictating
 		if(Amslib_Router::isService() == false){
 			self::setLanguage("content", Amslib_Router::getLanguage());
 			self::setLanguage("website", Amslib_Router::getLanguage());
@@ -173,15 +207,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		//	We can't use Amslib_Plugin_Manager for this, because it's an application plugin
 		$this->config($name,$location);
-		//	We need to set this before any plugins are touched, because other plugins will depend on it's knowledge
-		//	NOTE:	It sounds like I'm setting up a system of "priming" certain values which are important, this might need expanding in the future
-		//	NOTE:	I really hate the language setup, I think it's old and clunky, should think about replacing it
-		//	FIXME:	this introduces a problem if a plugin attempts to set a new language key, but we've already set it and now we'll have duplicate language keys
-		//	NOTE:	could this be the reason why the language system doesnt load correctly? I need to create a test case for bpremium to test that
-		//	NOTE:	perhaps what I need to do is write a way to manage the language keys, instead of letting the system 
-		//			do it's own thing and if the key changes, upgrade the old keys to new keys
-		//	NOTE:	I think the problem might be that I have the language API on a plugin object and not the final API object (for the application) therefore could be easier to centralise
-		$this->setLanguageKey();
 		//	Now continue loading the plugin like normal
 		$this->transfer();
 		$this->load();

@@ -178,6 +178,8 @@ class Amslib_Plugin
 		}
 	}
 
+	//	NOTE: hmmmm, I really hate this code....I am not 100% sure what it does
+	//	NOTE: investigate a way to remove this code and/or improve it to the point where it's logical again
 	protected function installLanguages($name,$lang)
 	{
 		foreach($lang["language"] as $langCode){
@@ -258,24 +260,37 @@ class Amslib_Plugin
 			}break;
 		}
 
-		//	Obtain the language the system should use when printing text
-		$language = Amslib_Plugin_Application::getLanguage($config["name"]);
-		if(!$language) $language = reset($config["language"]);
-
 		//	Create the language translator object and insert it into the api
 		$translator = new Amslib_Translator($config["type"],$config["name"]);
 		$translator->addLanguage($config["language"]);
 		$translator->setLocation($location);
-		$translator->setLanguage($language);
-		$translator->load();
 
 		$config["cache"] = $translator;
 
 		return $translator;
 	}
 
-	protected function initialisePlugin(){	/* do nothing by default */ }
-	protected function finalisePlugin(){	/* do nothing by default */ }
+	protected function initialisePlugin()
+	{
+		/* do nothing by default */
+	}
+	
+	protected function finalisePlugin()
+	{
+		$api = $this->getAPI();
+		
+		if($api){
+			$translators = $api->listTranslators(false);
+	
+			foreach(Amslib_Array::valid($translators) as $name=>$object){
+				//	Obtain the language the system should use when printing text
+				$object->setLanguage(Amslib_Plugin_Application::getLanguage($name));
+				$object->load();
+			}
+		}else{
+			Amslib::errorLog("plugin not found?",$api);
+		}
+	}
 
 	public function __construct()
 	{
@@ -657,6 +672,7 @@ class Amslib_Plugin
 			$this->api->initialise();
 			//	Insert into the plugin manager
 			Amslib_Plugin_Manager::insert($this->name,$this);
+			
 			//	finalise the plugin, finish any last requests by the plugin
 			$this->finalisePlugin();
 
