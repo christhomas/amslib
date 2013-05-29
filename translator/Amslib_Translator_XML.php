@@ -48,6 +48,9 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	 */
 	public function load()
 	{
+		//	initialise the keystore to empty
+		parent::reset();
+		
 		if($this->language)
 		{
 			$this->database = Amslib_Website::abs(Amslib_File::reduceSlashes("$this->location/{$this->language}.xml"));

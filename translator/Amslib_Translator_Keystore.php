@@ -17,19 +17,22 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	
 	public function __construct()
 	{
-		$this->store				=	array();
-		$this->language				=	false;
-		$this->permittedLanguage	=	array();
-		$this->defaultKey			=	0;
+		$this->reset();
 	}
 	
 	//	Set location in the future could mean "set a default set of array information"
 	public function setLocation($location){}
+	
+	//	NOTE: load has no functionality, since it has nothing to load
+	public function load(){}
 
-	//	The concept of "load" doesnt make sense for a keystore array
-	public function load()
+	//	Calling reset will reset the keystore to empty, read to accept translations
+	public function reset()
 	{
-		//	DO NOTHING
+		$this->store				=	array();
+		$this->language				=	false;
+		$this->permittedLanguage	=	array();
+		$this->defaultKey			=	0;
 	}
 	
 	public function addLanguage($langCode)
