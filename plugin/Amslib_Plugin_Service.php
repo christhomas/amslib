@@ -42,9 +42,9 @@ class Amslib_Plugin_Service
 
 	protected function storeData($status)
 	{
-		if($this->activeHandler["record"]){
-			$this->session[self::SC]	= $status;
-			
+		$this->session[self::SC] = $status;
+		
+		if($this->activeHandler["record"]){			
 			if(!empty($this->data)){
 				$this->session[self::HD][]	= $this->data;
 			}
@@ -181,13 +181,14 @@ class Amslib_Plugin_Service
 		$this->session[self::FB] = false;
 	}
 
-	public function setHandler($plugin,$object,$method,$record,$global,$failure)
+	public function setHandler($plugin,$object,$method,$source,$record,$global,$failure)
 	{
 		//	here we store handlers loaded from the service path before we execute them.
 		$this->handlerList[] = array(
 			"plugin"	=>	$plugin,
 			"object"	=>	$object,
 			"method"	=>	$method,
+			"source"	=>	$source,
 			"record"	=>	$record,
 			"global"	=>	$global,
 			"failure"	=>	$failure

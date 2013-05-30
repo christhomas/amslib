@@ -325,8 +325,13 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			if(isset($h["failure"])){
 				if(strpos($h["failure"],"ignore") !== false) $failure = false;
 			}
+			
+			if(!isset($h["source"])) $h["source"] = "post";
+			$h["source"] = strtolower($h["source"]);
+			if(!in_array($h["source"],array("get","post"))) $h["source"] = "post";
+			$source = $h["source"];
 
-			$service->setHandler($plugin,$object,$method,$record,$global,$failure);
+			$service->setHandler($plugin,$object,$method,$source,$record,$global,$failure);
 		}
 
 		$service->execute();
