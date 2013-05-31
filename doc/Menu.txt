@@ -48,11 +48,11 @@ Format: 1.52
 
 File: $domain  (router/Amslib_Router.php)
 File: Amslib.php  (Amslib.php)
+File: Amslib_Database_MySQL  (database/Amslib_Database_MySQL.php)
 File: Amslib_Paypal.php  (Amslib_Paypal.php)
 File: Amslib_Translator  (translator/Amslib_Translator.php)
 File: Amslib_Validator  (Amslib_Validator.php)
 File: database/Amslib_Database.php  (database/Amslib_Database.php)
-File: database/Amslib_Database_MySQL.php  (database/Amslib_Database_MySQL.php)
 File: execute  (plugin/Amslib_Plugin_Application.php)
 File: extract  (router/Amslib_Router_Language.php)
 File: listFiles  (file/Amslib_File.php)
