@@ -23,7 +23,7 @@
 /**
  * 	class:	Amslib_Image2
  *
- *	group:	Core
+ *	group:	core
  *
  *	file:	Amslib_Image2.php
  *

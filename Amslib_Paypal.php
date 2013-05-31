@@ -23,7 +23,7 @@
 /**
  * 	class:	Amslib_Paypal
  *
- *	group:	Core
+ *	group:	core
  *
  *	file:	Amslib_Paypal.php
  *

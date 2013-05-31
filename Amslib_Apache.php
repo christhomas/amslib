@@ -23,7 +23,7 @@
 /**
  * 	class:	Amslib_Apache
  *
- *	group:	Core
+ *	group:	core
  *
  *	file:	Amslib_Apache.php
  *

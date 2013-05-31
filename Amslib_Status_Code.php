@@ -23,7 +23,7 @@
 /**
  * 	class:	Amslib_Status_Code
  *
- *	group:	Core
+ *	group:	core
  *
  *	file:	Amslib_Status_Code.php
  *

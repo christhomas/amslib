@@ -23,7 +23,7 @@
 /**
  * 	class:	Amslib_Keystore
  *
- *	group:	Core
+ *	group:	core
  *
  *	file:	Amslib_Keystore.php
  *

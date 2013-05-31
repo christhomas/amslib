@@ -23,7 +23,7 @@
 /**
  * 	class:	Amslib_Form_Profile
  *
- *	group:	Core
+ *	group:	core
  *
  *	file:	Amslib_Form_Profile.php
  *

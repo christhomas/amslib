@@ -20,21 +20,10 @@
  *     
  *******************************************************************************/
 
-/*
- * File: Amslib_Validator.php
- * Title: Antimatter Form Validator
- * Version: 4.0
- * Project: amslib
- * Note: This is version 3.0, modified to support filter_var instead of doing all it's own custom code
- *
- * Contributors:
- *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *******************************************************************************/
-
 /**
  * 	class:	Amslib_Validator
  *
- *	group:	Core
+ *	group:	core
  *
  *	file:	Amslib_Validator.php
  *

@@ -23,7 +23,7 @@
 /**
  * 	class:	Amslib_Resource_Compiler
  *
- *	group:	Core
+ *	group:	core
  *
  *	file:	Amslib_Resource_Compiler.php
  *
