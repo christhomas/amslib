@@ -14,12 +14,26 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * file: Amslib.js
- * title: Antimatter core javascript
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
+
+/**
+ * 	class:	Amslib
+ * 
+ *	group:	javascript
+ * 
+ *	file:	Amslib.js
+ * 
+ *	title:	Antimatter Studios Core Amslib Javascript
+ * 
+ *	description:
+ *		todo, write description 
+ *
+ * 	todo:
+ * 		write documentation
+ */
 var Amslib = my.Amslib = my.Class({
 	__amslibDefaultName:	"Amslib_Default_Controller",
 	__amslibName:			false,
