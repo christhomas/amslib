@@ -130,7 +130,11 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		if(is_string($name) && strlen($name)){
 			$this->value[$name] = $value;
+			
+			return $value;
 		}
+		
+		return NULL;
 	}
 
 	public function getValue($name=NULL,$default=NULL)
