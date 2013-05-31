@@ -118,6 +118,23 @@ Group: Xml  {
    File: Amslib_XML_Youtube  (xml/Amslib_XML_Youtube.php)
    }  # Group: Xml
 
+Group: Js  {
+
+   File: Amslib  (js/Amslib.js)
+   File: Amslib_Accordion  (js/Amslib_Accordion.js)
+   File: Amslib_DataTables  (js/Amslib_DataTables.js)
+   File: Amslib_Dynamic_Grid  (js/Amslib_Dynamic_Grid.js)
+   File: Amslib_Fullscreen_Image  (js/Amslib_Fullscreen_Image.js)
+   File: Amslib_Google_Map  (js/Amslib_Google_Map.js)
+   File: Amslib_JQuery_UI  (js/Amslib_JQuery_UI.js)
+   File: Amslib_Numeric_Field  (js/Amslib_Numeric_Field.js)
+   File: Amslib_Service_Response  (js/Amslib_Service_Response.js)
+   File: Amslib_Shelf_Gallery  (js/Amslib_Shelf_Gallery.js)
+   File: Amslib_Simple_Fader_Slideshow  (js/Amslib_Simple_Fader_Slideshow.js)
+   File: Amslib_String  (js/Amslib_String.js)
+   File: Amslib_Urlname  (js/Amslib_Urlname.js)
+   }  # Group: Js
+
 Group: Index  {
 
    Index: Everything
