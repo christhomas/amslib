@@ -23,20 +23,30 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *    
- * group:		Database
- * 
- * file:		Amslib_Database_MySQL.php
- * 
- * title:		Antimatter Database: MySQL library
- * 
- * description:	This is a small cover object which enhanced the original with some
- * 				new functionality aiming to solve the fatal_error problem but keep returning data
- * 
+ *     
  *******************************************************************************/
 
+/**
+ * 	class: Amslib_Database_MySQL
+ * 
+ *	group:		Database
+ * 
+ *	file:		Amslib_Database_MySQL.php
+ * 
+ *	title:		Antimatter Database: MySQL library
+ * 
+ *	description:	This is a small cover object which enhanced the original with some
+ * 					new functionality aiming to solve the fatal_error problem but keep returning data 
+ *
+ * 	todo: write documentation
+ */
 class Amslib_Database_MySQL extends Amslib_Database
 {
+	/**
+	 * 	method:	setDebugOutput
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function setDebugOutput($query)
 	{
 		if($this->debug && $this->errorState){
@@ -96,6 +106,11 @@ class Amslib_Database_MySQL extends Amslib_Database
 		if($connect) $this->connect();
 	}
 
+	/**
+	 * 	method:	setEncoding
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setEncoding($encoding)
 	{
 		if($this->getConnectionStatus() == false) return;
@@ -111,6 +126,11 @@ class Amslib_Database_MySQL extends Amslib_Database
 		}
 	}
 
+	/**
+	 * 	method:	escape
+	 *
+	 * 	todo: write documentation
+	 */
 	public function escape($value)
 	{
 		if($value === NULL)		return $value;
@@ -134,6 +154,11 @@ class Amslib_Database_MySQL extends Amslib_Database
 		return @mysql_real_escape_string($value);
 	}
 
+	/**
+	 * 	method:	unescape
+	 *
+	 * 	todo: write documentation
+	 */
 	public function unescape($results,$keys="")
 	{
 		if(!$results || !is_array($results)) return $results;
@@ -153,6 +178,11 @@ class Amslib_Database_MySQL extends Amslib_Database
 		return $results;
 	}
 
+	/**
+	 * 	method:	fixColumnEncoding
+	 *
+	 * 	todo: write documentation
+	 */
 	public function fixColumnEncoding($src,$dst,$table,$primaryKey,$column)
 	{
 		$encoding_map = array(
@@ -250,11 +280,21 @@ HAS_TABLE;
 		return false;
 	}
 
+	/**
+	 * 	method:	getDBList
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getDBList()
 	{
 		return $this->select("distinct table_schema as database_name from information_schema.tables");
 	}
 
+	/**
+	 * 	method:	getDBTables
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getDBTables($database_name=NULL)
 	{
 		$filter = "";
@@ -267,6 +307,11 @@ HAS_TABLE;
 		return $this->select("distinct table_name,table_schema as database_name from information_schema.tables $filter");
 	}
 
+	/**
+	 * 	method:	getDBColumns
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getDBColumns($database_name=NULL,$table_name=NULL)
 	{
 		$filter = array();
@@ -295,6 +340,11 @@ QUERY;
 		return $this->select($query);
 	}
 
+	/**
+	 * 	method:	getDBTableFields
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getDBTableFields($table)
 	{
 		$table = $this->escape($table);
@@ -302,6 +352,11 @@ QUERY;
 		return $this->select("column_name from Information_Schema.Columns where table_name='$table'");
 	}
 
+	/**
+	 * 	method:	getDBTableRowCount
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getDBTableRowCount($database,$table)
 	{
 		$database	=	$this->escape($database);
@@ -312,6 +367,11 @@ QUERY;
 		return $this->getRealResultCount();
 	}
 
+	/**
+	 * 	method:	setDBErrors
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setDBErrors($data,$error=NULL,$errno=NULL,$insert_id=NULL)
 	{
 		parent::setDBErrors(
@@ -333,6 +393,11 @@ QUERY;
 		$this->connection = false;
 	}
 
+	/**
+	 * 	method:	getResults
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getResults($numResults,$resultHandle=NULL,$optimise=false)
 	{
 		$this->lastResult = array();
@@ -355,6 +420,11 @@ QUERY;
 		return $this->lastResult;
 	}
 
+	/**
+	 * 	method:	releaseMemory
+	 *
+	 * 	todo: write documentation
+	 */
 	public function releaseMemory()
 	{
 		$resultHandle = $this->getSearchResultHandle();
@@ -362,6 +432,11 @@ QUERY;
 		return $resultHandle ? mysql_free_result($resultHandle) : false;
 	}
 
+	/**
+	 * 	method:	query
+	 *
+	 * 	todo: write documentation
+	 */
 	public function query($query)
 	{
 		$this->seq++;
@@ -381,6 +456,11 @@ QUERY;
 		return true;
 	}
 
+	/**
+	 * 	method:	select
+	 *
+	 * 	todo: write documentation
+	 */
 	public function select($query,$numResults=0,$optimise=false)
 	{
 		$this->seq++;
@@ -406,6 +486,11 @@ QUERY;
 		return false;
 	}
 
+	/**
+	 * 	method:	select2
+	 *
+	 * 	todo: write documentation
+	 */
 	public function select2($query,$numResults=0,$optimise=false)
 	{
 		$this->seq++;
@@ -466,6 +551,11 @@ QUERY;
 		return $result;
 	}
 	
+	/**
+	 * 	method:	selectField
+	 *
+	 * 	todo: write documentation
+	 */
 	public function selectField($table,$value,$field,$count=1,$optimise=true)
 	{
 		$table = $this->escape($table);
@@ -507,9 +597,16 @@ QUERY;
 		return $this->select($query);
 	}
 
-	//	Anxo has explained that perhaps it's unnecessary that in the query to put the field if you are going to put
-	//	the field you want in the first parameter, so in the query you can just put a "$field $query" and it'll
-	//	select only what you want, without duplication.  He's clever sometimes.
+	/**
+	 * 	method:	selectValue
+	 *
+	 * 	todo: write documentation
+	 * 
+	 * 	notes:
+	 * 		Anxo has explained that perhaps it's unnecessary that in the query to put the field if you are going to put
+	 * 		the field you want in the first parameter, so in the query you can just put a "$field $query" and it'll
+	 * 		select only what you want, without duplication.  He's clever sometimes.
+	 */
 	public function selectValue($field,$query,$numResults=0,$optimise=false)
 	{
 		$values = $this->select($query,$numResults,$optimise);
@@ -528,11 +625,21 @@ QUERY;
 		return $values;
 	}
 
+	/**
+	 * 	method:	selectRow
+	 *
+	 * 	todo: write documentation
+	 */
 	public function selectRow($query)
 	{
 		return $this->select($query,1,true);
 	}
 
+	/**
+	 * 	method:	insert
+	 *
+	 * 	todo: write documentation
+	 */
 	public function insert($query)
 	{
 		$this->seq++;
@@ -561,6 +668,11 @@ QUERY;
 		return $this->lastInsertId;
 	}
 
+	/**
+	 * 	method:	update
+	 *
+	 * 	todo: write documentation
+	 */
 	public function update($query,$allow_zero=true)
 	{
 		$this->seq++;
@@ -583,6 +695,11 @@ QUERY;
 		return $allow_zero ? $affected >= 0 : $affected > 0;
 	}
 
+	/**
+	 * 	method:	delete
+	 *
+	 * 	todo: write documentation
+	 */
 	public function delete($query)
 	{
 		$this->seq++;
