@@ -327,7 +327,21 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	public function setLanguageKey()
 	{
 		$k = current(Amslib_Array::filter(Amslib_Array::valid($this->config["value"]),"name","lang_key",true));
-		if(!empty($k)) self::$langKey = $k["value"];
+		
+		//	key wasn't found, do nothing
+		if(empty($k)) return;
+		
+		//	key was found, attempt to upgrade old keys to new keys
+		$old = self::$langKey;
+		self::$langKey = $k["value"];
+		
+		//	loop through session, find matching keys against the old key, replace with the new keys
+		foreach($_SESSION as $key=>$value) if(strpos($key,$old) !== false){
+			unset($_SESSION[$key]);
+			
+			$key = str_replace($old,self::$langKey,$key);
+			Amslib::setSESSION(Amslib_File::reduceSlashes($key),$value);
+		}
 	}
 
 	/**
@@ -338,7 +352,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	static public function setLanguage($name,$langCode)
 	{
 		if(is_string($name) && strlen($name) && in_array($langCode,self::getLanguageList($name))){
-			Amslib::insertSessionParam(Amslib_File::reduceSlashes(self::$langKey."/$name"),$langCode);
+			Amslib::setSESSION(Amslib_File::reduceSlashes(self::$langKey."/$name"),$langCode);
 		}
 	}
 
@@ -350,7 +364,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	static public function getLanguage($name)
 	{
 		if(is_string($name) && strlen($name)){
-			return Amslib::sessionParam(Amslib_File::reduceSlashes(self::$langKey."/$name"));
+			return Amslib::getSESSION(Amslib_File::reduceSlashes(self::$langKey."/$name"));
 		}
 
 		return false;
