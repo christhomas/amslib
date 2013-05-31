@@ -15,15 +15,23 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: Amslib_Keystore.php
- * Title: Amslib key/value storage mechanism
- * Version: 1.0
- * Project: Amslib (antimatter studios library)
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
 
+/**
+ * 	class:	Amslib_Keystore
+ *
+ *	group:	Core
+ *
+ *	file:	Amslib_Keystore.php
+ *
+ *	description: Amslib key/value storage mechanism
+ *
+ * 	todo: write documentation
+ *
+ */
 class Amslib_Keystore
 {
 	protected static $store = array();

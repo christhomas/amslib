@@ -15,14 +15,25 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: Amslib_Router_Source_XML.php
- * Title: The XML router source reader, version 4.0 of the api/object
- * Version: 4.0
- * Project: Amslib/Router/Source
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
+
+/**
+ * 	class:	Amslib_Router_Source_XML
+ *
+ *	group:	router
+ *
+ *	file:	Amslib_Router_Source_XML.php
+ *
+ *	description:
+ *		write description
+ *
+ * 	todo:
+ * 		write documentation
+ *
+ */
 class Amslib_Router_Source_XML
 {
 	protected $route ;

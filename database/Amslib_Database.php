@@ -15,16 +15,28 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * file: Amslib_Database.php
- * title: Antimatter Database: Base layer
- * description: A low level object to collect shared data and methods that are common
- * 				to all database layers
- * version: 3.0
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
 
+/**
+ * 	class:	Amslib_Database
+ *
+ *	group:	database
+ *
+ *	file:	Amslib_Database.php
+ *
+ *	title:	Antimatter Database: Base layer
+ *
+ *	description:
+ *		A low level object to collect shared data and methods 
+ *		that are common to all database layers
+ *
+ * 	todo:
+ * 		write documentation
+ *
+ */
 class Amslib_Database
 {
 /******************************************************************************

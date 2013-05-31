@@ -15,15 +15,26 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * file: Amslib_Plugin.php
- * title: Antimatter Plugin: Core plugin object version 3
- * description: An object to manage how a plugin it loaded through to
- * 				how the MVC object is created and configured
- * version: 3.0
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
+
+/**
+ * 	class:	Amslib_Plugin
+ *
+ *	group:	plugin
+ *
+ *	file:	Amslib_Plugin.php
+ *
+ *	description:
+ *		An object to manage how a plugin it loaded through to
+ * 		how the MVC object is created and configured
+ *
+ * 	todo:
+ * 		write documentation
+ *
+ */
 class Amslib_Plugin
 {
 	//	NOTE:	The paths registered in the application which are ways to replace

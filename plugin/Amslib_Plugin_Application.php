@@ -15,18 +15,27 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * file: Amslib_Plugin_Application.php
- * title: Antimatter Plugin, Plugin Application object version 3
- * description: An object to handle a plugin, which is actually an application
- * 				which represents a website, the application can have extra configuration
- * 				options which a normal plugin doesn't have.  To setup the "website".
- *
- * version: 3.0
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
 
+/**
+ * 	class:	Amslib_Plugin_Application
+ *
+ *	group:	plugin
+ *
+ *	file:	Amslib_Plugin_Application.php
+ *
+ *	description:
+ *		An object to handle a plugin, which is actually an application
+ *		which represents a website, the application can have extra configuration
+ *		options which a normal plugin doesn't have.  To setup the "website".
+ *
+ * 	todo:
+ * 		write documentation
+ *
+ */
 class Amslib_Plugin_Application extends Amslib_Plugin
 {
 	static protected $version;

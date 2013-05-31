@@ -15,15 +15,25 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: Amslib_MVC.php
- * Title: Model/View/Controller implementation for use with Amslib projects
- * Version: 6.0
- * Project: amslib
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
 
+/**
+ * 	class:	Amslib_MVC
+ *
+ *	group:	mvc
+ *
+ *	file:	Amslib_MVC.php
+ *
+ *	description:
+ *		Model/View/Controller implementation for use with Amslib projects
+ *
+ * 	todo:
+ * 		write documentation
+ *
+ */
 class Amslib_MVC extends Amslib_Mixin
 {
 	protected $object;

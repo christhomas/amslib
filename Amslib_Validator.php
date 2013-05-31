@@ -1,6 +1,6 @@
 <?php
 /*******************************************************************************
- * Copyright (c) {04/02/2008} {Christopher Thomas}
+ * Copyright (c) {15/03/2008} {Christopher Thomas}
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -15,6 +15,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
+ * Contributors/Author:
+ *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
+ *******************************************************************************/
+
+/*
  * File: Amslib_Validator.php
  * Title: Antimatter Form Validator
  * Version: 4.0
@@ -26,11 +32,17 @@
  *******************************************************************************/
 
 /**
- * class: Amslib_Validator
+ * 	class:	Amslib_Validator
  *
- * Validates a form posted from the browser to see whether the data conforms to the expected types
+ *	group:	Core
  *
- * future improvements
+ *	file:	Amslib_Validator.php
+ *
+ *	description: todo, write description
+ *
+ * 	todo: Validates a form posted from the browser to see whether the data conforms to the expected types
+ *
+ *	future improvements
  * 	-	Add a url validator method perhaps?
  * 	-	move the required parameter into the options structure
  * 	-	Allow a date to validate between two unix timestamps defining the start and end period (useful for birthdates, restriction of dates based on product availability etc)

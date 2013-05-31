@@ -15,19 +15,30 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: Amslib_MVC_Missing.php
- * Title: Implements a fake interface where everything returns false and it logs errors
- * Description: This object's purpose is to provide an error reporting mechanism whilst
- * 				avoiding the fatal errors, warnings, etc when you try to obtain a plugin which 
- * 				doesn't exist, this object will be returned and it's using a __call interface
- * 				to hijack and control the system, report errors and attempt to correct failures
- * Version: 4.0
- * Project: amslib
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
 
+/**
+ * 	class:	Amslib_MVC_Missing
+ *
+ *	group:	mvc
+ *
+ *	file:	Amslib_MVC_Missing.php
+ *
+ *	title:	Implements a fake interface where everything returns false and it logs errors
+ *
+ *	description:
+ *		This object's purpose is to provide an error reporting mechanism whilst
+ * 		avoiding the fatal errors, warnings, etc when you try to obtain a plugin which 
+ * 		doesn't exist, this object will be returned and it's using a __call interface
+ * 		to hijack and control the system, report errors and attempt to correct failures
+ *
+ * 	todo:
+ * 		write documentation
+ *
+ */
 class Amslib_MVC_Missing
 {
 	public function __construct(){}

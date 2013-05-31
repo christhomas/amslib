@@ -15,15 +15,25 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: Amslib_Router.php
- * Title: Version 4.0 of the Core router object
- * Version: 4.0
- * Project: Amslib/Router
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
 
+/**
+ * 	class:	Amslib_Router
+ *
+ *	group:	router
+ *
+ *	file:	Amslib_Router.php
+ *
+ *	description:
+ *		write description
+ *
+ * 	todo:
+ * 		write documentation
+ *
+ */
 class Amslib_Router
 {
 	static protected $emptyRoute = array(

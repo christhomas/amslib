@@ -15,23 +15,29 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * file: Amslib_Translator.php
- * title: Human Language Translator
- * version: 3.0
- * description: A translator object which uses a language catalog like gettext but doesnt
+ * Contributors/Author:
+ *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
+ *******************************************************************************/
+
+/**
+ * 	class:	Amslib_Translator
+ *
+ *	group:	translator
+ *
+ *	file:	Amslib_Translator.php
+ *
+ *	description:  
+ *		Translate strings from between a recognised input and output, it's fast,
+ *		flexible and easy to use (easier than PO files anyway)
+ *
+ *		The translator object uses a language catalog like gettext but doesnt
  *		really suck by actually doing things cleverly, you can learn, forget, translate
  *		mix catalogues from different parts of projects together, it's much more powerful
  *		and does exactly the same job.
  *
- * Contributors:
- *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *******************************************************************************/
-
-/**
- * class: Amslib_Translator
+ * 	todo: write documentation
  *
- * Translate strings from between a recognised input and output, it's fast,
- * flexible and easy to use (easier than PO files anyway)
  */
 class Amslib_Translator extends Amslib_Translator_Source
 {

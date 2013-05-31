@@ -15,16 +15,26 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * file: Amslib_Plugin_Manager.php
- * title: Antimatter Plugin: Plugin Manager object version 3
- * description: An object to store all the plugins and provide a central method
- * 				to access them all
- * version: 3.0
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
 
+/**
+ * 	class:	Amslib_Plugin_Manager
+ *
+ *	group:	plugin
+ *
+ *	file:	Amslib_Plugin_Manager.php
+ *
+ *	description:
+ *		An object to store all the plugins and provide a 
+ *		central method to access them all
+ *
+ * 	todo:
+ * 		write documentation
+ *
+ */
 class Amslib_Plugin_Manager
 {
 	static protected $plugins		=	array();

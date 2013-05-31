@@ -1,29 +1,37 @@
 <?php 
 /*******************************************************************************
- * Copyright (c) {15/03/2013} {Christopher Thomas}
-* This library is free software; you can redistribute it and/or
-* modify it under the terms of the GNU Lesser General Public
-* License as published by the Free Software Foundation; either
-* version 3 of the License, or any later version.
-*
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public
-* License along with this library; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*
-* File: Amslib_Image.php
-* Title: Amslib Image manipulation object
-* Version: 2+
-* Project: Amslib (antimatter studios library)
-*
-* Contributors/Author:
-*    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
-*******************************************************************************/
+ * Copyright (c) {15/03/2008} {Christopher Thomas}
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contributors/Author:
+ *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
+ *******************************************************************************/
 
+/**
+ * 	class:	Amslib_Image2
+ *
+ *	group:	Core
+ *
+ *	file:	Amslib_Image2.php
+ *
+ *	description: Amslib Image manipulation object
+ *
+ * 	todo: write documentation
+ *
+ */
 class Amslib_Image2
 {
 	protected $commands		=	false;

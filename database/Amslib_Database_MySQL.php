@@ -15,25 +15,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * file: Amslib_Database_MySQL.php
- * title: Antimatter Database: MySQL library version 3
- * description: This is a small cover object which enhanced the original with some
- * new functionality aiming to solve the fatal_error problem but keep returning data
- * version: 3.0
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *     
  *******************************************************************************/
 
 /**
- * 	class: Amslib_Database_MySQL
+ * 	class:	Amslib_Database_MySQL
  * 
- *	group:		Database
+ *	group:	database
  * 
- *	file:		Amslib_Database_MySQL.php
+ *	file:	Amslib_Database_MySQL.php
  * 
- *	title:		Antimatter Database: MySQL library
+ *	title:	Antimatter Database: MySQL library
  * 
  *	description:	This is a small cover object which enhanced the original with some
  * 					new functionality aiming to solve the fatal_error problem but keep returning data 

@@ -15,15 +15,22 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: Amslib.php
- * Title: Amslib core utility object
- * Project: Amslib (antimatter studios library)
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
 
-//	Amslib helper class
+/**
+ * 	class:	Amslib
+ *
+ *	group:	Core
+ *
+ *	file:	Amslib.php
+ *
+ *	description: todo, write description
+ *
+ * 	todo: write documentation
+ */
 class Amslib
 {
 	static protected $showErrorTrigger		=	false;

@@ -15,15 +15,23 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: Amslib_Image.php
- * Title: Amslib Image manipulation object
- * Version: 1.2
- * Project: Amslib (antimatter studios library)
- *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
  *******************************************************************************/
 
+/**
+ * 	class:	Amslib_Image
+ *
+ *	group:	Core
+ *
+ *	file:	Amslib_Image.php
+ *
+ *	description: Amslib Image manipulation object
+ *
+ * 	todo: write documentation
+ *
+ */
 class Amslib_Image
 {
 	protected $images;
