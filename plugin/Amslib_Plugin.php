@@ -32,6 +32,9 @@ class Amslib_Plugin
 
 	//	The ready state of the plugin is true/false depending on whether it has been configured
 	protected $isReady;
+	
+	//	The load state of the plugin is true/false depending on whether it has been loaded
+	protected $isLoaded;
 
 	//	The name of the plugin
 	protected $name;
@@ -310,7 +313,7 @@ class Amslib_Plugin
 
 		//	This stores where all the types components are stored as part of the application
 		$this->setComponent("view",		"views",	"Vi_");
-		$this->setComponent("object",	"objects",	"");
+		$this->setComponent("object",	"objects",	"");	
 	}
 
 	//	Type 1 data transfers
@@ -442,6 +445,7 @@ class Amslib_Plugin
 	public function config($name,$location)
 	{
 		$this->isReady	=	false;
+		$this->isLoaded	=	false;
 		$this->name		=	$name;
 		$this->location	=	$location;
 		$this->filename	=	$this->getPackageFilename();
@@ -661,6 +665,8 @@ class Amslib_Plugin
 
 	public function load()
 	{
+		if($this->isLoaded) return $this->api;
+		
 		if($this->isReady)
 		{
 			//	Process all child plugins before the parents
@@ -675,6 +681,8 @@ class Amslib_Plugin
 			
 			//	finalise the plugin, finish any last requests by the plugin
 			$this->finalisePlugin();
+			
+			$this->isLoaded = true;
 
 			return $this->api;
 		}
