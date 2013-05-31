@@ -46,22 +46,77 @@ Format: 1.52
 # --------------------------------------------------------------------------
 
 
-File: $domain  (router/Amslib_Router.php)
-File: Amslib.php  (Amslib.php)
+File: Amslib  (Amslib.php)
+File: Amslib_Apache  (Amslib_Apache.php)
+File: Amslib_Array  (Amslib_Array.php)
+File: Amslib_Array2  (Amslib_Array2.php)
+File: Amslib_Database  (database/Amslib_Database.php)
 File: Amslib_Database_MySQL  (database/Amslib_Database_MySQL.php)
-File: Amslib_Paypal.php  (Amslib_Paypal.php)
-File: Amslib_Translator  (translator/Amslib_Translator.php)
-File: Amslib_Validator  (Amslib_Validator.php)
-File: database/Amslib_Database.php  (database/Amslib_Database.php)
-File: execute  (plugin/Amslib_Plugin_Application.php)
-File: extract  (router/Amslib_Router_Language.php)
-File: listFiles  (file/Amslib_File.php)
-File: load  (translator/Amslib_Translator_XML.php)
-File: mvc/Amslib_MVC.php  (mvc/Amslib_MVC.php)
-File: remove  (Amslib_Array.php)
+File: Amslib_Form  (Amslib_Form.php)
+File: Amslib_Form_Profile  (Amslib_FirePHP.php)
+File: Amslib_Form_Profile  (Amslib_Form_Profile.php)
+File: Amslib_Image  (Amslib_Image.php)
+File: Amslib_Image2  (Amslib_Image2.php)
+File: Amslib_Keystore  (Amslib_Keystore.php)
+File: Amslib_Paypal  (Amslib_Paypal.php)
+File: Amslib_Resource  (Amslib_Resource.php)
+File: Amslib_Resource_Compiler  (Amslib_Resource_Compiler.php)
+File: Amslib_Status_Code  (Amslib_Status_Code.php)
+File: Amslib_Testing_Translator_XML  (testing/Amslib_Testing_Translator_XML.php)
+File: Amslib_Validator.php  (Amslib_Validator.php)
+File: Amslib_Website  (Amslib_Website.php)
+
+Group: File  {
+
+   File: Amslib_File  (file/Amslib_File.php)
+   File: Amslib_File_Raw  (file/Amslib_File_Raw.php)
+   File: Amslib_File_Secure_Transfer  (file/Amslib_File_Secure_Transfer.php)
+   }  # Group: File
+
+Group: Mvc  {
+
+   File: Amslib_Mixin  (mvc/Amslib_Mixin.php)
+   File: Amslib_MVC  (mvc/Amslib_MVC.php)
+   File: Amslib_MVC_Missing  (mvc/Amslib_MVC_Missing.php)
+   }  # Group: Mvc
+
+Group: Plugin  {
+
+   File: Amslib_Plugin  (plugin/Amslib_Plugin.php)
+   File: Amslib_Plugin_Application  (plugin/Amslib_Plugin_Application.php)
+   File: Amslib_Plugin_Manager  (plugin/Amslib_Plugin_Manager.php)
+   File: Amslib_Plugin_Model  (plugin/Amslib_Plugin_Model.php)
+   File: Amslib_Plugin_Service  (plugin/Amslib_Plugin_Service.php)
+   }  # Group: Plugin
+
 File: render  (templates/xml_translation/objects/XML_Translation.php)
 File: render  (templates/hello_world/objects/Hello_World.php)
+
+Group: Router  {
+
+   File: Amslib_Router  (router/Amslib_Router.php)
+   File: Amslib_Router_Language  (router/Amslib_Router_Language.php)
+   File: Amslib_Router_Source_XML  (router/Amslib_Router_Source_XML.php)
+   File: Amslib_Router_URL  (router/Amslib_Router_URL.php)
+   }  # Group: Router
+
 File: scrollTo  (javascript/Amslib_ScrollBar.js)
+
+Group: Translator  {
+
+   File: Amslib_Translator  (translator/Amslib_Translator.php)
+   File: Amslib_Translator_Database  (translator/Amslib_Translator_Database.php)
+   File: Amslib_Translator_Keystore  (translator/Amslib_Translator_Keystore.php)
+   File: Amslib_Translator_Source  (translator/Amslib_Translator_Source.php)
+   File: Amslib_Translator_XML  (translator/Amslib_Translator_XML.php)
+   }  # Group: Translator
+
+Group: Xml  {
+
+   File: Amslib_XML  (xml/Amslib_XML.php)
+   File: Amslib_XML_RSS  (xml/Amslib_XML_RSS.php)
+   File: Amslib_XML_Youtube  (xml/Amslib_XML_Youtube.php)
+   }  # Group: Xml
 
 Group: Index  {
 
