@@ -23,6 +23,16 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *    
+ * group:		Database
+ * 
+ * file:		Amslib_Database_MySQL.php
+ * 
+ * title:		Antimatter Database: MySQL library
+ * 
+ * description:	This is a small cover object which enhanced the original with some
+ * 				new functionality aiming to solve the fatal_error problem but keep returning data
+ * 
  *******************************************************************************/
 
 class Amslib_Database_MySQL extends Amslib_Database
