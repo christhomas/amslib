@@ -100,8 +100,6 @@ Group: Router  {
    File: Amslib_Router_URL  (router/Amslib_Router_URL.php)
    }  # Group: Router
 
-File: scrollTo  (javascript/Amslib_ScrollBar.js)
-
 Group: Translator  {
 
    File: Amslib_Translator  (translator/Amslib_Translator.php)
