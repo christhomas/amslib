@@ -619,11 +619,11 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
-	 * 	method:	findPlugin
+	 * 	method:	removeFont
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getHiddenParameters($id)
+	public function removeFont($id)
 	{
 		Amslib_Resource::removeFont($id);
 	}
