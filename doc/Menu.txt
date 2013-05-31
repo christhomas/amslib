@@ -89,9 +89,6 @@ Group: Plugin  {
    File: Amslib_Plugin_Service  (plugin/Amslib_Plugin_Service.php)
    }  # Group: Plugin
 
-File: render  (templates/xml_translation/objects/XML_Translation.php)
-File: render  (templates/hello_world/objects/Hello_World.php)
-
 Group: Router  {
 
    File: Amslib_Router  (router/Amslib_Router.php)
