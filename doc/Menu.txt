@@ -63,7 +63,7 @@ File: Amslib_Resource  (Amslib_Resource.php)
 File: Amslib_Resource_Compiler  (Amslib_Resource_Compiler.php)
 File: Amslib_Status_Code  (Amslib_Status_Code.php)
 File: Amslib_Testing_Translator_XML  (testing/Amslib_Testing_Translator_XML.php)
-File: Amslib_Validator.php  (Amslib_Validator.php)
+File: Amslib_Validator  (Amslib_Validator.php)
 File: Amslib_Website  (Amslib_Website.php)
 
 Group: File  {
