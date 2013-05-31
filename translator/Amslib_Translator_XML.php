@@ -42,6 +42,11 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	protected $xdoc;
 	protected $error;
 
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		parent::__construct();
@@ -50,6 +55,11 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 		$this->xpath = false;
 	}
 
+	/**
+	 * 	method:	setError
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setError($error)
 	{
 		error_log(__METHOD__.": $error");
@@ -57,11 +67,21 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 		$this->error[] = $error;
 	}
 
+	/**
+	 * 	method:	getErrors
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getErrors()
 	{
 		return $this->error;
 	}
 
+	/**
+	 * 	method:	setLocation
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setLocation($location)
 	{
 		$this->location = $location;
@@ -110,6 +130,11 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 		return false;
 	}
 
+	/**
+	 * 	method:	translateExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function translateExtended($n,$i,$l=NULL)
 	{
 		if(!$this->xpath){
@@ -139,6 +164,11 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	}
 
 	//	TODO: we need to add the key/value to the xml database on disk
+	/**
+	 * 	method:	learnExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function learnExtended($n,$i,$v,$l=NULL)
 	{
 		return parent::learnExtended($n,$i,$v,$l);
@@ -147,6 +177,11 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	//	TODO: do the physical remove the key from the xml database
 	//	TODO: do I remove from just a single language, or all of them?
 	//	TODO: perhaps remove all by default, or specify the language to single a particular xml database out.
+	/**
+	 * 	method:	forgetExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function forgetExtended($n,$i,$l=NULL)
 	{
 		$cache	=	parent::forgetExtended($n,$i,$l);
@@ -155,12 +190,22 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 		return $cache && $xml;
 	}
 
+	/**
+	 * 	method:	updateKeyExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function updateKeyExtended($n,$i,$nn,$l=NULL)
 	{
 		$this->learnExtended($nn,$i,$this->translateExtended($n,$i,$l),$l);
 		$this->forgetExtended($n,$i,$l);
 	}
 
+	/**
+	 * 	method:	getKeyListExended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getKeyListExended($i,$l=NULL)
 	{
 		$list = $this->xpath->query("//database/translation/attribute::key");
@@ -171,12 +216,22 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	}
 
 	//	TODO: NOT IMPLEMENTED YET
+	/**
+	 * 	method:	getValueListExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getValueListExtended($i,$l=NULL)
 	{
 		return array();
 	}
 
 	//	TODO: NOT IMPLEMENTED YET
+	/**
+	 * 	method:	getListExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getListExtended($i,$l=NULL)
 	{
 		return array();

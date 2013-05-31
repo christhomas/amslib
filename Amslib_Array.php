@@ -44,6 +44,11 @@ class Amslib_Array
 	 * it'll cause an error to go into the log, but testing it by passing the variable and the key separately means
 	 * we can handle the situation more gracefully
 	 */
+	/**
+	 * 	method:	valid
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function valid($array=NULL,$key=NULL)
 	{
 		if($key !== NULL && is_string($key)) $array = isset($array[$key]) ? $array[$key] : array();
@@ -55,6 +60,11 @@ class Amslib_Array
 		return $array;
 	}
 
+	/**
+	 * 	method:	min
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function min($array,$key,$returnKey=NULL)
 	{
 		$min = NULL;
@@ -68,6 +78,11 @@ class Amslib_Array
 		return $returnKey !== NULL && isset($min[$returnKey]) ? $min[$returnKey] : $min;
 	}
 
+	/**
+	 * 	method:	max
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function max($array,$key,$returnKey=NULL)
 	{
 		$max = NULL;
@@ -81,6 +96,11 @@ class Amslib_Array
 		return $returnKey !== NULL && isset($max[$returnKey]) ? $max[$returnKey] : $max;
 	}
 
+	/**
+	 * 	method:	sort
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function sort($array,$index)
 	{
 		if(count($array) < 2) return $array;
@@ -101,6 +121,11 @@ class Amslib_Array
 		return array_merge(self::sort($left,$index), array($pivot_key => $pivot), self::sort($right,$index));
 	}
 
+	/**
+	 * 	method:	pluck
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function pluck($array,$key)
 	{
 		if(!is_array($array)) return array();
@@ -118,6 +143,11 @@ class Amslib_Array
 		return $values;
 	}
 
+	/**
+	 * 	method:	unique
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function unique($array,$field)
 	{
 		if(!self::isMulti($array)) return false;
@@ -134,13 +164,18 @@ class Amslib_Array
 		return $unique;
 	}
 
+	/**
+	 * 	method:	removeValue
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function removeValue(array $array,$value,$strict=false)
 	{
 	    return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));
 	}
 
 	/**
-	 * method: remove
+	 * method: removeKeys
 	 *
 	 * This method is a wrapper around unset to make it easier and less verbose in your code to remove multiple elements
 	 */
@@ -157,11 +192,21 @@ class Amslib_Array
 	}
 
 	//	NOTE: I dont think "filterType" is a good function name for this, when it takes a callback, perhaps filterCallback instead?
+	/**
+	 * 	method:	filterType
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function filterType($array,$callback)
 	{
 		return function_exists($callback) ? array_filter(self::valid($array),$callback) : $array;
 	}
 
+	/**
+	 * 	method:	filterKey
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function filterKey($array,$filter,$similar=false)
 	{
 		$array = self::valid($array);
@@ -191,6 +236,11 @@ class Amslib_Array
 		return self::filter($array,NULL,$filter,true,true);
 	}
 
+	/**
+	 * 	method:	filter
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function filter($array,$key,$value,$returnFiltered=false,$similar=false)
 	{
 		$filter = array();
@@ -237,6 +287,11 @@ class Amslib_Array
 		return $returnFiltered ? $filter : $array;
 	}
 
+	/**
+	 * 	method:	reindexByKey
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function reindexByKey($array,$key)
 	{
 		$array = self::valid($array);
@@ -254,6 +309,11 @@ class Amslib_Array
 
 	//	TODO: this method is a little open to abuse and in some situations wouldn't do the right thing
 	//	TODO: explain in words what this does and how it should work
+	/**
+	 * 	method:	countValues
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function countValues($array)
 	{
 		$counts = array();
@@ -268,6 +328,11 @@ class Amslib_Array
 	}
 
 	//	This method allows me to batch fix missing keys in arrays in broken code quickly and easily.
+	/**
+	 * 	method:	missingKeys
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function missingKeys($array,$key,$value=NULL)
 	{
 		if(is_string($key)) $key = array($key);
@@ -277,6 +342,11 @@ class Amslib_Array
 		return $array;
 	}
 
+	/**
+	 * 	method:	find
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function find($array,$key,$value)
 	{
 		$result = NULL;
@@ -288,8 +358,7 @@ class Amslib_Array
 		return false;
 	}
 
-	/*
-	//	I don't know how to integrate this into the api yet, but it's a cool function!!!
+	/*	I don't know how to integrate this into the api yet, but it's a cool function!!!
 	//	author: d3x from freenode's #php channel
 	//	usage: find($array,$k1,$k2,$k3,$k4)
 	//	description: you have a multi-dimensional array, the keys will represent a path to the final kv pair
@@ -302,9 +371,13 @@ class Amslib_Array
 			return call_user_func_array(__FUNCTION__, $args);
 		}
 		return $array;
-	}
-	*/
+	}*/
 
+	/**
+	 * 	method:	findKey
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function findKey($array,$key,$value)
 	{
 		foreach(self::valid($array) as $k=>$a){
@@ -314,6 +387,11 @@ class Amslib_Array
 		return false;
 	}
 
+	/**
+	 * 	method:	searchKeys
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function searchKeys($array,$filter)
 	{
 		$matches = array();
@@ -325,6 +403,11 @@ class Amslib_Array
 		return $matches;
 	}
 
+	/**
+	 * 	method:	hasKeys
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function hasKeys($array,$present,$missing=NULL)
 	{
 		if(!is_array($array)) return false;
@@ -348,6 +431,11 @@ class Amslib_Array
 		return true;
 	}
 
+	/**
+	 * 	method:	stripSlashesMulti
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function stripSlashesMulti($array,$key=NULL)
 	{
 		if(is_string($key)) $key = array($key);
@@ -365,6 +453,11 @@ class Amslib_Array
 		return $array;
 	}
 
+	/**
+	 * 	method:	stripSlashesSingle
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function stripSlashesSingle($array,$key="")
 	{
 		if($key == "") $key = array_keys($array);
@@ -379,6 +472,11 @@ class Amslib_Array
 		return $array;
 	}
 
+	/**
+	 * 	method:	stripSlashes
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function stripSlashes($array,$key="")
 	{
 		if(!is_array($array) || empty($array)) return $array;
@@ -390,6 +488,11 @@ class Amslib_Array
 					self::stripSlashesSingle($array,$key);
 	}
 
+	/**
+	 * 	method:	isMulti
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function isMulti($array)
 	{
 		return count($array)!==count($array, COUNT_RECURSIVE);
@@ -397,6 +500,11 @@ class Amslib_Array
 
 	//	DEPRECATED: this is not supposed to be here
 	//	FIXME: glob() on an array object? when it refers to the filesystem or array? I think it's a mistake to put this method here
+	/**
+	 * 	method:	glob
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function glob($location,$relative=false)
 	{
 		$items = glob(Amslib_Website::abs($location));
@@ -413,6 +521,11 @@ class Amslib_Array
 	//	I got this function from here: http://stackoverflow.com/questions/8917039/php-checking-difference-between-two-multidim-arrays
 	//	NOTE: 06/02/2013=> I modified this with the $strict parameter to let me check types as well as values
 	//	NOTE: this method will tell you the missing keys and different values in the second array
+	/**
+	 * 	method:	diff
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function diff($array1, $array2, $strict=false)
 	{
 		$return = array();
@@ -444,6 +557,11 @@ class Amslib_Array
 	}
 	
 	//	NOTE: this will give both sets of changes from both arrays compared against each other instead of in one direction only
+	/**
+	 * 	method:	diffBoth
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function diffBoth($array1,$array2,$strict=false)
 	{
 		return array(
@@ -453,6 +571,11 @@ class Amslib_Array
 		);
 	}
 	
+	/**
+	 * 	method:	implodeQuote
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function implodeQuote($array,$join=",",$quote="")
 	{
 		$spaceList = array();
@@ -463,11 +586,21 @@ class Amslib_Array
 		return implode($join,$spaceList);
 	}
 	
+	/**
+	 * 	method:	implodeQuoteSingle
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function implodeQuoteSingle($array,$join=",")
 	{
 		return self::implodeQuote($array,$join,"'");
 	}
 	
+	/**
+	 * 	method:	implodeQuoteDouble
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function implodeQuoteDouble($array,$join=",")
 	{
 		return self::implodeQuote($array,$join,"\"");

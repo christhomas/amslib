@@ -34,6 +34,11 @@
  */
 class Amslib_Apache
 {
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		//	Request apache headers, so you can find the content length

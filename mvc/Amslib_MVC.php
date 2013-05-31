@@ -60,6 +60,11 @@ class Amslib_MVC extends Amslib_Mixin
 	protected $location;
 	protected $plugin;
 
+	/**
+	 * 	method:	getInstance
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		$this->object		=	array();
@@ -72,6 +77,11 @@ class Amslib_MVC extends Amslib_Mixin
 		$this->viewParams	=	array();
 	}
 
+	/**
+	 * 	method:	getInstance
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function &getInstance()
 	{
 		static $instance = NULL;
@@ -81,6 +91,11 @@ class Amslib_MVC extends Amslib_Mixin
 		return $instance;
 	}
 
+	/**
+	 * 	method:	addMixin
+	 *
+	 * 	todo: write documentation
+	 */
 	public function addMixin($name,$reject=array(),$accept=array())
 	{
 		if(is_string($name)){
@@ -96,46 +111,91 @@ class Amslib_MVC extends Amslib_Mixin
 		return parent::addMixin($object,$reject,$accept);
 	}
 
+	/**
+	 * 	method:	setName
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setName($name)
 	{
 		$this->name = $name;
 	}
 
+	/**
+	 * 	method:	getName
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getName()
 	{
 		return $this->name;
 	}
 
+	/**
+	 * 	method:	setLocation
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setLocation($location)
 	{
 		$this->location = $location;
 	}
 
+	/**
+	 * 	method:	initialise
+	 *
+	 * 	todo: write documentation
+	 */
 	public function initialise()
 	{
 		return $this;
 	}
 
+	/**
+	 * 	method:	setModel
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setModel($model)
 	{
 		$this->model = $model;
 	}
 
+	/**
+	 * 	method:	getModel
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getModel()
 	{
 		return $this->model;
 	}
 
+	/**
+	 * 	method:	setPlugin
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setPlugin($plugin)
 	{
 		$this->plugin = $plugin;
 	}
 
+	/**
+	 * 	method:	getPlugin
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getPlugin()
 	{
 		return $this->plugin;
 	}
 
+	/**
+	 * 	method:	setValue
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setValue($name,$value)
 	{
 		if(is_string($name) && strlen($name)){
@@ -147,6 +207,11 @@ class Amslib_MVC extends Amslib_Mixin
 		return NULL;
 	}
 
+	/**
+	 * 	method:	getValue
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getValue($name=NULL,$default=NULL)
 	{
 		if(is_string($name) && strlen($name)){
@@ -157,6 +222,11 @@ class Amslib_MVC extends Amslib_Mixin
 		return $name == NULL && $default == NULL ? $this->value : $default;
 	}
 
+	/**
+	 * 	method:	setFields
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setFields($name,$value)
 	{
 		$name = "validate/$name";
@@ -168,27 +238,52 @@ class Amslib_MVC extends Amslib_Mixin
 		$this->setValue($name,array_merge($f,$value));
 	}
 
+	/**
+	 * 	method:	getFields
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getFields($name)
 	{
 		return $this->getValue("validate/$name",array());
 	}
 
+	/**
+	 * 	method:	listValues
+	 *
+	 * 	todo: write documentation
+	 */
 	public function listValues()
 	{
 		return array_keys($this->value);
 	}
 
 	//	TODO: need to explain the difference between a value and a view param
+	/**
+	 * 	method:	setViewParam
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setViewParam($parameters)
 	{
 		$this->viewParams = $parameters;
 	}
 
+	/**
+	 * 	method:	getViewParam
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getViewParam($name,$default=NULL)
 	{
 		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : $default;
 	}
 
+	/**
+	 * 	method:	setObject
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setObject($id,$name)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
@@ -196,6 +291,11 @@ class Amslib_MVC extends Amslib_Mixin
 		$this->object[$id] = $name;
 	}
 
+	/**
+	 * 	method:	getObject
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getObject($id,$singleton=true)
 	{
 		//	If the object requested is this object, return it directly
@@ -226,11 +326,21 @@ class Amslib_MVC extends Amslib_Mixin
 		return false;
 	}
 
+	/**
+	 * 	method:	listObjects
+	 *
+	 * 	todo: write documentation
+	 */
 	public function listObjects()
 	{
 		return array_keys($this->object);
 	}
 
+	/**
+	 * 	method:	setView
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setView($id,$name)
 	{
 		if(!$id || strlen($id) == 0) $id = $name;
@@ -240,6 +350,11 @@ class Amslib_MVC extends Amslib_Mixin
 		if(!isset($this->view["default"])) $this->view["default"] = $name;
 	}
 
+	/**
+	 * 	method:	getView
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getView($id)
 	{
 		if($id && isset($this->view[$id])) return $this->view[$id];
@@ -247,16 +362,31 @@ class Amslib_MVC extends Amslib_Mixin
 		return $this->view;
 	}
 
+	/**
+	 * 	method:	hasView
+	 *
+	 * 	todo: write documentation
+	 */
 	public function hasView($id)
 	{
 		return ($id && isset($this->view[$id]));
 	}
 
+	/**
+	 * 	method:	render
+	 *
+	 * 	todo: write documentation
+	 */
 	public function render($id="default",$parameters=array())
 	{
 		return $this->renderView($id,$parameters);
 	}
 
+	/**
+	 * 	method:	renderView
+	 *
+	 * 	todo: write documentation
+	 */
 	public function renderView($id,$parameters=array())
 	{
 		if(is_string($id) && isset($this->view[$id]))
@@ -278,26 +408,51 @@ class Amslib_MVC extends Amslib_Mixin
 		return "";
 	}
 
+	/**
+	 * 	method:	listViews
+	 *
+	 * 	todo: write documentation
+	 */
 	public function listViews()
 	{
 		return array_keys($this->view);
 	}
 
+	/**
+	 * 	method:	setTranslator
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setTranslator($name,$translator)
 	{
 		$this->translator[$name] = $translator;
 	}
 
+	/**
+	 * 	method:	getTranslator
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getTranslator($name)
 	{
 		return (isset($this->translator[$name])) ? $this->translator[$name] : reset($this->translator);
 	}
 	
+	/**
+	 * 	method:	listTranslators
+	 *
+	 * 	todo: write documentation
+	 */
 	public function listTranslators($pluckNames=true)
 	{
 		return $pluckNames ? array_keys($this->translator) : $this->translator;
 	}
 
+	/**
+	 * 	method:	setStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setStylesheet($id,$file,$conditional=NULL,$autoload=NULL,$media=NULL)
 	{
 		if(!is_string($id) && $file) return;
@@ -310,6 +465,11 @@ class Amslib_MVC extends Amslib_Mixin
 		);
 	}
 
+	/**
+	 * 	method:	addStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	public function addStylesheet($id)
 	{
 		if(isset($this->stylesheet[$id])){
@@ -322,11 +482,21 @@ class Amslib_MVC extends Amslib_Mixin
 		}
 	}
 
+	/**
+	 * 	method:	listStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	public function listStylesheet($key="file")
 	{
 		return $key !== false ? Amslib_Array::pluck($this->stylesheet,$key) : $this->stylesheet;
 	}
 
+	/**
+	 * 	method:	getStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getStylesheet($id,$file=true)
 	{
 		return isset($this->stylesheet[$id])
@@ -334,11 +504,21 @@ class Amslib_MVC extends Amslib_Mixin
 			: "";
 	}
 
+	/**
+	 * 	method:	removeStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	public function removeStylesheet($id)
 	{
 		Amslib_Resource::removeStylesheet($id);
 	}
 
+	/**
+	 * 	method:	setJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setJavascript($id,$file,$conditional=NULL,$autoload=NULL)
 	{
 		if(!is_string($id) && $file) return;
@@ -350,6 +530,11 @@ class Amslib_MVC extends Amslib_Mixin
 		);
 	}
 
+	/**
+	 * 	method:	addJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	public function addJavascript($id)
 	{
 		if(isset($this->javascript[$id])){
@@ -358,11 +543,21 @@ class Amslib_MVC extends Amslib_Mixin
 		}
 	}
 
+	/**
+	 * 	method:	listJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	public function listJavascript($key="file")
 	{
 		return $key !== false ? Amslib_Array::pluck($this->javascript,$key) : $this->javascript;
 	}
 
+	/**
+	 * 	method:	getJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getJavascript($id,$file=true)
 	{
 		return isset($this->javascript[$id])
@@ -370,11 +565,21 @@ class Amslib_MVC extends Amslib_Mixin
 			: "";
 	}
 
+	/**
+	 * 	method:	removeJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	public function removeJavascript($id)
 	{
 		Amslib_Resource::removeJavascript($id);
 	}
 
+	/**
+	 * 	method:	autoloadResources
+	 *
+	 * 	todo: write documentation
+	 */
 	public function autoloadResources()
 	{
 		foreach($this->stylesheet as $k=>$s) if($s["autoload"]){
@@ -386,6 +591,11 @@ class Amslib_MVC extends Amslib_Mixin
 		}
 	}
 
+	/**
+	 * 	method:	setFont
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setFont($type,$id,$file,$autoload)
 	{
 		//	FIXME: implement the $type field somehow, but atm we only support google webfont
@@ -396,6 +606,11 @@ class Amslib_MVC extends Amslib_Mixin
 		if($autoload) $this->addFont($id);
 	}
 
+	/**
+	 * 	method:	addFont
+	 *
+	 * 	todo: write documentation
+	 */
 	public function addFont($id)
 	{
 		if(!isset($this->font[$id])) return;
@@ -403,7 +618,12 @@ class Amslib_MVC extends Amslib_Mixin
 		Amslib_Resource::addFont($id,$this->font[$id]["file"]);
 	}
 
-	public function removeFont($id)
+	/**
+	 * 	method:	findPlugin
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getHiddenParameters($id)
 	{
 		Amslib_Resource::removeFont($id);
 	}
@@ -432,6 +652,11 @@ class Amslib_MVC extends Amslib_Mixin
 		return $this->getValueData("input");
 	}
 
+	/**
+	 * 	method:	getValueData
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getValueData($type,$filter=false)
 	{
 		if($filter == false) $filter = array_keys($this->value);
@@ -472,6 +697,11 @@ class Amslib_MVC extends Amslib_Mixin
 		return $output ? "<div class='__amslib_mvc_values'>$output</div>" : "";
 	}
 
+	/**
+	 * 	method:	setImage
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setImage($id,$file)
 	{
 		$this->images[$id] = $file;
@@ -480,6 +710,11 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	//	NOTE: this function is being abused to be a generic "make relative url for a file" method for pretty much everything
+	/**
+	 * 	method:	getImage
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getImage($id,$relative=true)
 	{
 		if(!is_string($id)) return false;
@@ -498,31 +733,61 @@ class Amslib_MVC extends Amslib_Mixin
 		return false;
 	}
 
+	/**
+	 * 	method:	getAPI
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getAPI($name)
 	{
 		return Amslib_Plugin_Manager::getAPI($name);
 	}
 
+	/**
+	 * 	method:	getRoute
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getRoute($name=NULL)
 	{
 		return Amslib_Router::getRoute($name,$this->getName());
 	}
 
+	/**
+	 * 	method:	getFullURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getFullURL()
 	{
 		return Amslib_Router::getPath();
 	}
 
+	/**
+	 * 	method:	getURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getURL($name=NULL,$group=NULL)
 	{
 		return Amslib_Router_URL::getURL($name,$group?$group:$this->getName());
 	}
 
+	/**
+	 * 	method:	getService
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getService($name,$group=NULL)
 	{
 		return Amslib_Router_URL::getService($name,$group?$group:$this->getName());
 	}
 
+	/**
+	 * 	method:	getServiceURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getServiceURL($name,$group=NULL)
 	{
 		return Amslib_Router_URL::getServiceURL($name,$group?$group:$this->getName());
@@ -530,6 +795,11 @@ class Amslib_MVC extends Amslib_Mixin
 
 	//	FIXME: we have to formalise what this slot code is supposed to do, opposed to what the view system already does.
 	//	NOTE: 10/03/2013, still have no idea what this code is really supposed to do
+	/**
+	 * 	method:	setSlot
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setSlot($name,$content,$index=NULL)
 	{
 		if($index){
@@ -539,6 +809,11 @@ class Amslib_MVC extends Amslib_Mixin
 		}
 	}
 
+	/**
+	 * 	method:	getSlot
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getSlot($name,$index=NULL)
 	{
 		if(isset($this->slots[$name])){

@@ -47,6 +47,11 @@ var Amslib_Numeric_Field = my.Amslib_Numeric_Field = my.Class(
 	selector:		false,
 	
 	STATIC: {
+		/**
+		 * 	method:	autoload
+		 *
+		 * 	todo: write documentation
+		 */
 		autoload: function(){
 			$(".amslib_numeric_field.amslib_autoload").each(function(){
 				new Amslib_Numeric_Field(this);
@@ -54,6 +59,11 @@ var Amslib_Numeric_Field = my.Amslib_Numeric_Field = my.Class(
 		}
 	},
 
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
 	constructor: function(parent)
 	{
 		this.parent	=	$(parent);
@@ -72,6 +82,11 @@ var Amslib_Numeric_Field = my.Amslib_Numeric_Field = my.Class(
 	},
 
 	//	Example config: 0,0,0,1,250,input[name='duration']
+	/**
+	 * 	method:	readConfig
+	 *
+	 * 	todo: write documentation
+	 */
 	readConfig: function()
 	{
 		if(c = $("span.config",this.parent)){
@@ -86,6 +101,11 @@ var Amslib_Numeric_Field = my.Amslib_Numeric_Field = my.Class(
 		}
 	},
 
+	/**
+	 * 	method:	update
+	 *
+	 * 	todo: write documentation
+	 */
 	update: function(event)
 	{
 		var element = event.currentTarget || this;
@@ -107,6 +127,11 @@ var Amslib_Numeric_Field = my.Amslib_Numeric_Field = my.Class(
 		$(this.selector).val(update);
 	},
 
+	/**
+	 * 	method:	startUpdate
+	 *
+	 * 	todo: write documentation
+	 */
 	startUpdate: function(event)
 	{
 		if(this.timer) this.stopUpdate();
@@ -117,6 +142,11 @@ var Amslib_Numeric_Field = my.Amslib_Numeric_Field = my.Class(
 		return false;
 	},
 
+	/**
+	 * 	method:	stopUpdate
+	 *
+	 * 	todo: write documentation
+	 */
 	stopUpdate: function()
 	{
 		if(this.timer) clearInterval(this.timer);

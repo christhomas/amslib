@@ -64,6 +64,11 @@ class Amslib_Router
 	 */
 	static protected $domain		=	"__LOCAL_DOMAIN__";
 	
+	/**
+	 * 	method:	finaliseRoute
+	 *
+	 * 	todo: write documentation
+	 */
 	static protected function finaliseRoute($route,$select,$url)
 	{
 		//	Don't replace anything if the string is / because it'll nuke all the separators
@@ -80,6 +85,11 @@ class Amslib_Router
 		return $route;
 	}
 
+	/**
+	 * 	method:	findLongest
+	 *
+	 * 	todo: write documentation
+	 */
 	static protected function findLongest($list,$url)
 	{
 		$select = "";
@@ -95,6 +105,11 @@ class Amslib_Router
 		return $select;
 	}
 
+	/**
+	 * 	method:	initialise
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function initialise()
 	{
 		//	NOTE: what does AMSLIB_ROUTER do now? this isn't explained and not understandable
@@ -116,6 +131,11 @@ class Amslib_Router
 		self::load(Amslib::locate()."/router/router.xml","xml","framework");
 	}
 
+	/**
+	 * 	method:	finalise
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function finalise()
 	{
 		if(!self::$path){
@@ -153,6 +173,11 @@ class Amslib_Router
 		}
 	}
 
+	/**
+	 * 	method:	getPath
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getPath($key=NULL)
 	{
 		if($key == NULL || !isset(self::$pathList[$key])) return self::$path;
@@ -160,21 +185,41 @@ class Amslib_Router
 		return self::$pathList[$key];
 	}
 
+	/**
+	 * 	method:	setPath
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setPath($key,$value)
 	{
 		self::$pathList[$key] = $value;
 	}
 
+	/**
+	 * 	method:	listPaths
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function listPaths()
 	{
 		return array_keys(self::$pathList);
 	}
 
+	/**
+	 * 	method:	getBase
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getBase()
 	{
 		return self::$base;
 	}
 
+	/**
+	 * 	method:	load
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function load($source,$type,$group,$domain=NULL)
 	{
 		try{
@@ -199,6 +244,11 @@ class Amslib_Router
 		return true;
 	}
 
+	/**
+	 * 	method:	setCallback
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setCallback($callback)
 	{
 		if($callback !== NULL && strlen($callback) && !in_array($callback,self::$callback)){
@@ -206,16 +256,31 @@ class Amslib_Router
 		}
 	}
 
+	/**
+	 * 	method:	getLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getLanguage()
 	{
 		return isset(self::$route["lang"]) ? self::$route["lang"] : false;
 	}
 
+	/**
+	 * 	method:	setLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setLanguage($lang)
 	{
 		//	TODO: write how this would work
 	}
 
+	/**
+	 * 	method:	changeLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function changeLanguage($lang,$fullRoute=NULL,$key=NULL)
 	{
 		//	NOTE: what does fullRoute mean??
@@ -225,6 +290,11 @@ class Amslib_Router
 		return self::getURL(NULL,NULL,$lang);
 	}
 
+	/**
+	 * 	method:	getURL
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getURL($name=NULL,$group=NULL,$lang="default",$domain=NULL)
 	{
 		if($domain == NULL) $domain = self::$domain;
@@ -242,6 +312,11 @@ class Amslib_Router
 		return strpos($url,"http") !== false ? $url : Amslib_Website::rel($url);
 	}
 
+	/**
+	 * 	method:	getRouteByURL
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getRouteByURL($url=NULL)
 	{
 		if($url == NULL) return self::$route;
@@ -260,6 +335,11 @@ class Amslib_Router
 		return $route;
 	}
 
+	/**
+	 * 	method:	getRoute
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getRoute($name=NULL,$group=NULL,$domain=NULL)
 	{
 		//	if there was no name, surely you mean return the current route
@@ -287,16 +367,31 @@ class Amslib_Router
 		return self::$emptyRoute;
 	}
 
+	/**
+	 * 	method:	getServiceURL
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getServiceURL($name,$group=NULL,$lang="default",$domain=NULL)
 	{
 		return self::getURL("service:$name",$group,$lang,$domain);
 	}
 
+	/**
+	 * 	method:	getService
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getService($name,$group=NULL)
 	{
 		return self::getRoute("service:$name",$group);
 	}
 
+	/**
+	 * 	method:	setRoute
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setRoute($name,$group,$domain,$route,$updateURLCache=true)
 	{
 		//	test if the group is valid or not
@@ -332,16 +427,31 @@ class Amslib_Router
 		}
 	}
 
+	/**
+	 * 	method:	getName
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getName()
 	{
 		return self::$route["name"];
 	}
 
+	/**
+	 * 	method:	isRouted
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function isRouted()
 	{
 		return self::$path !== NULL ? true : false;
 	}
 
+	/**
+	 * 	method:	isService
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function isService()
 	{
 		return self::$route && isset(self::$route["type"]) && self::$route["type"] == "service"
@@ -349,6 +459,11 @@ class Amslib_Router
 			: false;
 	}
 
+	/**
+	 * 	method:	getResource
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getResource($name=NULL)
 	{
 		$r = ($name == NULL) ? self::$route : self::getRoute($name);
@@ -356,6 +471,11 @@ class Amslib_Router
 		return $r && isset($r["resource"]) ? $r["resource"] : false;
 	}
 
+	/**
+	 * 	method:	getRouteParam
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getRouteParam($name=NULL,$default="")
 	{
 		if(isset(self::$route["route_param"])){
@@ -369,6 +489,11 @@ class Amslib_Router
 		return $default;
 	}
 
+	/**
+	 * 	method:	setRouteParam
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setRouteParam($name,$value)
 	{
 		if(self::$route && isset(self::$route["route_param"])){
@@ -376,11 +501,21 @@ class Amslib_Router
 		}
 	}
 
+	/**
+	 * 	method:	hasRouteParam
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function hasRouteParam($name)
 	{
 		return in_array($name,self::$route["route_param"]) ? true : false;
 	}
 
+	/**
+	 * 	method:	getURLParam
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getURLParam($index=NULL,$default="")
 	{
 		//	if there are no url options, return the default
@@ -397,6 +532,11 @@ class Amslib_Router
 				: $default;
 	}
 	
+	/**
+	 * 	method:	setURLParam
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setURLParam($index,$value)
 	{
 		if($index && is_int($index)){
@@ -404,16 +544,31 @@ class Amslib_Router
 		}
 	}
 
+	/**
+	 * 	method:	getStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getStylesheet()
 	{
 		return isset(self::$route["stylesheet"]) ? self::$route["stylesheet"] : array();
 	}
 
+	/**
+	 * 	method:	getJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getJavascript()
 	{
 		return isset(self::$route["javascript"]) ? self::$route["javascript"] : array();
 	}
 
+	/**
+	 * 	method:	decodeURLPairs
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function decodeURLPairs($offset=0)
 	{
 		//	here we decode the url into a series of k/v/k/v pairs => [k,v],[k,v]
@@ -436,16 +591,31 @@ class Amslib_Router
 		return $p;
 	}
 	
+	/**
+	 * 	method:	setExportRestriction
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setExportRestriction($group,$status)
 	{
 		self::$export[$group] = $status;
 	}
 	
+	/**
+	 * 	method:	getExportRestriction
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getExportRestriction($group)
 	{
 		return !isset(self::$export[$group]) || self::$export[$group];
 	}
 	
+	/**
+	 * 	method:	importRouter
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function importRouter($import)
 	{
 		//	acquire the latest route for the export url and construct the url to call the external remote service
@@ -472,6 +642,11 @@ class Amslib_Router
 		}
 	}
 	
+	/**
+	 * 	method:	exportRouterShared
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function exportRouterShared()
 	{
 		//	Construct the protocol.domain to prepend all the urls with
@@ -501,11 +676,21 @@ class Amslib_Router
 		return $data;
 	}
 	
+	/**
+	 * 	method:	serviceExportRouterXML
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function serviceExportRouterXML($service,$source)
 	{
 		die("NOT IMPLEMENTED YET");
 	}
 	
+	/**
+	 * 	method:	serviceExportRouterJSON
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function serviceExportRouterJSON($service,$source)
 	{
 		$data = self::exportRouterShared();
@@ -513,11 +698,21 @@ class Amslib_Router
 		Amslib_Website::outputJSON($data);
 	}
 	
+	/**
+	 * 	method:	serviceExportRouterDEBUG
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function serviceExportRouterDEBUG($service,$source)
 	{
 		die(Amslib::var_dump(self::exportRouterShared(),true));
 	}
 
+	/**
+	 * 	method:	dump
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function dump()
 	{
 		return array(

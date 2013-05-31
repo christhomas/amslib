@@ -35,6 +35,11 @@ class Amslib_Website
 {
 	static protected $location = NULL;
 
+	/**
+	 * 	method:	set
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function set($path=NULL)
 	{
 		if(self::$location !== NULL) return self::$location;
@@ -60,6 +65,11 @@ class Amslib_Website
 	}
 
 	//	Return a relative url for the file to the document root
+	/**
+	 * 	method:	rel
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function rel($file="")
 	{
 		return Amslib_File::relative(self::$location.$file);
@@ -67,12 +77,22 @@ class Amslib_Website
 
 	//	Return an absolute url for the file to the root directory
 	//	FIXME: if you pass an absolute filename into this method, it won't return the correct filename back
+	/**
+	 * 	method:	abs
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function abs($file="")
 	{
 		return Amslib_File::absolute(self::$location.$file);
 	}
 
 	//	NOTE type=0 means no specific header is given, so it'll default to a 302 redirection
+	/**
+	 * 	method:	redirect
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function redirect($location,$block=true,$type=0)
 	{
 		$message = "waiting to redirect";
@@ -96,6 +116,11 @@ class Amslib_Website
 		if($block) die($message);
 	}
 
+	/**
+	 * 	method:	outputJSON
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function outputJSON($array,$block=true)
 	{
 		header("Cache-Control: no-cache");

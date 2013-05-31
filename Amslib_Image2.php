@@ -58,6 +58,11 @@ class Amslib_Image2
 	const ERROR_CACHE_NOT_FOUND				= "The image could not be found in the cache";
 	const ERROR_MAXDIM_FAILED				= "maxdim method failed to process correctly";
 	
+	/**
+	 * 	method:	getMIMEType
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getMIMEType($filename)
 	{
 		$extension = end(explode(".",$filename));
@@ -72,6 +77,11 @@ class Amslib_Image2
 		return false;
 	}
 	
+	/**
+	 * 	method:	getFileExtension
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getFileExtension($filename)
 	{
 		$extension = Amslib_File::getFileExtension($filename);
@@ -85,6 +95,11 @@ class Amslib_Image2
 		return $extension;
 	}
 	
+	/**
+	 * 	method:	setCacheParam
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function setCacheParam($key,$value=NULL)
 	{
 		if(!is_string($key)) return NULL;
@@ -94,16 +109,31 @@ class Amslib_Image2
 		return $value;
 	}
 	
+	/**
+	 * 	method:	getCacheParam
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getCacheParam($key,$default=NULL)
 	{
 		return array_key_exists($key,$this->cache_params) ? $this->cache_params[$key] : $default;
 	}
 	
+	/**
+	 * 	method:	resetCacheParam
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function resetCacheParam()
 	{
 		$this->cache_params = array();
 	}
 	
+	/**
+	 * 	method:	setImageParam
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function setImageParam($key,$value)
 	{
 		if(!is_string($key)) return NULL;
@@ -113,26 +143,51 @@ class Amslib_Image2
 		return $value;
 	}
 	
+	/**
+	 * 	method:	getImageParam
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getImageParam($key,$default=NULL)
 	{
 		return array_key_exists($key,$this->image_params) ? $this->image_params[$key] : $default;
 	}
 	
+	/**
+	 * 	method:	resetImageParam
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function resetImageParam()
 	{
 		$this->image_params = Amslib_Array::removeKeys($this->image_params,array("handle","width","height"));
 	}
 	
+	/**
+	 * 	method:	getCacheKey
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getCacheKey()
 	{
 		return sha1(http_build_query($this->cache_params)).".".$this->cache_params["extension"];
 	}
 	
+	/**
+	 * 	method:	getCacheFilename
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getCacheFilename()
 	{
 		return Amslib_File::reduceSlashes($this->cache_dir."/".$this->getCacheKey());
 	}
 	
+	/**
+	 * 	method:	getDimensions
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getDimensions()
 	{
 		if(!$this->getImageParam("handle")){
@@ -145,6 +200,11 @@ class Amslib_Image2
 		);
 	}
 	
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		if(!function_exists('imagecreatetruecolor')) {
@@ -157,6 +217,11 @@ class Amslib_Image2
 		$this->resetImageParam();
 	}	
 	
+	/**
+	 * 	method:	setCacheDirectory
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setCacheDirectory($directory)
 	{
 		$directory = Amslib_File::reduceSlashes($directory);
@@ -168,6 +233,11 @@ class Amslib_Image2
 		$this->cache_dir = $directory;
 	}
 	
+	/**
+	 * 	method:	setError
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setError($error)
 	{
 		$this->error = $error;
@@ -175,6 +245,11 @@ class Amslib_Image2
 		return false;
 	}
 	
+	/**
+	 * 	method:	getError
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getError()
 	{
 		return is_array($this->error) 
@@ -182,16 +257,31 @@ class Amslib_Image2
 			: $this->error;
 	}
 	
+	/**
+	 * 	method:	setErrorState
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setErrorState($state)
 	{
 		$this->errorState = $state;
 	}
 	
+	/**
+	 * 	method:	getErrorState
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getErrorState()
 	{
 		return $this->errorState;
 	}
 	
+	/**
+	 * 	method:	clearCache
+	 *
+	 * 	todo: write documentation
+	 */
 	public function clearCache()
 	{
 		if(!is_dir($this->cache_dir)){
@@ -212,6 +302,11 @@ class Amslib_Image2
 		return true;
 	}
 	
+	/**
+	 * 	method:	setCommands
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setCommands($source)
 	{
 		if(is_array($source)){
@@ -225,6 +320,11 @@ class Amslib_Image2
 		return true;
 	}
 	
+	/**
+	 * 	method:	processCommands
+	 *
+	 * 	todo: write documentation
+	 */
 	public function processCommands($commands=NULL)
 	{
 		if(!$commands) $commands = $this->commands;
@@ -285,6 +385,11 @@ class Amslib_Image2
 		return true;
 	}
 	
+	/**
+	 * 	method:	open
+	 *
+	 * 	todo: write documentation
+	 */
 	public function open($filename)
 	{
 		//	get file extension and if not valid, return false
@@ -319,6 +424,11 @@ class Amslib_Image2
 		return true;
 	}
 	
+	/**
+	 * 	method:	close
+	 *
+	 * 	todo: write documentation
+	 */
 	public function close()
 	{
 		$handle = $this->getImageParam("handle");
@@ -332,6 +442,11 @@ class Amslib_Image2
 		return true;
 	}
 	
+	/**
+	 * 	method:	maxdim
+	 *
+	 * 	todo: write documentation
+	 */
 	public function maxdim($width,$height)
 	{
 		if(!$this->getImageParam("handle")){
@@ -387,6 +502,11 @@ class Amslib_Image2
 		return $this->resize($d["width"],$d["height"]);
 	}
 	
+	/**
+	 * 	method:	crop
+	 *
+	 * 	todo: write documentation
+	 */
 	public function crop($x1,$y1,$x2,$y2)
 	{
 		$handle = $this->getImageParam("handle");
@@ -432,7 +552,12 @@ class Amslib_Image2
 		
 		return true;
 	}
-	
+
+	/**
+	 * 	method:	resize
+	 *
+	 * 	todo: write documentation
+	 */
 	public function resize($width,$height)
 	{
 		$handle = $this->getImageParam("handle");
@@ -486,6 +611,11 @@ class Amslib_Image2
 		return true;
 	}
 	
+	/**
+	 * 	method:	sharpen
+	 *
+	 * 	todo: write documentation
+	 */
 	public function sharpen()
 	{
 		$handle = $this->getImageParam("handle");
@@ -505,6 +635,11 @@ class Amslib_Image2
 		imageconvolution($handle, $matrix, $divisor, $offset);
 	}
 	
+	/**
+	 * 	method:	readCache
+	 *
+	 * 	todo: write documentation
+	 */
 	public function readCache($filename=NULL,$returnData=false)
 	{
 		//	If the filename was not given, attempt to get it from the cache 
@@ -548,6 +683,11 @@ class Amslib_Image2
 		return $this->setError(self::ERROR_CACHE_NOT_FOUND);
 	}
 	
+	/**
+	 * 	method:	writeCacheFromFile
+	 *
+	 * 	todo: write documentation
+	 */
 	public function writeCacheFromFile($filename)
 	{
 		$filename	= Amslib_Website::abs($filename);
@@ -556,6 +696,11 @@ class Amslib_Image2
 		return copy($filename,$cache) && chmod($cache,0755);
 	}
 	
+	/**
+	 * 	method:	writeCacheFromImage
+	 *
+	 * 	todo: write documentation
+	 */
 	public function writeCacheFromImage()
 	{
 		$handle		= $this->getImageParam("handle");
@@ -580,6 +725,11 @@ class Amslib_Image2
 		return file_exists($cache) && chmod($cache,0755);
 	}
 	
+	/**
+	 * 	method:	imageCopyResampleBicubic
+	 *
+	 * 	todo: write documentation
+	 */
 	public function imageCopyResampleBicubic($dst_img, $src_img, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h)
 	{
 		$scaleX = ($src_w - 1) / $dst_w;

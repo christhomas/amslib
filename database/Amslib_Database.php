@@ -88,28 +88,53 @@ class Amslib_Database
 	 */
 	protected $connection = false;
 
+	/**
+	 * 	method:	setLastQuery
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function setLastQuery($query)
 	{
 		$this->lastQuery[] = $query;
 		if(count($this->lastQuery) > 100) array_shift($this->lastQuery);
 	}
 
+	/**
+	 * 	method:	getLastTransactionId
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getLastTransactionId()
 	{
 		return $this->lastInsertId;
 	}
 
+	/**
+	 * 	method:	getLastResult
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getLastResult()
 	{
 		return $this->lastResult;
 	}
 
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		$this->seq		=	0;
 		$this->table	=	array();
 	}
 
+	/**
+	 * 	method:	setFetchMethod
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setFetchMethod($method)
 	{
 		if(function_exists($method)){
@@ -117,16 +142,31 @@ class Amslib_Database
 		}
 	}
 
+	/**
+	 * 	method:	getConnectionDetails
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getConnectionDetails()
 	{
 		die("(".basename(__FILE__)." / FATAL ERROR): getConnectionDetails was not defined in your database object, so connection attempt will fail");
 	}
 
+	/**
+	 * 	method:	setDebug
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setDebug($state)
 	{
 		$this->debug = $state;
 	}
 
+	/**
+	 * 	method:	setErrorState
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setErrorState($state)
 	{
 		$e = $this->errorState;
@@ -136,6 +176,11 @@ class Amslib_Database
 		return $e;
 	}
 	
+	/**
+	 * 	method:	setDBErrors
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setDBErrors($data,$error=NULL,$errno=NULL,$insert_id=NULL)
 	{
 		$this->errors[] = array(
@@ -153,26 +198,51 @@ class Amslib_Database
 		}
 	}
 	
+	/**
+	 * 	method:	getDBErrors
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getDBErrors()
 	{
 		return $this->errors;
 	}
 
+	/**
+	 * 	method:	getLastQuery
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getLastQuery()
 	{
 		return $this->lastQuery;
 	}
 
+	/**
+	 * 	method:	getSearchResultHandle
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getSearchResultHandle()
 	{
 		return $this->selectResult;
 	}
 
+	/**
+	 * 	method:	storeSearchHandle
+	 *
+	 * 	todo: write documentation
+	 */
 	public function storeSearchHandle()
 	{
 		$this->storeSearchResult = $this->selectResult;
 	}
 
+	/**
+	 * 	method:	restoreSearchHandle
+	 *
+	 * 	todo: write documentation
+	 */
 	public function restoreSearchHandle()
 	{
 		if($this->storeSearchResult) $this->selectResult = $this->storeSearchResult;
@@ -235,11 +305,21 @@ class Amslib_Database
 		return $this->connection;
 	}
 
+	/**
+	 * 	method:	setConnection
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setConnection($connection)
 	{
 		$this->connection = $connection;
 	}
 
+	/**
+	 * 	method:	copyConnection
+	 *
+	 * 	todo: write documentation
+	 */
 	public function copyConnection($database)
 	{
 		if($database && method_exists($database,"getConnection")){

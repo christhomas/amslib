@@ -23,7 +23,7 @@
 /**
  * 	class:	Amslib_Testing_Translator_XML
  *
- *	group:	translator
+ *	group:	testing
  *
  *	file:	Amslib_Testing_Translator_XML.php
  *
@@ -36,6 +36,11 @@
  */
 class Amslib_Testing_Translator_XML extends Amslib_Translator_XML
 {
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		parent::__construct();

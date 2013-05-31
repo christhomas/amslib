@@ -36,6 +36,11 @@ class Amslib_Resource
 	static protected $stylesheet = array();
 	static protected $javascript = array();
 
+	/**
+	 * 	method:	addStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function addStylesheet($id,$file,$conditional=NULL,$media=NULL)
 	{
 		if($id && $file){
@@ -48,16 +53,31 @@ class Amslib_Resource
 		}
 	}
 
+	/**
+	 * 	method:	getStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getStylesheet()
 	{
 		return implode("\n",self::$stylesheet);
 	}
 
+	/**
+	 * 	method:	removeStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function removeStylesheet($id)
 	{
 		unset(self::$stylesheet[$id]);
 	}
 
+	/**
+	 * 	method:	addJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function addJavascript($id,$file,$conditional=NULL)
 	{
 		if($id && $file){
@@ -69,21 +89,41 @@ class Amslib_Resource
 		}
 	}
 
+	/**
+	 * 	method:	getJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getJavascript()
 	{
 		return implode("\n",self::$javascript);
 	}
 
+	/**
+	 * 	method:	removeJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function removeJavascript($id)
 	{
 		unset(self::$javascript[$id]);
 	}
 
+	/**
+	 * 	method:	addFont
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function addFont($id,$font)
 	{
 		self::addStylesheet($id,"http://fonts.googleapis.com/css?$font");
 	}
 
+	/**
+	 * 	method:	removeFont
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function removeFont($id)
 	{
 		self::removeStylesheet($id);

@@ -40,6 +40,11 @@ class Amslib_File
 {
 	static protected $docroot = false;
 
+	/**
+	 * 	method:	documentRoot
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function documentRoot($docroot=NULL)
 	{
 		//	Manually override the document root
@@ -76,6 +81,11 @@ class Amslib_File
 		return self::$docroot;
 	}
 
+	/**
+	 * 	method:	removeWindowsDrive
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function removeWindowsDrive($location)
 	{
 		if(strpos($location,":") !== false && isset($_SERVER["WINDIR"])){
@@ -87,6 +97,11 @@ class Amslib_File
 		return $location;
 	}
 
+	/**
+	 * 	method:	dirname
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function dirname($location)
 	{
 		$dirname = dirname($location);
@@ -94,6 +109,11 @@ class Amslib_File
 		return (strpos($dirname,":") !== false) ? self::removeWindowsDrive($dirname) : $dirname;
 	}
 
+	/**
+	 * 	method:	absolute
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function absolute($path)
 	{
 		$root	=	self::documentRoot();
@@ -103,6 +123,11 @@ class Amslib_File
 		return self::reduceSlashes("$root/$rel");
 	}
 
+	/**
+	 * 	method:	relative
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function relative($path)
 	{
 		$root	=	self::documentRoot();
@@ -112,6 +137,8 @@ class Amslib_File
 	}
 	
 	/**
+	 * method: mkdir
+	 * 
 	 * A function to make directories but can handle creating all the parent directories
 	 * this avoids problems with mkdir+recursive which lots of times just fails without reason
 	 * 
@@ -138,17 +165,32 @@ class Amslib_File
 	 * 
 	 * 
 	 */
+	/**
+	 * 	method:	rdelete
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function rdelete($location)
 	{
 		//	NOTE:	not implemented yet because I changed my mind on it's creation, it seems useful, but SOOOOOOOO dangerous..
 		//			I'm not sure I should do this....it could nuke your filesystem and make your system unbootable...	
 	}
 	
+	/**
+	 * 	method:	getFileExtension
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getFileExtension($filename)
 	{
 		return strtolower(end(explode(".",$filename)));
 	}
 
+	/**
+	 * 	method:	find
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function find($filename,$includeFilename=false)
 	{
 		if(@file_exists($filename)){
@@ -167,6 +209,11 @@ class Amslib_File
 		return false;
 	}
 
+	/**
+	 * 	method:	removeTrailingSlash
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function removeTrailingSlash($path)
 	{
 		//	Make sure the path doesnt end with a trailing slash
@@ -177,11 +224,21 @@ class Amslib_File
 		return $path;
 	}
 
+	/**
+	 * 	method:	reduceSlashes
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function reduceSlashes($string)
 	{
 		return preg_replace('#//+#','/',$string);
 	}
 
+	/**
+	 * 	method:	getList
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getList($dir,$recurse=false)
 	{
 		$list = array();
@@ -236,6 +293,11 @@ class Amslib_File
 		return $list;
 	}
 
+	/**
+	 * 	method:	glob
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function glob($path,$relative=false)
 	{
 		$list = glob(self::absolute($path));
@@ -247,6 +309,11 @@ class Amslib_File
 		return $list;
 	}
 
+	/**
+	 * 	method:	saveUploadedFile
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function saveUploadedFile($src_filename,$directory,&$dst_filename)
 	{
 		$error = false;

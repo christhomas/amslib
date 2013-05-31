@@ -34,11 +34,21 @@
  */
 class Amslib_FirePHP extends FirePHP
 {
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		parent::__construct();
 	}
 
+	/**
+	 * 	method:	backtrace
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function backtrace($levels=false)
 	{
 		$e = new Exception();
@@ -50,6 +60,11 @@ class Amslib_FirePHP extends FirePHP
 		self::output("backtrace",$trace);
 	}
 
+	/**
+	 * 	method:	output
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function output($name,$data){
 		$a=func_get_args();
 
@@ -61,6 +76,11 @@ class Amslib_FirePHP extends FirePHP
 		}
 	}
 
+	/**
+	 * 	method:	init
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function init()
 	{
 		parent::init();

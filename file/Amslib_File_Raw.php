@@ -42,28 +42,53 @@ class Amslib_File_Raw
 	protected $output;
 	protected $chunkLength;
 	
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		$this->input		=	fopen("php://input","rb");
 		$this->chunkLength	=	8192;	
 	}
 	
+	/**
+	 * 	method:	isOpen
+	 *
+	 * 	todo: write documentation
+	 */
 	public function isOpen()
 	{
 		return $this->input ? true : false;
 	}
 	
+	/**
+	 * 	method:	hasData
+	 *
+	 * 	todo: write documentation
+	 */
 	public function hasData()
 	{
 		//	NOTE: not sure how to proceed with this yet.  perhaps I have to read the headers
 		return true;	
 	}
 	
+	/**
+	 * 	method:	getFilename
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getFilename()
 	{
 		//	TODO: need to extract it from the raw data like in mp3?
 	}
 	
+	/**
+	 * 	method:	save
+	 *
+	 * 	todo: write documentation
+	 */
 	public function save($filename)
 	{
 		$this->output = fopen($filename,"w+b");

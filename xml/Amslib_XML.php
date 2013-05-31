@@ -41,6 +41,11 @@ class Amslib_XML
 	protected $documentLoaded;
 	protected $filename;
 
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		$this->domdoc			=	false;
@@ -48,6 +53,11 @@ class Amslib_XML
 		$this->documentLoaded	=	false;
 	}
 
+	/**
+	 * 	method:	readURL
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function readURL($url)
 	{
 		if($handle = @fopen($url,"r")){
@@ -63,11 +73,21 @@ class Amslib_XML
 		return false;
 	}
 
+	/**
+	 * 	method:	getRawData
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getRawData()
 	{
 		return $this->rawData;
 	}
 
+	/**
+	 * 	method:	openURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function openURL($url)
 	{
 		$this->readURL($url);
@@ -75,6 +95,11 @@ class Amslib_XML
 		//	TODO: now do something with the data you read
 	}
 
+	/**
+	 * 	method:	openFile
+	 *
+	 * 	todo: write documentation
+	 */
 	public function openFile($filename)
 	{
 		//	NOTE:	Added a call to Amslib_Website::abs to fix finding the file, because in some cases,
@@ -93,6 +118,11 @@ class Amslib_XML
 		return false;
 	}
 
+	/**
+	 * 	method:	var_dump
+	 *
+	 * 	todo: write documentation
+	 */
 	public function var_dump()
 	{
 		$data = array();
@@ -113,6 +143,11 @@ class Amslib_XML
 		return __METHOD__.Amslib::var_dump($data,true);
 	}
 
+	/**
+	 * 	method:	query
+	 *
+	 * 	todo: write documentation
+	 */
 	public function query($query)
 	{
 		if(!$this->xpath) return;
@@ -122,6 +157,11 @@ class Amslib_XML
 		return $this->queryResults;
 	}
 
+	/**
+	 * 	method:	sort
+	 *
+	 * 	todo: write documentation
+	 */
 	public function sort($method,$nodeName,$order="asc")
 	{
 		if(!$this->queryResults) return -1;
@@ -136,11 +176,21 @@ class Amslib_XML
 		if(count($nodes)) $this->queryResults = $nodes;
 	}
 
+	/**
+	 * 	method:	limit
+	 *
+	 * 	todo: write documentation
+	 */
 	public function limit($count=NULL)
 	{
 		return $count === NULL ? $this->queryResults : array_slice($this->queryResults,0,$count);
 	}
 
+	/**
+	 * 	method:	length
+	 *
+	 * 	todo: write documentation
+	 */
 	public function length()
 	{
 		if(!$this->queryResults) return -1;
@@ -148,6 +198,11 @@ class Amslib_XML
 		return $this->queryResults->length;
 	}
 
+	/**
+	 * 	method:	getArray
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getArray($node=false,$attributes=false)
 	{
 		if(!$node){

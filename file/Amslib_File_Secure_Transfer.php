@@ -41,6 +41,11 @@ class Amslib_File_Secure_Transfer
 	static protected $check		=	false;
 	static protected $password	=	false;
 	
+	/**
+	 * 	method:	getCheck
+	 *
+	 * 	todo: write documentation
+	 */
 	static protected function getCheck()
 	{
 		if(self::$check) return self::$check;
@@ -53,6 +58,11 @@ class Amslib_File_Secure_Transfer
 				"pv5987nournawocfrt30v424b1eqnowu";
 	}
 	
+	/**
+	 * 	method:	getPassword
+	 *
+	 * 	todo: write documentation
+	 */
 	static protected function getPassword()
 	{
 		if(self::$password) return self::$password;
@@ -65,16 +75,31 @@ class Amslib_File_Secure_Transfer
 				"fuhasdfrgibqwdc84y2bf98uv23bf2fu";
 	}
 
+	/**
+	 * 	method:	setCheck
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setCheck($value)
 	{
 		self::$check = sha1($value);
 	}
 
+	/**
+	 * 	method:	setPassword
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setPassword($value)
 	{
 		self::$password = sha1($value);
 	}
 
+	/**
+	 * 	method:	message
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function message($status,$message="",$payload="")
 	{
 		die(json_encode(array(
@@ -84,6 +109,11 @@ class Amslib_File_Secure_Transfer
 		)));
 	}
 
+	/**
+	 * 	method:	encrypt
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function encrypt($payload,$post_url)
 	{
 		$data = array(
@@ -98,6 +128,11 @@ class Amslib_File_Secure_Transfer
 		return json_decode(file_get_contents($remote_url),true);
 	}
 
+	/**
+	 * 	method:	decrypt
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function decrypt()
 	{
 		$base64		=	Amslib::getGET("encrypted");

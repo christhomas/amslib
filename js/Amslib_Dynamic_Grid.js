@@ -40,6 +40,11 @@ var Amslib_Dynamic_Grid = my.Amslib_Dynamic_Grid = my.Class(
 	list:	false,
 	
 	STATIC: {
+		/**
+		 * 	method:	autoload
+		 *
+		 * 	todo: write documentation
+		 */
 		autoload: function(){
 			new Amslib_Dynamic_Grid($(Amslib_Dynamic_Grid.options.parent+".amslib_autoload"));
 		},
@@ -50,6 +55,11 @@ var Amslib_Dynamic_Grid = my.Amslib_Dynamic_Grid = my.Class(
 		}
 	},
 	
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
 	constructor: function(parent)
 	{
 		this.list	=	$(Amslib_Dynamic_Grid.options.child,parent);
@@ -59,6 +69,11 @@ var Amslib_Dynamic_Grid = my.Amslib_Dynamic_Grid = my.Class(
 		$(document.onresize ? document : window).bind("resize",$.proxy(this,"resize"));
 	},
 	
+	/**
+	 * 	method:	resize
+	 *
+	 * 	todo: write documentation
+	 */
 	resize: function()
 	{
 		if(this.list.length == 0) return;

@@ -38,6 +38,11 @@
 var Amslib_Accordion = my.Amslib_Accordion = my.Class(
 {
 	STATIC: {
+		/**
+		 * 	method:	autoload
+		 *
+		 * 	todo: write documentation
+		 */
 		autoload: function(){
 			$(Amslib_Accordion.options.src).each(function(){
 				new Amslib_Accordion($(this));
@@ -52,6 +57,11 @@ var Amslib_Accordion = my.Amslib_Accordion = my.Class(
 		}
 	},
 	
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
 	constructor: function(parent)
 	{
 		var p = $(parent);

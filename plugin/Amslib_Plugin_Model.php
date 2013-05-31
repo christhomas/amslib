@@ -47,6 +47,11 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	protected $enableDebug;
 	protected $enableDebugLog;
 
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		parent::__construct(false);
@@ -55,6 +60,11 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		$this->api = false;
 	}
 	
+	/**
+	 * 	method:	isInitialised
+	 *
+	 * 	todo: write documentation
+	 */
 	public function isInitialised()
 	{
 		//	FIXME: this is overly simplistic, but quite realiable.
@@ -62,6 +72,11 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		return $this->api ? true : false;
 	}
 
+	/**
+	 * 	method:	initialiseObject
+	 *
+	 * 	todo: write documentation
+	 */
 	public function initialiseObject($api)
 	{
 		$this->api = $api;
@@ -74,6 +89,11 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		$this->enableDebugLog	=	Amslib::getGET("debug_database_log",$ddl);
 	}
 	
+	/**
+	 * 	method:	selectValue
+	 *
+	 * 	todo: write documentation
+	 */
 	public function selectValue($field,$query,$numResults=0,$optimise=false)
 	{
 		if($this->enableDebug){
@@ -87,6 +107,11 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		return parent::selectValue($field,$query,$numResults,$optimise);
 	}
 	
+	/**
+	 * 	method:	select
+	 *
+	 * 	todo: write documentation
+	 */
 	public function select($query,$numResults=0,$optimise=false)
 	{
 		if($this->enableDebug){
@@ -100,6 +125,11 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		return parent::select($query,$numResults,$optimise);
 	}
 	
+	/**
+	 * 	method:	select2
+	 *
+	 * 	todo: write documentation
+	 */
 	public function select2($query,$numResults=0,$optimise=false)
 	{
 		if($this->enableDebug){
@@ -113,6 +143,11 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		return parent::select2($query,$numResults,$optimise);
 	}
 	
+	/**
+	 * 	method:	insert
+	 *
+	 * 	todo: write documentation
+	 */
 	public function insert($query)
 	{
 		if($this->enableDebug){
@@ -122,6 +157,11 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		return parent::insert($query);
 	}
 	
+	/**
+	 * 	method:	update
+	 *
+	 * 	todo: write documentation
+	 */
 	public function update($query,$allow_zero=true)
 	{
 		if($this->enableDebug){
@@ -131,6 +171,11 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		return parent::update($query,$allow_zero);
 	}
 	
+	/**
+	 * 	method:	delete
+	 *
+	 * 	todo: write documentation
+	 */
 	public function delete($query)
 	{
 		if($this->enableDebug){

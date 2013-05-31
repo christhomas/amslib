@@ -49,6 +49,11 @@ class Amslib_Form_Profile
 	//	Here we can delegate how a profile is stored to another function/method who can create it on the fly
 	static protected $delegate	=	false;
 	
+	/**
+	 * 	method:	initialise
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function initialise()
 	{
 		if(!isset($_SESSION[self::KEY])) $_SESSION[self::KEY] = array();
@@ -56,6 +61,11 @@ class Amslib_Form_Profile
 		self::$profiles = &$_SESSION[self::KEY];
 	}
 	
+	/**
+	 * 	method:	setDelegate
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setDelegate($method,$object=NULL)
 	{
 		if($object && $method && method_exists($object,$method)){
@@ -66,6 +76,11 @@ class Amslib_Form_Profile
 	}
 	
 	//	Assign a new profile
+	/**
+	 * 	method:	setProfile
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setProfile($name,$data)
 	{
 		if(!is_string($name)) return false;
@@ -78,6 +93,11 @@ class Amslib_Form_Profile
 	}
 	
 	//	Get a profile from the cache or the delegate
+	/**
+	 * 	method:	getProfile
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getProfile($name)
 	{
 		if(!is_string($name)) return array();
@@ -92,6 +112,11 @@ class Amslib_Form_Profile
 	}
 	
 	//	Delete a profile
+	/**
+	 * 	method:	deleteProfile
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function deleteProfile($name)
 	{
 		if(!is_string($name)) return;
@@ -99,6 +124,11 @@ class Amslib_Form_Profile
 		unset(self::$profiles[$name]);
 	}
 	
+	/**
+	 * 	method:	resetProfile
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function resetProfile($name)
 	{
 		if(!is_string($name)) return;
@@ -110,6 +140,11 @@ class Amslib_Form_Profile
 		return $d;
 	}
 	
+	/**
+	 * 	method:	getSuccessURL
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getSuccessURL($name,$default="")
 	{
 		if(!is_string($name)) return;
@@ -119,6 +154,11 @@ class Amslib_Form_Profile
 			:	$default;
 	}
 	
+	/**
+	 * 	method:	getFailureURL
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getFailureURL($name,$default="")
 	{
 		if(!is_string($name)) return;
@@ -128,6 +168,11 @@ class Amslib_Form_Profile
 			:	$default;
 	}
 	
+	/**
+	 * 	method:	getAjaxState
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getAjaxState($name)
 	{
 		return is_string($name) && isset(self::$profiles[$name][self::AJAX])
@@ -136,6 +181,11 @@ class Amslib_Form_Profile
 	}
 	
 	//	Store a piece of data inside the profile, ready to pickup the next time
+	/**
+	 * 	method:	setData
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setData($name,$key,$value)
 	{
 		if(is_string($name) && isset(self::$profiles[$name])){
@@ -143,6 +193,11 @@ class Amslib_Form_Profile
 		}
 	}
 	
+	/**
+	 * 	method:	getData
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getData($name)
 	{ 
 		if(!is_string($name)) return array();
@@ -157,6 +212,11 @@ class Amslib_Form_Profile
 	}
 	
 	//	Retrieve a piece of data that was stored inside the profile
+	/**
+	 * 	method:	getDataElement
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getDataElement($name,$key,$default=false)
 	{
 		if(is_string($name) && isset(self::$profiles[$name][$key])){

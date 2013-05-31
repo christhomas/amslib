@@ -39,6 +39,11 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	protected $store;
 	protected $permittedLanguage;	
 	
+	/**
+	 * 	method:	sanitise
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function sanitise($langCode)
 	{
 		if(in_array($langCode,$this->permittedLanguage)){ 
@@ -50,18 +55,38 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		return current($this->permittedLanguage);
 	}
 	
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		$this->reset();
 	}
 	
 	//	Set location in the future could mean "set a default set of array information"
+	/**
+	 * 	method:	setLocation
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setLocation($location){}
 	
 	//	NOTE: load has no functionality, since it has nothing to load
+	/**
+	 * 	method:	load
+	 *
+	 * 	todo: write documentation
+	 */
 	public function load(){}
 
 	//	Calling reset will reset the keystore to empty, read to accept translations
+	/**
+	 * 	method:	reset
+	 *
+	 * 	todo: write documentation
+	 */
 	public function reset()
 	{
 		$this->store				=	array();
@@ -70,6 +95,11 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		$this->defaultKey			=	0;
 	}
 	
+	/**
+	 * 	method:	addLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	public function addLanguage($langCode)
 	{
 		if(is_string($langCode)){
@@ -83,26 +113,51 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		}
 	}
 	
+	/**
+	 * 	method:	setLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setLanguage($langCode)
 	{
 		$this->language = $this->sanitise($langCode);
 	}
 	
+	/**
+	 * 	method:	getLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getLanguage()
 	{
 		return $this->language;
 	}
 	
+	/**
+	 * 	method:	getAllLanguages
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getAllLanguages()
 	{
 		return $this->permittedLanguage;
 	}
 	
+	/**
+	 * 	method:	isLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	public function isLanguage($langCode)
 	{
 		return ($langCode == $this->language);
 	}
 	
+	/**
+	 * 	method:	translateExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function translateExtended($n,$i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
@@ -112,6 +167,11 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 			: $n;
 	}
 	
+	/**
+	 * 	method:	learnExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function learnExtended($n,$i,$v,$l=NULL)
 	{
 		if(!is_int($i)) return false;
@@ -123,6 +183,11 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		return true;
 	}
 	
+	/**
+	 * 	method:	forgetExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function forgetExtended($n,$i,$l=NULL)
 	{
 		if(!is_int($i)) return false;
@@ -134,12 +199,22 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		return true;
 	}
 	
+	/**
+	 * 	method:	updateKeyExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function updateKeyExtended($n,$i,$nn,$l=NULL)
 	{
 		$this->learnExtended($nn,$i,$this->translateExtended($n,$i,$l),$l);
 		$this->forgetExtended($n,$i,$l);
 	}
 	
+	/**
+	 * 	method:	searchKeyExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function searchKeyExtended($n,$i,$s=false,$l=NULL)
 	{
 		//	TODO: not implemented yet
@@ -147,6 +222,11 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		return array();		
 	}
 	
+	/**
+	 * 	method:	searchValueExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function searchValueExtended($v,$i,$s=false,$l=NULL)
 	{
 		//	TODO: not implemented yet
@@ -154,6 +234,11 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		return array();
 	}
 	
+	/**
+	 * 	method:	getKeyListExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getKeyListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
@@ -161,6 +246,11 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		return array_keys($this->store[$l][$i]);
 	}
 	
+	/**
+	 * 	method:	getValueListExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getValueListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
@@ -168,6 +258,11 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		return array_values($this->store[$l][$i]);
 	}
 	
+	/**
+	 * 	method:	getListExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;

@@ -39,6 +39,11 @@ class Amslib_Router_Source_XML
 	protected $route ;
 	protected $import;
 
+	/**
+	 * 	method:	toArray
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function toArray($node,$recursive=true)
 	{
 		if(!$node || $node->count() == 0) return false;
@@ -61,6 +66,11 @@ class Amslib_Router_Source_XML
 		return $data;
 	}
 
+	/**
+	 * 	method:	processRoute
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function processRoute($node)
 	{
 		$path	=	$this->toArray($node);
@@ -117,6 +127,11 @@ class Amslib_Router_Source_XML
 		return $data;
 	}
 
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct($source)
 	{
 		try{
@@ -138,6 +153,11 @@ class Amslib_Router_Source_XML
 		$this->import	=	false;
 	}
 
+	/**
+	 * 	method:	getRoutes
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getRoutes()
 	{
 		if(!$this->route) return false;
@@ -149,6 +169,11 @@ class Amslib_Router_Source_XML
 		return $list;
 	}
 	
+	/**
+	 * 	method:	getImports
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getImports()
 	{
 		if(!$this->import) return false;

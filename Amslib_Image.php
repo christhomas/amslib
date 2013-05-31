@@ -51,6 +51,11 @@ class Amslib_Image
 	const ERROR_WRITE_FILE_EXIST = "file destination exists, delete original file first";
 	const ERROR_CACHE_NOT_FOUND = "The image could not be found in the cache";
 
+	/**
+	 * 	method:	setError
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function setError($error)
 	{
 		if(is_string($error)){
@@ -58,6 +63,11 @@ class Amslib_Image
 		}
 	}
 
+	/**
+	 * 	method:	setMIMEType
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function setMIMEType($filename)
 	{
 		$extension = end(explode(".",$filename));
@@ -72,6 +82,11 @@ class Amslib_Image
 		return false;
 	}
 
+	/**
+	 * 	method:	testWriteLocation
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function testWriteLocation($destination,$overwrite=false)
 	{
 		$directory = dirname($destination);
@@ -89,22 +104,42 @@ class Amslib_Image
 		return $destination;
 	}
 
+	/**
+	 * 	method:	scaleDimension
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function scaleDimension($d1,$d2,$d3)
 	{
 		return $d3 * ($d1 / $d2);
 	}
 
+	/**
+	 * 	method:	getCacheFilename
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getCacheFilename($filename)
 	{
 		return str_replace("//","/",$this->cache."/".$filename);
 	}
 
+	/**
+	 * 	method:	validExtension
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function validExtension($filename)
 	{
 		$extension = strtolower(end(explode(".",$filename)));
 		return (in_array($extension,$this->allowedTypes)) ? $extension : false;
 	}
 
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		if(!function_exists('imagecreatetruecolor')) {
@@ -116,11 +151,21 @@ class Amslib_Image
 		$this->allowedTypes	=	array("jpeg","jpg","gif","png");
 	}
 
+	/**
+	 * 	method:	enableCache
+	 *
+	 * 	todo: write documentation
+	 */
 	public function enableCache($location)
 	{
 		$this->cache = Amslib_File::absolute($location);
 	}
 
+	/**
+	 * 	method:	clearCache
+	 *
+	 * 	todo: write documentation
+	 */
 	public function clearCache()
 	{
 		$files = glob("$location/*");
@@ -133,6 +178,11 @@ class Amslib_Image
 		}
 	}
 
+	/**
+	 * 	method:	getFromCache
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getFromCache($parameters)
 	{
 		if(is_string($parameters)) $parameters = array("image"=>$parameters);
@@ -158,6 +208,11 @@ class Amslib_Image
 		return false;
 	}
 
+	/**
+	 * 	method:	create
+	 *
+	 * 	todo: write documentation
+	 */
 	public function create($parameters,$overwrite=false)
 	{
 		//	If a filename is passed as a string, make it an array, just to keep the logic simple
@@ -218,6 +273,11 @@ class Amslib_Image
 		return false;
 	}
 
+	/**
+	 * 	method:	maxdim
+	 *
+	 * 	todo: write documentation
+	 */
 	public function maxdim($filename,$width,$height)
 	{
 		$d = $this->getDimensions($filename);
@@ -239,6 +299,11 @@ class Amslib_Image
 		return false;
 	}
 
+	/**
+	 * 	method:	resize
+	 *
+	 * 	todo: write documentation
+	 */
 	public function resize($filename,$width,$height)
 	{
 		if(!isset($this->images[$filename])) return false;
@@ -273,11 +338,21 @@ class Amslib_Image
 		return $filename;
 	}
 
+	/**
+	 * 	method:	cropArea
+	 *
+	 * 	todo: write documentation
+	 */
 	public function cropArea($filename,$x,$y,$width,$height)
 	{
 		return $this->crop($filename,$x,$y,0,0,$width,$height,$width,$height);
 	}
 
+	/**
+	 * 	method:	crop
+	 *
+	 * 	todo: write documentation
+	 */
 	public function crop($filename,$sx,$sy,$dx,$dy,$sw,$sh,$dw,$dh)
 	{
 		if(!isset($this->images[$filename])) return false;
@@ -316,6 +391,11 @@ class Amslib_Image
 		return false;
 	}
 
+	/**
+	 * 	method:	resizeToWidth
+	 *
+	 * 	todo: write documentation
+	 */
 	public function resizeToWidth($filename,$width)
 	{
 		if(!isset($this->images[$filename])) return false;
@@ -326,6 +406,11 @@ class Amslib_Image
 		return $this->resize($filename,$width,$height);
 	}
 
+	/**
+	 * 	method:	resizeToHeight
+	 *
+	 * 	todo: write documentation
+	 */
 	public function resizeToHeight($filename,$height)
 	{
 		if(!isset($this->images[$filename])) return false;
@@ -336,6 +421,11 @@ class Amslib_Image
 		return $this->resize($filename,$width,$height);
 	}
 
+	/**
+	 * 	method:	scale
+	 *
+	 * 	todo: write documentation
+	 */
 	public function scale($filename,$scale)
 	{
 		if(!isset($this->images[$filename])) return false;
@@ -348,6 +438,11 @@ class Amslib_Image
 		return $this->resize($filename,$width,$height);
 	}
 
+	/**
+	 * 	method:	getDimensions
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getDimensions($filename)
 	{
 		if(!isset($this->images[$filename])) return false;
@@ -358,6 +453,11 @@ class Amslib_Image
 		);
 	}
 
+	/**
+	 * 	method:	cache
+	 *
+	 * 	todo: write documentation
+	 */
 	public function cache($filename)
 	{
 		if(!$this->cache)						return false;
@@ -390,6 +490,11 @@ class Amslib_Image
 		return false;
 	}
 
+	/**
+	 * 	method:	write
+	 *
+	 * 	todo: write documentation
+	 */
 	public function write($filename)
 	{
 		if(!isset($this->images[$filename])) return false;
@@ -432,6 +537,11 @@ class Amslib_Image
 		return false;
 	}
 
+	/**
+	 * 	method:	writeToDisk
+	 *
+	 * 	todo: write documentation
+	 */
 	public function writeToDisk($filename,$destination,$overwrite=false)
 	{
 		if(!isset($this->images[$filename])) return false;
@@ -480,6 +590,11 @@ class Amslib_Image
 		return false;
 	}
 
+	/**
+	 * 	method:	close
+	 *
+	 * 	todo: write documentation
+	 */
 	public function close($filename=NULL)
 	{
 		if(isset($this->images[$filename])){
@@ -491,6 +606,11 @@ class Amslib_Image
 		}
 	}
 
+	/**
+	 * 	method:	getMIMEType
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getMIMEType($filename)
 	{
 		if(!isset($this->images[$filename])) return false;
@@ -498,6 +618,11 @@ class Amslib_Image
 		return $this->images[$filename]["mime"];
 	}
 
+	/**
+	 * 	method:	getInstance
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function &getInstance()
 	{
 		static $instance = NULL;

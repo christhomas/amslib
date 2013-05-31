@@ -98,6 +98,11 @@ class Amslib_Validator
 
 	//	NOTE: we ignore the name, it's not used here
 	//	NOTE: I hate this function :( it's so "unstructured"
+	/**
+	 * 	method:	__require_one
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function __require_one($name,$value,$required,$options)
 	{
 		unset($options["__vobject"]);
@@ -125,6 +130,11 @@ class Amslib_Validator
 		return false;
 	}
 
+	/**
+	 * 	method:	__array
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function __array($name,$value,$required,$options)
 	{
 		if(!isset($options["type"])) return "ARRAY_REQUIRE_TYPE_PARAM";
@@ -144,6 +154,11 @@ class Amslib_Validator
 		return true;
 	}
 
+	/**
+	 * 	method:	__isbn
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function __isbn($name,$value,$required,$options)
 	{
 		//	strip out some characters we know might be present, but have to be removed
@@ -162,6 +177,11 @@ class Amslib_Validator
 		return true;
 	}
 
+	/**
+	 * 	method:	__isbn10
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function __isbn10($name,$value,$required,$options)
 	{
 		//	Disclaimer, I took this code from the isbn wikipedia article
@@ -176,6 +196,11 @@ class Amslib_Validator
     	return true;
 	}
 
+	/**
+	 * 	method:	__isbn13
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function __isbn13($name,$value,$required,$options)
 	{
 		//	Disclaimer, I took this code from the isbn wikipedia article
@@ -316,6 +341,11 @@ class Amslib_Validator
 		return true;
 	}
 
+	/**
+	 * 	method:	__password
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function __password($name,$value,$required,$options)
 	{
 		if(isset($options["p1"]) && isset($options["p2"])){
@@ -867,6 +897,11 @@ class Amslib_Validator
 		return false;
 	}
 
+	/**
+	 * 	method:	__array_number
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function __array_number($name,$value,$required,$options)
 	{
 		$error = !is_array($value) || empty($value);
@@ -887,6 +922,11 @@ class Amslib_Validator
 		return "ARRAY_INVALID";
 	}
 
+	/**
+	 * 	method:	__array_text
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function __array_text($name,$value,$required,$options)
 	{
 		$error = !is_array($value) || empty($value);
@@ -996,6 +1036,11 @@ class Amslib_Validator
 		return "FILE_NOT_FOUND[{$value["error"]}]";
 	}
 
+	/**
+	 * 	method:	__file_exists
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function __file_exists($name,$value,$required,$options)
 	{
 		if($options["absolute"] == true) $value = Amslib_File::absolute($value);
@@ -1013,11 +1058,21 @@ class Amslib_Validator
 	/**
 	 * For description: read the member variables related to this method, they explain all
 	 */
+	/**
+	 * 	method:	__setRequiredRules
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function __setRequiredRules($state)
 	{
 		$this->__hasRequiredRules = $state;
 	}
 
+	/**
+	 * 	method:	__checkRequiredRules
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function __checkRequiredRules()
 	{
 		$areRequiredRules = false;
@@ -1079,6 +1134,11 @@ class Amslib_Validator
 		$this->register("array_string",		array($this,"__array_text"));
 	}
 
+	/**
+	 * 	method:	setValid
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setValid($name,$value)
 	{
 		$this->__validData[$name] = $value;
@@ -1122,6 +1182,11 @@ class Amslib_Validator
 		if($required === true) $this->__setRequiredRules(true);
 	}
 
+	/**
+	 * 	method:	addRules
+	 *
+	 * 	todo: write documentation
+	 */
 	public function addRules($rules)
 	{
 		foreach(Amslib_Array::valid($rules) as $name=>$r){
@@ -1217,6 +1282,11 @@ class Amslib_Validator
 		return $this->getStatus();
 	}
 
+	/**
+	 * 	method:	test
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function test($value,$type,$required,$options)
 	{
 		$v = new self(array("test"=>$value));
@@ -1347,6 +1417,11 @@ class Amslib_Validator
 		return $this->__hasExecuted;
 	}
 
+	/**
+	 * 	method:	runTests
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function runTests()
 	{
 		$tests = array(

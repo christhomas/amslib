@@ -43,6 +43,11 @@ class Amslib_Plugin_Manager
 	static protected $replace		=	array();
 	static protected $prevent		=	array();
 
+	/**
+	 * 	method:	findPlugin
+	 *
+	 * 	todo: write documentation
+	 */
 	static protected function findPlugin($name,$location=NULL)
 	{
 		$search = array_merge(array($location),self::$location);
@@ -60,6 +65,11 @@ class Amslib_Plugin_Manager
 		return false;
 	}
 	
+	/**
+	 * 	method:	preventPluginLoad
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function preventPluginLoad($prevent,$plugin)
 	{
 		if(!is_string($prevent) && strlen($prevent) == 0) return false;
@@ -68,6 +78,11 @@ class Amslib_Plugin_Manager
 		self::$prevent[$plugin] = $prevent;
 	}
 
+	/**
+	 * 	method:	replacePluginLoad
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function replacePluginLoad($plugin1,$plugin2)
 	{
 		//	This function will map plugin1 => plugin2, so any attempt to load plugin1 will result in loading plugin2
@@ -80,6 +95,11 @@ class Amslib_Plugin_Manager
 		self::$replace[$plugin1] = $plugin2;
 	}
 
+	/**
+	 * 	method:	config
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function config($name,$location)
 	{
 		//	If this plugin is configured to not load, return false
@@ -103,6 +123,11 @@ class Amslib_Plugin_Manager
 		return false;
 	}
 
+	/**
+	 * 	method:	load
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function load($name,$location=NULL)
 	{
 		//	If this plugin is configured to not load, return false
@@ -130,6 +155,11 @@ class Amslib_Plugin_Manager
 		return self::getAPI($name);
 	}
 
+	/**
+	 * 	method:	preload
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function preload($name,$plugin)
 	{
 		//	If this plugin is configured to be replaced with another, use the replacement
@@ -138,6 +168,11 @@ class Amslib_Plugin_Manager
 		if($name && $plugin) self::$plugins[$name] = $plugin;
 	}
 
+	/**
+	 * 	method:	insert
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function insert($name,$plugin)
 	{
 		//	If this plugin is configured to be replaced with another, use the replacement
@@ -157,6 +192,11 @@ class Amslib_Plugin_Manager
 		return false;
 	}
 
+	/**
+	 * 	method:	remove
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function remove($name)
 	{
 		//	If this plugin is configured to be replaced with another, use the replacement
@@ -169,6 +209,11 @@ class Amslib_Plugin_Manager
 		return $r;
 	}
 
+	/**
+	 * 	method:	getAPI
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getAPI($name)
 	{
 		//	If this plugin is configured to be replaced with another, use the replacement
@@ -177,6 +222,11 @@ class Amslib_Plugin_Manager
 		return is_string($name) && isset(self::$api[$name]) ? self::$api[$name] : false;
 	}
 
+	/**
+	 * 	method:	setAPI
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setAPI($name,$api)
 	{
 		//	If this plugin is configured to be replaced with another, use the replacement
@@ -185,6 +235,11 @@ class Amslib_Plugin_Manager
 		self::$api[$name] = $api;
 	}
 
+	/**
+	 * 	method:	getPlugin
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getPlugin($name)
 	{
 		//	If this plugin is configured to be replaced with another, use the replacement
@@ -193,16 +248,31 @@ class Amslib_Plugin_Manager
 		return is_string($name) && isset(self::$plugins[$name]) ? self::$plugins[$name] : false;
 	}
 
+	/**
+	 * 	method:	listPlugins
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function listPlugins()
 	{
 		return array_keys(self::$plugins);
 	}
 
+	/**
+	 * 	method:	listAPI
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function listAPI()
 	{
 		return array_keys(self::$api);
 	}
 
+	/**
+	 * 	method:	isLoaded
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function isLoaded($name)
 	{
 		//	If this plugin is configured to be replaced with another, use the replacement
@@ -211,11 +281,21 @@ class Amslib_Plugin_Manager
 		return isset(self::$plugins[$name]) ? true : false;
 	}
 
+	/**
+	 * 	method:	addLocation
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function addLocation($location)
 	{
 		self::$location[] = Amslib_File::absolute($location);
 	}
 
+	/**
+	 * 	method:	getLocation
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getLocation()
 	{
 		return self::$location;
@@ -229,6 +309,11 @@ class Amslib_Plugin_Manager
 	 	will find out which appropriate plugin to call to execute
 	 	the functionality
 	********************************************************************/
+	/**
+	 * 	method:	render
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function render($plugin,$view="default",$parameters=array())
 	{
 		$api = self::getAPI($plugin);
@@ -236,6 +321,11 @@ class Amslib_Plugin_Manager
 		return $api ? $api->render($view,$parameters) : false;
 	}
 
+	/**
+	 * 	method:	getObject
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getObject($plugin,$id,$singleton=false)
 	{
 		$api = self::getAPI($plugin);
@@ -243,6 +333,11 @@ class Amslib_Plugin_Manager
 		return $api ? $api->getObject($id,$singleton) : false;
 	}
 
+	/**
+	 * 	method:	setStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setStylesheet($plugin,$id,$file,$conditional=NULL)
 	{
 		$api = self::getAPI($plugin);
@@ -250,6 +345,11 @@ class Amslib_Plugin_Manager
 		return $api ? $api->setStylesheet($id,$file,$conditional) : false;
 	}
 
+	/**
+	 * 	method:	addStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function addStylesheet($plugin,$stylesheet)
 	{
 		$api = self::getAPI($plugin);
@@ -257,6 +357,11 @@ class Amslib_Plugin_Manager
 		return $api ? $api->addStylesheet($stylesheet) : false;
 	}
 
+	/**
+	 * 	method:	setJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setJavascript($plugin,$id,$file,$conditional=NULL)
 	{
 		$api = self::getAPI($plugin);
@@ -264,6 +369,11 @@ class Amslib_Plugin_Manager
 		return $api ? $api->setJavascript($id,$file,$conditional) : false;
 	}
 
+	/**
+	 * 	method:	addJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function addJavascript($plugin,$javascript)
 	{
 		$api = self::getAPI($plugin);

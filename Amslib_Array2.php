@@ -34,6 +34,11 @@
  */
 class Amslib_Array2
 {
+	/**
+	 * 	method:	valid
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function valid($array=NULL)
 	{
 		//	Invalid values return an empty array
@@ -44,6 +49,11 @@ class Amslib_Array2
 		return $array;
 	}
 
+	/**
+	 * 	method:	min
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function min($array,$key,$returnKey=NULL)
 	{
 		$min = NULL;
@@ -57,6 +67,11 @@ class Amslib_Array2
 		return $returnKey !== NULL && isset($min[$returnKey]) ? $min[$returnKey] : $min;
 	}
 
+	/**
+	 * 	method:	max
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function max($array,$key,$returnKey=NULL)
 	{
 		$max = NULL;
@@ -70,6 +85,11 @@ class Amslib_Array2
 		return $returnKey !== NULL && isset($max[$returnKey]) ? $max[$returnKey] : $max;
 	}
 
+	/**
+	 * 	method:	sort
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function sort($array,$index)
 	{
 		if(count($array) < 2) return $array;
@@ -91,6 +111,11 @@ class Amslib_Array2
 		return array_merge(self::sort($left,$index), array($pivot_key => $pivot), self::sort($right,$index));
 	}
 	
+	/**
+	 * 	method:	filterKey
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function filterKey($array,$key,$returnFiltered=false)
 	{
 		$filter = array();

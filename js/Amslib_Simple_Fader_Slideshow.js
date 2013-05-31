@@ -45,6 +45,11 @@ var Amslib_Simple_Fader_Slideshow = my.Amslib_Simple_Fader_Slideshow = my.Class(
 		//		NOTE:	This version doesnt work if the slideshow doesnt exist at page load time
 		//		NOTE:	There was another system employed in another project which let you "register" a callback
 		//		NOTE:	We need to load this callback and let it call the autoloader
+		/**
+		 * 	method:	autoload
+		 *
+		 * 	todo: write documentation
+		 */
 		autoload: function(){
 			$(Amslib_Simple_Fader_Slideshow.config.pselector+".amslib_autoload").each(function(){
 				new Amslib_Simple_Fader_Slideshow(this);
@@ -57,6 +62,11 @@ var Amslib_Simple_Fader_Slideshow = my.Amslib_Simple_Fader_Slideshow = my.Class(
 		}
 	},
 	
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
 	constructor: function(parent)
 	{
 		Amslib_Simple_Fader_Slideshow.Super.call(this,parent,"Amslib_Simple_Fader_Slideshow");
@@ -76,6 +86,11 @@ var Amslib_Simple_Fader_Slideshow = my.Amslib_Simple_Fader_Slideshow = my.Class(
 		if(this.images.length > 1) this.start();
 	},
 	
+	/**
+	 * 	method:	start
+	 *
+	 * 	todo: write documentation
+	 */
 	start: function()
 	{
 		//	NOTE: disabled until Amslib_Event is rewritten
@@ -84,6 +99,11 @@ var Amslib_Simple_Fader_Slideshow = my.Amslib_Simple_Fader_Slideshow = my.Class(
 		this.handle = setTimeout($.proxy(this,"animate"),this.timeout);
 	},
 	
+	/**
+	 * 	method:	stop
+	 *
+	 * 	todo: write documentation
+	 */
 	stop: function()
 	{
 		//	NOTE: disabled until Amslib_Event is rewritten
@@ -94,6 +114,11 @@ var Amslib_Simple_Fader_Slideshow = my.Amslib_Simple_Fader_Slideshow = my.Class(
 		this.handle = false;
 	},
 	
+	/**
+	 * 	method:	animate
+	 *
+	 * 	todo: write documentation
+	 */
 	animate: function()
 	{
 		var selector	=	Amslib_Simple_Fader_Slideshow.config.cselector;

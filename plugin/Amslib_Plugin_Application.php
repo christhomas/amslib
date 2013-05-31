@@ -45,6 +45,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	protected $completionCallback;
 
+	/**
+	 * 	method:	getPackageFilename
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getPackageFilename()
 	{
 		foreach(Amslib_Array::valid(self::$packageName) as $host=>$file){
@@ -54,6 +59,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return parent::getPackageFilename();
 	}
 
+	/**
+	 * 	method:	readVersion
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function readVersion()
 	{
 		if(isset($this->config["version"])){
@@ -65,8 +75,21 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		}
 	}
 
-	protected function initialisePlugin(){}
+	/**
+	 * 	method:	initialisePlugin
+	 *
+	 * 	todo: write documentation
+	 */
+	protected function initialisePlugin()
+	{
+		
+	}
 
+	/**
+	 * 	method:	finalisePlugin
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function finalisePlugin()
 	{
 		//	Set the version of the admin this panel is running
@@ -120,6 +143,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return true;
 	}
 
+	/**
+	 * 	method:	autoloadResources
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function autoloadResources()
 	{
 		//	STEP 1: Autoload all resources from each plugin as they are requested
@@ -168,6 +196,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	//	NOTE:	It might be worth noting that in the future, this functionality might be useless
 	//			because we don't load any routes from the amslib_router.xml in the administration panel
 	//			any way, so this functionality is practically worthless.
+	/**
+	 * 	method:	executeRouter
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function executeRouter()
 	{
 		//	Initialise and execute the router
@@ -192,6 +225,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		}
 	}
 
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct($name,$location)
 	{
 		parent::__construct();
@@ -223,6 +261,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->runCompletionCallbacks();
 	}
 
+	/**
+	 * 	method:	getInstance
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function &getInstance()
 	{
 		static $instance = NULL;
@@ -232,6 +275,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return $instance;
 	}
 
+	/**
+	 * 	method:	addCompletionCallback
+	 *
+	 * 	todo: write documentation
+	 */
 	public function addCompletionCallback($function,$object=NULL)
 	{
 		$this->completionCallback[] = $object
@@ -239,6 +287,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			: $function;
 	}
 
+	/**
+	 * 	method:	runCompletionCallbacks
+	 *
+	 * 	todo: write documentation
+	 */
 	public function runCompletionCallbacks()
 	{
 		foreach(Amslib_Array::valid($this->completionCallback) as $cb){
@@ -246,22 +299,42 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		}
 	}
 
+	/**
+	 * 	method:	setPackageFilename
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setPackageFilename($domain,$file)
 	{
 		self::$packageName[$domain] = $file;
 	}
 
+	/**
+	 * 	method:	getVersion
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getVersion($element=NULL)
 	{
 		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
 	}
 
+	/**
+	 * 	method:	setLanguageKey
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setLanguageKey()
 	{
 		$k = current(Amslib_Array::filter(Amslib_Array::valid($this->config["value"]),"name","lang_key",true));
 		if(!empty($k)) self::$langKey = $k["value"];
 	}
 
+	/**
+	 * 	method:	setLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setLanguage($name,$langCode)
 	{
 		if(is_string($name) && strlen($name) && in_array($langCode,self::getLanguageList($name))){
@@ -269,6 +342,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		}
 	}
 
+	/**
+	 * 	method:	getLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getLanguage($name)
 	{
 		if(is_string($name) && strlen($name)){
@@ -278,11 +356,21 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return false;
 	}
 
+	/**
+	 * 	method:	registerLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function registerLanguage($name,$langCode)
 	{
 		self::$registeredLanguages[$name][$langCode] = true;
 	}
 
+	/**
+	 * 	method:	getLanguageList
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getLanguageList($name)
 	{
 		return isset(self::$registeredLanguages[$name])
@@ -290,6 +378,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 					: array();
 	}
 
+	/**
+	 * 	method:	runService
+	 *
+	 * 	todo: write documentation
+	 */
 	public function runService()
 	{
 		$route = Amslib_Router::getRoute();

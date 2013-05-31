@@ -41,8 +41,18 @@
  */
 class Amslib_MVC_Missing
 {
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct(){}
 	
+	/**
+	 * 	method:	__call
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __call($name,$args)
 	{
 		//	TODO: we need a logging interface to record this error

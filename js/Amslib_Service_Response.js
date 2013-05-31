@@ -39,27 +39,61 @@ var Amslib_Service_Response = my.Amslib_Service_Response = my.Class(
 {
 	json: false,
 
-	constructor: function(json){
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
+	constructor: function(json)
+	{
 		this.setJSON(json);
 	},
 	
-	setJSON: function(json){
+	/**
+	 * 	method:	setJSON
+	 *
+	 * 	todo: write documentation
+	 */
+	setJSON: function(json)
+	{
 		this.json = json;
 	},
 	
+	/**
+	 * 	method:	getJSON
+	 *
+	 * 	todo: write documentation
+	 */
 	getJSON: function()
 	{
 		return this.json;
 	},
 	
-	hasSuccess: function(){
+	/**
+	 * 	method:	hasSuccess
+	 *
+	 * 	todo: write documentation
+	 */
+	hasSuccess: function()
+	{
 		return this.json.success ? true : false;
 	},
 
-	hasPlugin: function(plugin){
+	/**
+	 * 	method:	hasPlugin
+	 *
+	 * 	todo: write documentation
+	 */
+	hasPlugin: function(plugin)
+	{
 		return this.readData(plugin) != undefined ? true : false;
 	},
 	
+	/**
+	 * 	method:	handlerCount
+	 *
+	 * 	todo: write documentation
+	 */
 	handlerCount: function()
 	{
 		try{
@@ -69,6 +103,11 @@ var Amslib_Service_Response = my.Amslib_Service_Response = my.Class(
 		return 0;
 	},
 
+	/**
+	 * 	method:	readData
+	 *
+	 * 	todo: write documentation
+	 */
 	readData: function(plugin,group,name,handlerindex)
 	{
 		if(handlerindex === undefined || handlerindex === null) handlerindex = 0;
@@ -83,19 +122,43 @@ var Amslib_Service_Response = my.Amslib_Service_Response = my.Class(
 		return undefined;
 	},
 
-	getServiceData: function(plugin,name,handlerindex){	
+	/**
+	 * 	method:	getServiceData
+	 *
+	 * 	todo: write documentation
+	 */
+	getServiceData: function(plugin,name,handlerindex)
+	{	
 		return this.readData(plugin,"service/data",name,handlerindex);		
 	},
 	
-	getServiceErrors: function(plugin,name,handlerindex){	
+	/**
+	 * 	method:	getServiceErrors
+	 *
+	 * 	todo: write documentation
+	 */
+	getServiceErrors: function(plugin,name,handlerindex)
+	{	
 		return this.readData(plugin,"service/errors",name,handlerindex);		
 	},
 	
-	getValidationData: function(plugin,name,handlerindex){	
+	/**
+	 * 	method:	getValidationData
+	 *
+	 * 	todo: write documentation
+	 */
+	getValidationData: function(plugin,name,handlerindex)
+	{	
 		return this.readData(plugin,"validation/errors",name,handlerindex);	
 	},
 	
-	getValidationErrors: function(plugin,name,handlerindex){	
+	/**
+	 * 	method:	getValidationErrors
+	 *
+	 * 	todo: write documentation
+	 */
+	getValidationErrors: function(plugin,name,handlerindex)
+	{	
 		return this.readData(plugin,"validation/data",name,handlerindex);	
 	}
 	//	TODO: getDatabaseErrors

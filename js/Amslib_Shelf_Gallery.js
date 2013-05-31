@@ -41,6 +41,11 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 	mutex: false,
 	
 	STATIC: {
+		/**
+		 * 	method:	autoload
+		 *
+		 * 	todo: write documentation
+		 */
 		autoload: function(){
 			$(Amslib_Shelf_Gallery.options.parent).each(function(){
 				new Amslib_Shelf_Gallery($(this));
@@ -59,6 +64,11 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		}
 	},
 	
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
 	constructor: function(parent)
 	{
 		Amslib_Shelf_Gallery.Super.call(this,parent,Amslib_Shelf_Gallery.options.amslibName);
@@ -71,16 +81,31 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		this.start();
 	},
 	
+	/**
+	 * 	method:	start
+	 *
+	 * 	todo: write documentation
+	 */
 	start: function()
 	{
 		this.timeout = setTimeout($.proxy(this,this.options.animate),this.options.autoTimeout);
 	},
 	
+	/**
+	 * 	method:	stop
+	 *
+	 * 	todo: write documentation
+	 */
 	stop: function()
 	{
 		if(this.timeout) clearTimeout(this.timeout);
 	},
 	
+	/**
+	 * 	method:	setAnimation
+	 *
+	 * 	todo: write documentation
+	 */
 	setAnimation: function(type)
 	{
 		switch(type){
@@ -91,6 +116,11 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		}
 	},
 	
+	/**
+	 * 	method:	prev
+	 *
+	 * 	todo: write documentation
+	 */
 	prev: function(cb)
 	{
 		if(this.mutex) return;
@@ -116,6 +146,11 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		},this));
 	},
 	
+	/**
+	 * 	method:	next
+	 *
+	 * 	todo: write documentation
+	 */
 	next: function(cb)
 	{
 		if(this.mutex) return;
@@ -140,6 +175,11 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		},this));
 	},
 	
+	/**
+	 * 	method:	toIndex
+	 *
+	 * 	todo: write documentation
+	 */
 	toIndex: function(index)
 	{
 		var first	=	$(this.options.selItem+":first",this.parent);
@@ -155,6 +195,11 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		}
 	},
 	
+	/**
+	 * 	method:	toIndexPrev
+	 *
+	 * 	todo: write documentation
+	 */
 	toIndexPrev: function(s,f)
 	{
 		if(this.mutex) return;
@@ -174,6 +219,11 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		},this));
 	},
 	
+	/**
+	 * 	method:	toIndexNext
+	 *
+	 * 	todo: write documentation
+	 */
 	toIndexNext: function(s,f)
 	{
 		if(this.mutex) return;
@@ -194,11 +244,21 @@ var Amslib_Shelf_Gallery = my.Amslib_Shelf_Gallery = my.Class(my.Amslib,
 		},this));
 	},
 	
+	/**
+	 * 	method:	animateAutoNext
+	 *
+	 * 	todo: write documentation
+	 */
 	animateAutoNext: function()
 	{
 		this.next($.proxy(this,"start"));
 	},
 	
+	/**
+	 * 	method:	animateAutoPrev
+	 *
+	 * 	todo: write documentation
+	 */
 	animateAutoPrev: function()
 	{
 		this.prev($.proxy(this,"start"));

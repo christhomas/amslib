@@ -39,6 +39,11 @@ class Amslib_XML_Youtube extends Amslib_XML
 
 	protected $feed;
 
+	/**
+	 * 	method:	decodeFeedEntry
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function decodeFeedEntry(&$feed,$parent)
 	{
 		$entry = array();
@@ -58,11 +63,21 @@ class Amslib_XML_Youtube extends Amslib_XML
 		$feed["entry"][] = $entry;
 	}
 
+	/**
+	 * 	method:	decodeText
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function decodeText(&$node,$name,$parent)
 	{
 		$node[$name] = $parent->nodeValue;
 	}
 
+	/**
+	 * 	method:	decodeMediaGroup
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function decodeMediaGroup(&$entry,$parent)
 	{
 		$mediaGroup = array();
@@ -82,16 +97,31 @@ class Amslib_XML_Youtube extends Amslib_XML
 		$entry["media:group"] = $mediaGroup;
 	}
 
+	/**
+	 * 	method:	decodeMediaPlayer
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function decodeMediaPlayer(&$mediaGroup,$parent)
 	{
 		$mediaGroup["media:player"][] = $parent->getAttribute("url");
 	}
 
+	/**
+	 * 	method:	decodeMediaThumbnail
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function decodeMediaThumbnail(&$mediaGroup,$parent)
 	{
 		$mediaGroup["media:thumbnail"][] = $parent->getAttribute("url");
 	}
 
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		parent::__construct();
@@ -99,11 +129,21 @@ class Amslib_XML_Youtube extends Amslib_XML
 		$this->articleLoaded = false;
 	}
 
+	/**
+	 * 	method:	load
+	 *
+	 * 	todo: write documentation
+	 */
 	public function load($string)
 	{
 
 	}
 
+	/**
+	 * 	method:	loadURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function loadURL($url)
 	{
 		$this->documentLoaded = false;
@@ -135,6 +175,11 @@ class Amslib_XML_Youtube extends Amslib_XML
 		return false;
 	}
 
+	/**
+	 * 	method:	getFeed
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getFeed()
 	{
 		return $this->feed;

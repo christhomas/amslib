@@ -44,6 +44,11 @@ class Amslib_Translator extends Amslib_Translator_Source
 	protected	$source;
 	protected	$stackLanguage;
 
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct($type,$name=NULL)
 	{
 		$this->name = $name;
@@ -55,6 +60,11 @@ class Amslib_Translator extends Amslib_Translator_Source
 		}
 	}
 	
+	/**
+	 * 	method:	getInstance
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function &getInstance($type)
 	{
 		static $instance = NULL;
@@ -67,14 +77,63 @@ class Amslib_Translator extends Amslib_Translator_Source
 	/********************************************************************************
 	 *	LANGUAGE METHODS
 	********************************************************************************/
-	public function addLanguage($langCode){		return $this->source->addLanguage($langCode);	}
-	public function setLanguage($langCode){		return $this->source->setLanguage($langCode);	}
-	public function getLanguage(){				return $this->source->getLanguage();			}
-	public function getAllLanguages(){			return $this->source->getAllLanguages();		}
-	public function isLanguage($langCode){		return $this->source->isLanguage($langCode);	}
+	/**
+	 * 	method:	addLanguage
+	 *
+	 * 	todo: write documentation
+	 */
+	public function addLanguage($langCode)
+	{		
+		return $this->source->addLanguage($langCode);	
+	}
 	
+	/**
+	 * 	method:	setLanguage
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setLanguage($langCode)
+	{		
+		return $this->source->setLanguage($langCode);	
+	}
+	
+	/**
+	 * 	method:	getLanguage
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getLanguage()
+	{				
+		return $this->source->getLanguage();			
+	}
+	
+	/**
+	 * 	method:	getAllLanguages
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getAllLanguages()
+	{			
+		return $this->source->getAllLanguages();		
+	}
+	
+	/**
+	 * 	method:	isLanguage
+	 *
+	 * 	todo: write documentation
+	 */
+	public function isLanguage($langCode)
+	{		
+		return $this->source->isLanguage($langCode);	
+	}
+		
 	//	NOTE: This method is used to temporarily change the language of the translator, but not lose the original
 	//	NOTE: should change this method to use like a stack of plates
+	/**
+	 * 	method:	pushLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	public function pushLanguage($langCode)
 	{
 		if(is_string($langCode) && strlen($langCode)){
@@ -85,6 +144,11 @@ class Amslib_Translator extends Amslib_Translator_Source
 
 	//	NOTE: Then after you've done your "thing" you can swap it back out.
 	//	NOTE: should change this method to use like a stack of plates
+	/**
+	 * 	method:	popLanguage
+	 *
+	 * 	todo: write documentation
+	 */
 	public function popLanguage()
 	{
 		if(is_string($this->stackLanguage) && strlen($this->stackLanguage)){
@@ -96,30 +160,214 @@ class Amslib_Translator extends Amslib_Translator_Source
 	/********************************************************************************
 	 *	TRANSLATOR METHODS
 	********************************************************************************/
-	public function setLocation($location){						return $this->source->setLocation($location);				}
-	public function load(){										return $this->source->load();								}
-	public function translate($n,$l=NULL){						return $this->source->translate($n,$l);					}
-	public function translateExtended($n,$i,$l=NULL){				return $this->source->translateExtended($n,$i,$l);			}
-	public function learn($n,$v,$l=NULL){							return $this->source->learn($n,$v,$l);						}
-	public function learnExtended($n,$i,$v,$l=NULL){				return $this->source->learnExtended($n,$i,$v,$l);			}
-	public function forget($n,$l=NULL){							return $this->source->forget($n,$l);						}
-	public function forgetExtended($n,$i,$l=NULL){				return $this->source->forgetExtended($n,$i,$l);			}
-	public function searchKey($n,$s=false,$l=NULL){				return $this->source->searchKey($n,$s,$l);					}
-	public function searchKeyExtended($n,$i,$s=false,$l=NULL){	return $this->source->searchKeyExtended($n,$i,$s,$l);		}
-	public function searchValue($v,$s=false,$l=NULL){			return $this->source->searchValue($v,$s,$l);				}
-	public function searchValueExtended($v,$i,$s=false,$l=NULL){	return $this->source->searchValueExtended($v,$i,$s,$l);	}
-	public function getKeyList($l=NULL){							return $this->source->getKeyList($l);						}
-	public function getKeyListExtended($i,$l=NULL){				return $this->source->getKeyListExtended($i,$l);			}
-	public function getValueList($l=NULL){						return $this->source->getValueList($l);					}
-	public function getValueListExtended($i,$l=NULL){				return $this->source->getValueListExtended($i,$l);			}
-	public function getList($l=NULL){								return $this->source->getList($l);							}
-	public function getListExtended($i,$l=NULL){					return $this->source->getListExtended($i,$l);				}
-	public function updateKey($n,$nk,$l=NULL){					return $this->source->updateKey($n,$nk,$l);				}
-	public function updateKeyExtended($n,$i,$nn,$l=NULL){			return $this->source->updateKeyExtended($n,$i,$nn,$l);		}
+	/**
+	 * 	method:	setLocation
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setLocation($location)
+	{						
+		return $this->source->setLocation($location);				
+	}
+	
+	/**
+	 * 	method:	load
+	 *
+	 * 	todo: write documentation
+	 */
+	public function load()
+	{										
+		return $this->source->load();								
+	}
+	
+	/**
+	 * 	method:	translate
+	 *
+	 * 	todo: write documentation
+	 */
+	public function translate($n,$l=NULL)
+	{						
+		return $this->source->translate($n,$l);					
+	}
+	
+	/**
+	 * 	method:	translateExtended
+	 *
+	 * 	todo: write documentation
+	 */
+	public function translateExtended($n,$i,$l=NULL)
+	{				
+		return $this->source->translateExtended($n,$i,$l);			
+	}
+	
+	/**
+	 * 	method:	learn
+	 *
+	 * 	todo: write documentation
+	 */
+	public function learn($n,$v,$l=NULL)
+	{							
+		return $this->source->learn($n,$v,$l);						
+	}
+	
+	/**
+	 * 	method:	learnExtended
+	 *
+	 * 	todo: write documentation
+	 */
+	public function learnExtended($n,$i,$v,$l=NULL)
+	{				
+		return $this->source->learnExtended($n,$i,$v,$l);			
+	}
+	
+	/**
+	 * 	method:	forget
+	 *
+	 * 	todo: write documentation
+	 */
+	public function forget($n,$l=NULL)
+	{							
+		return $this->source->forget($n,$l);						
+	}
+	
+	/**
+	 * 	method:	forgetExtended
+	 *
+	 * 	todo: write documentation
+	 */
+	public function forgetExtended($n,$i,$l=NULL)
+	{				
+		return $this->source->forgetExtended($n,$i,$l);		
+	}
+	
+	/**
+	 * 	method:	searchKey
+	 *
+	 * 	todo: write documentation
+	 */
+	public function searchKey($n,$s=false,$l=NULL)
+	{				
+		return $this->source->searchKey($n,$s,$l);					
+	}
+	
+	/**
+	 * 	method:	searchKeyExtended
+	 *
+	 * 	todo: write documentation
+	 */
+	public function searchKeyExtended($n,$i,$s=false,$l=NULL)
+	{	
+		return $this->source->searchKeyExtended($n,$i,$s,$l);		
+	}
+	
+	/**
+	 * 	method:	searchValue
+	 *
+	 * 	todo: write documentation
+	 */
+	public function searchValue($v,$s=false,$l=NULL)
+	{			
+		return $this->source->searchValue($v,$s,$l);				
+	}
+	
+	/**
+	 * 	method:	searchValueExtended
+	 *
+	 * 	todo: write documentation
+	 */
+	public function searchValueExtended($v,$i,$s=false,$l=NULL)
+	{	
+		return $this->source->searchValueExtended($v,$i,$s,$l);	
+	}
+	
+	/**
+	 * 	method:	getKeyList
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getKeyList($l=NULL)
+	{							
+		return $this->source->getKeyList($l);						
+	}
+	
+	/**
+	 * 	method:	getKeyListExtended
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getKeyListExtended($i,$l=NULL)
+	{				
+		return $this->source->getKeyListExtended($i,$l);			
+	}
+	
+	/**
+	 * 	method:	getValueList
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getValueList($l=NULL)
+	{						
+		return $this->source->getValueList($l);					
+	}
+	
+	/**
+	 * 	method:	getValueListExtended
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getValueListExtended($i,$l=NULL)
+	{			
+		return $this->source->getValueListExtended($i,$l);			
+	}
+	
+	/**
+	 * 	method:	getList
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getList($l=NULL)
+	{								
+		return $this->source->getList($l);							
+	}
+	
+	/**
+	 * 	method:	getListExtended
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getListExtended($i,$l=NULL)
+	{				
+		return $this->source->getListExtended($i,$l);				
+	}
+	
+	/**
+	 * 	method:	updateKey
+	 *
+	 * 	todo: write documentation
+	 */
+	public function updateKey($n,$nk,$l=NULL)
+	{				
+		return $this->source->updateKey($n,$nk,$l);				
+	}
+	
+	/**
+	 * 	method:	updateKeyExtended
+	 *
+	 * 	todo: write documentation
+	 */
+	public function updateKeyExtended($n,$i,$nn,$l=NULL)
+	{		
+		return $this->source->updateKeyExtended($n,$i,$nn,$l);		
+	}
 	
 	/********************************************************************************
 	 *	IMPORT TRANSLATION METHODS
 	********************************************************************************/
+	/**
+	 * 	method:	importKeyedArray
+	 *
+	 * 	todo: write documentation
+	 */
 	public function importKeyedArray($array)
 	{
 		foreach($array as $key=>$string){
@@ -129,6 +377,11 @@ class Amslib_Translator extends Amslib_Translator_Source
 		}
 	}
 	
+	/**
+	 * 	method:	importArray
+	 *
+	 * 	todo: write documentation
+	 */
 	public function importArray($array,$keyIndex,$valueIndex)
 	{
 		foreach($array as $translation){
@@ -139,6 +392,11 @@ class Amslib_Translator extends Amslib_Translator_Source
 		}
 	}
 	
+	/**
+	 * 	method:	importSource
+	 *
+	 * 	todo: write documentation
+	 */
 	public function importSource($source)
 	{
 		$list = $source->getKeyList();

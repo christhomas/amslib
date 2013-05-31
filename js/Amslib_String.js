@@ -46,6 +46,11 @@ var Amslib_String = my.Amslib_String = my.Class(
 	STATIC: {
 		map: false,
 		
+		/**
+		 * 	method:	slugify
+		 *
+		 * 	todo: write documentation
+		 */
 		slugify: function(text,slug)
 		{
 			slug = slug || "-";
@@ -58,6 +63,11 @@ var Amslib_String = my.Amslib_String = my.Class(
 			return text;
 		},
 		
+		/**
+		 * 	method:	removeDiacritics
+		 *
+		 * 	todo: write documentation
+		 */
 		removeDiacritics: function(text)
 		{
 			if(text) for(var i=0; i<Amslib_String.map.length; i++) {
@@ -67,31 +77,61 @@ var Amslib_String = my.Amslib_String = my.Class(
 			return text;
 		},
 		
+		/**
+		 * 	method:	trim
+		 *
+		 * 	todo: write documentation
+		 */
 		trim: function(str, chars)
 		{
 			return Amslib_String.ltrim(Amslib_String.rtrim(str, chars), chars);
 		},
 		 
+		/**
+		 * 	method:	ltrim
+		 *
+		 * 	todo: write documentation
+		 */
 		ltrim: function(str, chars)
 		{
 			return str.replace(new RegExp("^[" + (chars || "\\s") + "]+", "g"), "");
 		},
 		 
+		/**
+		 * 	method:	rtrim
+		 *
+		 * 	todo: write documentation
+		 */
 		rtrim: function(str, chars)
 		{
 			return str.replace(new RegExp("[" + (chars || "\\s") + "]+$", "g"), "");
 		},
 		
+		/**
+		 * 	method:	padLeft
+		 *
+		 * 	todo: write documentation
+		 */
 		padLeft: function(string,pad,length)
 		{
 		    return (new Array(length+1).join(pad)+string).slice(-length);
 		},
 		
+		/**
+		 * 	method:	padRight
+		 *
+		 * 	todo: write documentation
+		 */
 		padRight: function(string,pad,length)
 		{
 		    return (string+new Array(length+1).join(pad)).slice(0,length);
 		},
 		
+		/**
+		 * 	method:	replace
+		 *
+		 * 	todo: write documentation
+		 */
 		replace: function(str, chars, replace)
 		{
 			return str.replace(new RegExp(chars, "g"), replace || "");

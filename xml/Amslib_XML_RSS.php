@@ -37,6 +37,11 @@ class Amslib_XML_RSS extends Amslib_XML
 	protected $article;
 	protected $articleLoaded;
 	
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		parent::__construct();
@@ -44,11 +49,21 @@ class Amslib_XML_RSS extends Amslib_XML
 		$this->articleLoaded = false;
 	}
 	
+	/**
+	 * 	method:	load
+	 *
+	 * 	todo: write documentation
+	 */
 	public function load($string)
 	{
 		
 	}
 	
+	/**
+	 * 	method:	loadURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function loadURL($url)
 	{
 		$this->documentLoaded = false;
@@ -67,11 +82,21 @@ class Amslib_XML_RSS extends Amslib_XML
 		return false;
 	}
 	
+	/**
+	 * 	method:	getArticle
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getArticle($item)
 	{
 		return $this->setArticle($item) ? $this->article : false;
 	}
 	
+	/**
+	 * 	method:	setArticle
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setArticle($item)
 	{
 		$this->articleLoaded = false;
@@ -106,6 +131,11 @@ class Amslib_XML_RSS extends Amslib_XML
 		return false;
 	}
 	
+	/**
+	 * 	method:	getArticleTitle
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getArticleTitle()
 	{
 		if($this->articleLoaded == false) return false;
@@ -113,6 +143,11 @@ class Amslib_XML_RSS extends Amslib_XML
 		return $this->article["title"];
 	}
 	
+	/**
+	 * 	method:	getArticleContent
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getArticleContent()
 	{
 		if($this->articleLoaded == false) return false;

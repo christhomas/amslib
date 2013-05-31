@@ -38,7 +38,12 @@ class Amslib
 
 	//	DEPRECATED: should use findPath instead, makes more sense
 	static protected function findFile($filename){ return self::findPath($filename); }
-
+	
+	/**
+	 * 	method:	findPath
+	 *
+	 * 	todo: write documentation
+	 */
 	static protected function findPath($filename)
 	{
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
@@ -52,11 +57,21 @@ class Amslib
 		return false;
 	}
 
+	/**
+	 * 	method:	locate
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function locate()
 	{
 		return dirname(__FILE__);
 	}
 
+	/**
+	 * 	method:	showErrors
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function showErrors($state=true)
 	{
 		error_reporting(E_ALL);
@@ -69,11 +84,21 @@ class Amslib
 		}
 	}
 
+	/**
+	 * 	method:	setErrorHandler
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setErrorHandler($handler)
 	{
 		self::$originalErrorHandler = set_error_handler($handler);
 	}
 
+	/**
+	 * 	method:	restoreErrorHandler
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function restoreErrorHandler()
 	{
 		if(self::$originalErrorHandler){
@@ -84,6 +109,11 @@ class Amslib
 	//	FIXME:	there is a bug here in the ppanel has a 500 webserver error when you return "" or false for not finding a string
 	//	NOTE:	I think it makes more sense now to return false, since if you return a string, it's like you've found a result, but
 	//			thats not true
+	/**
+	 * 	method:	lchop
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function lchop($str,$search,$removeSearch=false)
 	{
 		$p = strlen($search) ? strpos($str,$search) : false;
@@ -98,6 +128,11 @@ class Amslib
 	//	FIXME:	there is a bug here in the ppanel has a 500 webserver error when you return "" or false for not finding a string
 	//	NOTE:	I think it makes more sense now to return false, since if you return a string, it's like you've found a result, but
 	//			thats not true
+	/**
+	 * 	method:	rchop
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function rchop($str,$search)
 	{
 		$p = strlen($search) ? strrpos($str,$search) : false;
@@ -107,6 +142,11 @@ class Amslib
 
 	//	NOTE: I copied this code from CakePHP::truncate() which was super useful
 	//	NOTE: I just didnt want to import the CakePHP namespace, I wanted to just merge this functionality
+	/**
+	 * 	method:	truncateString
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function truncateString($text, $length = 100, $ending = '...', $exact = false, $considerHtml = true)
 	{
 		if ($considerHtml)
@@ -240,6 +280,11 @@ class Amslib
 		ini_set("include_path",implode(PATH_SEPARATOR,$includePath));
 	}
 
+	/**
+	 * 	method:	getIncludeContents
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getIncludeContents($filename)
 	{
 		ob_start();
@@ -249,6 +294,11 @@ class Amslib
 		return $contents;
 	}
 
+	/**
+	 * 	method:	trimString
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function trimString($string,$maxlen,$postfix="...")
 	{
 		return (strlen($string) > $maxlen) ? substr($string,0,$maxlen).$postfix : $string;
@@ -257,6 +307,11 @@ class Amslib
 	//	blatently stolen code from: http://snipplr.com/view/22741/slugify-a-string-in-php/ :-) thank you!
 	//	modified 01/08/2011: added ability to allow custom regex through so you can add terms if required
 	//
+	/**
+	 * 	method:	slugify
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function slugify($text,$remove="",$replace="-")
 	{
 		// replace non letter or digits by -
@@ -278,6 +333,11 @@ class Amslib
 	}
 
 	//	Perhaps $preformat by default should be true ? would make more sense, otherwise why not just use var_dump directly??
+	/**
+	 * 	method:	var_dump
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function var_dump($dump,$preformat=false,$hiddenOutput=false)
 	{
 		ob_start();
@@ -293,6 +353,11 @@ class Amslib
 	//	User: Levofski
 	//	Link: http://www.php.net/manual/en/function.print-r.php#97901
 	//	Thanks, it works great!
+	/**
+	 * 	method:	var_dump_xml
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function var_dump_xml($mixed)
 	{
 	    // capture the output of print_r
@@ -324,6 +389,11 @@ class Amslib
 	    return $out;
 	}
 
+	/**
+	 * 	method:	backtrace
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function backtrace()
 	{
 		$args	=	func_get_args();
@@ -338,6 +408,11 @@ class Amslib
 		return Amslib_Array::filterKey($bt,Amslib_Array::filterType($args,"is_string"));
 	}
 
+	/**
+	 * 	method:	getStackTrace
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getStackTrace($index=NULL,$string=NULL,$var_dump=NULL)
 	{
 		$e = new Exception();
@@ -358,6 +433,11 @@ class Amslib
 		return $t;
 	}
 	
+	/**
+	 * 	method:	errorLog
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function errorLog()
 	{
 		$args		=	func_get_args();	
@@ -420,6 +500,11 @@ class Amslib
 	}
 
 	//	NOTE: This method has weird parameter names to make it harder to clash with extract()'d parameters from the $__p parameter
+	/**
+	 * 	method:	__importFile
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function __importFile($__r,$__f,$__p=array(),$__b=false)
 	{
 		$path = "";
@@ -453,16 +538,31 @@ class Amslib
 		return false;
 	}
 
+	/**
+	 * 	method:	requireFile
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function includeFile($file,$params=array(),$buffer=false)
 	{
 		return self::__importFile(false,$file,$params,$buffer);
 	}
 
+	/**
+	 * 	method:	requireFile
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function requireFile($file,$params=array(),$buffer=false)
 	{
 		return self::__importFile(true,$file,$params,$buffer);
 	}
 
+	/**
+	 * 	method:	autoloader
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function autoloader()
 	{
 		//	Only register it once.
@@ -505,12 +605,22 @@ class Amslib
 		spl_autoload_register("amslib_autoload");
 	}
 
+	/**
+	 * 	method:	shutdown
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function shutdown($url,$callback=NULL,$warnings=false)
 	{
 		//	Clean these parameters each page load, cause they are only useful on the error pages, not everywhere else
 		Amslib::getSESSION("/amslib/php/fatal_error/",NULL,true);
 		Amslib::getSESSION("/amslib/php/backtrace/",NULL,true);
 		
+		/**
+		 * 	method:	amslib_shutdown
+		 *
+		 * 	todo: write documentation
+		 */
 		function amslib_shutdown($url,$callback,$warnings)
 		{
 			//	E_PARSE: you cannot catch parse errors without a prepend file.
@@ -557,6 +667,11 @@ class Amslib
 		register_shutdown_function("amslib_shutdown",$url,$callback,$warnings);
 	}
 
+	/**
+	 * 	method:	findKey
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function findKey($key,$source)
 	{
 		foreach($source as $k=>$ignore){
@@ -567,7 +682,7 @@ class Amslib
 	}
 
 	/**
-	 * 	function:	getParam
+	 * 	function:	getGET
 	 *
 	 * 	Obtain a parameter from the GET global array
 	 *
@@ -584,13 +699,18 @@ class Amslib
 		return self::arrayParam($_GET,$key,$default,$erase);
 	}
 
+	/**
+	 * 	method:	hasGET
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function hasGET($key)
 	{
 		return (isset($_GET[$key])) ? true : false;
 	}
 
 	/**
-	 *	function:	setGet
+	 *	function:	setGET
 	 *
 	 *	Insert a parameter into the global GET array
 	 *
@@ -609,7 +729,7 @@ class Amslib
 	}
 
 	/**
-	 * 	function:	postParam
+	 * 	function:	getPOST
 	 *
 	 * 	Obtain a parameter from the POST global array
 	 *
@@ -626,13 +746,18 @@ class Amslib
 		return self::arrayParam($_POST,$key,$default,$erase);
 	}
 
+	/**
+	 * 	method:	hasPOST
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function hasPOST($key)
 	{
 		return (isset($_POST[$key])) ? true : false;
 	}
 
 	/**
-	 *	function:	setPost
+	 *	function:	setPOST
 	 *
 	 *	Insert a parameter into the global POST array
 	 *
@@ -651,7 +776,7 @@ class Amslib
 	}
 
 	/**
-	 * 	function:	sessionParam
+	 * 	function:	getSESSION
 	 *
 	 * 	Obtain a parameter from the SESSION global array
 	 *
@@ -668,11 +793,21 @@ class Amslib
 		return self::arrayParam($_SESSION,$key,$default,$erase);
 	}
 
+	/**
+	 * 	method:	hasSESSION
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function hasSESSION($key)
 	{
 		return (isset($_SESSION[$key])) ? true : false;
 	}
 
+	/**
+	 * 	method:	setSESSION
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setSESSION($key,$value)
 	{
 		$_SESSION[$key] = $value;
@@ -681,18 +816,30 @@ class Amslib
 	}
 
 	/**
-	 * 	COOKIE methods
+	 * 	method:	getCOOKIE
+	 *
+	 * 	todo: write documentation
 	 */
 	static public function getCOOKIE($key,$default=NULL)
 	{
 		return self::arrayParam($_COOKIE,$key,$default);
 	}
 
+	/**
+	 * 	method:	hasCOOKIE
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function hasCOOKIE($key)
 	{
 		return (isset($_COOKIE[$key])) ? true : false;
 	}
 
+	/**
+	 * 	method:	getFILES
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setCOOKIE($key,$value)
 	{
 		$_COOKIE[$key] = $value;
@@ -701,7 +848,7 @@ class Amslib
 	}
 
 	/**
-	 * 	function:	filesParam
+	 * 	function:	getFILES
 	 *
 	 * 	Obtain a parameter from the FILES global array
 	 *
@@ -718,6 +865,11 @@ class Amslib
 		return self::arrayParam($_FILES,$key,$default,$erase);
 	}
 
+	/**
+	 * 	method:	setFILES
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setFILES($key,$value)
 	{
 		$_FILES[$key] = $value;
@@ -726,7 +878,7 @@ class Amslib
 	}
 
 	/**
-	 * 	function:	requestParam
+	 * 	function:	getREQUEST
 	 *
 	 * 	Obtain a parameter from the REQUEST global array
 	 *
@@ -743,6 +895,11 @@ class Amslib
 		return self::arrayParam($_REQUEST,$key,$default,$erase);
 	}
 
+	/**
+	 * 	method:	arrayParam
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function setREQUEST($key,$value)
 	{
 		$_REQUEST[$key] = $value;
@@ -750,6 +907,11 @@ class Amslib
 		return $value;
 	}
 
+	/**
+	 * 	method:	arrayParam
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function arrayParam(&$source,$key,$default=NULL,$erase=false)
 	{
 		if(is_array($key)){
@@ -767,6 +929,11 @@ class Amslib
 
 	//	I wonder if this is true, or it's bullshit? could ask someone to verify whether they think it's safe or not
 	//	TODO: I was told to replace this with a call to crypt()
+	/**
+	 * 	method:	getRandomCode
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getRandomCode($input=NULL)
 	{
 		$salt = '!@£$%^&*()QIDNFOEWBVIEWM:"|}{>|:|()**^$%(&&£NARVOEIUMCWP*£(£%@%*(}|:<>>fka9fgbqpeg';

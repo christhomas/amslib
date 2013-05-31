@@ -46,6 +46,11 @@ var Amslib = my.Amslib = my.Class({
 	__events:				false,
 	
 	STATIC: {
+		/**
+		 * 	method:	autoload
+		 *
+		 * 	todo: write documentation
+		 */
 		autoload: function()
 		{
 			// usage: log('inside coolFunc', this, arguments);
@@ -65,6 +70,11 @@ var Amslib = my.Amslib = my.Class({
 			{console.log();return window.console;}catch(err){return window.console={};}})());			 	
 		},
 		
+		/**
+		 * 	method:	getController
+		 *
+		 * 	todo: write documentation
+		 */
 		getController: function(amslib_object)
 		{
 			if(typeof(amslib_object.instances) != "undefined" && amslib_object.instances != false){
@@ -74,6 +84,11 @@ var Amslib = my.Amslib = my.Class({
 			return false;
 		},
 		
+		/**
+		 * 	method:	firebug
+		 *
+		 * 	todo: write documentation
+		 */
 		firebug: function()
 		{
 			//	NOTE: This is suspiciously similar to paulirishes window.log method shown above in the autoload method
@@ -82,6 +97,11 @@ var Amslib = my.Amslib = my.Class({
 		},
 		
 		//	DEPRECATED getPath, use Amslib.locate() instead, it does exactly what I was supposed to do here
+		/**
+		 * 	method:	getPath
+		 *
+		 * 	todo: write documentation
+		 */
 		getPath: function(file)
 		{
 			//	Copied from how scriptaculous does it's "query string" thing
@@ -102,6 +122,11 @@ var Amslib = my.Amslib = my.Class({
 			return path;
 		},
 		
+		/**
+		 * 	method:	locate
+		 *
+		 * 	todo: write documentation
+		 */
 		locate: function()
 		{
 			Amslib.__location = Amslib.getJSPath("/js/Amslib.js").split("/js/Amslib.js")[0];
@@ -109,6 +134,11 @@ var Amslib = my.Amslib = my.Class({
 			return Amslib.__location || false;
 		},
 
+		/**
+		 * 	method:	getQuery
+		 *
+		 * 	todo: write documentation
+		 */
 		getQuery: function()
 		{
 			var p = function(s){
@@ -149,7 +179,11 @@ var Amslib = my.Amslib = my.Class({
 		//
 		//	NOTE: refactor this against the wait API, it's cleaner
 		////////////////////////////////////////////////////////////////////
-		
+		/**
+		 * 	method:	loadJS
+		 *
+		 * 	todo: write documentation
+		 */
 		loadJS: function(name,file,onReady)
 		{
 			if(typeof(require) != 'function') return;
@@ -170,6 +204,11 @@ var Amslib = my.Amslib = my.Class({
 			},Amslib.loader[name]);
 		},
 		
+		/**
+		 * 	method:	hasJS
+		 *
+		 * 	todo: write documentation
+		 */
 		hasJS: function(name,callback)
 		{
 			if(typeof name == "string") name = new Array(name);
@@ -196,6 +235,11 @@ var Amslib = my.Amslib = my.Class({
 			return false;
 		},
 		
+		/**
+		 * 	method:	getJSPath
+		 *
+		 * 	todo: write documentation
+		 */
 		getJSPath: function(search,path)
 		{
 			var s = $("script[src*='"+search+"']").attr("src");
@@ -203,6 +247,11 @@ var Amslib = my.Amslib = my.Class({
 			return s && path ? s.split(search)[0] : s;
 		},
 		
+		/**
+		 * 	method:	loadCSS
+		 *
+		 * 	todo: write documentation
+		 */
 		loadCSS: function(file)
 		{
 			$("head").append($("<link/>").attr({rel:"stylesheet",type:"text/css",href: file}));
@@ -226,6 +275,11 @@ var Amslib = my.Amslib = my.Class({
 		////////////////////////////////////////////////////////////////////
 		waitObject:  false,
 		
+		/**
+		 * 	method:	waitUntil
+		 *
+		 * 	todo: write documentation
+		 */
 		waitUntil:  function()
 		{
 			if(Amslib.waitObject == false) Amslib.waitObject = {};
@@ -260,6 +314,11 @@ var Amslib = my.Amslib = my.Class({
 			return w;
 		},
 		
+		/**
+		 * 	method:	waitResolve
+		 *
+		 * 	todo: write documentation
+		 */
 		waitResolve:  function(name)
 		{
 			if(typeof(Amslib.waitObject[name]) == "object"){
@@ -268,6 +327,11 @@ var Amslib = my.Amslib = my.Class({
 		}
 	},	
 	
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
 	constructor: function(parent,name)
 	{
 		this.parent = $(parent) || false;
@@ -289,6 +353,11 @@ var Amslib = my.Amslib = my.Class({
 		return this;
 	},
 	
+	/**
+	 * 	method:	readMVC
+	 *
+	 * 	todo: write documentation
+	 */
 	readMVC: function()
 	{
 		try{
@@ -323,51 +392,148 @@ var Amslib = my.Amslib = my.Class({
 		}
 	},
 	
+	/**
+	 * 	method:	getAmslibName
+	 *
+	 * 	todo: write documentation
+	 */
 	getAmslibName: function()
 	{
 		return this.__amslibName;
 	},
 	
+	/**
+	 * 	method:	getParentNode
+	 *
+	 * 	todo: write documentation
+	 */
 	getParentNode: function()
 	{
 		return this.parent;
 	},
 	
+	/**
+	 * 	method:	bind
+	 *
+	 * 	todo: write documentation
+	 */
 	bind: function(event,callback,live)
 	{
 		this.__events.bind(event,callback);
 	},
 	
+	/**
+	 * 	method:	on
+	 *
+	 * 	todo: write documentation
+	 */
 	on: function(event,callback)
 	{
 		this.__events.on(event,callback);
 	},
 	
+	/**
+	 * 	method:	live
+	 *
+	 * 	todo: write documentation
+	 */
 	live: function(event,callback)
 	{
 		this.on(event,callback);
 	},
 	
+	/**
+	 * 	method:	trigger
+	 *
+	 * 	todo: write documentation
+	 */
 	trigger: function(event,data)
 	{
 		this.__events.trigger(event,[data]);
 	},
 	
 	//	Getter/Setter for the object values
-	setValue: function(name,value){			this.__value.data(name,value);			},
-	getValue: function(name){				return this.__value.data(name);			},
+	/**
+	 * 	method:	setValue
+	 *
+	 * 	todo: write documentation
+	 */
+	setValue: function(name,value){			
+		this.__value.data(name,value);			
+	},
+	
+	/**
+	 * 	method:	getValue
+	 *
+	 * 	todo: write documentation
+	 */
+	getValue: function(name)
+	{				
+		return this.__value.data(name);			
+	},
 	
 	//	Getter/Setter for web services
-	setService: function(name,value){		this.__services.data(name,value);		},
-	getService: function(name){				return this.__services.data(name);		},
+	/**
+	 * 	method:	setService
+	 *
+	 * 	todo: write documentation
+	 */
+	setService: function(name,value)
+	{		
+		this.__services.data(name,value);		
+	},
+	
+	/**
+	 * 	method:	getService
+	 *
+	 * 	todo: write documentation
+	 */
+	getService: function(name)
+	{				
+		return this.__services.data(name);		
+	},
 	
 	//	Getter/Setter for text translations
-	setTranslation: function(name,value){	this.__translation.data(name,value);	},
-	getTranslation: function(name){			return this.__translation.data(name);	},
+	/**
+	 * 	method:	setTranslation
+	 *
+	 * 	todo: write documentation
+	 */
+	setTranslation: function(name,value)
+	{	
+		this.__translation.data(name,value);	
+	},
+	
+	/**
+	 * 	method:	getTranslation
+	 *
+	 * 	todo: write documentation
+	 */
+	getTranslation: function(name)
+	{			
+		return this.__translation.data(name);	
+	},
 	
 	//	Getter/Setter for images
-	setImage: function(name,value){			this.__images.data(name,value);			},
-	getImage: function(name){				return this.__images.data(name);		}
+	/**
+	 * 	method:	setImage
+	 *
+	 * 	todo: write documentation
+	 */
+	setImage: function(name,value)
+	{			
+		this.__images.data(name,value);			
+	},
+	
+	/**
+	 * 	method:	getImage
+	 *
+	 * 	todo: write documentation
+	 */
+	getImage: function(name)
+	{				
+		return this.__images.data(name);		
+	}
 });
 
 $(document).ready(Amslib.autoload);

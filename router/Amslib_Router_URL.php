@@ -36,11 +36,21 @@
  */
 class Amslib_Router_URL
 {
+	/**
+	 * 	method:	getFullURL
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getFullURL()
 	{
 		return Amslib_Router::getPath();
 	}
 	
+	/**
+	 * 	method:	getURL
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getURL($route,$group=NULL)
 	{
 		if(is_array($route)){
@@ -68,21 +78,41 @@ class Amslib_Router_URL
 		return $r;
 	}*/
 	
+	/**
+	 * 	method:	getService
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getService($route,$group=NULL)
 	{
 		return Amslib_Router::getService($route,$group);
 	}
 
+	/**
+	 * 	method:	getServiceURL
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getServiceURL($route,$group=NULL)
 	{
 		return Amslib_Router::getServiceURL($route,$group);
 	}
 	
+	/**
+	 * 	method:	redirectToRoute
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function redirectToRoute($route,$permenant=0)
 	{
 		return self::redirect(self::getURL($route),$permenant);
 	}
 
+	/**
+	 * 	method:	redirect
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function redirect($url,$permenant=0)
 	{
 		$type = $permenant ? 301 : 0;
@@ -90,28 +120,54 @@ class Amslib_Router_URL
 		return Amslib_Website::redirect($url,true,$type);
 	}
 
+	/**
+	 * 	method:	getRouteParam
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getRouteParam($name=NULL,$default="")
 	{
 		return Amslib_Router::getRouteParam($name,$default);
 	}
 
+	/**
+	 * 	method:	getURLParam
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getURLParam($index=NULL,$default="")
 	{
 		return Amslib_Router::getURLParam($index,$default);
 	}
 	
+	/**
+	 * 	method:	decodeURLPairs
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function decodeURLPairs($offset=0)
 	{
 		return Amslib_Router::decodeURLPairs($offset);
 	}
 	
+	/**
+	 * 	method:	externalURL
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function externalURL($url="")
 	{
 		return (isset($_SERVER['HTTPS'])?'https':'http').'://'.$_SERVER['HTTP_HOST'].$url;
 	}
 	
 	//	DEPRECATED METHODS, DO NOT USE THEM
-	static public function getDomain($url=""){
+	/**
+	 * 	method:	getDomain
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function getDomain($url="")
+	{
 		return self::externalURL($url);	
 	}
 }

@@ -38,6 +38,11 @@ class Amslib_Mixin
 {
 	private $mixin = array();
 
+	/**
+	 * 	method:	__call
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __call($name,$args)
 	{
 		if(in_array($name,array_keys($this->mixin))){
@@ -61,6 +66,11 @@ class Amslib_Mixin
 	//			object2 can only call native methods on object1, object0's methods are invisible
 	
 	//	TODO: implement reject+accept, now its just the bare idea
+	/**
+	 * 	method:	addMixin
+	 *
+	 * 	todo: write documentation
+	 */
 	public function addMixin($object,$reject=array(),$accept=array())
 	{
 		if(!is_array($reject)) $reject = array();
@@ -89,6 +99,11 @@ class Amslib_Mixin
 		return $object;
 	}
 
+	/**
+	 * 	method:	getMixin
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getMixin()
 	{
 		return array_keys($this->mixin);

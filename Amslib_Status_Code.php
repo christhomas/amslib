@@ -33,6 +33,11 @@
  */
 class Amslib_Status_Code extends Amslib_Database_MySQL
 {
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct($db=NULL)
 	{
 		parent::__construct(false);
@@ -40,6 +45,11 @@ class Amslib_Status_Code extends Amslib_Database_MySQL
 		if($db) $this->copyConnection($db);
 	}
 
+	/**
+	 * 	method:	getInstance
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function &getInstance($db=NULL)
 	{
 		static $instance = NULL;
@@ -49,6 +59,11 @@ class Amslib_Status_Code extends Amslib_Database_MySQL
 		return $instance;
 	}
 
+	/**
+	 * 	method:	setStatusValue
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setStatusValue($table,$field,$pkid,$pkval,$value)
 	{
 		if($this->getConnectionStatus() == false) return false;
@@ -62,20 +77,35 @@ class Amslib_Status_Code extends Amslib_Database_MySQL
 		return $this->update("$table set $field='$value' where $pkid='$pkval'");
 	}
 
+	/**
+	 * 	method:	setStatusValueByIndent
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setStatusValueByIndent($table,$field,$pkid,$pkval,$ident)
 	{
 		$ident = $this->escape($ident);
-		$value = $this->selectValue("id","id from {$this->table} where ident='$ident' order by id desc",1,true)
+		$value = $this->selectValue("id","id from {$this->table} where ident='$ident' order by id desc",1,true);
 
 		return $this->setStatusValue($table,$field,$pkid,$pkval,$value);
 	}
 
+	/**
+	 * 	method:	setStatusIndentByValue
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setStatusIndentByValue($table,$field,$pkid,$pkval,$value)
 	{
 		$value = $this->escape($value);
 		$ident = $this->selectValue("ident","ident from {$this->table} where id='$value' order by id desc",1,true);
 	}
 
+	/**
+	 * 	method:	getStatusIdentByValue
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getStatusIdentByValue($value)
 	{
 		if($this->getConnectionStatus() == false) return false;
@@ -85,6 +115,11 @@ class Amslib_Status_Code extends Amslib_Database_MySQL
 		return $this->selectValue("ident","ident from {$this->table} where id='$value'",1,true);
 	}
 
+	/**
+	 * 	method:	getStatusValueByIdent
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getStatusValueByIdent($ident)
 	{
 		if($this->getConnectionStatus() == false) return false;
@@ -94,6 +129,11 @@ class Amslib_Status_Code extends Amslib_Database_MySQL
 		return $this->selectValue("id","id from {$this->table} where ident='$ident'",1,true);
 	}
 
+	/**
+	 * 	method:	getStatusByValue
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getStatusByValue($value)
 	{
 		if($this->getConnectionStatus() == false) return false;
@@ -103,6 +143,11 @@ class Amslib_Status_Code extends Amslib_Database_MySQL
 		return $this->select("* from {$this->table} where id='$value'",1,true);
 	}
 
+	/**
+	 * 	method:	getStatusByIdent
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getStatusByIdent($ident)
 	{
 		if($this->getConnectionStatus() == false) return false;

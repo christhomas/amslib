@@ -42,6 +42,11 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 	base:	false,
 	
 	STATIC: {
+		/**
+		 * 	method:	autoload
+		 *
+		 * 	todo: write documentation
+		 */
 		autoload: function()
 		{
 			$(".amslib_urlname_parent.amslib_autoload").each(function(){
@@ -60,6 +65,11 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 		}
 	},
 	
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
 	constructor: function(parent,src,dest)
 	{
 		this.parent	=	$(parent);
@@ -83,16 +93,31 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 		}
 	},
 	
+	/**
+	 * 	method:	updateFromSrc
+	 *
+	 * 	todo: write documentation
+	 */
 	updateFromSrc: function()
 	{
 		this.update(this.src.val());
 	},
 	
+	/**
+	 * 	method:	updateFromDest
+	 *
+	 * 	todo: write documentation
+	 */
 	updateFromDest: function()
 	{
 		this.update(this.dest.val());
 	},
 	
+	/**
+	 * 	method:	update
+	 *
+	 * 	todo: write documentation
+	 */
 	update: function(string)
 	{
 		//	get the string from the data attribute, or return an empty string or an empty string if attribute never existed
@@ -101,6 +126,11 @@ var Amslib_Urlname = my.Amslib_Urlname = my.Class(
 		this.dest.val(this.slugify(baseString+string));
 	},
 	
+	/**
+	 * 	method:	slugify
+	 *
+	 * 	todo: write documentation
+	 */
 	slugify: function(string)
 	{
 		var po = this;

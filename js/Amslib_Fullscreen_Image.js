@@ -42,6 +42,11 @@ var Amslib_Fullscreen_Image = my.Amslib_Fullscreen_Image = my.Class(my.Amslib,
 	resizeNode:	false,
 	
 	STATIC: {
+		/**
+		 * 	method:	autoload
+		 *
+		 * 	todo: write documentation
+		 */
 		autoload: function(){
 			$(Amslib_Fullscreen_Image.options.autoload).each(function(){
 				new Amslib_Fullscreen_Image(this);
@@ -57,6 +62,11 @@ var Amslib_Fullscreen_Image = my.Amslib_Fullscreen_Image = my.Class(my.Amslib,
 		}
 	},
 	
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
 	constructor: function(image,container){
 		Amslib_Fullscreen_Image.Super.call(this,image,Amslib_Fullscreen_Image.options.amslibName);
 		
@@ -69,6 +79,11 @@ var Amslib_Fullscreen_Image = my.Amslib_Fullscreen_Image = my.Class(my.Amslib,
 		this.enable();
 	},
 	
+	/**
+	 * 	method:	enable
+	 *
+	 * 	todo: write documentation
+	 */
 	enable: function()
 	{
 		if(!this.resizeNode)	this.resizeNode = $(document.onresize ? document : window);
@@ -79,6 +94,11 @@ var Amslib_Fullscreen_Image = my.Amslib_Fullscreen_Image = my.Class(my.Amslib,
 		return this;
 	},
 	
+	/**
+	 * 	method:	disable
+	 *
+	 * 	todo: write documentation
+	 */
 	disable: function()
 	{
 		this.resizeNode.off("resize");
@@ -86,6 +106,11 @@ var Amslib_Fullscreen_Image = my.Amslib_Fullscreen_Image = my.Class(my.Amslib,
 		return this;
 	},
 	
+	/**
+	 * 	method:	setImage
+	 *
+	 * 	todo: write documentation
+	 */
 	setImage: function(parent)
 	{
 		parent = parent || this.parent;
@@ -96,6 +121,11 @@ var Amslib_Fullscreen_Image = my.Amslib_Fullscreen_Image = my.Class(my.Amslib,
 		}
 	},
 	
+	/**
+	 * 	method:	resize
+	 *
+	 * 	todo: write documentation
+	 */
 	resize: function() {
 		//	Sometimes, the image doesn't load until very late, causing the ratio calc to fail
 		//	FIXME: this might cause a huge number of calls to a method which will fail everytime

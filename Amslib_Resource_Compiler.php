@@ -45,6 +45,11 @@ class Amslib_Resource_Compiler
 	static protected $cssi	=	array();
 	static protected $css	=	array();
 	
+	/**
+	 * 	method:	addStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function addStylesheet($id,$file,$conditional=NULL,$media=NULL)
 	{
 		if(!$id || !is_string($id) || !$file || !is_string($file)) return;
@@ -60,12 +65,22 @@ class Amslib_Resource_Compiler
 		}
 	}
 	
+	/**
+	 * 	method:	compile
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function compile()
 	{
 		self::compileStylesheet();
 		self::compileJavascript();
 	}
 	
+	/**
+	 * 	method:	compileStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	static protected function compileStylesheet()
 	{
 		self::$stylesheet = array();
@@ -89,22 +104,42 @@ class Amslib_Resource_Compiler
 		}
 	}
 	
+	/**
+	 * 	method:	compileJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	static protected function compileJavascript()
 	{
 
 	}
 	
+	/**
+	 * 	method:	getStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getStylesheet()
 	{
 		return implode("",self::$stylesheet);
 	}
 	
+	/**
+	 * 	method:	removeStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function removeStylesheet($id)
 	{
 		//	TODO: This functionality is broken until I can unify the resource models
 		//unset(self::$stylesheet[$id]);
 	}
 	
+	/**
+	 * 	method:	addJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function addJavascript($id,$file,$conditional=NULL)
 	{
 		if($id && $file){
@@ -118,6 +153,11 @@ class Amslib_Resource_Compiler
 		}	
 	}
 
+	/**
+	 * 	method:	getJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getJavascript()
 	{
 		$output = "";
@@ -139,17 +179,32 @@ class Amslib_Resource_Compiler
 		return $output;
 	}
 	
+	/**
+	 * 	method:	removeJavascript
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function removeJavascript($id)
 	{
 		//	TODO: This functionality is broken until I can unify the resource models		
 		//unset(self::$javascript[$id]);
 	}
 	
+	/**
+	 * 	method:	addGoogleFont
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function addGoogleFont($id,$font,$conditional=NULL)
 	{
 		Amslib_Resource::addStylesheet($id,"http://fonts.googleapis.com/css?$font",$conditional);
 	}
 	
+	/**
+	 * 	method:	removeGoogleFont
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function removeGoogleFont($id)
 	{
 		Amslib_Resource::removeStylesheet($id);

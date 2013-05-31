@@ -34,6 +34,11 @@
  */
 class Amslib_Form
 {
+	/**
+	 * 	method:	selectOptions
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function selectOptions($array,$selected=NULL,$indexText=NULL,$indexValue=NULL,$createAttributes=false)
 	{
 		$options = array();
@@ -69,6 +74,11 @@ class Amslib_Form
 		return implode("",$options);
 	}
 	
+	/**
+	 * 	method:	monthOptions
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function monthOptions($start,$stop,$selected=NULL,$pad=NULL)
 	{
 		if($start < 0 || $start > 12) $start = 12;
@@ -90,11 +100,21 @@ class Amslib_Form
 		return self::selectOptions($months,$selected,"use_key");
 	}
 
+	/**
+	 * 	method:	numericSelectOptions
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function numericSelectOptions($start,$stop,$selected=NULL,$pad=NULL)
 	{
 		return self::numberSequenceToSelectOptions($start,$stop,$selected,$pad);
 	}
 
+	/**
+	 * 	method:	numberSequenceToSelectOptions
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function numberSequenceToSelectOptions($start,$stop,$selected=NULL,$pad=NULL)
 	{
 		$options = "";
@@ -112,16 +132,31 @@ class Amslib_Form
 		return $options;
 	}
 
+	/**
+	 * 	method:	selectRadioButton
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function selectRadioButton($value,$compare)
 	{
 		return ($value == $compare) ? "checked='checked'" : "";
 	}
 
+	/**
+	 * 	method:	selectCheckbox
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function selectCheckbox($value,$compare)
 	{
 		return ($value == $compare) ? "checked='checked'" : "";
 	}
 
+	/**
+	 * 	method:	getFilename
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getFilename($name)
 	{
 		$file = Amslib::filesParam($name);
@@ -129,6 +164,11 @@ class Amslib_Form
 		return ($file && isset($file["name"])) ? $file["name"] : false;
 	}
 
+	/**
+	 * 	method:	getTempFilename
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getTempFilename($name)
 	{
 		$file = Amslib::filesParam($name);
@@ -137,6 +177,11 @@ class Amslib_Form
 	}
 
 	//	DEPRECATED METHOD: use selectOptions() instead
+	/**
+	 * 	method:	arrayToSelectOptions
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function arrayToSelectOptions($array,$keyText,$keyValue,$selected=NULL)
 	{
 		return self::selectOptions($array,$selected,$keyText,$keyValue);

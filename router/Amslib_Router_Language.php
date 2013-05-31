@@ -46,6 +46,11 @@ class Amslib_Router_Language
 	protected static $sessionKey	=	"Amslib_Router_Language";
 	
 	//	If there was a language passed, make sure it's one of those supported
+	/**
+	 * 	method:	sanitise
+	 *
+	 * 	todo: write documentation
+	 */
 	protected static function sanitise($langName=NULL,$langCode=NULL)
 	{
 		//	Detect by language name (en, de, fr, es, pt, cat, etc, etc)
@@ -62,11 +67,21 @@ class Amslib_Router_Language
 		return self::$default;
 	}
 	
+	/**
+	 * 	method:	setSessionKey
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function setSessionKey($name)
 	{
 		self::$sessionKey = $name;
 	}
 	
+	/**
+	 * 	method:	add
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function add($langCode,$langName,$default=false)
 	{
 		self::$supported[$langCode] = $langName;
@@ -84,6 +99,11 @@ class Amslib_Router_Language
 	 * Extract from the $path a language embedded as the first part of the url, if there is one, you need
 	 * to override the session language so the page will render in the correct language, this is also
 	 * used in the construction of urls to show in the pages
+	 */
+	/**
+	 * 	method:	extract
+	 *
+	 * 	todo: write documentation
 	 */
 	public static function extract($path)
 	{
@@ -106,6 +126,11 @@ class Amslib_Router_Language
 		return $path;
 	}
 	
+	/**
+	 * 	method:	execute
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function execute($langName=NULL)
 	{
 		//	NOTE: You should only enable the system if there are languages added to it.
@@ -130,41 +155,81 @@ class Amslib_Router_Language
 		self::$current = &$_SESSION[self::$sessionKey];
 	}
 	
+	/**
+	 * 	method:	enable
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function enable()
 	{
 		self::$enabled = true;
 	}
 	
+	/**
+	 * 	method:	disable
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function disable()
 	{
 		self::$enabled = false;
 	}
 	
+	/**
+	 * 	method:	set
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function set($langName)
 	{
 		self::$current = self::sanitise($langName);
 	}
 	
+	/**
+	 * 	method:	setCode
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function setCode($langCode)
 	{
 		self::$current = self::sanitise(NULL,$langCode);
 	}
 
+	/**
+	 * 	method:	getName
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function getName()
 	{
 		return self::$current;
 	}
 	
+	/**
+	 * 	method:	getCode
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function getCode()
 	{
 		return array_search(self::$current,self::$supported);	
 	}
 	
+	/**
+	 * 	method:	push
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function push()
 	{
 		self::$push = self::$current;
 	}
 	
+	/**
+	 * 	method:	pop
+	 *
+	 * 	todo: write documentation
+	 */
 	public static function pop()
 	{
 		self::$current = self::$push;

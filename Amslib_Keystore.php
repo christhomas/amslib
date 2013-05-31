@@ -36,6 +36,11 @@ class Amslib_Keystore
 {
 	protected static $store = array();
 
+	/**
+	 * 	method:	set
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function set($name,$value)
 	{
 		if(!is_string($name)) return NULL;
@@ -45,11 +50,21 @@ class Amslib_Keystore
 		return $value;
 	}
 
+	/**
+	 * 	method:	has
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function has($name)
 	{
 		return (isset(self::$store[$name])) ? true : false;
 	}
 
+	/**
+	 * 	method:	get
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function add($name,$value)
 	{
 		if(!isset(self::$store[$name])) self::$store[$name] = array();
@@ -61,11 +76,21 @@ class Amslib_Keystore
 		return self::get($name);
 	}
 
+	/**
+	 * 	method:	get
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function get($name)
 	{
 		return (isset(self::$store[$name])) ? self::$store[$name] : NULL;
 	}
 
+	/**
+	 * 	method:	getAll
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getAll()
 	{
 		return self::$store;

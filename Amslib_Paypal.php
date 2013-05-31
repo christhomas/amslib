@@ -107,6 +107,11 @@ class Amslib_Paypal
 		$this->setAmountTotal($amount);
 	}
 	
+	/**
+	 * 	method:	checkRequiredFields
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function checkRequiredFields()
 	{
 		switch($this->command){
@@ -126,6 +131,11 @@ class Amslib_Paypal
 		}
 	}
 	
+	/**
+	 * 	method:	collapseParameters
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function collapseParameters()
 	{
 		//	Collapse all the parameters set manually
@@ -137,6 +147,11 @@ class Amslib_Paypal
 		}
 	}	
 	
+	/**
+	 * 	method:	decodeResponse
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function decodeResponse($response)
 	{
 		if($response == false) return false;
@@ -155,7 +170,12 @@ class Amslib_Paypal
 			return ($this->getResponse("ACK") == "Success") ? true : false;
 		}
 	}
-		
+	
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		$this->initialise();
@@ -163,17 +183,32 @@ class Amslib_Paypal
 		$this->setDebug(false);
 	}
 	
+	/**
+	 * 	method:	setDebug
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setDebug($state)
 	{
 		$this->debug = $state;
 	}
 	
+	/**
+	 * 	method:	initialise
+	 *
+	 * 	todo: write documentation
+	 */
 	public function initialise()
 	{
 		$this->params		=	array();
 		$this->products		=	array();
 	}
 	
+	/**
+	 * 	method:	setAPIDetails
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setAPIDetails($username,$password,$signature)
 	{
 		$this->set("user",		urlencode($username));
@@ -181,18 +216,33 @@ class Amslib_Paypal
 		$this->set("signature",	urlencode($signature));
 	}
 	
+	/**
+	 * 	method:	enableSandbox
+	 *
+	 * 	todo: write documentation
+	 */
 	public function enableSandbox()
 	{
 		$this->nvpURL		=	"https://api-3t.sandbox.paypal.com/nvp";
 		$this->paypalURL	=	"https://www.sandbox.paypal.com/webscr";
 	}
 	
+	/**
+	 * 	method:	enableLive
+	 *
+	 * 	todo: write documentation
+	 */
 	public function enableLive()
 	{
 		$this->nvpURL		=	"https://api-3t.paypal.com/nvp";
 		$this->paypalURL	=	"https://www.paypal.com/webscr";
 	}
 	
+	/**
+	 * 	method:	setExpressCheckout
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setExpressCheckout($redirect=false)
 	{
 		if(!$redirect){
@@ -207,6 +257,11 @@ class Amslib_Paypal
 		}
 	}
 	
+	/**
+	 * 	method:	getExpressCheckoutDetails
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getExpressCheckoutDetails($token=false)
 	{
 		$this->url		=	$this->nvpURL;
@@ -215,6 +270,11 @@ class Amslib_Paypal
 		$this->setToken($token);		
 	}
 	
+	/**
+	 * 	method:	doExpressCheckout
+	 *
+	 * 	todo: write documentation
+	 */
 	public function doExpressCheckout($token=false,$payerId=false)
 	{
 		$this->url		=	$this->nvpURL;
@@ -228,21 +288,41 @@ class Amslib_Paypal
 		$this->setPaymentAction("sale");
 	}
 	
+	/**
+	 * 	method:	set
+	 *
+	 * 	todo: write documentation
+	 */
 	public function set($name,$value)
 	{
 		$this->params[$name] = $value;
 	}
 	
+	/**
+	 * 	method:	get
+	 *
+	 * 	todo: write documentation
+	 */
 	public function get($name)
 	{
 		return (isset($this->params[$name])) ? $this->params[$name] : false;
 	}
 	
+	/**
+	 * 	method:	setIPAddress
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setIPAddress($address)
 	{
 		$this->set("ipaddress",urlencode($address));
 	}
 	
+	/**
+	 * 	method:	setToken
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setToken($token=false)
 	{
 		if($token == false) $token = $this->getResponse("TOKEN");
@@ -253,6 +333,11 @@ class Amslib_Paypal
 		return true;
 	}
 	
+	/**
+	 * 	method:	setPayerId
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setPayerId($payerId=false)
 	{
 		if($payerId == false) $payerId = $this->getResponse("PAYERID");
@@ -263,6 +348,11 @@ class Amslib_Paypal
 		return true;
 	}
 	
+	/**
+	 * 	method:	addProduct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function addProduct($name,$description,$productId,$quantity,$price)
 	{
 		$num = count($this->products);
@@ -283,6 +373,11 @@ class Amslib_Paypal
 		return $num;
 	}
 	
+	/**
+	 * 	method:	setShippingDetails
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setShippingDetails($personName,$street,$city,$state,$countryCode,$postcode)
 	{
 		$this->set("addroverride",		1);
@@ -298,17 +393,32 @@ class Amslib_Paypal
 		}
 	}
 	
+	/**
+	 * 	method:	setShippingAmount
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setShippingAmount($shippingAmount,$shippingDiscount)
 	{
 		$this->set("shippingamt",$shippingAmount);
 		$this->set("shipdiscamt",$shippingDiscount);
 	}
 	
+	/**
+	 * 	method:	setPhoneNumber
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setPhoneNumber($number)
 	{
 		$this->set("shiptophonenum",$number);
 	}
 	
+	/**
+	 * 	method:	setEmail
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setEmail($email)
 	{
 		$this->set("email",$email);
@@ -361,6 +471,11 @@ class Amslib_Paypal
 		}
 	}
 	
+	/**
+	 * 	method:	setPaymentAction
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setPaymentAction($action)
 	{
 		$allowed = array("sale","offer","authorization");
@@ -370,6 +485,11 @@ class Amslib_Paypal
 		}
 	}
 	
+	/**
+	 * 	method:	setLocaleCode
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setLocaleCode($code)
 	{
 		$allowed = array("AU","DE","FR","GB","IT","ES","JP","US");
@@ -379,6 +499,11 @@ class Amslib_Paypal
 		}
 	}
 	
+	/**
+	 * 	method:	setCurrencyCode
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setCurrencyCode($currencyCode)
 	{
 		$allowed = array(
@@ -395,11 +520,21 @@ class Amslib_Paypal
 		}
 	}
 	
+	/**
+	 * 	method:	setAPIVersion
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setAPIVersion($version)
 	{
 		$this->set("version",urlencode($version));
 	}
 	
+	/**
+	 * 	method:	setAmountTotal
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setAmountTotal($amount)
 	{
 		if(!$amount || !is_numeric($amount)) return false;
@@ -407,6 +542,11 @@ class Amslib_Paypal
 		$this->set("amt",$amount);
 	}
 	
+	/**
+	 * 	method:	setTaxAmount
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setTaxAmount($amount)
 	{
 		if(!$amount || !is_numeric($amount)) return false;
@@ -414,16 +554,31 @@ class Amslib_Paypal
 		$this->set("taxamt",$amount);
 	}
 	
+	/**
+	 * 	method:	setReturnURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setReturnURL($url)
 	{
 		$this->set("returnurl",$url);
 	}
 	
+	/**
+	 * 	method:	setCancelURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setCancelURL($url)
 	{
 		$this->set("cancelurl",$url);
 	}
 	
+	/**
+	 * 	method:	setInsurance
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setInsurance($amount)
 	{
 		if(!$amount || !is_numeric($amount)) return false;
@@ -432,6 +587,11 @@ class Amslib_Paypal
 		$this->set("insuranceamt",$amount);
 	}
 	
+	/**
+	 * 	method:	execute
+	 *
+	 * 	todo: write documentation
+	 */
 	public function execute()
 	{
 		$ch = curl_init();
@@ -466,6 +626,11 @@ class Amslib_Paypal
 		return $this->decodeResponse($r);
 	}
 	
+	/**
+	 * 	method:	getResponse
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getResponse($field=false)
 	{
 		if($field){
@@ -475,6 +640,11 @@ class Amslib_Paypal
 		return $this->response;
 	}
 	
+	/**
+	 * 	method:	getError
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getError()
 	{
 		$r = $this->getResponse();
@@ -485,6 +655,11 @@ class Amslib_Paypal
 		}
 	}
 	
+	/**
+	 * 	method:	redirect
+	 *
+	 * 	todo: write documentation
+	 */
 	public function redirect($command=false)
 	{
 		if($command != false) $this->command = $command;

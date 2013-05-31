@@ -44,6 +44,11 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 	currentPosition:	false,
 	
 	STATIC: {
+		/**
+		 * 	method:	autoload
+		 *
+		 * 	todo: write documentation
+		 */
 		autoload: function(){
 			Amslib_Google_Map.instances = $(Amslib_Google_Map.options.autoload);
 			
@@ -60,6 +65,11 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 		instances: false
 	},
 	
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
 	constructor: function(parent){
 		Amslib_Google_Map.Super.call(this,parent,Amslib_Google_Map.options.amslibName);
 
@@ -78,11 +88,21 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 		Amslib.waitResolve("Amslib_Google_Map");
 	},
 	
+	/**
+	 * 	method:	isEnabled
+	 *
+	 * 	todo: write documentation
+	 */
 	isEnabled: function(key)
 	{
 		return this.config.indexOf(key) >= 0;
 	},
 	
+	/**
+	 * 	method:	getCurrentPosition
+	 *
+	 * 	todo: write documentation
+	 */
 	getCurrentPosition: function()
 	{
 		var $this = this;
@@ -95,11 +115,21 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 		);
 	},
 	
+	/**
+	 * 	method:	disableGeolocation
+	 *
+	 * 	todo: write documentation
+	 */
 	disableGeolocation: function()
 	{
 		//	NOTE: I am not sure whether I want to, or am able to, disable this
 	},
 	
+	/**
+	 * 	method:	updateGeolocationPosition
+	 *
+	 * 	todo: write documentation
+	 */
 	updateGeolocationPosition: function(position)
 	{
 		var marker = this.createMarker(position.coords.latitude,position.coords.longitude);
@@ -116,6 +146,11 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 		});
 	},	
 	
+	/**
+	 * 	method:	createMap
+	 *
+	 * 	todo: write documentation
+	 */
 	createMap: function()
 	{
 		this.mapObject = new google.maps.Map(this.parent[0],{
@@ -126,6 +161,11 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 		this.resizeMap();
 	},
 	
+	/**
+	 * 	method:	centerMap
+	 *
+	 * 	todo: write documentation
+	 */
 	centerMap: function(marker)
 	{
 		if(!marker) return false;
@@ -140,11 +180,21 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 		this.resizeMap();	
 	},
 	
+	/**
+	 * 	method:	resizeMap
+	 *
+	 * 	todo: write documentation
+	 */
 	resizeMap: function()
 	{
 		google.maps.event.trigger(this.mapObject, "resize");
 	},
 	
+	/**
+	 * 	method:	setZoom
+	 *
+	 * 	todo: write documentation
+	 */
 	setZoom: function(level)
 	{
 		this.mapObject.setZoom(level);
@@ -152,6 +202,11 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 		this.resizeMap();
 	},
 	
+	/**
+	 * 	method:	createMarker
+	 *
+	 * 	todo: write documentation
+	 */
 	createMarker: function(lat,lng)
 	{
 		var position = new google.maps.LatLng(lat,lng);
@@ -176,6 +231,11 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 		return m;
 	},
 	
+	/**
+	 * 	method:	clearMarkers
+	 *
+	 * 	todo: write documentation
+	 */
 	clearMarkers: function()
 	{
 		for(var a=0,len=this.marker.length;a<len;a++){

@@ -62,6 +62,11 @@ class Amslib_Plugin_Service
 	static protected $handler		=	NULL;
 	static protected $var			=	array();
 
+	/**
+	 * 	method:	getHandlerData
+	 *
+	 * 	todo: write documentation
+	 */
 	static protected function getHandlerData($plugin,$default,$key)
 	{
 		if(!self::$handler){
@@ -75,6 +80,11 @@ class Amslib_Plugin_Service
 			: $default;
 	}
 
+	/**
+	 * 	method:	storeData
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function storeData($status)
 	{
 		$this->session[self::SC] = $status;
@@ -92,6 +102,11 @@ class Amslib_Plugin_Service
 		$this->data = array();
 	}
 
+	/**
+	 * 	method:	successPOST
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function successPOST()
 	{
 		$_SESSION[self::SR] = $this->session;
@@ -99,6 +114,11 @@ class Amslib_Plugin_Service
 		Amslib_Website::redirect($this->getSuccessURL(),true);
 	}
 
+	/**
+	 * 	method:	failurePOST
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function failurePOST()
 	{
 		$_SESSION[self::SR] = $this->session;
@@ -106,16 +126,31 @@ class Amslib_Plugin_Service
 		Amslib_Website::redirect($this->getFailureURL(),true);
 	}
 
+	/**
+	 * 	method:	successAJAX
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function successAJAX()
 	{
 		Amslib_Website::outputJSON($this->session,true);
 	}
 
+	/**
+	 * 	method:	failureAJAX
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function failureAJAX()
 	{
 		Amslib_Website::outputJSON($this->session,true);
 	}
 
+	/**
+	 * 	method:	sanitiseURL
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function sanitiseURL($url)
 	{
 		//	Capture the http:// part so you can replace it afterwards
@@ -124,6 +159,11 @@ class Amslib_Plugin_Service
 		return $http.Amslib_File::reduceSlashes(str_replace("http://","",$url));
 	}
 
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		//	FIXME: we are hardcoding a route "home" which might not exist, this could be a bad idea
@@ -143,6 +183,11 @@ class Amslib_Plugin_Service
 		$this->setAjax(Amslib::postParam("return_ajax",false));
 	}
 	
+	/**
+	 * 	method:	getInstance
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function &getInstance()
 	{
 		static $instance = NULL;
@@ -152,6 +197,11 @@ class Amslib_Plugin_Service
 		return $instance;
 	}
 
+	/**
+	 * 	method:	setAjax
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setAjax($status)
 	{
 		$this->isAJAX		=	$status;
@@ -162,32 +212,62 @@ class Amslib_Plugin_Service
 		if($status) $this->hideFeedback();
 	}
 
+	/**
+	 * 	method:	setSuccessURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setSuccessURL($url)
 	{
 		$this->successURL = $this->sanitiseURL($url);
 	}
 
+	/**
+	 * 	method:	getSuccessURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getSuccessURL()
 	{
 		return $this->successURL;
 	}
 
+	/**
+	 * 	method:	setFailureURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setFailureURL($url)
 	{
 		$this->failureURL = $this->sanitiseURL($url);
 	}
 
+	/**
+	 * 	method:	getFailureURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getFailureURL()
 	{
 		return $this->failureURL;
 	}
 
+	/**
+	 * 	method:	setReturnURL
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setReturnURL($url)
 	{
 		$this->setSuccessURL($url);
 		$this->setFailureURL($url);
 	}
 
+	/**
+	 * 	method:	setVar
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setVar($key,$data)
 	{
 		if($key == NULL && is_array($data)){
@@ -197,6 +277,11 @@ class Amslib_Plugin_Service
 		}
 	}
 
+	/**
+	 * 	method:	getVar
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getVar($key=NULL)
 	{
 		if($key == NULL) return self::$var;
@@ -206,16 +291,31 @@ class Amslib_Plugin_Service
 			: NULL;
 	}
 
+	/**
+	 * 	method:	showFeedback
+	 *
+	 * 	todo: write documentation
+	 */
 	public function showFeedback()
 	{
 		$this->session[self::FB] = true;
 	}
 
+	/**
+	 * 	method:	hideFeedback
+	 *
+	 * 	todo: write documentation
+	 */
 	public function hideFeedback()
 	{
 		$this->session[self::FB] = false;
 	}
 
+	/**
+	 * 	method:	setHandler
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setHandler($plugin,$object,$method,$source,$record,$global,$failure)
 	{
 		//	here we store handlers loaded from the service path before we execute them.
@@ -230,6 +330,11 @@ class Amslib_Plugin_Service
 		);
 	}
 
+	/**
+	 * 	method:	runHandler
+	 *
+	 * 	todo: write documentation
+	 */
 	public function runHandler($object,$method)
 	{
 		if(method_exists($object,$method)){
@@ -250,6 +355,11 @@ class Amslib_Plugin_Service
 	//	NOTE: the problem is that service handlers are not programmed to understand the extra attributes
 	//	NOTE: the other problem is that service import/export definitions are not programmed as well
 	//	NOTE: so the idea will have to stay here until I can dedicate time to implementing those.
+	/**
+	 * 	method:	runManagedHandler
+	 *
+	 * 	todo: write documentation
+	 */
 	public function runManagedHandler($rules,$object,$method)
 	{
 		//	This method needs to exist on the object to retrieve the validation rules
@@ -286,6 +396,11 @@ class Amslib_Plugin_Service
 		return false;
 	}
 
+	/**
+	 * 	method:	execute
+	 *
+	 * 	todo: write documentation
+	 */
 	public function execute()
 	{
 		$state = false;
@@ -316,6 +431,11 @@ class Amslib_Plugin_Service
 		die("FAILURE[p:".get_class($plugin)."][m:$method]-> All services should terminate with redirect or json");
 	}
 
+	/**
+	 * 	method:	pluginToName
+	 *
+	 * 	todo: write documentation
+	 */
 	public function pluginToName($plugin)
 	{
 		if(is_object($plugin)) $plugin = get_class($plugin);
@@ -324,11 +444,21 @@ class Amslib_Plugin_Service
 		return $plugin;
 	}
 
+	/**
+	 * 	method:	setValidationData
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setValidationData($plugin,$data)
 	{
 		$this->data[$this->pluginToName($plugin)][self::VD] = $data;
 	}
 
+	/**
+	 * 	method:	setValidationErrors
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setValidationErrors($plugin,$errors)
 	{
 		if(empty($errors)){
@@ -339,11 +469,21 @@ class Amslib_Plugin_Service
 	}
 
 	//	NOTE: Be careful with this method, you could be pushing secret data
+	/**
+	 * 	method:	setDatabaseErrors
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setDatabaseErrors($plugin,$errors)
 	{
 		if(!empty($errors)) $this->data[$this->pluginToName($plugin)][self::DB] = $errors;
 	}
 
+	/**
+	 * 	method:	setData
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setData($plugin,$name,$value)
 	{
 		$plugin = $this->pluginToName($plugin);
@@ -355,6 +495,11 @@ class Amslib_Plugin_Service
 		}
 	}
 	
+	/**
+	 * 	method:	getData
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getData($plugin,$name=NULL,$default=NULL)
 	{
 		$plugin = $this->pluginToName($plugin);
@@ -368,6 +513,11 @@ class Amslib_Plugin_Service
 		return isset($plugin[self::SD][$name]) ? $plugin[self::SD][$name] : $default;
 	}
 	
+	/**
+	 * 	method:	deleteData
+	 *
+	 * 	todo: write documentation
+	 */
 	public function deleteData($plugin,$name=NULL)
 	{
 		$plugin	=	$this->pluginToName($plugin);
@@ -391,6 +541,11 @@ class Amslib_Plugin_Service
 		return $copy;
 	}
 	
+	/**
+	 * 	method:	moveData
+	 *
+	 * 	todo: write documentation
+	 */
 	public function moveData($dst,$src,$name=NULL)
 	{
 		$this->setData(
@@ -400,6 +555,11 @@ class Amslib_Plugin_Service
 		);
 	}
 
+	/**
+	 * 	method:	setError
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setError($plugin,$name,$value)
 	{
 		$plugin = $this->pluginToName($plugin);
@@ -411,6 +571,11 @@ class Amslib_Plugin_Service
 		}
 	}
 
+	/**
+	 * 	method:	getError
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getError($plugin=NULL,$name=NULL)
 	{
 		if($plugin === NULL){
@@ -439,11 +604,21 @@ class Amslib_Plugin_Service
 	/*****************************************************************************
 	 * 	STATIC API TO RETRIEVE SESSION DATA
 	*****************************************************************************/
+	/**
+	 * 	method:	displayFeedback
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function displayFeedback()
 	{
 		return self::$serviceData[self::FB];
 	}
 
+	/**
+	 * 	method:	hasData
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function hasData($remove=true)
 	{
 		if(self::$serviceData === NULL || $remove == false) self::$serviceData = Amslib::sessionParam(self::SR,false,$remove);
@@ -451,16 +626,31 @@ class Amslib_Plugin_Service
 		return self::$serviceData ? true : false;
 	}
 
+	/**
+	 * 	method:	getRawData
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getRawData()
 	{
 		return self::$serviceData;
 	}
 
+	/**
+	 * 	method:	countHandler
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function countHandler()
 	{
 		return count(self::$serviceData[self::HD]);
 	}
 
+	/**
+	 * 	method:	processHandler
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function processHandler($id=0)
 	{
 		self::$handler = isset(self::$serviceData[self::HD][$id]) ? self::$serviceData[self::HD][$id] : array();
@@ -469,6 +659,11 @@ class Amslib_Plugin_Service
 		return array_keys(Amslib_Array::valid(self::$handler));
 	}
 
+	/**
+	 * 	method:	getStatus
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getStatus()
 	{
 		$success = isset(self::$serviceData[self::SC]) ? self::$serviceData[self::SC] : false;
@@ -479,21 +674,41 @@ class Amslib_Plugin_Service
 		return $success;
 	}
 
+	/**
+	 * 	method:	getValidationData
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getValidationData($plugin,$default=array())
 	{
 		return Amslib_Array::valid(self::getHandlerData($plugin,$default,self::VD));
 	}
 
+	/**
+	 * 	method:	getValidationErrors
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getValidationErrors($plugin,$default=false)
 	{
 		return self::getHandlerData($plugin,$default,self::VE);
 	}
 
+	/**
+	 * 	method:	getServiceData
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getServiceErrors($plugin,$default=false)
 	{
 		return self::getHandlerData($plugin,$default,self::SE);
 	}
 
+	/**
+	 * 	method:	getServiceData
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getServiceData($plugin,$default=false,$key=false)
 	{
 		$data = self::getHandlerData($plugin,$default,self::SD);
@@ -502,16 +717,25 @@ class Amslib_Plugin_Service
 	}
 
 	//	NOTE: Be careful with this method, it could leak secret data if you didnt sanitise it properly of sensitive data
+	/**
+	 * 	method:	getDatabaseErrors
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getDatabaseErrors($plugin,$default=false)
 	{
 		return self::getHandlerData($plugin,$default,self::DB);
 	}
 
+	/**
+	 * 	method:	getDatabaseMessage
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function getDatabaseMessage($plugin,$default=false)
 	{
 		return Amslib_Array::filterKey(self::getDatabaseErrors($plugin,$default),array("db_error","db_location"));
 	}
-	
 	
 	//////////////////////////////////////////////////////////////////
 	//	DEPRECATED METHODS

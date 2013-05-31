@@ -55,8 +55,14 @@ if(amslib){
 	Amslib.loadJS("jquery.ui",amslib+"/util/jquery-ui-1.8.14.custom.min.js");
 };
 
-var Amslib_JQuery_UI = my.Amslib_JQuery_UI = my.Class(Amslib,{
+var Amslib_JQuery_UI = my.Amslib_JQuery_UI = my.Class(Amslib,
+{
 	STATIC:{
+		/**
+		 * 	method:	autoload
+		 *
+		 * 	todo: write documentation
+		 */
 		autoload: function(){
 			var jqui = new Amslib_JQuery_UI();
 			
@@ -76,11 +82,21 @@ var Amslib_JQuery_UI = my.Amslib_JQuery_UI = my.Class(Amslib,{
 		}
 	},
 	
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
 	constructor: function(parent)
 	{
 		Amslib_JQuery_UI.Super.call(this,$(document),Amslib_JQuery_UI.options.amslibName);
 	},
 	
+	/**
+	 * 	method:	setupDatepicker
+	 *
+	 * 	todo: write documentation
+	 */
 	setupDatepicker: function(parent)
 	{
 		var o = $.extend({}, Amslib_JQuery_UI.datepicker);

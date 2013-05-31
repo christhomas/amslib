@@ -71,21 +71,41 @@ class Amslib_Plugin
 	//	The path prefixes of each component type
 	protected $prefix = array();
 
+	/**
+	 * 	method:	setComponent
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function setComponent($component,$directory,$prefix)
 	{
 		$this->prefix[$component] = "/$directory/$prefix";
 	}
 
+	/**
+	 * 	method:	getComponent
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getComponent($component,$name)
 	{
 		return $this->location.$this->prefix[$component]."$name.php";
 	}
 
+	/**
+	 * 	method:	getPackageFilename
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getPackageFilename()
 	{
 		return $this->location."/package.xml";
 	}
 
+	/**
+	 * 	method:	findResource
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function findResource($resource,$absolute=false)
 	{
 		//	If the resource has an attribute "absolute" don't process it, return it directly
@@ -135,6 +155,11 @@ class Amslib_Plugin
 		return false;
 	}
 
+	/**
+	 * 	method:	process
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function process()
 	{
 		$this->api = $this->createAPI();
@@ -194,6 +219,11 @@ class Amslib_Plugin
 
 	//	NOTE: hmmmm, I really hate this code....I am not 100% sure what it does
 	//	NOTE: investigate a way to remove this code and/or improve it to the point where it's logical again
+	/**
+	 * 	method:	installLanguages
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function installLanguages($name,$lang)
 	{
 		foreach($lang["language"] as $langCode){
@@ -207,6 +237,11 @@ class Amslib_Plugin
 		}
 	}
 
+	/**
+	 * 	method:	createObject
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function createObject(&$object,$singleton=false,$dieOnError=false)
 	{
 		if(!$object || empty($object)) return false;
@@ -239,6 +274,11 @@ class Amslib_Plugin
 		return $cache;
 	}
 
+	/**
+	 * 	method:	createAPI
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function createAPI()
 	{
 		//	Create the API object
@@ -255,6 +295,11 @@ class Amslib_Plugin
 		return $api;
 	}
 
+	/**
+	 * 	method:	createTranslator
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function createTranslator(&$config)
 	{
 		if(isset($config["cache"])) return $config["cache"];
@@ -284,11 +329,21 @@ class Amslib_Plugin
 		return $translator;
 	}
 
+	/**
+	 * 	method:	initialisePlugin
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function initialisePlugin()
 	{
 		/* do nothing by default */
 	}
 	
+	/**
+	 * 	method:	finalisePlugin
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function finalisePlugin()
 	{
 		$api = $this->getAPI();
@@ -306,6 +361,11 @@ class Amslib_Plugin
 		}
 	}
 
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		$this->search = array(
@@ -328,6 +388,11 @@ class Amslib_Plugin
 	}
 
 	//	Type 1 data transfers
+	/**
+	 * 	method:	transferData
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function transferData($src,$dst,$key,$value,$move)
 	{
 		if(!$dst || !$src) return;
@@ -337,6 +402,11 @@ class Amslib_Plugin
 	}
 
 	//	Type 2 data transfers
+	/**
+	 * 	method:	transferData2
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function transferData2($src,$dst,$key,$value,$move)
 	{
 		if(!$dst || !$src) return;
@@ -349,6 +419,11 @@ class Amslib_Plugin
 		if($move) $src->removeConfig($key,$value);
 	}
 
+	/**
+	 * 	method:	transfer
+	 *
+	 * 	todo: write documentation
+	 */
 	public function transfer()
 	{
 		//	Process all child transfers before the parents
@@ -446,6 +521,11 @@ class Amslib_Plugin
 		}
 	}
 
+	/**
+	 * 	method:	getAttributeArray
+	 *
+	 * 	todo: write documentation
+	 */
 	protected function getAttributeArray($node,$array=array())
 	{
 		foreach($node->attributes as $k=>$v) $array[$k] = $v->nodeValue;
@@ -453,6 +533,11 @@ class Amslib_Plugin
 		return $array;
 	}
 
+	/**
+	 * 	method:	config
+	 *
+	 * 	todo: write documentation
+	 */
 	public function config($name,$location)
 	{
 		$this->isReady	=	false;
@@ -674,6 +759,11 @@ class Amslib_Plugin
 		return $this->isReady;
 	}
 
+	/**
+	 * 	method:	load
+	 *
+	 * 	todo: write documentation
+	 */
 	public function load()
 	{
 		if($this->isLoaded) return $this->api;
@@ -704,6 +794,11 @@ class Amslib_Plugin
 		return false;
 	}
 
+	/**
+	 * 	method:	setConfig
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setConfig($key,$value)
 	{
 		//	This is important, because otherwise values imported/exported through transfer() will not execute in process()
@@ -730,6 +825,11 @@ class Amslib_Plugin
 		}
 	}
 
+	/**
+	 * 	method:	getConfig
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getConfig($key,$name=NULL)
 	{
 		switch($key){
@@ -762,6 +862,11 @@ class Amslib_Plugin
 		return false;
 	}
 
+	/**
+	 * 	method:	removeConfig
+	 *
+	 * 	todo: write documentation
+	 */
 	public function removeConfig($type,$id=NULL)
 	{
 		if($id === NULL){
@@ -771,41 +876,81 @@ class Amslib_Plugin
 		}
 	}
 
+	/**
+	 * 	method:	getLocation
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getLocation()
 	{
 		return $this->location;
 	}
 
+	/**
+	 * 	method:	getName
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getName()
 	{
 		return $this->name;
 	}
 
+	/**
+	 * 	method:	getAPI
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getAPI()
 	{
 		return $this->api;
 	}
 
+	/**
+	 * 	method:	setAPI
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setAPI($api)
 	{
 		$this->api = $api;
 	}
 
+	/**
+	 * 	method:	getModel
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getModel()
 	{
 		return $this->api->getModel();
 	}
 
+	/**
+	 * 	method:	setModel
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setModel($model)
 	{
 		$this->api->setModel($model);
 	}
 
+	/**
+	 * 	method:	setPath
+	 *
+	 * 	todo: write documentation
+	 */
 	static protected function setPath($name,$path)
 	{
 		self::$path[$name] = $path;
 	}
 
+	/**
+	 * 	method:	expandPath
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function expandPath($path)
 	{
 		//	Loop through all the paths given in the htaccess file and attempt to replace them
@@ -821,6 +966,11 @@ class Amslib_Plugin
 		return Amslib_File::reduceSlashes($path);
 	}
 
+	/**
+	 * 	method:	getInstance
+	 *
+	 * 	todo: write documentation
+	 */
 	static public function &getInstance()
 	{
 		static $instance = NULL;

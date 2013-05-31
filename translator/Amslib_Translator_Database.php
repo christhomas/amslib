@@ -40,6 +40,11 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 	protected $database;
 	protected $table;
 	
+	/**
+	 * 	method:	__construct
+	 *
+	 * 	todo: write documentation
+	 */
 	public function __construct()
 	{
 		parent::__construct();
@@ -48,11 +53,21 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 		$this->table	=	NULL;
 	}
 	
+	/**
+	 * 	method:	setLocation
+	 *
+	 * 	todo: write documentation
+	 */
 	public function setLocation($location)
 	{
 		$this->location = $location;
 	}
-		
+
+	/**
+	 * 	method:	load
+	 *
+	 * 	todo: write documentation
+	 */
 	public function load()
 	{	
 		if($this->language)
@@ -75,6 +90,11 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 		return false;
 	}
 	
+	/**
+	 * 	method:	translateExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function translateExtended($n,$i,$l=NULL)
 	{
 		$v = parent::translateExtended($n,$i,$l);
@@ -103,6 +123,11 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 		return stripslashes($v);
 	}
 	
+	/**
+	 * 	method:	learnExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function learnExtended($n,$i,$v,$l=NULL)
 	{			
 		if(!$l) $l = $this->language;
@@ -120,6 +145,11 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 			: $this->database->insert("{$this->table} set value='$v',name='$n',object_id='$id',lang='$l'");
 	}
 	
+	/**
+	 * 	method:	forgetExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function forgetExtended($n,$i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
@@ -133,6 +163,11 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 		return $f && $d;
 	}
 	
+	/**
+	 * 	method:	searchKeyExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function searchKeyExtended($k,$i,$s=false,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
@@ -147,6 +182,11 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 		return Amslib_Array::stripSlashesMulti($this->database->select($query));
 	}
 	
+	/**
+	 * 	method:	searchValueExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function searchValueExtended($v,$i,$s=false,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
@@ -161,6 +201,11 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 		return Amslib_Array::stripSlashesMulti($this->database->select($query));
 	}
 	
+	/**
+	 * 	method:	getKeyListExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getKeyListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
@@ -172,6 +217,11 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 		return Amslib_Array::valid($this->database->select($query));
 	}
 	
+	/**
+	 * 	method:	getValueListExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getValueListExtended($i,$l=NULL)
 	{				
 		if(!$l) $l = $this->language;
@@ -183,6 +233,11 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 		return Amslib_Array::valid($this->database->select($query));		
 	}
 	
+	/**
+	 * 	method:	getListExtended
+	 *
+	 * 	todo: write documentation
+	 */
 	public function getListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;

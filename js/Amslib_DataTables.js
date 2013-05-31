@@ -56,6 +56,11 @@ if(amslib){
  */
 var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 	STATIC: {
+		/**
+		 * 	method:	autoload
+		 *
+		 * 	todo: write documentation
+		 */
 		autoload: function(){
 			$(Amslib_DataTables.options.autoload).each(function(){
 				new Amslib_DataTables(this);
@@ -75,6 +80,11 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 		}
 	},
 	
+	/**
+	 * 	method:	constructor
+	 *
+	 * 	todo: write documentation
+	 */
 	constructor: function(parent)
 	{
 		var o = $.extend({}, Amslib_DataTables.options);
