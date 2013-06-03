@@ -87,9 +87,9 @@ class Amslib_Plugin_Service
 	 */
 	protected function storeData($status)
 	{
-		$this->session[self::SC] = $status;
-		
-		if($this->activeHandler["record"]){			
+		$this->session[self::SC]	= $status;
+
+		if($this->activeHandler["record"]){
 			if(!empty($this->data)){
 				$this->session[self::HD][]	= $this->data;
 			}
@@ -316,7 +316,7 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setHandler($plugin,$object,$method,$source,$record,$global,$failure)
+	public function setHandler($plugin,$object,$method,$source="post",$record=true,$global=false,$failure=true)
 	{
 		//	here we store handlers loaded from the service path before we execute them.
 		$this->handlerList[] = array(
@@ -340,7 +340,7 @@ class Amslib_Plugin_Service
 		if(method_exists($object,$method)){
 			return call_user_func(array($object,$method),$this,$this->source);
 		}
-		
+
 		if(!is_object($object)){
 			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib::var_dump($object));
 		}
@@ -416,14 +416,14 @@ class Amslib_Plugin_Service
 			$state = isset($h["managed"])
 				? $this->runManagedHandler($h["managed"],$h["object"],$h["method"])
 				: $this->runHandler($h["object"],$h["method"]);
-			
+
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($state);
 
 			//	OH NOES! we got brokens, have to stop here, cause something failed :(
 			if($h["failure"] && !$state) break;
 		}
-		
+
 		//	run the failure or success callback to send data back to the receiver
 		call_user_func(array($this,$state ? $this->successCB : $this->failureCB));
 
@@ -462,7 +462,8 @@ class Amslib_Plugin_Service
 	public function setValidationErrors($plugin,$errors)
 	{
 		if(empty($errors)){
-			$errors[] = "No Errors set and array was empty, perhaps validation failed because source was empty?";	
+			$errors["no_errors"] = true;
+			$errors["debug_help"] = "No Errors set and array was empty, perhaps validation failed because source was empty?";	
 		}
 		
 		$this->data[$this->pluginToName($plugin)][self::VE] = $errors;
@@ -479,7 +480,7 @@ class Amslib_Plugin_Service
 		if(!empty($errors)) $this->data[$this->pluginToName($plugin)][self::DB] = $errors;
 	}
 
-	/**
+/**
 	 * 	method:	setData
 	 *
 	 * 	todo: write documentation
@@ -599,6 +600,34 @@ class Amslib_Plugin_Service
 		}
 
 		return $this->data[$plugin][self::SE][$name];
+	}
+	
+	/**
+	 * 	method:	cloneResponse
+	 *
+	 * 	This method will accept an array of data, normally acquired from the Amslib_Plugin_Service
+	 * 	object and import various keys into a new plugin key, ready to use, this is useful when
+	 * 	copying and deleting old data in order to reformat it based on the requirements
+	 */
+	public function cloneResponse($plugin,$data)
+	{
+		$plugin = $this->pluginToName($plugin);
+	
+		if(isset($data["service/data"])){
+			$this->setData($plugin,NULL,$data["service/data"]);
+		}
+			
+		if(isset($data["service/errors"])){
+			$this->setError($plugin,NULL,$data["service/errors"]);
+		}
+			
+		if(isset($data["validation/data"])){
+			$this->setValidationData($plugin,$data["validation/data"]);
+		}
+	
+		if(isset($data["validation/errors"])){
+			$this->setValidationErrors($plugin,$data["validation/errors"]);
+		}
 	}
 
 	/*****************************************************************************
