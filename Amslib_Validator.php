@@ -605,7 +605,7 @@ class Amslib_Validator
 			$bool = (bool)$value;
 		}
 
-		if(isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
+		if(isset($options["limit-input"]) && !in_array($bool,$options["limit-input"])){
 			return "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT_INPUT";
 		}else if(isset($options["limit-output"]) && !in_array($bool,$options["limit-output"])){
 			return "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT_OUTPUT";
