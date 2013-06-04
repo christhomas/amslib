@@ -625,9 +625,8 @@ class Amslib_Plugin_Service
 	 */
 	public function getServiceStatus()
 	{
-		return $this->session[self::SC];
+		return isset($this->session[self::SC]) ? $this->session[self::SC] : NULL;
 	}
-
 
 	/**
 	 * 	method:	cloneResponse
