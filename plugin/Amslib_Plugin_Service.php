@@ -87,14 +87,14 @@ class Amslib_Plugin_Service
 	 */
 	protected function storeData($status)
 	{
-		$this->session[self::SC]	= $status;
+		$this->setServiceStatus($status);
 
 		if($this->activeHandler["record"]){
 			if(!empty($this->data)){
 				$this->session[self::HD][]	= $this->data;
 			}
 		}
-		
+
 		if($this->activeHandler["global"]){
 			$this->setVar(NULL,$this->data);
 		}
@@ -182,7 +182,7 @@ class Amslib_Plugin_Service
 		$this->showFeedback();
 		$this->setAjax(Amslib::postParam("return_ajax",false));
 	}
-	
+
 	/**
 	 * 	method:	getInstance
 	 *
@@ -191,9 +191,9 @@ class Amslib_Plugin_Service
 	static public function &getInstance()
 	{
 		static $instance = NULL;
-	
+
 		if($instance === NULL) $instance = new self();
-	
+
 		return $instance;
 	}
 
@@ -207,7 +207,7 @@ class Amslib_Plugin_Service
 		$this->isAJAX		=	$status;
 		$this->successCB	=	$this->isAJAX ? "successAJAX" : "successPOST";
 		$this->failureCB	=	$this->isAJAX ? "failureAJAX" : "failurePOST";
-		
+
 		//	When doing ajax calls, you should never show feedback on the next available page
 		if($status) $this->hideFeedback();
 	}
@@ -285,7 +285,7 @@ class Amslib_Plugin_Service
 	public function getVar($key=NULL)
 	{
 		if($key == NULL) return self::$var;
-		
+
 		return is_string($key) && strlen($key) && isset(self::$var[$key])
 			? self::$var[$key]
 			: NULL;
@@ -463,9 +463,9 @@ class Amslib_Plugin_Service
 	{
 		if(empty($errors)){
 			$errors["no_errors"] = true;
-			$errors["debug_help"] = "No Errors set and array was empty, perhaps validation failed because source was empty?";	
+			$errors["debug_help"] = "No Errors set and array was empty, perhaps validation failed because source was empty?";
 		}
-		
+
 		$this->data[$this->pluginToName($plugin)][self::VE] = $errors;
 	}
 
@@ -488,14 +488,14 @@ class Amslib_Plugin_Service
 	public function setData($plugin,$name,$value)
 	{
 		$plugin = $this->pluginToName($plugin);
-		
+
 		if($name == NULL && is_array($value)){
-			$this->data[$plugin][self::SD] = $value;	
+			$this->data[$plugin][self::SD] = $value;
 		}else{
 			$this->data[$plugin][self::SD][$name] = $value;
 		}
 	}
-	
+
 	/**
 	 * 	method:	getData
 	 *
@@ -504,16 +504,16 @@ class Amslib_Plugin_Service
 	public function getData($plugin,$name=NULL,$default=NULL)
 	{
 		$plugin = $this->pluginToName($plugin);
-		
+
 		if(!isset($this->data[$plugin])) return $default;
-		
+
 		$plugin = $this->data[$plugin];
-					
+
 		if($name == NULL) return $plugin[self::SD];
 
 		return isset($plugin[self::SD][$name]) ? $plugin[self::SD][$name] : $default;
 	}
-	
+
 	/**
 	 * 	method:	deleteData
 	 *
@@ -523,25 +523,25 @@ class Amslib_Plugin_Service
 	{
 		$plugin	=	$this->pluginToName($plugin);
 		$copy	=	NULL;
-		
+
 		if(isset($this->data[$plugin])){
 			if($name && isset($this->data[$plugin][self::SD][$name])){
 				$copy = $this->data[$plugin][self::SD][$name];
-				
+
 				unset($this->data[$plugin][self::SD][$name]);
-			}else{
+			}else if(!$name){
 				$copy = $this->data[$plugin][self::SD];
-				
+
 				unset($this->data[$plugin][self::SD]);
 			}
-			
+
 			//	clean up empty arrays in the return structure
 			if(empty($this->data[$plugin])) unset($this->data[$plugin]);
 		}
 
 		return $copy;
 	}
-	
+
 	/**
 	 * 	method:	moveData
 	 *
@@ -564,7 +564,7 @@ class Amslib_Plugin_Service
 	public function setError($plugin,$name,$value)
 	{
 		$plugin = $this->pluginToName($plugin);
-		
+
 		if($name == NULL && is_array($value)){
 			$this->data[$plugin][self::SE] = $value;
 		}else{
@@ -601,7 +601,34 @@ class Amslib_Plugin_Service
 
 		return $this->data[$plugin][self::SE][$name];
 	}
-	
+
+	/**
+	 * 	method:	setServiceStatus
+	 *
+	 * 	Set the global success status of the current service being executed
+	 *
+	 * 	parameters:
+	 * 		$status	-	The status to set, will be forced into being boolean true or false
+	 */
+	public function setServiceStatus($status)
+	{
+		$this->session[self::SC] = $status ? true : false;
+	}
+
+	/**
+	 * 	method:	getServiceStatus
+	 *
+	 * 	Retrieve the current global success status of the current service being executed
+	 *
+	 * 	returns:
+	 * 		Boolean true or false, depending on the current status of the service
+	 */
+	public function getServiceStatus()
+	{
+		return $this->session[self::SC];
+	}
+
+
 	/**
 	 * 	method:	cloneResponse
 	 *
@@ -612,19 +639,19 @@ class Amslib_Plugin_Service
 	public function cloneResponse($plugin,$data)
 	{
 		$plugin = $this->pluginToName($plugin);
-	
+
 		if(isset($data["service/data"])){
 			$this->setData($plugin,NULL,$data["service/data"]);
 		}
-			
+
 		if(isset($data["service/errors"])){
 			$this->setError($plugin,NULL,$data["service/errors"]);
 		}
-			
+
 		if(isset($data["validation/data"])){
 			$this->setValidationData($plugin,$data["validation/data"]);
 		}
-	
+
 		if(isset($data["validation/errors"])){
 			$this->setValidationErrors($plugin,$data["validation/errors"]);
 		}
@@ -765,7 +792,7 @@ class Amslib_Plugin_Service
 	{
 		return Amslib_Array::filterKey(self::getDatabaseErrors($plugin,$default),array("db_error","db_location"));
 	}
-	
+
 	//////////////////////////////////////////////////////////////////
 	//	DEPRECATED METHODS
 	//////////////////////////////////////////////////////////////////
