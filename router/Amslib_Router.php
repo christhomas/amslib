@@ -96,7 +96,9 @@ class Amslib_Router
 
 		foreach(self::$url as $u=>$d){
 			if(preg_match("/^".str_replace("/","\/",$u)."/",$url,$matches) && count($matches)){
+				$c = self::$url[$u];
 				$u = $matches[0];
+				self::$url[$u] = $c;
 			}
 			
 			if($url != "/" && strpos($url,$u) === 0 && strlen($u) >= strlen($select)){
