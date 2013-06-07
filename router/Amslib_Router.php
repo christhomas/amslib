@@ -95,6 +95,10 @@ class Amslib_Router
 		$select = "";
 
 		foreach(self::$url as $u=>$d){
+			if(preg_match("/^".str_replace("/","\/",$u)."/",$url,$matches) && count($matches)){
+				$u = $matches[0];
+			}
+			
 			if($url != "/" && strpos($url,$u) === 0 && strlen($u) >= strlen($select)){
 				$select = $u;
 			}else if($url == $u){
@@ -149,6 +153,8 @@ class Amslib_Router
 		$static = self::getRouteByURL(self::$path);
 		//	Find all the matches and store all the route names here
 		$matches = array($static["src_selected"]=>$static);
+
+		//	NOTE: so every route passes through the callback, even though it doesnt ask for it??
 		foreach(self::$callback as $c){
 			$data = call_user_func($c,self::$path);
 
@@ -162,6 +168,7 @@ class Amslib_Router
 			//	set the only result
 			self::$route = current($matches);
 		}else{
+			//	If there was more than one match, we need to search for the longest one and discard the rest
 			$longest = "";
 
 			//	search for the longest match in the array
@@ -299,6 +306,13 @@ class Amslib_Router
 	{
 		if($domain == NULL) $domain = self::$domain;
 		
+		//	if the $name parameter is an array, this code will split the $name parameter to 
+		//	use the first as the route name and all the rest as optional parameters
+		if(is_array($name)){
+			$params	=	array_slice($name,1);
+			$name	=	array_shift($name);
+		}else $params = array();
+		
 		$route = self::getRoute($name,$group,$domain);
 		
 		//	NOTE: I think it's safe to assume sending NULL means you want the default language
@@ -309,7 +323,19 @@ class Amslib_Router
 
 		//	If the url contains a http, don't attempt to make it relative, it's an absolute url
 		//	NOTE: perhaps a better way to solve this is to mark routes as absolute, then I don't have to "best guess"
-		return strpos($url,"http") !== false ? $url : Amslib_Website::rel($url);
+		$url = strpos($url,"http") !== false ? $url : Amslib_Website::rel($url);
+		
+		//	Now we can replace all the wildcard targets in the url with parameters passed into the function
+		$target	=	'(\w+)';
+		$len	=	strlen($target);
+		
+		foreach(Amslib_Array2::valid($params) as $k=>$p){
+			//	I copied this replacement code from: http://stackoverflow.com/revisions/1252710/3
+			$pos = strpos($url,$target);
+			if ($pos !== false) $url = substr_replace($url,$p,$pos,$len);
+		}
+		
+		return $url;
 	}
 
 	/**
