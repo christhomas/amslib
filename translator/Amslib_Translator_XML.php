@@ -138,7 +138,7 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	public function translateExtended($n,$i,$l=NULL)
 	{
 		if(!$this->xpath){
-			trigger_error(__METHOD__.": xpath was invalid, db[$this->database], loc[$this->location], lang[$this->language]");
+			error_log(__METHOD__.": xpath was invalid, db[$this->database], loc[$this->location], lang[$this->language]");
 			return $n;
 		}
 
