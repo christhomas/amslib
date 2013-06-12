@@ -30,17 +30,348 @@
  *	description:  todo, write description
  *
  * 	todo: write documentation
- * 
- * 	deprecated: use the Amslib_Array2 object for everything that has been ported, dont use this in new code unless the method is not available
+ *
+ * 	notes:
+ * 		-	there are sometimes better versions of methods here in Amslib_Array2 object which is being used
+ * 			to explore better ideas, consider those before using versions in this object
  *
  */
 class Amslib_Array
 {
-	//	NOTE: I dont think "filterType" is a good function name for this, when it takes a callback, perhaps filterCallback instead?
+	/**
+	 * 	method:	valid
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	notes:
+	 * 		-	if you return nothing from a method, then catch that into a parameter
+	 * 			pass that parameter into this function, you'll freeze the browser
+	 * 			well done francisco for catching this :)
+	 *
+	 * 		-	Extended this method to support passing in a variable and then asking
+	 * 			for a key instead of passing it directly.  This is useful when you have
+	 * 			a variable but not sure whether the key exists or not, if it doesnt, then
+	 * 			it'll cause an error to go into the log, but testing it by passing the
+	 * 			variable and the key separately means we can handle the situation more gracefully
+	 */
+	static public function valid($array=NULL,$key=NULL)
+	{
+		if($key !== NULL && is_string($key)) $array = isset($array[$key]) ? $array[$key] : array();
+		//	Invalid values return an empty array
+		if(empty($array) || !$array || !is_array($array) || is_null($array)) return array();
+		//	cast objects to arrays
+		if(is_object($array)) $array = (array)$a;
+		//	return the original value
+		return $array;
+	}
+
+	/**
+	 * 	method:	min
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function min($array,$key,$returnKey=NULL)
+	{
+		$min = NULL;
+
+		foreach(self::valid($array) as $item){
+			if($min === NULL) $min = $item;
+
+			if($item[$key] < $min[$key]) $min = $item;
+		}
+
+		return $returnKey !== NULL && isset($min[$returnKey]) ? $min[$returnKey] : $min;
+	}
+
+	/**
+	 * 	method:	max
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function max($array,$key,$returnKey=NULL)
+	{
+		$max = NULL;
+
+		foreach(self::valid($array) as $item){
+			if($max === NULL) $max = $item;
+
+			if($item[$key] > $max[$key]) $max = $item;
+		}
+
+		return $returnKey !== NULL && isset($max[$returnKey]) ? $max[$returnKey] : $max;
+	}
+
+	/**
+	 * 	method:	sort
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function sort($array,$index)
+	{
+		if(count($array) < 2) return $array;
+
+		$left = $right = array();
+
+		reset($array);
+		$pivot_key = key($array);
+		$pivot = array_shift($array);
+
+		foreach($array as $k => $v) {
+			if($v[$index] < $pivot[$index]){
+				$left[$k] = $v;
+			}else{
+				$right[$k] = $v;
+			}
+		}
+
+		return array_merge(self::sort($left,$index), array($pivot_key => $pivot), self::sort($right,$index));
+	}
+
+	/**
+	 * 	method:	pluck
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function pluck($array,$key)
+	{
+		if(!is_array($array)) return array();
+
+		$values = array();
+
+		if(self::isMulti($array)){
+			foreach(self::valid($array) as $item){
+				if(isset($item[$key])) $values[] = $item[$key];
+			}
+		}else{
+			if(isset($array[$key])) $values[] = $array[$key];
+		}
+
+		return $values;
+	}
+
+	/**
+	 * 	method:	unique
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function unique($array,$field)
+	{
+		if(!self::isMulti($array)) return false;
+
+		$v = $unique = array();
+
+		foreach(self::valid($array) as $k=>$a){
+			if(isset($a[$field]) && !in_array($a[$field],$v)){
+				$v[] = $a[$field];
+				$unique[$k] = $a;
+			}
+		}
+
+		return $unique;
+	}
+
+	/**
+	 * 	method:	removeValue
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function removeValue(array $array,$value,$strict=false)
+	{
+		return array_diff_key($array, array_flip(array_keys($array, $value, $strict)));
+	}
+
+	/**
+	 * method: removeKeys
+	 *
+	 * This method is a wrapper around unset to make it easier and less verbose in your code to remove multiple elements
+	 */
+	static public function removeKeys($array,$keys)
+	{
+		if(is_string($keys)) $keys = array($keys);
+
+		$array	=	self::valid($array);
+		$keys	=	self::valid($keys);
+
+		foreach($keys as $k) unset($array[$k]);
+
+		return $array;
+	}
+
+	/**
+	 * 	method:	findKey
+	 *
+	 * 	look into an array and find a key which has a partial match for the key parameter
+	 *
+	 * 	parameters:
+	 * 		$source - The source array to scan
+	 * 		$key - The partial array key to look for
+	 *
+	 * 	returns:
+	 * 		Boolean false if it was not found, or the first match key that was found
+	 */
+	static public function findKey($source,$key)
+	{
+		if(is_array($source)) foreach($source as $k=>$ignore){
+			if(strpos($k,$key) !== false) return $k;
+		}
+
+		return false;
+	}
+
+	/**
+	 * 	method:	reindexByKey
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function reindexByKey($array,$key)
+	{
+		$array = self::valid($array);
+
+		if(!is_string($key)) return $array;
+
+		$copy = array();
+
+		foreach($array as $item) if(isset($item[$key])){
+			$copy[$item[$key]] = $item;
+		}
+
+		return $copy;
+	}
+
+	/**
+	 * 	method:	missingKeys
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	notes:
+	 * 		-	This method allows me to batch fix missing keys in arrays in broken code quickly and easily.
+	 */
+	static public function missingKeys($array,$key,$value=NULL)
+	{
+		if(is_string($key)) $key = array($key);
+
+		foreach($key as $k) if(!isset($array[$k])) $array[$k] = $value;
+
+		return $array;
+	}
+
+	/**
+	 * 	method:	hasKeys
+	 *
+	 *	A function to search an array for keys which exist, or keys which are missing and return true or false depending
+	 *
+	 * 	parameters:
+	 * 		$array		-	The array to search for the present or missing keys
+	 * 		$present	-	A string, or array of strings to search for in the array
+	 * 		$missing	-	A string, or array of strings to search that are missing from the array
+	 *
+	 * 	returns:
+	 * 		NULL, Boolean true or false, depending on the result of various actions
+	 * 		-	If the array is not an array, will return NULL, this is a different error than false,
+	 * 			used to know whether the array was invalid without further effort
+	 * 		-	If you find a key from the $present variable is missing, will return false
+	 * 		-	If you find a key from the $missing various actually exists, will return false
+	 * 		-	If all the $present keys exist and none of the $missing keys exist and the
+	 * 			array was a valid array, will return true
+	 *
+	 * 	notes:
+	 * 		-	$missing is not required, if you do not pass it, it will resolve to NULL and nothing will be searched
+	 * 		-	$present and $missing can be a single string, or an array of strings, the function will internally deal with both
+	 * 		-	perhaps I can investigate the use of array intersections instead of manually looping through and detecting
+	 */
+	static public function hasKeys($array,$present,$missing=NULL)
+	{
+		if(!is_array($array)) return NULL;
+
+		if(is_string($present) && strlen($present))	$present = array($present);
+		if(is_string($missing) && strlen($missing))	$missing = array($missing);
+
+		foreach(self::valid($present) as $k){
+			if(!isset($array[$k])) return false;
+		}
+
+		foreach(self::valid($missing) as $k){
+			if(isset($array[$k])) return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * 	method:	isMulti
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function isMulti($array)
+	{
+		return count($array)!==count($array, COUNT_RECURSIVE);
+	}
+
+	/**
+	 * 	method:	diff
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	notes:
+	 * 		-	I got this function from here: http://stackoverflow.com/questions/8917039/php-checking-difference-between-two-multidim-arrays
+	 * 		-	06/02/2013=> I modified this with the $strict parameter to let me check types as well as values
+	 * 		-	this method will tell you the missing keys and different values in the second array
+	 */
+	static public function diff($array1, $array2, $strict=false)
+	{
+		$return = array();
+
+		if(!is_array($array1) || !is_array($array2)) return $return;
+
+		foreach($array1 as $key => $value)
+		{
+			if(array_key_exists($key, $array2))
+			{
+				if (is_array($value))
+				{
+					$diff = self::diff($value, $array2[$key],$strict);
+
+					if(count($diff)){
+						$return[$key] = $diff;
+					}
+				}else{
+					if((!$strict && $value != $array2[$key]) || ($strict && $value !== $array2[$key])){
+						$return[$key] = $value;
+					}
+				}
+			}else{
+				$return[$key] = $value;
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * 	method:	diffBoth
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	notes:
+	 * 		-	this will give both sets of changes from both arrays compared against each other instead of in one direction only
+	 */
+	static public function diffBoth($array1,$array2,$strict=false)
+	{
+		return array(
+				"src"	=>	$a=self::diff($array1,$array2,$strict),
+				"dst"	=>	$b=self::diff($array2,$array1,$strict),
+				"equal"	=>	count($a) == 0 && count($b) == 0
+		);
+	}
+
 	/**
 	 * 	method:	filterType
 	 *
 	 * 	todo: write documentation
+	 *
+	 *	notes:
+	 *		I dont think "filterType" is a good function name for this, when
+	 *		it takes a callback, perhaps filterCallback instead?
 	 */
 	static public function filterType($array,$callback)
 	{
@@ -289,7 +620,7 @@ class Amslib_Array
 
 		return $items;
 	}
-	
+
 	/**
 	 * 	method:	implodeQuote
 	 *
@@ -301,10 +632,10 @@ class Amslib_Array
 		foreach($array as $s){
 			$spaceList[] = "{$quote}$s{$quote}";
 		}
-	
+
 		return implode($join,$spaceList);
 	}
-	
+
 	/**
 	 * 	method:	implodeQuoteSingle
 	 *
@@ -314,7 +645,7 @@ class Amslib_Array
 	{
 		return self::implodeQuote($array,$join,"'");
 	}
-	
+
 	/**
 	 * 	method:	implodeQuoteDouble
 	 *
@@ -324,20 +655,4 @@ class Amslib_Array
 	{
 		return self::implodeQuote($array,$join,"\"");
 	}
-	
-	/**	DEPRECATED METHODS: use the Amslib_Array2 version of each method, all parameters are identical */
-	static public function valid($array=NULL,$key=NULL){					return Amslib_Array2::valid($array,$key);					}
-	static public function min($array,$key,$returnKey=NULL){					return Amslib_Array2::min($array,$key,$returnKey);			}
-	static public function max($array,$key,$returnKey=NULL){					return Amslib_Array2::max($array,$key,$returnKey);			}	
-	static public function sort($array,$index){								return Amslib_Array2::sort($array,$index);					}
-	static public function pluck($array,$key){								return Amslib_Array2::pluck($array,$key);					}
-	static public function unique($array,$field){							return Amslib_Array2::unique($array,$field);				}	
-	static public function removeValue(array $array,$value,$strict=false){	return Amslib_Array2::removeValue($array,$value,$strict);	}
-	static public function removeKeys($array,$keys){							return Amslib_Array2::removeKeys($array,$keys);			}	
-	static public function reindexByKey($array,$key){						return Amslib_Array2::reindexByKey($array,$key);			}
-	static public function missingKeys($array,$key,$value=NULL){				return Amslib_Array2::missingKeys($array,$key,$value);		}
-	static public function hasKeys($array,$present,$missing=NULL){			return Amslib_Array2::hasKeys($array,$present,$missing);	}
-	static public function isMulti($array){									return Amslib_Array2::isMulti($array);						}
-	static public function diff($array1,$array2,$strict=false){				return Amslib_Array2::diff($array1,$array2,$strict);		}
-	static public function diffBoth($array1,$array2,$strict=false){			return Amslib_Array2::diffBoth($array1,$array2,$strict);	}
 }

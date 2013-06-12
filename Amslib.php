@@ -17,7 +17,7 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
@@ -27,9 +27,26 @@
  *
  *	file:	Amslib.php
  *
- *	description: todo, write description
+ *	description:
+ *		This is a core file within the Amslib framework, it's responsible for the
+ *		autoloading of PHP classes and handling the including of PHP scripts with extra
+ *		functionality on top of the base PHP functionality.
  *
- * 	todo: write documentation
+ *		Using Amslib::autoloader() will create an autoloader which can search more intelligently
+ *		your include path for matching PHP classes and load them
+ *
+ *		Using Amslib::requireFile() will search intelligently your path in a better way
+ *		than basic the PHP functionality, because it will allow relative file name
+ *		searches as PHP does not
+ *
+ *		There are functions for debugging, see var_dump, getStackTrace, errorLog which do
+ *		various useful things, var_dump is exactly what you expect, but can format the data
+ *		to be more visually understandable and return you a string so you can manipulate it further
+ *		errorLog can output multiple pieces of data to the error log, obtain stack traces, etc
+ *
+ *		lchop, rchop, truncateString are some basic string manipulation functions which are useful
+ *		for cutting up urls or blocks of html if required, which is useful when cutting html strings and
+ *		fixing up the html so it still works, or doesnt break
  */
 class Amslib
 {
@@ -38,11 +55,22 @@ class Amslib
 
 	//	DEPRECATED: should use findPath instead, makes more sense
 	static protected function findFile($filename){ return self::findPath($filename); }
-	
+
 	/**
 	 * 	method:	findPath
 	 *
-	 * 	todo: write documentation
+	 * 	Find a file include the include path, allowing for relative path names, which is
+	 * 	something that PHP does not provide by default.
+	 *
+	 *	parameters:
+	 *		$filename - The file to search for
+	 *
+	 *	returns:
+	 *		Boolean false if not found, or a string containing the path the file was found with
+	 *
+	 *	notes:
+	 *		-	The return does not include the filename requested, it only contains the
+	 *			path that was used to find the file.
 	 */
 	static protected function findPath($filename)
 	{
@@ -60,7 +88,11 @@ class Amslib
 	/**
 	 * 	method:	locate
 	 *
-	 * 	todo: write documentation
+	 * 	A method to "locate" the Amslib.php script within the website automatically, so it
+	 * 	can be used as an anchor to automatically know where amslib is installed
+	 *
+	 * 	returns:
+	 * 		A string containing the directory name of the Amslib.php script within the website
 	 */
 	static public function locate()
 	{
@@ -70,7 +102,12 @@ class Amslib
 	/**
 	 * 	method:	showErrors
 	 *
-	 * 	todo: write documentation
+	 * 	A method to turn on, off PHP's error reporting and display errors.  All this does is
+	 * 	convert a two liner into a one liner, but also might be enhanced in the future with
+	 * 	more functionality relating to errorLog and var_dump, etc.
+	 *
+	 * 	parameters:
+	 * 		$state - Whether or not to turn showing errors on or off.
 	 */
 	static public function showErrors($state=true)
 	{
@@ -87,7 +124,12 @@ class Amslib
 	/**
 	 * 	method:	setErrorHandler
 	 *
-	 * 	todo: write documentation
+	 *	Sets a custom error handler when a problem occurs inside the PHP code,
+	 *	we make a backup of the original handler so we can restore it
+	 *	if it is required to do so
+	 *
+	 *	parameters:
+	 *		$handler - The function call to make when an error occurs
 	 */
 	static public function setErrorHandler($handler)
 	{
@@ -97,7 +139,9 @@ class Amslib
 	/**
 	 * 	method:	restoreErrorHandler
 	 *
-	 * 	todo: write documentation
+	 * 	Restores the original error handler that was set.  This will only do so
+	 * 	If a handler was set before, otherwise nothing will happen since there
+	 * 	is nothing to restore.
 	 */
 	static public function restoreErrorHandler()
 	{
@@ -106,46 +150,102 @@ class Amslib
 		}
 	}
 
-	//	FIXME:	there is a bug here in the ppanel has a 500 webserver error when you return "" or false for not finding a string
-	//	NOTE:	I think it makes more sense now to return false, since if you return a string, it's like you've found a result, but
-	//			thats not true
 	/**
 	 * 	method:	lchop
 	 *
-	 * 	todo: write documentation
+	 * 	Chop a string to remove everything to the left of the
+	 * 	search, leaving only what is on the right of the search token
+	 *
+	 * 	parameters:
+	 * 		$str - The string o search through
+	 * 		$search - The search token to find
+	 * 		$removeSearch - Whether or not to remove the search token from the return string
+	 *
+	 * 	fixme:
+	 * 		there is a bug here in the amslib power panel has a 500 webserver
+	 * 		error when you return "" or false for not finding a string
+	 *
+	 * 	notes:
+	 * 		-	I think it makes more sense now to return false, since if you
+	 * 			return a string, it's like you've found a result, but thats not true
+	 * 		-	I disabled the removeSearch code since it was causing a 500 webserver error
 	 */
 	static public function lchop($str,$search,$removeSearch=false)
 	{
 		$p = strlen($search) ? strpos($str,$search) : false;
-		
+
 		//	TODO: fix the bugs and test this next line to optionally remove the search string instead of doing it by default
 		//	NOTE: I didnt want to activate this by default in case it broke things I didnt realise
 		//if($removeSearch) $p+=strlen($search);
-		
+
 		return ($p) !== false ? substr($str,$p+strlen($search)) : $str;
 	}
 
-	//	FIXME:	there is a bug here in the ppanel has a 500 webserver error when you return "" or false for not finding a string
-	//	NOTE:	I think it makes more sense now to return false, since if you return a string, it's like you've found a result, but
-	//			thats not true
 	/**
 	 * 	method:	rchop
 	 *
-	 * 	todo: write documentation
+	 * 	Chop a string to remove everything to the right of the
+	 * 	search, leaving only what is on the left of the search token
+	 *
+	 * 	parameters:
+	 * 		$str - The string o search through
+	 * 		$search - The search token to find
+	 *
+	 * 	fixme:
+	 * 		there is a bug here in the amslib power panel has a 500 webserver
+	 * 		error when you return "" or false for not finding a string
+	 *
+	 * 	notes:
+	 * 		-	I think it makes more sense now to return false, since if you
+	 *	 		return a string, it's like you've found a result, but thats not true
+	 *		-	Why does this function not have a $removeSearch parameter like
+	 *			lchop? seems inconsistent
 	 */
 	static public function rchop($str,$search)
 	{
 		$p = strlen($search) ? strrpos($str,$search) : false;
-		
+
 		return ($p) !== false ? substr($str,0,$p) : $str;
 	}
 
-	//	NOTE: I copied this code from CakePHP::truncate() which was super useful
-	//	NOTE: I just didnt want to import the CakePHP namespace, I wanted to just merge this functionality
+	/**
+	 * 	method:	trimString
+	 *
+	 * 	A cheaper, but far less useful version of Amslib::truncateString, does not consider html, does nothing
+	 * 	except chop where it was told and append the postfix, job done.  It's quite stupid.
+	 *
+	 * 	parameters:
+	 * 		$text - The string to trim
+	 * 		$length - default 100, the length required
+	 * 		$ending - default "...", the ending to append if a string is truncated
+	 *
+	 * 	returns:
+	 * 		A truncated string, or the original string if it was not longer than required
+	 */
+	static public function trimString($text,$length=100,$ending="...")
+	{
+		$length = $length-strlen($ending);
+
+		return (strlen($text) > $length) ? substr($text,0,$length).$ending : $text;
+	}
+
 	/**
 	 * 	method:	truncateString
 	 *
-	 * 	todo: write documentation
+	 * 	A more intelligent truncate string method that will cut a string better than just substr()
+	 *
+	 * 	parameters:
+	 * 		$text - the string to truncate
+	 * 		$length - default 100, the length required
+	 * 		$ending - default "...", the ending to append if a string is truncated
+	 * 		$exact - default false, if true, will not cut a word in two, but look for a space in the
+	 * 				truncated string and truncate to that position, so words are not cut in the midd....(<-irony)
+	 * 		$considerHtml - default true, whether or not to consider HTML tags, so the code doesn't cut them
+	 * 						in the middle and break the HTML structure of a text string
+	 *
+	 *	notes:
+	 *		- I copied this code from CakePHP::truncate() which was super useful
+	 *		- I just didnt want to import the CakePHP namespace, I wanted to just merge this functionality
 	 */
 	static public function truncateString($text, $length = 100, $ending = '...', $exact = false, $considerHtml = true)
 	{
@@ -283,7 +383,15 @@ class Amslib
 	/**
 	 * 	method:	getIncludeContents
 	 *
-	 * 	todo: write documentation
+	 *	Obtain a files contents when it was included as a string instead of just importing it into the
+	 *	current output, which is useful if errors occur, it'll grab those instead of dumping them to the page
+	 *	and breaking the layout
+	 *
+	 *	parameters:
+	 *		$filename - the filename to obtain the contents of
+	 *
+	 *	returns:
+	 *		The output from including that file, as a string
 	 */
 	static public function getIncludeContents($filename)
 	{
@@ -295,35 +403,39 @@ class Amslib
 	}
 
 	/**
-	 * 	method:	trimString
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function trimString($string,$maxlen,$postfix="...")
-	{
-		return (strlen($string) > $maxlen) ? substr($string,0,$maxlen).$postfix : $string;
-	}
-
-	//	blatently stolen code from: http://snipplr.com/view/22741/slugify-a-string-in-php/ :-) thank you!
-	//	modified 01/08/2011: added ability to allow custom regex through so you can add terms if required
-	//
-	/**
 	 * 	method:	slugify
 	 *
-	 * 	todo: write documentation
+	 * 	Converts a string into something that replaces all non-url-compatible characters with
+	 * 	a "slug" this is useful for creating article names in a website, where including a " " (space)
+	 * 	in the filename is going to break the url and cause problems.  Will also remove more than just space
+	 * 	but all other none-alphanumeric type characters and transliterate accented characters into none-accented
+	 * 	versions.  This function automatically lower cases the entire text string
+	 *
+	 * 	parameters:
+	 * 		$text - The text to slugify
+	 * 		$remove - default "" (empty, nothing), any extra regex to remove - WARNING, you could break your code by putting non-functioning regex operators here
+	 * 		$replace - default "-", the character to replace all the non-matching characters with
+	 *
+	 * 	returns:
+	 * 		A string which has been stripped of all the invalid characters, in lower case
+	 *
+	 * 	notes:
+	 * 		-	blatently stolen code from: http://snipplr.com/view/22741/slugify-a-string-in-php/ :-) thank you!
+	 * 		-	modified 01/08/2011: added ability to allow custom regex through the $remove parameter
+	 * 			so you can add terms if required
+	 *
+	 * 	todo:
+	 * 		investigate whether the remove unwanted character step should be BEFORE
+	 * 		the replace step since the more it was been observed, the more that it makes sense.
 	 */
 	static public function slugify($text,$remove="",$replace="-")
 	{
 		// replace non letter or digits by -
 		$text = preg_replace("~[^\\pL\d{$remove}]+~u", $replace, $text);
 
-		// trim
+		// trim and transliterate the string to be baseline ASCII and lowercase it for good luck
 		$text = trim($text, $replace);
-
-		// transliterate
 		if (function_exists('iconv')) $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-
-		// lowercase
 		$text = strtolower($text);
 
 		// remove unwanted characters
@@ -332,16 +444,27 @@ class Amslib
 		return $text;
 	}
 
-	//	Perhaps $preformat by default should be true ? would make more sense, otherwise why not just use var_dump directly??
 	/**
 	 * 	method:	var_dump
 	 *
-	 * 	todo: write documentation
+	 *	Obtain a var_dump of a variable, but obtain the dump as a string to be printed or manipulated
+	 *	with extra options for hiding the output from the browser
+	 *
+	 *	parameters:
+	 *		$variable - the variable to var_dump
+	 *		$preformat - whether or not to wrap up the dump in a HTML <pre> tag
+	 *		$hiddenOutput - whether or not to apply a css style display none to the <pre> tag
+	 *
+	 * 	notes:
+	 * 		-	Perhaps $preformat by default should be true ? would make more sense,
+	 * 			otherwise why not just use var_dump directly??
+	 * 		-	this function can cause out of memory problems if the variable is huge but
+	 * 			it's not known how it is possible to test for this before attempting it
 	 */
-	static public function var_dump($dump,$preformat=false,$hiddenOutput=false)
+	static public function var_dump($variable,$preformat=false,$hiddenOutput=false)
 	{
 		ob_start();
-		var_dump($dump);
+		var_dump($variable);
 		$dump = ob_get_clean();
 
 		$hiddenOutput = $hiddenOutput ? "style='display:none'" : "";
@@ -349,14 +472,20 @@ class Amslib
 		return ($preformat) ? "<pre $hiddenOutput>$dump</pre>" : $dump;
 	}
 
-	//	Website: http://php.net
-	//	User: Levofski
-	//	Link: http://www.php.net/manual/en/function.print-r.php#97901
-	//	Thanks, it works great!
 	/**
 	 * 	method:	var_dump_xml
 	 *
-	 * 	todo: write documentation
+	 *	To var dump a variable into a block of XML describing the structure of the variable being dumped
+	 *
+	 *	parameters:
+	 *		$mixed - the variable being var_dumped
+	 *
+	 *	returns:
+	 *		An XML document containing the variable in XML format as if it was var dumped
+	 *
+	 * 	notes:
+	 * 		-	This code was copied from [http://www.php.net/manual/en/function.print-r.php#97901]
+	 * 			by the user Levofski, thanks, it's amazing!
 	 */
 	static public function var_dump_xml($mixed)
 	{
@@ -392,7 +521,23 @@ class Amslib
 	/**
 	 * 	method:	backtrace
 	 *
-	 * 	todo: write documentation
+	 *	a method to obtain a debug backtrace of the current PHP function stack with options to
+	 *	slice a part of the array
+	 *
+	 *	this function uses variable arguments, it will only slice the string if it first two
+	 *	parameters are integer numbers after that, all the arguments will be tested whether
+	 *	they are a string and if so, they will be used to filter each array stack element to
+	 *	return only the keys which match the strings, dropping all the unwanted keys from
+	 *	each array stack element
+	 *
+	 *	parameters:
+	 *		$start - The starting offset to slice from the array stack
+	 *		$finish - the ending offset to slice from the array stack
+	 *		vargs - any number of string variables which will be used to filter each array index to reutrn only the keys requested
+	 *
+	 *	notes:
+	 *		-	The function is really really memory hungry, use Amslib::getStackTrace if you can
+	 *		-	This is a really ancient function, it's hard to know what it's trying to do
 	 */
 	static public function backtrace()
 	{
@@ -411,9 +556,21 @@ class Amslib
 	/**
 	 * 	method:	getStackTrace
 	 *
-	 * 	todo: write documentation
+	 * 	Obtains a PHP exceptions stack trace, with optional starting index and string output facilities
+	 *
+	 *	parameters:
+	 *		$index		-	default NULL, the index to start the stack trace from, can be used to
+	 *						drop a certain number of leading function calls to focus on the section
+	 *						of the stack required.  Only will accept integer numbers.
+	 *		$string		-	default false, return the stack trace as a string or an array, useful
+	 *						when debugging and dumping the data to the browser, error log
+	 *		$var_dump - 	Whether or not to var_dump each section of the stack trace, only used
+	 *						when $string parameter is not set to true
+	 *
+	 *	notes:
+	 *		- the $var_dump parameter is not very useful, it should be considered a candidate for deletion
 	 */
-	static public function getStackTrace($index=NULL,$string=NULL,$var_dump=NULL)
+	static public function getStackTrace($index=NULL,$string=false,$var_dump=NULL)
 	{
 		$e = new Exception();
 		$t = false;
@@ -432,7 +589,7 @@ class Amslib
 
 		return $t;
 	}
-	
+
 	/**
 	 * 	method:	errorLog
 	 *
@@ -440,62 +597,62 @@ class Amslib
 	 */
 	static public function errorLog()
 	{
-		$args		=	func_get_args();	
+		$args		=	func_get_args();
 		$data		=	array();
 		$maxlength	=	8912;
 		$function	=	false;
-		
+
 		foreach($args as $k=>$a){
 			if(is_string($a) && strpos($a,"stack_trace") === 0){
 				$command = explode(",",$a);
-					
+
 				$stack = Amslib::getStackTrace(NULL,true);
 				$stack = explode("\n",$stack);
-					
+
 				$c = count($command);
-					
+
 				if($c == 2){
 					$stack = array_slice($stack,$command[1]);
 				}else if($c == 3 && $command[2] > 0){
 					$stack = array_slice($stack,$command[1],$command[2]);
 				}
-					
+
 				foreach($stack as $row){
 					error_log("[TRACE] ".Amslib::var_dump($row));
 				}
 			}else if(is_string($a) && strpos($a,"func_offset") === 0){
 				$command = explode(",",array_shift($args));
-				
+
 				if(count($command) == 2) $function = $command[1];
 			}else{
 				if(is_object($a))	$a = array(get_class($a),Amslib::var_dump($a));
 				if(is_array($a)) 	$a = Amslib::var_dump($a);
 				if(is_bool($a))		$a = $a ? "true" : "false";
 				if(is_null($a))		$a = "null";
-				
+
 				$a = trim(preg_replace("/\s+/"," ",$a));
-				
+
 				if(strlen($a) > $maxlength) $a = substr($a,0,$maxlength-50)."...[array too large to display]";
-				
+
 				$data[] = "arg[$k]=> $a";
 			}
 		}
-		
+
 		$stack = Amslib::getStackTrace();
-		
+
 		if(!is_numeric($function)) $function = 2;
-		
+
 		$line		=	isset($stack[$function-1])	? $stack[$function-1]	:	array("line"=>-1);
 		$function	=	isset($stack[$function])	? $stack[$function] 	:	false;
-		
+
 		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
 			$function	=	"(ERROR, function invalid: ".Amslib::var_dump($function).")";
 		}else{
 			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}({$line["line"]})";
 		}
-		
+
 		error_log("[DEBUG] $function, ".implode(", ",$data));
-		
+
 		return array("function"=>$function,"data"=>$data);
 	}
 
@@ -521,7 +678,7 @@ class Amslib
 
 		if(is_file($__f) && file_exists($__f)){
 			if(is_array($__p) && count($__p)) extract($__p, EXTR_SKIP);
-			
+
 			//	Optional output buffering
 			if($__b) ob_start();
 
@@ -615,7 +772,7 @@ class Amslib
 		//	Clean these parameters each page load, cause they are only useful on the error pages, not everywhere else
 		Amslib::getSESSION("/amslib/php/fatal_error/",NULL,true);
 		Amslib::getSESSION("/amslib/php/backtrace/",NULL,true);
-		
+
 		/**
 		 * 	method:	amslib_shutdown
 		 *
@@ -670,15 +827,12 @@ class Amslib
 	/**
 	 * 	method:	findKey
 	 *
-	 * 	todo: write documentation
+	 * 	notes:
+	 * 		DEPRECATED, use Amslib_Array::findKey directly
 	 */
 	static public function findKey($key,$source)
 	{
-		foreach($source as $k=>$ignore){
-			if(strpos($k,$key) !== false) return $k;
-		}
-
-		return false;
+		return Amslib_Array2::findKey($source,$key);
 	}
 
 	/**
