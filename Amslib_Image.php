@@ -17,7 +17,7 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
@@ -34,41 +34,45 @@
  */
 class Amslib_Image
 {
-	protected $images;
-	protected $allowedTypes;
-	protected $error;
+	protected $commands		=	false;
+	protected $cache_dir	=	false;
+	protected $cache_params	=	false;
+	protected $image_params	=	false;
+	protected $permit_ext	=	false;
 
-	const ERROR_PHPGD_NOT_FOUND = "PHP GD not found, cannot continue";
-	const ERROR_NO_CACHE_DIR = "There was no cache directory set";
-	const ERROR_INVALID_IMAGE_OBJECT = "The PHP GD Image Object was invalid";
-	const ERROR_CREATE_IMAGE_OBJECT = "The system could not create an image object to handle your request";
-	const ERROR_IMAGE_OBJECT_CLOSE = "It was not possible to close the image object";
-	const ERROR_IMAGE_DIMENSIONS_INVALID = "The dimensions of this image were not valid";
-	const ERROR_RESIZE_IMAGE_OBJECT_FAILED = "Resizing the image has failed";
-	const ERROR_FILE_EXTENSION_INVALID = "extension was invalid, permitted extensions are jpeg,jpg.png,gif";
-	const ERROR_FILE_NOT_EXIST = "The file requested cannot be found (doesn't exist?)";
-	const ERROR_WRITE_DIRECTORY_NOT_EXIST = "destination directory does not exist";
-	const ERROR_WRITE_FILE_EXIST = "file destination exists, delete original file first";
-	const ERROR_CACHE_NOT_FOUND = "The image could not be found in the cache";
+	protected $error		=	false;
+	protected $errorState	=	false;
 
-	/**
-	 * 	method:	setError
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function setError($error)
-	{
-		if(is_string($error)){
-			$this->error = "ERROR: $error\n";
-		}
-	}
+	const COMMAND_SEQUENCE_INVALID			= "The sequence of commands given was not acceptable";
+	const ERROR_PHPGD_NOT_FOUND				= "PHP GD not found, cannot continue";
+	const ERROR_NO_CACHE_DIR				= "There was no cache directory set";
+	const ERROR_CREATE_IMAGE_OBJECT			= "The system could not create an image object to handle your request";
+	const ERROR_IMAGE_OBJECT_INVALID		= "The PHP GD Image Object was invalid";
+	const ERROR_IMAGE_OBJECT_CLOSE			= "It was not possible to close the image object";
+	const ERROR_IMAGE_DIMENSIONS_INVALID	= "The dimensions of this image were not valid";
+	const ERROR_RESIZE_IMAGE_OBJECT_FAILED	= "Resizing the image has failed";
+	const ERROR_FILE_EXTENSION_INVALID		= "extension was invalid, permitted extensions are jpeg,jpg.png,gif";
+	const ERROR_FILE_NOT_EXIST				= "The file requested cannot be found (doesn't exist?)";
+	const ERROR_WRITE_DIRECTORY_NOT_EXIST	= "destination directory does not exist";
+	const ERROR_WRITE_FILE_EXIST			= "file destination exists, delete original file first";
+	const ERROR_CACHE_NOT_FOUND				= "The image could not be found in the cache";
+	const ERROR_MAXDIM_FAILED				= "maxdim method failed to process correctly";
 
 	/**
-	 * 	method:	setMIMEType
+	 * 	method:	getMIMEType
 	 *
-	 * 	todo: write documentation
+	 *	Obtain the mime type of a file based on the extension the file has, assuming it's not lying
+	 *
+	 *	parameters:
+	 *		$filename - The filename to look for the file extension to determine the mime type to use
+	 *
+	 *	returns:
+	 *		Boolean false if the file extension was not recognised, or a mime string for the file extension given
+	 *
+	 *	notes:
+	 *		If the file is a GIF and the extension says .jpg, this function will not detect that
 	 */
-	protected function setMIMEType($filename)
+	protected function getMIMEType($filename)
 	{
 		$extension = end(explode(".",$filename));
 
@@ -83,35 +87,126 @@ class Amslib_Image
 	}
 
 	/**
-	 * 	method:	testWriteLocation
+	 * 	method:	getFileExtension
 	 *
-	 * 	todo: write documentation
+	 *	Obtain the file extension from a given filename and if found, store the mime type in the cache array
+	 *
+	 *	parameters:
+	 *		$filename - The filename to obtain the extension from
+	 *
+	 *	returns:
+	 *		Boolean false if the extension was not found, or the extension if it was found
+	 *
+	 *	notes:
+	 *		It's inconsistent to set the cache param for the mime type here, but not the file extension
+	 *		As where this function is used, it's almost always used when setting the file extension, perhaps
+	 *		This function should be called setFileExtension instead and just return the extension afterwards
+	 *		Then we could hide the set cache param for the file extension inside here too and clean up the code
 	 */
-	protected function testWriteLocation($destination,$overwrite=false)
+	protected function getFileExtension($filename)
 	{
-		$directory = dirname($destination);
+		$extension = Amslib_File::getFileExtension($filename);
 
-		if(!is_dir($directory)){
-			$this->setError(self::ERROR_WRITE_DIRECTORY_NOT_EXIST);
-			return false;
+		$extension = (in_array($extension,$this->permit_ext)) ? $extension : false;
+
+		if($extension !== false){
+			$this->setCacheParam("mime_type",$this->getMIMEType($filename));
 		}
 
-		if($overwrite == false && file_exists($destination)){
-			$this->setError(self::ERROR_WRITE_FILE_EXIST);
-			return false;
-		}
-
-		return $destination;
+		return $extension;
 	}
 
 	/**
-	 * 	method:	scaleDimension
+	 * 	method:	setCacheParam
+	 *
+	 *	Set a parameter in the cache array, which is an object of valid data used when processing images
+	 *
+	 *	parameters:
+	 *		$key - The key to set in the cache array
+	 *		$value - The value to set to the key
+	 *
+	 *	returns:
+	 *		If the key was not a string, this function returns NULL, or the value that was set
+	 */
+	protected function setCacheParam($key,$value=NULL)
+	{
+		if(!is_string($key)) return NULL;
+
+		$this->cache_params[$key] = $value;
+
+		return $value;
+	}
+
+	/**
+	 * 	method:	getCacheParam
+	 *
+	 *	Get a parameter from the cache array
+	 *
+	 *	parameters:
+	 *		$key - The key to obtain
+	 *		$default - The default value to use if the key was not present
+	 *
+	 *	returns:
+	 *		If the value is not present, it'll return the $default value, otherwise,
+	 *		the value from the cache array
+	 */
+	protected function getCacheParam($key,$default=NULL)
+	{
+		return array_key_exists($key,$this->cache_params) ? $this->cache_params[$key] : $default;
+	}
+
+	/**
+	 * 	method:	resetCacheParam
+	 *
+	 *	Resets the cache array to completely empty, ready to fill again
+	 */
+	protected function resetCacheParam()
+	{
+		$this->cache_params = array();
+	}
+
+	/**
+	 * 	method:	setImageParam
+	 *
+	 *	todo: write documentation
+	 */
+	protected function setImageParam($key,$value)
+	{
+		if(!is_string($key)) return NULL;
+
+		$this->image_params[$key] = $value;
+
+		return $value;
+	}
+
+	/**
+	 * 	method:	getImageParam
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function scaleDimension($d1,$d2,$d3)
+	protected function getImageParam($key,$default=NULL)
 	{
-		return $d3 * ($d1 / $d2);
+		return array_key_exists($key,$this->image_params) ? $this->image_params[$key] : $default;
+	}
+
+	/**
+	 * 	method:	resetImageParam
+	 *
+	 * 	todo: write documentation
+	 */
+	protected function resetImageParam()
+	{
+		$this->image_params = Amslib_Array::removeKeys($this->image_params,array("handle","width","height"));
+	}
+
+	/**
+	 * 	method:	getCacheKey
+	 *
+	 * 	todo: write documentation
+	 */
+	protected function getCacheKey()
+	{
+		return sha1(http_build_query($this->cache_params)).".".$this->cache_params["extension"];
 	}
 
 	/**
@@ -119,20 +214,26 @@ class Amslib_Image
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function getCacheFilename($filename)
+	protected function getCacheFilename()
 	{
-		return str_replace("//","/",$this->cache."/".$filename);
+		return Amslib_File::reduceSlashes($this->cache_dir."/".$this->getCacheKey());
 	}
 
 	/**
-	 * 	method:	validExtension
+	 * 	method:	getDimensions
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function validExtension($filename)
+	protected function getDimensions()
 	{
-		$extension = strtolower(end(explode(".",$filename)));
-		return (in_array($extension,$this->allowedTypes)) ? $extension : false;
+		if(!$this->getImageParam("handle")){
+			return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
+		}
+
+		return array(
+			"width"		=>	intval($this->getImageParam("width")),
+			"height"	=>	intval($this->getImageParam("height"))
+		);
 	}
 
 	/**
@@ -146,19 +247,70 @@ class Amslib_Image
 			$this->setError(self::ERROR_PHPGD_NOT_FOUND);
 		}
 
-		$this->cache		=	false;
-		$this->images		=	array();
-		$this->allowedTypes	=	array("jpeg","jpg","gif","png");
+		$this->permit_ext = array("jpeg","jpg","gif","png");
+
+		$this->resetCacheParam();
+		$this->resetImageParam();
 	}
 
 	/**
-	 * 	method:	enableCache
+	 * 	method:	setCacheDirectory
 	 *
 	 * 	todo: write documentation
 	 */
-	public function enableCache($location)
+	public function setCacheDirectory($directory)
 	{
-		$this->cache = Amslib_File::absolute($location);
+		$directory = Amslib_File::reduceSlashes($directory);
+
+		if(!is_dir($directory) && !file_exists($directory)){
+			if(!Amslib_File::mkdir($directory)) return false;
+		}
+
+		$this->cache_dir = $directory;
+	}
+
+	/**
+	 * 	method:	setError
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setError($error)
+	{
+		$this->error = $error;
+
+		return false;
+	}
+
+	/**
+	 * 	method:	getError
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getError()
+	{
+		return is_array($this->error)
+			? Amslib::var_dump($this->error)
+			: $this->error;
+	}
+
+	/**
+	 * 	method:	setErrorState
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setErrorState($state)
+	{
+		$this->errorState = $state;
+	}
+
+	/**
+	 * 	method:	getErrorState
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getErrorState()
+	{
+		return $this->errorState;
 	}
 
 	/**
@@ -168,426 +320,144 @@ class Amslib_Image
 	 */
 	public function clearCache()
 	{
-		$files = glob("$location/*");
+		if(!is_dir($this->cache_dir)){
+			return $this->setError(self::ERROR_NO_CACHE_DIR);
+		}
 
-		foreach($files as $f){
-			if(strpos($f,"..")) continue;
-			
+		$list = glob("$this->cache_dir/*");
+
+		foreach($list as $i){
+			//	Skip directories of files with .. in the filename (PREVENT HACKS)
+			if(is_dir($i)) continue;
+			if(strpos($i,"..")) continue;
+
 			//	Just in case someone managed to write a file with .. in it (back directory)
 			@unlink($f);
 		}
+
+		return true;
 	}
 
 	/**
-	 * 	method:	getFromCache
+	 * 	method:	setCommands
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getFromCache($parameters)
+	public function setCommands($source)
 	{
-		if(is_string($parameters)) $parameters = array("image"=>$parameters);
-
-		//	If caching is disabled, or the source file is not found, return false
-		if(!$this->cache) return false;
-		if(!isset($parameters["image"])) return false;
-
-		$parameters["cache"]	=	true;
-		$filename				=	$this->create($parameters,false);
-
-		//	check cache file exists
-		if($filename){
-			$data			=	$this->images[$filename];
-			$data["cache"]	=	true;
-
-			return $filename;
-		}
-
-		//	The attempt to open the cache file failed, so close off any used resources
-		$this->close($filename);
-
-		return false;
-	}
-
-	/**
-	 * 	method:	create
-	 *
-	 * 	todo: write documentation
-	 */
-	public function create($parameters,$overwrite=false)
-	{
-		//	If a filename is passed as a string, make it an array, just to keep the logic simple
-		if(is_string($parameters)) $parameters = array("image"=>$parameters);
-
-		//	Make the path absolute and obtain a unique name for this requested file
-		$parameters["image"]	=	Amslib_File::absolute($parameters["image"]);
-		//	Get the extension for this file
-		$extension				=	end(explode(".",strtolower($parameters["image"])));
-		$uniqueName				=	sha1(http_build_query($parameters)).".$extension";
-
-		//	Obtain the cache name, or the disk filename
-		//	The cache name is the sha1 of the unique name, stored inside the cache directory
-		if(isset($parameters["cache"])){
-			$filename = $this->getCacheFilename($uniqueName);
+		if(is_array($source)){
+			$this->commands = $source;
+		}elseif(is_string($source)){
+			$this->commands = explode("/",trim(Amslib::rchop($source,"?"),"/"));
 		}else{
-			$filename = $parameters["image"];
+			return $this->setError(self::COMMAND_SEQUENCE_INVALID);
 		}
 
-		if(!file_exists($filename)) return false;
-
-		//	If the file exists and overwrite is false, you can't proceed
-		if($overwrite == false && isset($this->images[$filename])) return false;
-
-		//	Check the extension is valid and the file exists on disk
-		$extension = $this->validExtension($parameters["image"]);
-		if($extension)
-		{
-			$handle = false;
-
-			//	Open and obtain a handle for the image
-			switch($extension){
-				case "jpeg":
-				case "jpg":{	$handle	=	imagecreatefromjpeg($filename);		}break;
-				case "png":{	$handle	=	imagecreatefrompng($filename);		}break;
-				case "gif":{	$handle	=	imagecreatefromgif($filename);		}break;
-			}
-
-			//	If valid, construct a structure to hold the data about the opened file
-			if($handle){
-				$this->images[$uniqueName] = array(
-					"handle"	=>	$handle,
-					"file"		=>	$parameters["image"],
-					"width"		=>	imagesx($handle),
-					"height"	=>	imagesy($handle),
-					"mime"		=>	$this->setMIMEType($filename),
-					"cache"		=>	false
-				);
-
-				return $uniqueName;
-			}else{
-				$this->setError(self::ERROR_CREATE_IMAGE_OBJECT);
-			}
-		}else{
-			$this->setError(self::ERROR_FILE_EXTENSION_INVALID);
-		}
-
-		return false;
+		return true;
 	}
 
 	/**
-	 * 	method:	maxdim
+	 * 	method:	processCommands
 	 *
 	 * 	todo: write documentation
 	 */
-	public function maxdim($filename,$width,$height)
+	public function processCommands($commands=NULL)
 	{
-		$d = $this->getDimensions($filename);
+		if(!$commands) $commands = $this->commands;
 
-		if($d){
-			if($d["width"] > $width){
-				$ratio			=	$width / $d["width"];
-				$d["width"]		*=	$ratio;
-				$d["height"]	*=	$ratio;
-			}
+		$cache = array_shift($commands);
 
-			if($d["height"] > $height){
-				$ratio			=	$height / $d["height"];
-				$d["width"]		*=	$ratio;
-				$d["height"]	*=	$ratio;
-			}
-			return $this->resize($filename,$d["width"],$d["height"]);
-		}
-		return false;
-	}
+		if($cache != "cache") return false;
 
-	/**
-	 * 	method:	resize
-	 *
-	 * 	todo: write documentation
-	 */
-	public function resize($filename,$width,$height)
-	{
-		if(!isset($this->images[$filename])) return false;
+		$filename = Amslib_Website::abs();
+		$filename = rtrim($filename,"/");
 
-		$width		=	(int)$width;
-		$height		=	(int)$height;
-		$image		=	$this->images[$filename];
-		$tmp_image	=	imagecreatetruecolor($width,$height);
+		$search_file = true;
 
-		if($tmp_image){
-			$success = imagecopyresampled(
-				$tmp_image, $image["handle"],
-				0, 0,
-				0, 0,
-				$width, $height,
-				$image["width"],$image["height"]
-			);
+		while($commands){
+			$c = array_shift($commands);
 
-			if($success){
-				$this->close($filename);
-				$image["handle"]	=	$tmp_image;
-				$image["width"]		=	$width;
-				$image["height"]	=	$height;
-				$this->images[$filename] = $image;
+			if($search_file){
+				$filename .= "/$c";
 
-				return $filename;
-			}
-		}
+				if(is_file($filename)){
+					$this->open($filename);
 
-		$this->setError(self::ERROR_CREATE_IMAGE_OBJECT);
-
-		return $filename;
-	}
-
-	/**
-	 * 	method:	cropArea
-	 *
-	 * 	todo: write documentation
-	 */
-	public function cropArea($filename,$x,$y,$width,$height)
-	{
-		return $this->crop($filename,$x,$y,0,0,$width,$height,$width,$height);
-	}
-
-	/**
-	 * 	method:	crop
-	 *
-	 * 	todo: write documentation
-	 */
-	public function crop($filename,$sx,$sy,$dx,$dy,$sw,$sh,$dw,$dh)
-	{
-		if(!isset($this->images[$filename])) return false;
-
-		$sx			=	(int)$sx;
-		$sy			=	(int)$sy;
-		$dx			=	(int)$dx;
-		$dy			=	(int)$dy;
-		$sw			=	(int)$sw;
-		$sh			=	(int)$sh;
-		$dw			=	(int)$dw;
-		$dh			=	(int)$dh;
-		$image		=	$this->images[$filename];
-		$tmp_image	=	imagecreatetruecolor($dw,$dh);
-
-		if($tmp_image){
-			$success = imagecopyresampled(
-				$tmp_image,$image["handle"],
-				$dx,$dy,$sx,$sy,
-				$dw,$dh,$sw,$sh
-			);
-
-			if($success){
-				$this->close($filename);
-				$image["handle"]	=	$tmp_image;
-				$image["width"]		=	$dw;
-				$image["height"]	=	$dh;
-				$this->images[$filename] = $image;
-
-				return $filename;
-			}
-		}
-
-		$this->setError(self::ERROR_CREATE_IMAGE_OBJECT);
-
-		return false;
-	}
-
-	/**
-	 * 	method:	resizeToWidth
-	 *
-	 * 	todo: write documentation
-	 */
-	public function resizeToWidth($filename,$width)
-	{
-		if(!isset($this->images[$filename])) return false;
-
-		$image	=	$this->images[$filename];
-		$height	=	$this->scaleDimension($width,$image["width"],$image["height"]);
-
-		return $this->resize($filename,$width,$height);
-	}
-
-	/**
-	 * 	method:	resizeToHeight
-	 *
-	 * 	todo: write documentation
-	 */
-	public function resizeToHeight($filename,$height)
-	{
-		if(!isset($this->images[$filename])) return false;
-
-		$image	=	$this->images[$filename];
-		$width	=	$this->scaleDimension($height,$image["height"],$image["width"]);
-
-		return $this->resize($filename,$width,$height);
-	}
-
-	/**
-	 * 	method:	scale
-	 *
-	 * 	todo: write documentation
-	 */
-	public function scale($filename,$scale)
-	{
-		if(!isset($this->images[$filename])) return false;
-
-		$image	=	$this->images[$filename];
-
-		$width	=	($image["width"]*$scale)/100;
-		$height	=	($image["height"]*$scale)/100;
-
-		return $this->resize($filename,$width,$height);
-	}
-
-	/**
-	 * 	method:	getDimensions
-	 *
-	 * 	todo: write documentation
-	 */
-	public function getDimensions($filename)
-	{
-		if(!isset($this->images[$filename])) return false;
-
-		return array(
-			"width"		=>	$this->images[$filename]["width"],
-			"height"	=>	$this->images[$filename]["height"]
-		);
-	}
-
-	/**
-	 * 	method:	cache
-	 *
-	 * 	todo: write documentation
-	 */
-	public function cache($filename)
-	{
-		if(!$this->cache)						return false;
-		if(!isset($this->images[$filename]))	return false;
-
-		$image = $this->images[$filename];
-
-		//	File is cached, just read it out and return
-		if($image["cache"]) return true;
-
-		//	Grab the extension and test whether it's valid or not
-		$extension = $this->validExtension($image["file"]);
-		if($extension)
-		{
-			//	If cache is enabled, set the output to be a file
-			$destination = $this->getCacheFilename($filename);
-
-			switch($extension){
-				case "jpeg":
-				case "jpg":{	imagejpeg($image["handle"],$destination);		}break;
-				case "png":{	imagepng($image["handle"],$destination);		}break;
-				case "gif":{	imagegif($image["handle"],$destination);		}break;
-			};
-
-			return true;
-		}
-
-		$this->setError(self::ERROR_FILE_EXTENSION_INVALID);
-
-		return false;
-	}
-
-	/**
-	 * 	method:	write
-	 *
-	 * 	todo: write documentation
-	 */
-	public function write($filename)
-	{
-		if(!isset($this->images[$filename])) return false;
-
-		$image = $this->images[$filename];
-
-		//	File is cached, just read it out and return
-		if($image["cache"]){
-			readfile($filename);
-
-			return $filename;
-		}
-
-		//	Grab the extension and test whether it's valid or not
-		$extension = $this->validExtension($image["file"]);
-		if($extension)
-		{
-			//	If cache is enabled, set the output to be a file
-			$destination = ($this->cache) ? $this->getCacheFilename($filename) : NULL;
-
-			switch($extension){
-				case "jpeg":
-				case "jpg":{	imagejpeg($image["handle"],$destination);		}break;
-				case "png":{	imagepng($image["handle"],$destination);		}break;
-				case "gif":{	imagegif($image["handle"],$destination);		}break;
-			};
-
-			//	If cache is enabled, you have to output a copy now to the browser
-			if($this->cache){
-				chmod($destination,0755);
-				readfile($destination);
-			}
-
-			//	FIXME: Should I return filename or destination here??
-			return $filename;
-		}
-
-		$this->setError(self::ERROR_FILE_EXTENSION_INVALID);
-
-		return false;
-	}
-
-	/**
-	 * 	method:	writeToDisk
-	 *
-	 * 	todo: write documentation
-	 */
-	public function writeToDisk($filename,$destination,$overwrite=false)
-	{
-		if(!isset($this->images[$filename])) return false;
-
-		$image = $this->images[$filename];
-
-		$destination = $this->testWriteLocation($destination,$overwrite);
-		if(!$destination) return false;
-
-		//	Image is cached, just copy it to the new location
-		if($image["cache"]){
-			copy($filename,$destination);
-			chmod($destination,0755);
-
-			//	FIXME: Should I return filename or destination here??
-			return $filename;
-		}
-
-		//	Grab the extension and test whether it's valid or not
-		$extension = $this->validExtension($destination);
-		if($extension){
-			switch($extension){
-				case "jpeg":
-				case "jpg":{	imagejpeg($image["handle"],$destination);		}break;
-				case "png":{	imagepng($image["handle"],$destination);		}break;
-				case "gif":{	imagegif($image["handle"],$destination);		}break;
-			};
-
-			//	Write the file to a new destination, or to the browser
-			if(file_exists($destination)){
-				chmod($destination,0755);
-
-				//	Write a copy of this file into the cache
-				if($this->cache){
-					$cacheName = $this->getCacheFilename($filename,$extension);
-					copy($destination,$cacheName);
-					chmod($cacheName,0755);
+					$search_file = false;
 				}
+			}else{
+				switch($c){
+					case "regenerate":{
 
-				return $destination;
+					}break;
+
+					case "maxdim":{
+						$width	= array_shift($commands);
+						$height	= array_shift($commands);
+
+						$state = $this->maxdim($width,$height);
+
+						if(!$state) return $state;
+					}break;
+
+					case "crop":{
+						$x1 = array_shift($commands);
+						$y1 = array_shift($commands);
+						$x2 = array_shift($commands);
+						$y2 = array_shift($commands);
+
+						$state = $this->crop($x1,$y1,$x2,$y2);
+
+						if(!$state) return $state;
+					}break;
+
+					case "show_errors":{
+						$this->setErrorState(true);
+					}break;
+				};
 			}
 		}
 
-		$this->setError(self::ERROR_FILE_EXTENSION_INVALID);
+		return true;
+	}
 
-		return false;
+	/**
+	 * 	method:	open
+	 *
+	 * 	todo: write documentation
+	 */
+	public function open($filename)
+	{
+		//	get file extension and if not valid, return false
+		$ext = $this->setImageParam("extension",$this->getFileExtension($filename));
+		//	if false, ERROR_FILE_EXTENSION_INVALID
+		if(!$ext) return $this->setError(self::ERROR_FILE_EXTENSION_INVALID);
+
+		$filename = $this->setImageParam("filename",$filename);
+
+		//	By default, set the handle to false (invalid)
+		$this->setImageParam("handle",false);
+
+		//	If false, ERROR_FILE_NOT_EXIST
+		if(!file_exists($filename)) return $this->setError(self::ERROR_FILE_NOT_EXIST);
+
+		$handle = false;
+
+		switch($ext){
+			case "jpeg":
+			case "jpg":{	$handle	=	imagecreatefromjpeg($filename);	}break;
+			case "png":{	$handle	=	imagecreatefrompng($filename);	}break;
+			case "gif":{	$handle	=	imagecreatefromgif($filename);	}break;
+		}
+
+		//	If false, ERROR_CREATE_IMAGE_OBJECT
+		if(!$handle) return $this->setError(self::ERROR_CREATE_IMAGE_OBJECT);
+
+		$this->setImageParam("handle",$handle);
+		$this->setImageParam("width",intval(imagesx($handle)));
+		$this->setImageParam("height",intval(imagesy($handle)));
+
+		return true;
 	}
 
 	/**
@@ -595,40 +465,358 @@ class Amslib_Image
 	 *
 	 * 	todo: write documentation
 	 */
-	public function close($filename=NULL)
+	public function close()
 	{
-		if(isset($this->images[$filename])){
-			imagedestroy($this->images[$filename]["handle"]);
+		$handle = $this->getImageParam("handle");
+
+		if(!$handle) return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
+
+		imagedestroy($handle);
+
+		$this->resetImageParam();
+
+		return true;
+	}
+
+	/**
+	 * 	method:	maxdim
+	 *
+	 * 	todo: write documentation
+	 */
+	public function maxdim($width,$height)
+	{
+		if(!$this->getImageParam("handle")){
+			return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
+		}
+
+		$d = $this->getDimensions();
+
+		$width	=	intval($width);
+		$height	=	intval($height);
+
+		//	If the width and height passed are empty, we can default to the original size, so it at least works, but not optimally
+		if(!$width)		$width = $d["width"];
+		if(!$height)	$height = $d["height"];
+
+		//	if failed, ERROR_IMAGE_DIMENSIONS_INVALID
+		if(!$d || !$width || !$height){
+			return $this->setError(self::ERROR_IMAGE_DIMENSIONS_INVALID.", w($width):h($height)");
+		}
+
+		$a = $d["width"] / $d["height"];
+
+		if($a > 1){
+			//	wider image
+			if($d["width"] != $width){
+				$ratio			= $width / $d["width"];
+				$d["width"]		= $d["width"] * $ratio;
+				$d["height"]	= $d["height"] * $ratio;
+			}
+
+			if($d["height"] > $height){
+				$ratio			= $height / $d["height"];
+				$d["width"]		= $d["width"] * $ratio;
+				$d["height"]	= $d["height"] * $ratio;
+			}
 		}else{
-			foreach($this->images as $i){
-				imagedestroy($i["handle"]);
+			//	taller image
+
+			//	wider image
+			if($d["height"] != $height){
+				$ratio			= $height / $d["height"];
+				$d["width"]		= $d["width"] * $ratio;
+				$d["height"]	= $d["height"] * $ratio;
+			}
+
+			if($d["width"] > $width){
+				$ratio			= $width / $d["width"];
+				$d["width"]		= $d["width"] * $ratio;
+				$d["height"]	= $d["height"] * $ratio;
 			}
 		}
+
+		return $this->resize($d["width"],$d["height"]);
 	}
 
 	/**
-	 * 	method:	getMIMEType
+	 * 	method:	crop
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getMIMEType($filename)
+	public function crop($x1,$y1,$x2,$y2)
 	{
-		if(!isset($this->images[$filename])) return false;
+		$handle = $this->getImageParam("handle");
 
-		return $this->images[$filename]["mime"];
+		if(!$handle){
+			return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
+		}
+
+		$x1 = intval($x1);
+		$y1 = intval($y1);
+		$x2 = intval($x2);
+		$y2 = intval($y2);
+		$dx = intval($x2-$x1);
+		$dy = intval($y2-$y1);
+
+		if($dx < 1 || $dy < 1){
+			return $this->setError(self::ERROR_IMAGE_DIMENSIONS_INVALID);
+		}
+
+		$tmp_image	=	imagecreatetruecolor($dx,$dy);
+
+		//	if failed, ERROR_CREATE_IMAGE_OBJECT
+		if(!$tmp_image) return $this->setError(self::ERROR_CREATE_IMAGE_OBJECT);
+		//imagecopyresampled($dst_image, $src_image, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h)
+		$success = imagecopyresampled(
+				$tmp_image,
+				$handle,
+				0, 0,
+				$x1, $y1,
+				$dx, $dy,
+				$dx, $dy
+		);
+
+		//	if failed, ERROR_RESIZE_IMAGE_OBJECT_FAILED
+		if(!$success) return $this->setError(self::ERROR_RESIZE_IMAGE_OBJECT_FAILED);
+
+		//	if failed, ERROR_CLOSE_IMAGE_OBJECT
+		if(!$this->close()) return $this->setError(self::ERROR_IMAGE_OBJECT_CLOSE);
+
+		$this->setImageParam("handle",$tmp_image);
+		$this->setImageParam("width",$dx);
+		$this->setImageParam("height",$dy);
+
+		return true;
 	}
 
 	/**
-	 * 	method:	getInstance
+	 * 	method:	resize
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function &getInstance()
+	public function resize($width,$height)
 	{
-		static $instance = NULL;
+		$handle = $this->getImageParam("handle");
 
-		if($instance === NULL) $instance = new self();
+		if(!$handle){
+			return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
+		}
 
-		return $instance;
+		$width		=	intval($width);
+		$height		=	intval($height);
+
+		if(!$width || !$height){
+			return $this->setError(self::ERROR_IMAGE_DIMENSIONS_INVALID);
+		}
+
+		$tmp_image	=	imagecreatetruecolor($width,$height);
+
+		//	if failed, ERROR_CREATE_IMAGE_OBJECT
+		if(!$tmp_image) return $this->setError(self::ERROR_CREATE_IMAGE_OBJECT);
+
+		/**	FUTURE IMPROVEMENT, NEEDS TESTING
+		 * // preserve transparency
+			if($type == "gif" or $type == "png"){
+				imagecolortransparent($new, imagecolorallocatealpha($new, 0, 0, 0, 127));
+				imagealphablending($new, false);
+				imagesavealpha($new, true);
+			}
+		 */
+
+		$success = imagecopyresampled(
+			$tmp_image,
+			$handle,
+			0, 0,
+			0, 0,
+			$width, $height,
+			$this->getImageParam("width"), $this->getImageParam("height")
+		);
+
+		//	if failed, ERROR_RESIZE_IMAGE_OBJECT_FAILED
+		if(!$success) return $this->setError(self::ERROR_RESIZE_IMAGE_OBJECT_FAILED);
+
+		//	if failed, ERROR_CLOSE_IMAGE_OBJECT
+		if(!$this->close()) return $this->setError(self::ERROR_IMAGE_OBJECT_CLOSE);
+
+		$this->setImageParam("handle",$tmp_image);
+		$this->setImageParam("width",$width);
+		$this->setImageParam("height",$height);
+
+		$this->sharpen();
+
+		return true;
+	}
+
+	/**
+	 * 	method:	sharpen
+	 *
+	 * 	todo: write documentation
+	 */
+	public function sharpen()
+	{
+		$handle = $this->getImageParam("handle");
+
+		if(!$handle){
+			return $this->setError(self::ERROR_IMAGE_OBJECT_INVALID);
+		}
+
+		$matrix = array(
+				array(-1, -1, -1),
+				array(-1, 16, -1),
+				array(-1, -1, -1),
+		);
+
+		$divisor = array_sum(array_map('array_sum', $matrix));
+		$offset = 0;
+		imageconvolution($handle, $matrix, $divisor, $offset);
+	}
+
+	/**
+	 * 	method:	readCache
+	 *
+	 * 	todo: write documentation
+	 */
+	public function readCache($filename=NULL,$returnData=false)
+	{
+		//	If the filename was not given, attempt to get it from the cache
+		//	but only if it appears to be a processed image
+		//	NOTE:	if we cannot find the information inside the image params, then we didnt process it
+		//			we are only really interested in working with files we've already processed
+		if($filename == NULL && $this->getCacheParam("filename") == $this->getImageParam("filename")){
+			$filename = $this->getCacheParam("filename");
+		}
+
+		//	If cache is not enabled, return false
+		if(!$this->cache_dir) return $this->setError(self::ERROR_NO_CACHE_DIR);
+
+		//	get file extension and if not valid, return false
+		$ext = $this->setCacheParam("extension",$this->getFileExtension($filename));
+		if(!$ext) return $this->setError(self::ERROR_FILE_EXTENSION_INVALID);
+
+		$this->setCacheParam("filename",$filename);
+		$cache_filename = $this->getCacheFilename();
+
+		//	does the file exist in the cache
+		if(file_exists($cache_filename)){
+			//	if yes, readfile($cache) or return data
+			if($returnData){
+				return file_get_contents($cache_filename);
+			}
+
+			//die($cache_filename);
+			header("Content-Type: ".$this->getCacheParam("mime_type"));
+			readfile($cache_filename);
+
+			return true;
+		}
+
+		//	if no, read original file into cache, then attempt to get from cache again
+		if($this->writeCacheFromFile($filename)){
+			return $this->readCache($filename,$returnData);
+		}
+
+		//	oh well, on images for you little jimmy...go cry to your mother...
+		return $this->setError(self::ERROR_CACHE_NOT_FOUND);
+	}
+
+	/**
+	 * 	method:	writeCacheFromFile
+	 *
+	 * 	todo: write documentation
+	 */
+	public function writeCacheFromFile($filename)
+	{
+		$filename	= Amslib_Website::abs($filename);
+		$cache		= $this->getCacheFilename();
+
+		return copy($filename,$cache) && chmod($cache,0755);
+	}
+
+	/**
+	 * 	method:	writeCacheFromImage
+	 *
+	 * 	todo: write documentation
+	 */
+	public function writeCacheFromImage()
+	{
+		$handle		= $this->getImageParam("handle");
+		$filename	= $this->getImageParam("filename");
+		$ext		= $this->getImageParam("extension");
+
+		$this->setCacheParam("extension",$ext);
+		$this->setCacheParam("filename",$filename);
+		$this->setCacheParam("width",$this->getImageParam("width"));
+		$this->setCacheParam("height",$this->getImageParam("height"));
+
+		$cache = $this->getCacheFilename();
+
+		switch($ext){
+			case "jpeg":
+			case "jpg":{	imagejpeg($handle,$cache);	}break;
+			case "png":{	imagepng($handle,$cache);	}break;
+			case "gif":{	imagegif($handle,$cache);	}break;
+		};
+
+		//	Write the file to a new destination, or to the browser
+		return file_exists($cache) && chmod($cache,0755);
+	}
+
+	/**
+	 * 	method:	imageCopyResampleBicubic
+	 *
+	 * 	todo: write documentation
+	 */
+	public function imageCopyResampleBicubic($dst_img, $src_img, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h)
+	{
+		$scaleX = ($src_w - 1) / $dst_w;
+		$scaleY = ($src_h - 1) / $dst_h;
+
+		$scaleX2 = $scaleX / 2.0;
+		$scaleY2 = $scaleY / 2.0;
+
+		$tc = imageistruecolor($src_img);
+
+		for ($y = $src_y; $y < $src_y + $dst_h; $y++)
+		{
+			$sY   = $y * $scaleY;
+			$siY  = (int) $sY;
+			$siY2 = (int) $sY + $scaleY2;
+
+			for ($x = $src_x; $x < $src_x + $dst_w; $x++)
+			{
+				$sX   = $x * $scaleX;
+				$siX  = (int) $sX;
+				$siX2 = (int) $sX + $scaleX2;
+
+				if ($tc)
+				{
+					$c1 = imagecolorat($src_img, $siX, $siY2);
+					$c2 = imagecolorat($src_img, $siX, $siY);
+					$c3 = imagecolorat($src_img, $siX2, $siY2);
+					$c4 = imagecolorat($src_img, $siX2, $siY);
+
+					$r = (($c1 + $c2 + $c3 + $c4) >> 2) & 0xFF0000;
+					$g = ((($c1 & 0xFF00) + ($c2 & 0xFF00) + ($c3 & 0xFF00) + ($c4 & 0xFF00)) >> 2) & 0xFF00;
+					$b = ((($c1 & 0xFF)   + ($c2 & 0xFF)   + ($c3 & 0xFF)   + ($c4 & 0xFF))   >> 2);
+
+					imagesetpixel($dst_img, $dst_x + $x - $src_x, $dst_y + $y - $src_y, $r+$g+$b);
+				}
+				else
+				{
+					$c1 = imagecolorsforindex($src_img, imagecolorat($src_img, $siX, $siY2));
+					$c2 = imagecolorsforindex($src_img, imagecolorat($src_img, $siX, $siY));
+					$c3 = imagecolorsforindex($src_img, imagecolorat($src_img, $siX2, $siY2));
+					$c4 = imagecolorsforindex($src_img, imagecolorat($src_img, $siX2, $siY));
+
+					$r = ($c1['red']   + $c2['red']   + $c3['red']   + $c4['red']  ) << 14;
+					$g = ($c1['green'] + $c2['green'] + $c3['green'] + $c4['green']) << 6;
+					$b = ($c1['blue']  + $c2['blue']  + $c3['blue']  + $c4['blue'] ) >> 2;
+
+					imagesetpixel($dst_img, $dst_x + $x - $src_x, $dst_y + $y - $src_y, $r+$g+$b);
+				}
+			}
+		}
+
+		return true;
 	}
 }
