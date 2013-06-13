@@ -110,8 +110,8 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->setLanguageKey();
 		
 		//	Setup all the translators in other plugins with the correct languages
-		foreach(Amslib_Plugin_Manager::listPlugins() as $name){
-			$api = Amslib_Plugin_Manager::getAPI($name);
+		foreach(Amslib_Plugin_Manager::listPlugins() as $plugin){
+			$api = Amslib_Plugin_Manager::getAPI($plugin);
 				
 			if($api){
 				$translators = $api->listTranslators(false);
