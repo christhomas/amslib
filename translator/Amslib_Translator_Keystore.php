@@ -62,6 +62,8 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	 */
 	public function __construct()
 	{
+		$this->language = false;
+		
 		$this->reset();
 	}
 	
@@ -90,7 +92,6 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	public function reset()
 	{
 		$this->store				=	array();
-		$this->language				=	false;
 		$this->permittedLanguage	=	array();
 		$this->defaultKey			=	0;
 	}
