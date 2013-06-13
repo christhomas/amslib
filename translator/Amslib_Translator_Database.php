@@ -70,6 +70,8 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 	 */
 	public function load()
 	{	
+		$this->reset();
+		
 		if($this->language)
 		{
 			$this->database	=	NULL;
