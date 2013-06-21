@@ -48,28 +48,35 @@ class Amslib_Mixin
 		if(in_array($name,array_keys($this->mixin))){
 			return call_user_func_array(array($this->mixin[$name],$name),$args);
 		}else{
-			//	NOTE: I think I should disable this, it might use a lot of memory over time
-			Amslib_Keystore::add("__call[failure]",array(
-				"class"		=>	get_class($this),
-				"method"	=>	$name,
-				"available"	=>	array_keys($this->mixin)
-			));
+			//	build an array map of objects to methods so you can output a 
+			//	data structure to the error log with what was searched and failed 
+			//	to find a match, for debugging
+			$map = array();
+			foreach($this->mixin as $method=>$object){
+				$o = get_class($object);
+				if(!isset($map[$o])) $map[$o] = "$method";
+				else $map[$o] = "{$map[$o]}$method,";
+			}
+			
+			//	Log the failure to find a method to call to the error log
+			Amslib::errorLog("__call / failure",get_class($this),$name,$map);
 		}
 
 		return false;
 	}
 
-	//	NOTE:	There is a potential !!GOTCHA!! here, if you mixin one object into another, 
-	//			then that object into another, the second mixin only searches for native 
-	//			methods in the first object, it won't see the mixed in methods from the original object
-	//			e.g: object2::mixin(object1::mixin(object0))), 
-	//			object2 can only call native methods on object1, object0's methods are invisible
-	
-	//	TODO: implement reject+accept, now its just the bare idea
 	/**
 	 * 	method:	addMixin
 	 *
 	 * 	todo: write documentation
+	 * 	
+	 * 	notes:
+	 * 		-	There is a potential !!GOTCHA!! here, if you mixin one object into another,
+	 * 			then that object into another, the second mixin only searches for native
+	 * 			methods in the first object, it won't see the mixed in methods from the original object
+	 * 			e.g: object2::mixin(object1::mixin(object0))),
+	 * 			object2 can only call native methods on object1, object0's methods are invisible
+	 * 		-	TODO: implement reject+accept, now its just the bare idea
 	 */
 	public function addMixin($object,$reject=array(),$accept=array())
 	{
