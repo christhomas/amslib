@@ -57,9 +57,9 @@ class Amslib_Mixin
 				if(!isset($map[$o])) $map[$o] = "$method";
 				else $map[$o] = "{$map[$o]}$method,";
 			}
-			
+
 			//	Log the failure to find a method to call to the error log
-			Amslib::errorLog("__call / failure",get_class($this),$name,$map);
+			Amslib::errorLog("__call / FAILURE",get_class($this),$name,$map);
 		}
 
 		return false;
