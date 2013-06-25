@@ -647,6 +647,7 @@ class Amslib
 
 		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
 			$function	=	"(ERROR, function invalid: ".Amslib::var_dump($function).")";
+			$data		=	Amslib::getStackTrace(NULL,false);
 		}else{
 			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}({$line["line"]})";
 		}

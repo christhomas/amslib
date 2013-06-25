@@ -33,7 +33,7 @@
  *
  */
 class Amslib_Array2
-{
+{	
 	/**
 	 * 	method:	filterKey
 	 *
