@@ -331,7 +331,7 @@ class Amslib_Router
 		$target	=	'(\w+)';
 		$len	=	strlen($target);
 		
-		foreach(Amslib_Array2::valid($params) as $k=>$p){
+		foreach(Amslib_Array::valid($params) as $k=>$p){
 			//	I copied this replacement code from: http://stackoverflow.com/revisions/1252710/3
 			$pos = strpos($url,$target);
 			if ($pos !== false) $url = substr_replace($url,$p,$pos,$len);

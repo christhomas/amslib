@@ -208,6 +208,9 @@ class Amslib_Array
 	 *
 	 * 	returns:
 	 * 		Boolean false if it was not found, or the first match key that was found
+	 * 
+	 * 	notes:
+	 * 		-	we should extend this with the ability to find an exact or partial key
 	 */
 	static public function findKey($source,$key)
 	{
@@ -513,20 +516,6 @@ class Amslib_Array
 		}
 		return $array;
 	}*/
-
-	/**
-	 * 	method:	findKey
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function findKey($array,$key,$value)
-	{
-		foreach(self::valid($array) as $k=>$a){
-			if($a[$key] == $value) return $k;
-		}
-
-		return false;
-	}
 
 	/**
 	 * 	method:	searchKeys
