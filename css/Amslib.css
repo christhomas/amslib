@@ -2,35 +2,44 @@
 @IMPORT url("box-model.css");
 @IMPORT url("../util/h5bp/css/normalize.css");
 
-/*	ANTIMATTER RESET STYLES:
-	Fix the stupid W3C box model, Internet explorer was the correct box model
-	*/
+/***************************************************
+	ANTIMATTER RESET STYLES: override normalize
+	with what I think is better.
+	
+	All elements
+***************************************************/
 *{
-	-moz-box-sizing: border-box;
+	/*	remove all margins and paddings */
+	padding: 0 0 0 0;
+	margin: 0 0 0 0;
+	
+	/*	Fix the stupid W3C box model, Internet explorer
+		was the correct box model */
 	-webkit-box-sizing: border-box;
-	-ms-box-sizing: border-box;
-	box-sizing: border-box;	
+	   -moz-box-sizing: border-box;
+	    -ms-box-sizing: border-box;
+	        box-sizing: border-box;
 }
 
-/*	DISABLE BOX SIZING WITH POSSIBLE INHERIT
-	This can give options if in some situation you need to do this, then 
-	you can still do it and keep your sanity, even though it's ugly
-	*/
+/***************************************************
+	Disable the above box sizing on html that
+	cannot support it, allow the use of inherit
+	and an noself inherit variant for more complex
+	situations
+***************************************************/
 .disable_box_sizing,
-.disable_box_sizing_inherit,
-.disable_box_sizing_inherit *,
-.disable_box_sizing_inherit_noself *{
-	-moz-box-sizing: content-box;
+.disable_box_sizing.inherit *,
+.disable_box_sizing_noself *{
 	-webkit-box-sizing: content-box;
-	-ms-box-sizing: content-box;
-	box-sizing: content-box;
+	   -moz-box-sizing: content-box;
+	    -ms-box-sizing: content-box;
+	        box-sizing: content-box;
 }
 
-/* reset all the font weights because by default because I personally think it should not be bolded */
-h1,h2,h3,h4,h5,h6{ font-weight: normal; }
-
-/* this is to help with the mvc system, this weird looking class is how we embed mvc data in the page */
-/* NOTE:	this isn't really used anymore */
-.__amslib_mvc_values{
-	display: none;
+/***************************************************
+	reset all the header bold stylings cause
+	if I want this, I'll do it myself
+***************************************************/
+h1,h2,h3,h4,h5,h6{ 
+	font-weight: normal;
 }
