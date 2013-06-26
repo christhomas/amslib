@@ -39,7 +39,7 @@ class Amslib_Form
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function selectOptions($array,$selected=NULL,$indexText=NULL,$indexValue=NULL,$createAttributes=false)
+	static public function selectOptions($array,$selected=NULL,$indexText=NULL,$indexValue=NULL,$createAttributes=true)
 	{
 		$options = array();
 

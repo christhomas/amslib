@@ -343,12 +343,15 @@ class Amslib_Plugin_Service
 
 		if(!is_object($object)){
 			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib::var_dump($object));
+			$object = "__INVALID_OBJECT__";
+		}else{
+			$object = get_class($object);
 		}
 
 		//	NOTE:	this might seem a little harsh, but it's a critical error, your object doesn't have
 		//			the method you said it would, probably this means something in your code is broken
 		//			and you need to know about it and fix it.
-		die("FAILURE[p:".get_class($object)."][m:$method]-> method did not exist, so could not be called");
+		die("FAILURE[p:$object][m:$method]-> method did not exist, so could not be called");
 	}
 
 	//	NOTE: the code is ready however the system is not
