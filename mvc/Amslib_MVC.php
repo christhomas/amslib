@@ -732,6 +732,16 @@ class Amslib_MVC extends Amslib_Mixin
 		//	Step 3: return false, image was not found
 		return false;
 	}
+	
+	/**
+	 * 	method:	listImage
+	 *
+	 * 	todo: write documentation
+	 */
+	public function listImage($return_data=false)
+	{
+		return $return_data ? $this->images : array_keys($this->images);
+	}
 
 	/**
 	 * 	method:	getAPI
