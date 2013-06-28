@@ -51,11 +51,9 @@ var Amslib_Datagrid = my.Amslib_Datagrid = my.Class(Amslib,
 		this.ajaxURL	= this.parent.data(this.options.ajaxURL) || this.options.ajaxURL;
 		if(this.ajaxURL == this.options.ajaxURL) this.ajaxURL = false;
 		
-		this.$thead = this.parent.find('thead');
 		this.$tfoot = this.parent.find('tfoot');
 		this.$footer = this.parent.find('tfoot th');
 		this.$footerchildren = this.$footer.children().show().css('visibility', 'hidden');
-		this.$topheader = this.parent.find('thead th');
 		this.$searchcontrol = this.parent.find('.datagrid-search');
 		this.$filtercontrol = this.parent.find('.filter');
 		this.$pagesize = this.parent.find('.grid-pagesize');
@@ -67,11 +65,14 @@ var Amslib_Datagrid = my.Amslib_Datagrid = my.Class(Amslib,
 		this.$countlabel = this.parent.find('.grid-count');
 		this.$startlabel = this.parent.find('.grid-start');
 		this.$endlabel = this.parent.find('.grid-end');
+		
+		this.$thead = this.parent.find('thead');
+		this.$topheader = this.$thead.find('th[data-datagrid-table-header]');
+		this.$colheader = this.$thead.find("tr[data-datagrid-column-header]");
+		this.$colheader = this.$colheader.length == 0 ? $('<tr>').appendTo(this.$thead) : this.$colheader;
 
 		this.$tbody = this.parent.find("tbody");
 		if(this.$tbody.length == 0) this.$tbody = $('<tbody>').insertAfter(this.$thead);
-		
-		this.$colheader = $('<tr>').appendTo(this.$thead);
 
 		// Shim until v3 -- account for FuelUX select or native select for page size:
 		this.options.dataOptions.pageSize = this.$pagesize.hasClass('select')
@@ -127,7 +128,7 @@ var Amslib_Datagrid = my.Amslib_Datagrid = my.Class(Amslib,
 			colHTML += '>' + column.label + '</th>';
 		});
 
-		this.$colheader.append(colHTML);
+		this.$colheader.html(colHTML);
 	},
 
 	updateColumns: function ($target, direction) {
@@ -361,7 +362,7 @@ var Amslib_Datagrid = my.Amslib_Datagrid = my.Class(Amslib,
 		
 		this.columns = [];
 		
-		this.parent.find("thead th").each(function(){
+		this.$colheader.find("th").each(function(){
 			$this.columns.push({
 				property:	$(this).data("property") || $(this).text().toLowerCase(),
 				label:		$(this).text(),
@@ -396,9 +397,9 @@ var Amslib_Datagrid = my.Amslib_Datagrid = my.Class(Amslib,
 		callback({
 			data: data,
 			start: 0,
-			end: data.length,
-			count: data.length,
-			pages: data.length / 10,
+			end: 500,
+			count: 50,
+			pages: 10,
 			page: 0
 		});
 	}
