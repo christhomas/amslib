@@ -69,6 +69,8 @@ class Amslib_Plugin_Service
 	 */
 	static protected function getHandlerData($plugin,$default,$key)
 	{
+		$plugin = self::pluginToName($plugin);
+		
 		if(!self::$handler){
 			//	TODO: move into the logging system intead of here
 			error_log("** ".__METHOD__." ** ".Amslib::var_dump(self::$handler,true)." was invalid");
@@ -439,7 +441,7 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function pluginToName($plugin)
+	static public function pluginToName($plugin)
 	{
 		if(is_object($plugin)) $plugin = get_class($plugin);
 		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN__";
@@ -454,7 +456,7 @@ class Amslib_Plugin_Service
 	 */
 	public function setValidationData($plugin,$data)
 	{
-		$this->data[$this->pluginToName($plugin)][self::VD] = $data;
+		$this->data[self::pluginToName($plugin)][self::VD] = $data;
 	}
 
 	/**
@@ -469,7 +471,7 @@ class Amslib_Plugin_Service
 			$errors["debug_help"] = "No Errors set and array was empty, perhaps validation failed because source was empty?";
 		}
 
-		$this->data[$this->pluginToName($plugin)][self::VE] = $errors;
+		$this->data[self::pluginToName($plugin)][self::VE] = $errors;
 	}
 
 	//	NOTE: Be careful with this method, you could be pushing secret data
@@ -480,7 +482,7 @@ class Amslib_Plugin_Service
 	 */
 	public function setDatabaseErrors($plugin,$errors)
 	{
-		if(!empty($errors)) $this->data[$this->pluginToName($plugin)][self::DB] = $errors;
+		if(!empty($errors)) $this->data[self::pluginToName($plugin)][self::DB] = $errors;
 	}
 
 /**
@@ -490,7 +492,7 @@ class Amslib_Plugin_Service
 	 */
 	public function setData($plugin,$name,$value)
 	{
-		$plugin = $this->pluginToName($plugin);
+		$plugin = self::pluginToName($plugin);
 
 		if($name == NULL && is_array($value)){
 			$this->data[$plugin][self::SD] = $value;
@@ -506,7 +508,7 @@ class Amslib_Plugin_Service
 	 */
 	public function getData($plugin,$name=NULL,$default=NULL)
 	{
-		$plugin = $this->pluginToName($plugin);
+		$plugin = self::pluginToName($plugin);
 
 		if(!isset($this->data[$plugin])) return $default;
 
@@ -524,7 +526,7 @@ class Amslib_Plugin_Service
 	 */
 	public function deleteData($plugin,$name=NULL)
 	{
-		$plugin	=	$this->pluginToName($plugin);
+		$plugin	=	self::pluginToName($plugin);
 		$copy	=	NULL;
 
 		if(isset($this->data[$plugin])){
@@ -566,7 +568,7 @@ class Amslib_Plugin_Service
 	 */
 	public function setError($plugin,$name,$value)
 	{
-		$plugin = $this->pluginToName($plugin);
+		$plugin = self::pluginToName($plugin);
 
 		if($name == NULL && is_array($value)){
 			$this->data[$plugin][self::SE] = $value;
@@ -640,7 +642,7 @@ class Amslib_Plugin_Service
 	 */
 	public function cloneResponse($plugin,$data)
 	{
-		$plugin = $this->pluginToName($plugin);
+		$plugin = self::pluginToName($plugin);
 
 		if(isset($data["service/data"])){
 			$this->setData($plugin,NULL,$data["service/data"]);
