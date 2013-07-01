@@ -712,7 +712,6 @@ class Amslib_Plugin_Service
 	static public function processHandler($id=0)
 	{
 		self::$handler = isset(self::$serviceData[self::HD][$id]) ? self::$serviceData[self::HD][$id] : array();
-		error_log("HANDLERS = ".Amslib::var_dump(self::$handler,true));
 
 		return array_keys(Amslib_Array::valid(self::$handler));
 	}
