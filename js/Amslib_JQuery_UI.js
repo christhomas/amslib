@@ -72,7 +72,7 @@ var Amslib_JQuery_UI = my.Amslib_JQuery_UI = my.Class(Amslib,
 		},
 		
 		options: {
-			autoload_datepicker:	"[data-autoload-datepicker]",
+			autoload_datepicker:	"[data-jqueryui-datepicker]",
 			amslibName:				"Amslib_JQuery_UI"
 		},
 		
