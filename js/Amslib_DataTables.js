@@ -19,24 +19,9 @@
  *     
  *******************************************************************************/
 
-if(Amslib == undefined || window.exports == undefined) throw("Amslib_DataTables.js: requires amslib/my.common to be loaded first");
-
-var amslib = Amslib.locate();
-
-if(amslib){
-	var theme		=	Amslib.getQuery("theme",$("script[src*='Amslib_DataTables.js']").attr("src"));
-	var pagination	=	Amslib.getQuery("pagination",$("script[src*='Amslib_DataTables.js']").attr("src"));
-	var datatables	=	amslib+"/util/jquery.dataTables/";
-	
-	var themeList = {
-		"smooth":	datatables+"theme.dataTables.smooth.css"
-	};
-	
-	if(!themeList[theme]) theme = "smooth";
-	
-	Amslib.loadCSS(themeList[theme]);
-	Amslib.loadJS("jquery.dataTables",datatables+"jquery.dataTables.min.js");
-};
+if(Amslib == undefined || window.exports == undefined){
+	throw("FATAL ERRORS: please load [amslib, my.common, my.class] first, they are missing");
+}
 
 /**
  * 	class:	Amslib_DataTables
@@ -44,8 +29,6 @@ if(amslib){
  *	group:	javascript
  * 
  *	file:	Amslib_DataTables.js
- * 
- *	title:	todo, give title
  * 
  *	description:
  *		todo, write description 
@@ -62,13 +45,33 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 		 * 	todo: write documentation
 		 */
 		autoload: function(){
-			$(Amslib_DataTables.options.autoload).each(function(){
-				new Amslib_DataTables(this);
+			var amslib = Amslib.locate();
+
+			if(amslib){
+				var src			=	Amslib.getJSPath("Amslib_DataTables.js");
+				var theme		=	Amslib.getQuery("theme",src);
+				var pagination	=	Amslib.getQuery("pagination",src);
+				var datatables	=	amslib+"/util/jquery.dataTables/";
+				
+				var themeList = {
+					"smooth":	datatables+"theme.dataTables.smooth.css"
+				};
+				
+				if(!themeList[theme]) theme = "smooth";
+				
+				Amslib.loadCSS(themeList[theme]);
+				Amslib.loadJS("jquery.dataTables",datatables+"jquery.dataTables.min.js");
+			};
+			
+			Amslib.waitUntil("jquery.dataTables",function(){
+				$(Amslib_DataTables.options.autoload).each(function(){
+					new Amslib_DataTables(this);
+				});
 			});
 		},
 		
 		options: {
-			autoload:			"[data-autoload-datatables]",
+			autoload:			"[data-datatables-autoload]",
 			amslibName:			"Amslib_DataTables",
 			//	jquery datatables options
 			bJQueryUI:			true,

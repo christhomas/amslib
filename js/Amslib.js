@@ -67,7 +67,7 @@ var Amslib = my.Amslib = my.Class({
 			
 			// make it safe to use console.log always
 			(function(b){function c(){}for(var d="assert,count,debug,dir,dirxml,error,exception,group,groupCollapsed,groupEnd,info,log,timeStamp,profile,profileEnd,time,timeEnd,trace,warn".split(","),a;a=d.pop();){b[a]=b[a]||c}})((function(){try
-			{console.log();return window.console;}catch(err){return window.console={};}})());			 	
+			{console.log();return window.console;}catch(err){return window.console={};}})());
 		},
 		
 		/**
@@ -95,33 +95,7 @@ var Amslib = my.Amslib = my.Class({
 			//	NOTE: apparently some people found this function would cause an error in google chrome, dunno why.
 			if(console && console.log) console.log.apply(console,arguments);
 		},
-		
-		//	DEPRECATED getPath, use Amslib.locate() instead, it does exactly what I was supposed to do here
-		/**
-		 * 	method:	getPath
-		 *
-		 * 	todo: write documentation
-		 */
-		getPath: function(file)
-		{
-			//	Copied from how scriptaculous does it's "query string" thing
-			var re 		=	new RegExp("^(.*?)"+file.replace(/[-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&")+"$","g");
-			var path	=	false;
-			
-			$("script[src]").each(function(){
-				var matches = re.exec(this.src);
-				
-				if(matches){
-					path = matches[1]; 
-					return false;
-				}
-			});
-			
-			if(!path) Amslib.firebug("requested path["+file+"] using regexp["+re+"] was not found");
-				
-			return path;
-		},
-		
+
 		/**
 		 * 	method:	locate
 		 *
@@ -228,7 +202,10 @@ var Amslib = my.Amslib = my.Class({
 					if(Amslib.__lready[name[n]] && checkGroup()) return true;
 				}catch(e){}
 				
-				if(typeof(Amslib.__lcback[name[n]]) == "undefined") Amslib.__lcback[name[n]] = new Array();
+				if(typeof(Amslib.__lcback[name[n]]) == "undefined"){
+					Amslib.__lcback[name[n]] = new Array();
+				}
+				
 				Amslib.__lcback[name[n]].push(checkGroup);
 			}
 			
@@ -254,7 +231,11 @@ var Amslib = my.Amslib = my.Class({
 		 */
 		loadCSS: function(file)
 		{
-			$("head").append($("<link/>").attr({rel:"stylesheet",type:"text/css",href: file}));
+			$("head").append($("<link/>").attr({
+				rel:	"stylesheet",
+				type:	"text/css",
+				href:	file
+			}));
 		},
 		
 		loader:			{},

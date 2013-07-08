@@ -48,18 +48,22 @@ class Amslib_Mixin
 		if(in_array($name,array_keys($this->mixin))){
 			return call_user_func_array(array($this->mixin[$name],$name),$args);
 		}else{
-			//	build an array map of objects to methods so you can output a 
-			//	data structure to the error log with what was searched and failed 
+			//	build an array map of objects to methods so you can output a
+			//	data structure to the error log with what was searched and failed
 			//	to find a match, for debugging
 			$map = array();
 			foreach($this->mixin as $method=>$object){
 				$o = get_class($object);
-				if(!isset($map[$o])) $map[$o] = "$method";
-				else $map[$o] = "{$map[$o]}$method,";
-			}
 
+				if(!isset($map[$o])) $map[$o] = array();
+
+				$map[$o][] = $method;
+			}
 			//	Log the failure to find a method to call to the error log
-			Amslib::errorLog("MIXIN FAILURE","stack_trace",get_class($this),$name,$map);
+			Amslib::errorLog("MIXIN FAILURE","stack_trace",get_class($this),$name);
+			foreach($map as $o=>$l){
+				Amslib::errorLog("MIXIN FAILURE DATA",$o,implode(",",$l));
+			}
 		}
 
 		return false;
@@ -69,7 +73,7 @@ class Amslib_Mixin
 	 * 	method:	addMixin
 	 *
 	 * 	todo: write documentation
-	 * 	
+	 *
 	 * 	notes:
 	 * 		-	There is a potential !!GOTCHA!! here, if you mixin one object into another,
 	 * 			then that object into another, the second mixin only searches for native
