@@ -619,10 +619,10 @@ class Amslib
 
 				$c = count($command);
 
-				if($c == 1){
-					$stack = array_slice($stack,$command[0]);
-				}else if($c == 2 && $command[1] > 0){
-					$stack = array_slice($stack,$command[0],$command[1]);
+				if($c == 2){
+					$stack = array_slice($stack,$command[1]);
+				}else if($c == 3 && $command[2] > 0){
+					$stack = array_slice($stack,$command[1],$command[2]);
 				}
 
 				foreach($stack as $row){
