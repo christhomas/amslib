@@ -743,6 +743,8 @@ class Amslib_Plugin
 				$prevent = $node->getAttribute("prevent");
 				if($prevent) Amslib_Plugin_Manager::preventPluginLoad($prevent,$node->nodeValue);
 
+				//	Only process plugins which have no replace or prevent instructions,
+				//	these are instructions about loading, not instructions to ACTUALLY load
 				if(!$prevent && !$replace){
 					$plugin = Amslib_Plugin_Manager::config($node->nodeValue,$this->location);
 				}
@@ -750,7 +752,7 @@ class Amslib_Plugin
 				if($plugin){
 					$this->config["requires"][$node->nodeValue] = $plugin;
 				}else{
-					//Amslib_FirePHP::output("AP::config(), child plugin config failed",array($node->nodeValue,$location));
+					Amslib::errorLog("PLUGIN LOAD FAILURE",$node->nodeValue,$location);
 				}
 			}
 		}
