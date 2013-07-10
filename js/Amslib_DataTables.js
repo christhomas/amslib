@@ -78,6 +78,7 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 		    sPaginationType:	"full_numbers",
 		    sDom:				"<'top floatfix'lpf>rt",
 		    iDisplayLength:		25,
+		    bSort:				true,
 		    aaSorting:			[],
 		    bAutoWidth:			false
 		}
@@ -103,6 +104,9 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 		
 		var paginate = this.parent.data("paginate")
 		if(paginate != undefined) o.bPaginate = paginate;
+		
+		var sort = this.parent.data("sort");
+		if(sort != undefined) o.bSort = sort;
 		
 		var dom = this.parent.data("dom");
 		if(dom != undefined){
