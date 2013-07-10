@@ -167,7 +167,10 @@ var Amslib = my.Amslib = my.Class({
 				Amslib.loader[name]		=	require(file);
 			}
 		
-			if(typeof onReady == "function") scope(onReady,Amslib.loader[name]);
+			if(typeof onReady == "function") scope(function(){
+				Amslib.waitResolve(name);
+				onReady();
+			},Amslib.loader[name]);
 			
 			scope(function(){
 				Amslib.__lready[name] = true;
@@ -190,6 +193,7 @@ var Amslib = my.Amslib = my.Class({
 			var checkGroup = function(){
 				for(n=0;n<name.length;n++){
 					if(!Amslib.__lready[name[n]]) return false;
+					Amslib.waitResolve(name);
 				}
 
 				if(callback) $(document).ready(callback);

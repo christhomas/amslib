@@ -98,13 +98,13 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 		
 		//	TODO: implement a way to add customised sorting rules without defaults in the code
 		
-		var scroll = this.parent.data("dt-scroll");
+		var scroll = this.parent.data("scroll");
 		if(scroll != undefined) o.sScrollY = scroll;
 		
-		var paginate = this.parent.data("dt-paginate")
+		var paginate = this.parent.data("paginate")
 		if(paginate != undefined) o.bPaginate = paginate;
 		
-		var dom = this.parent.data("dt-dom");
+		var dom = this.parent.data("dom");
 		if(dom != undefined){
 			o.sDom = dom;
 			if(o.sDom.indexOf("p") < 0){
@@ -113,10 +113,10 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 			}
 		}
 		
-		var page_count = this.parent.data("dt-page-count");
+		var page_count = this.parent.data("page-count");
 		if(page_count != undefined) o.iDisplayLength	= page_count;
 		
-		var ajax_source = this.parent.data("dt-ajax-source");
+		var ajax_source = this.parent.data("ajax-source");
 		if(ajax_source != undefined){
 			o.bProcessing	=	true;
 			o.bServerSide	=	true;
@@ -136,15 +136,16 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 		}
 		
 		//	TODO: in future, find a way to know this value, it's for the full number of records in the system
-		var defer_loading = this.parent.data("dt-defer-loading");
+		var defer_loading = this.parent.data("defer-loading");
 		if(defer_loading != undefined) o.iDeferLoading = 0;
 
-		var pagination = this.parent.data("dt-pagination");
+		var pagination = this.parent.data("pagination");
+		$this = this;
 		if(pagination != undefined){
 			Amslib.loadJS("jquery.dataTables.pagination",Amslib.locate()+"/util/jquery.dataTables/pagination."+pagination+".js",function(){
 				o.sPaginationType = pagination;
 				
-				this.parent.dataTable(o);
+				$this.parent.dataTable(o);
 			});
 		}else{
 			this.parent.dataTable(o);	
@@ -152,4 +153,4 @@ var Amslib_DataTables = my.Amslib_DataTables = my.Class(my.Amslib,{
 	}
 });
 
-Amslib.hasJS("jquery.dataTables",Amslib_DataTables.autoload);
+$(document).ready(Amslib_DataTables.autoload);
