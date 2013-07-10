@@ -173,6 +173,8 @@ var Amslib = my.Amslib = my.Class({
 			},Amslib.loader[name]);
 			
 			scope(function(){
+				Amslib.waitResolve(name);
+				
 				Amslib.__lready[name] = true;
 				
 				if(Amslib.__lcback[name]) for(k in Amslib.__lcback[name]){
@@ -193,7 +195,8 @@ var Amslib = my.Amslib = my.Class({
 			var checkGroup = function(){
 				for(n=0;n<name.length;n++){
 					if(!Amslib.__lready[name[n]]) return false;
-					Amslib.waitResolve(name);
+
+					Amslib.waitResolve(name[n]);
 				}
 
 				if(callback) $(document).ready(callback);
