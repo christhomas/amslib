@@ -579,12 +579,20 @@ class Amslib
 
 		if($index && is_numeric($index)){
 			$t = $string
+				//	NOTE: why in array_slice do we request a length of 1? we only want one return value??
 				? current(array_slice(explode("\n",$t),$index,1))
 				: ($var_dump ? Amslib::var_dump($t[$index]) : $t[$index]);
 
 			if($string || $var_dump){
 				$t = htmlspecialchars($t,ENT_QUOTES,"UTF-8");
 			}
+		}
+
+		//	NOTE: remove the first entry, it will always be this function, we never want that.
+		if(is_string($t)){
+			$t = implode("\n",array_slice(explode("\n",$t),1));
+		}else{
+			array_shift($t);
 		}
 
 		return $t;
@@ -611,10 +619,10 @@ class Amslib
 
 				$c = count($command);
 
-				if($c == 2){
-					$stack = array_slice($stack,$command[1]);
-				}else if($c == 3 && $command[2] > 0){
-					$stack = array_slice($stack,$command[1],$command[2]);
+				if($c == 1){
+					$stack = array_slice($stack,$command[0]);
+				}else if($c == 2 && $command[1] > 0){
+					$stack = array_slice($stack,$command[0],$command[1]);
 				}
 
 				foreach($stack as $row){
@@ -623,7 +631,7 @@ class Amslib
 			}else if(is_string($a) && strpos($a,"func_offset") === 0){
 				$command = explode(",",array_shift($args));
 
-				if(count($command) == 2) $function = $command[1];
+				if(count($command) == 1) $function = $command[0];
 			}else{
 				if(is_object($a))	$a = array(get_class($a),Amslib::var_dump($a));
 				if(is_array($a)) 	$a = Amslib::var_dump($a);
@@ -640,16 +648,37 @@ class Amslib
 
 		$stack = Amslib::getStackTrace();
 
-		if(!is_numeric($function)) $function = 2;
+		if(!is_numeric($function)) $function = count($stack) > 1 ? 1 : 0;
 
-		$line		=	isset($stack[$function-1])	? $stack[$function-1]	:	array("line"=>-1);
-		$function	=	isset($stack[$function])	? $stack[$function] 	:	false;
+		$line		= array("line"=>-1);
+		$function	= false;
+
+		if($function == 0){
+			if(isset($stack[$function])){
+				$line		= $stack[$function]["line"];
+				$f			= explode("/",$stack[$function]["file"]);
+				$function	= array(
+					"class"=>"",
+					"type"=>"",
+					"function"=>end($f)
+				);
+			}
+		}else{
+			if(isset($stack[$function-1])){
+				$line = $stack[$function-1]["line"];
+			}
+
+			if(isset($stack[$function])){
+				$function = $stack[$function];
+			}
+		}
 
 		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
 			$function	=	"(ERROR, function invalid: ".Amslib::var_dump($function).")";
-			$data		=	Amslib::getStackTrace(NULL,false);
+			$data		=	array(Amslib::var_dump($stack));
 		}else{
-			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}({$line["line"]})";
+			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
+			//$data[] = Amslib::var_dump($stack);
 		}
 
 		error_log("[DEBUG] $function, ".implode(", ",$data));
