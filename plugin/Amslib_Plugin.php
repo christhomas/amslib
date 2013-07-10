@@ -17,7 +17,7 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
@@ -43,7 +43,7 @@ class Amslib_Plugin
 
 	//	The ready state of the plugin is true/false depending on whether it has been configured
 	protected $isReady;
-	
+
 	//	The load state of the plugin is true/false depending on whether it has been loaded
 	protected $isLoaded;
 
@@ -286,7 +286,7 @@ class Amslib_Plugin
 
 		//	An API Object was not created, so create a default Amslib_MVC object instead
 		if($api == false) $api = new Amslib_MVC();
-		
+
 		//	Setup the api with basic name and filesystem location
 		$api->setLocation($this->getLocation());
 		$api->setName($this->getName());
@@ -338,7 +338,7 @@ class Amslib_Plugin
 	{
 		/* do nothing by default */
 	}
-	
+
 	/**
 	 * 	method:	finalisePlugin
 	 *
@@ -347,10 +347,10 @@ class Amslib_Plugin
 	protected function finalisePlugin()
 	{
 		$api = $this->getAPI();
-		
+
 		if($api){
 			$translators = $api->listTranslators(false);
-	
+
 			foreach(Amslib_Array::valid($translators) as $name=>$object){
 				//	Obtain the language the system should use when printing text
 				$object->setLanguage(Amslib_Plugin_Application::getLanguage($name));
@@ -384,7 +384,7 @@ class Amslib_Plugin
 
 		//	This stores where all the types components are stored as part of the application
 		$this->setComponent("view",		"views",	"Vi_");
-		$this->setComponent("object",	"objects",	"");	
+		$this->setComponent("object",	"objects",	"");
 	}
 
 	//	Type 1 data transfers
@@ -554,7 +554,7 @@ class Amslib_Plugin
 				$document->preserveWhiteSpace = false;
 				$xpath = new DOMXPath($document);
 			}
-	
+
 			if(!$xpath){
 				Amslib::errorLog("xpath failed to load on filename",$this->filename);
 
@@ -735,13 +735,17 @@ class Amslib_Plugin
 
 		foreach($list as $node){
 			if($this->getName() != $node->nodeValue){
+				$plugin = false;
+
 				$replace = $node->getAttribute("replace");
 				if($replace) Amslib_Plugin_Manager::replacePluginLoad($replace,$node->nodeValue);
 
 				$prevent = $node->getAttribute("prevent");
 				if($prevent) Amslib_Plugin_Manager::preventPluginLoad($prevent,$node->nodeValue);
 
-				$plugin = Amslib_Plugin_Manager::config($node->nodeValue,$this->location);
+				if(!$prevent && !$replace){
+					$plugin = Amslib_Plugin_Manager::config($node->nodeValue,$this->location);
+				}
 
 				if($plugin){
 					$this->config["requires"][$node->nodeValue] = $plugin;
@@ -767,7 +771,7 @@ class Amslib_Plugin
 	public function load()
 	{
 		if($this->isLoaded) return $this->api;
-		
+
 		if($this->isReady)
 		{
 			//	Process all child plugins before the parents
@@ -779,10 +783,10 @@ class Amslib_Plugin
 			$this->api->initialise();
 			//	Insert into the plugin manager
 			Amslib_Plugin_Manager::insert($this->name,$this);
-			
+
 			//	finalise the plugin, finish any last requests by the plugin
 			$this->finalisePlugin();
-			
+
 			$this->isLoaded = true;
 
 			return $this->api;
@@ -809,7 +813,7 @@ class Amslib_Plugin
 			$this->config[$key] = Amslib_Array::valid($this->config[$key]);
 			foreach($this->config[$key] as &$v){
 				if($v["name"] == $value["name"] && !isset($v["export"]) && !isset($v["import"])){
-					
+
 					$v["value"] = $value["value"];
 
 					return;

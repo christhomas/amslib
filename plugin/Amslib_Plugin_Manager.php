@@ -17,7 +17,7 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
@@ -28,7 +28,7 @@
  *	file:	Amslib_Plugin_Manager.php
  *
  *	description:
- *		An object to store all the plugins and provide a 
+ *		An object to store all the plugins and provide a
  *		central method to access them all
  *
  * 	todo:
@@ -64,7 +64,7 @@ class Amslib_Plugin_Manager
 
 		return false;
 	}
-	
+
 	/**
 	 * 	method:	preventPluginLoad
 	 *
@@ -74,7 +74,7 @@ class Amslib_Plugin_Manager
 	{
 		if(!is_string($prevent) && strlen($prevent) == 0) return false;
 		if(!is_string($plugin) && strlen($plugin) == 0) return false;
-		
+
 		self::$prevent[$plugin] = $prevent;
 	}
 
