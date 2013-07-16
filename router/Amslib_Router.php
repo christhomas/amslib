@@ -17,7 +17,7 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
@@ -56,14 +56,14 @@ class Amslib_Router
 	static protected $url			=	array();
 	static protected $callback	=	array();
 	static protected $export		=	array();
-	
+
 	/**
 	 * Variable: $domain
-	 * 
+	 *
 	 * The default domain string to use with routes that do not provide their own
 	 */
 	static protected $domain		=	"__LOCAL_DOMAIN__";
-	
+
 	/**
 	 * 	method:	finaliseRoute
 	 *
@@ -90,7 +90,7 @@ class Amslib_Router
 	 *
 	 * 	todo: write documentation
 	 */
-	static protected function findLongest($list,$url)
+	static protected function findLongest($list,$url,$group=NULL)
 	{
 		$select = "";
 
@@ -100,7 +100,10 @@ class Amslib_Router
 				$u = $matches[0];
 				self::$url[$u] = $c;
 			}
-			
+
+			//	Only allow matches against a requested group
+			if($group && $d["group"] != $group) continue;
+
 			if($url != "/" && strpos($url,$u) === 0 && strlen($u) >= strlen($select)){
 				$select = $u;
 			}else if($url == $u){
@@ -133,7 +136,7 @@ class Amslib_Router
 			self::$path =	Amslib::rchop(self::$path,"?");
 			self::$path	=	Amslib_File::reduceSlashes("/".self::$path."/");
 		}
-		
+
 		self::load(Amslib::locate()."/router/router.xml","xml","framework");
 	}
 
@@ -238,11 +241,11 @@ class Amslib_Router
 			}
 
 			if($domain == NULL) $domain = self::$domain;
-			
+
 			foreach(Amslib_Array::valid($s->getRoutes()) as $route){
 				self::setRoute($route["name"],$group,$domain,$route);
 			}
-			
+
 			foreach(Amslib_Array::valid($s->getImports()) as $import){
 				self::importRouter($import);
 			}
@@ -307,16 +310,16 @@ class Amslib_Router
 	static public function getURL($name=NULL,$group=NULL,$lang="default",$domain=NULL)
 	{
 		if($domain == NULL) $domain = self::$domain;
-		
-		//	if the $name parameter is an array, this code will split the $name parameter to 
+
+		//	if the $name parameter is an array, this code will split the $name parameter to
 		//	use the first as the route name and all the rest as optional parameters
 		if(is_array($name)){
 			$params	=	array_slice($name,1);
 			$name	=	array_shift($name);
 		}else $params = array();
-		
+
 		$route = self::getRoute($name,$group,$domain);
-		
+
 		//	NOTE: I think it's safe to assume sending NULL means you want the default language
 		//	NOTE: otherwise it would never ever match a language and the system would fail worse
 		if($lang == NULL) $lang = "default";
@@ -326,17 +329,17 @@ class Amslib_Router
 		//	If the url contains a http, don't attempt to make it relative, it's an absolute url
 		//	NOTE: perhaps a better way to solve this is to mark routes as absolute, then I don't have to "best guess"
 		$url = strpos($url,"http") !== false ? $url : Amslib_Website::rel($url);
-		
+
 		//	Now we can replace all the wildcard targets in the url with parameters passed into the function
 		$target	=	'(\w+)';
 		$len	=	strlen($target);
-		
+
 		foreach(Amslib_Array::valid($params) as $k=>$p){
 			//	I copied this replacement code from: http://stackoverflow.com/revisions/1252710/3
 			$pos = strpos($url,$target);
 			if ($pos !== false) $url = substr_replace($url,$p,$pos,$len);
 		}
-		
+
 		return $url;
 	}
 
@@ -345,14 +348,14 @@ class Amslib_Router
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getRouteByURL($url=NULL)
+	static public function getRouteByURL($url=NULL,$group=NULL)
 	{
 		if($url == NULL) return self::$route;
 
 		$route	=	false;
 
 		//	Obtain the route which is responsible for the url
-		$select = self::findLongest(self::$url,$url);
+		$select = self::findLongest(self::$url,$url,$group);
 
 		//	explode the remaining parts of the url into url parameters
 		if(strlen($select) && isset(self::$url[$select])){
@@ -372,10 +375,10 @@ class Amslib_Router
 	{
 		//	if there was no name, surely you mean return the current route
 		if($name == NULL) return self::$route;
-		
+
 		//	If the domain parameter was NULL, use the default local domain
 		if($domain == NULL) $domain = self::$domain;
-		
+
 		//	if you specify a group, look in the name array specifically for that group
 		if($group && is_string($group)){
 			$key = "$domain/$group/$name";
@@ -441,10 +444,10 @@ class Amslib_Router
 		//	importing/renaming a service, this will do it for free without complexity
 		$route["name"]	=	$name;
 		$route["group"]	=	$group;
-		
+
 		//	If domain was not specified, use the local default domain
 		if($domain == NULL) $domain = self::$domain;
-		
+
 		//	store the route data underneath the name so you can explicitly search for it
 		self::$cache[$domain."/$group/$name"]	=	&$route;
 		self::$name[$domain."/$name"]			=	&$route;
@@ -559,7 +562,7 @@ class Amslib_Router
 				? self::$route["url_param"][$index]
 				: $default;
 	}
-	
+
 	/**
 	 * 	method:	setURLParam
 	 *
@@ -618,7 +621,7 @@ class Amslib_Router
 
 		return $p;
 	}
-	
+
 	/**
 	 * 	method:	setExportRestriction
 	 *
@@ -628,7 +631,7 @@ class Amslib_Router
 	{
 		self::$export[$group] = $status;
 	}
-	
+
 	/**
 	 * 	method:	getExportRestriction
 	 *
@@ -638,7 +641,7 @@ class Amslib_Router
 	{
 		return !isset(self::$export[$group]) || self::$export[$group];
 	}
-	
+
 	/**
 	 * 	method:	importRouter
 	 *
@@ -649,14 +652,14 @@ class Amslib_Router
 		//	acquire the latest route for the export url and construct the url to call the external remote service
 		$route	=	self::getRoute("service:framework:router:export:".$import["attr"]["type"]);
 		$url	=	$import["attr"]["url"].$route["src"]["default"];
-		
+
 		if($import["attr"]["type"] == "json"){
 			//	We are going to install a router using json as a data transfer medium
 			//	Acquire the json, decode it and obtain the domain
 			$data	= file_get_contents($url);
 			$data	= json_decode($data,true);
 			$domain	= $data["domain"];
-			
+
 			//	For each route in the cache, create a new route in the local router, giving the name, group, domain and route data
 			//	You are not supposed to update the url cache, imported routes are not accessible through url
 			//	The reason for this is because it doesnt make sense a url from a remote system will be processed by the local system
@@ -666,10 +669,10 @@ class Amslib_Router
 			}
 		}else if($import["attr"]["type"] == "xml"){
 			$data = file_get_contents($url);
-			//	TODO: implement the logic to import from XML 
+			//	TODO: implement the logic to import from XML
 		}
 	}
-	
+
 	/**
 	 * 	method:	exportRouterShared
 	 *
@@ -680,30 +683,30 @@ class Amslib_Router
 		//	Construct the protocol.domain to prepend all the urls with
 		$protocol	=	"http".(isset($_SERVER["HTTPS"]) || (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"]) ? "s" : "")."://";
 		$domain		=	$_SERVER["HTTP_HOST"];
-		
+
 		//	The raw data source before processing
 		$data = array(
 				"domain"	=>	$protocol.$domain,
 				"cache"		=>	self::$cache
 		);
-		
+
 		//	For each cache block, remove the javascript, stylesheet and any framework routes
 		//	For each src inside each cache block, prepend the domain to each url making them accessible remotely
 		foreach($data["cache"] as $k=>&$r){
 			unset($r["stylesheet"]);
 			unset($r["javascript"]);
 			unset($r["handler"]);
-				
+
 			foreach($r["src"] as &$s) $s = $data["domain"].$s;
-			
+
 			if(strpos($k,"framework") || !self::getExportRestriction($r["group"])){
 				unset($data["cache"][$k]);
 			}
 		}
-		
+
 		return $data;
 	}
-	
+
 	/**
 	 * 	method:	serviceExportRouterXML
 	 *
@@ -713,7 +716,7 @@ class Amslib_Router
 	{
 		die("NOT IMPLEMENTED YET");
 	}
-	
+
 	/**
 	 * 	method:	serviceExportRouterJSON
 	 *
@@ -722,10 +725,10 @@ class Amslib_Router
 	static public function serviceExportRouterJSON($service,$source)
 	{
 		$data = self::exportRouterShared();
-		
+
 		Amslib_Website::outputJSON($data);
 	}
-	
+
 	/**
 	 * 	method:	serviceExportRouterDEBUG
 	 *
