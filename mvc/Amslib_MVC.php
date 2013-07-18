@@ -61,16 +61,6 @@ class Amslib_MVC extends Amslib_Mixin
 	protected $plugin;
 
 	/**
-	 * 	method:	getValidatorRules
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function getValidatorRules($group)
-	{
-		return array();
-	}
-
-	/**
 	 * 	method:	recoverServiceData
 	 *
 	 * 	todo: write documentation
