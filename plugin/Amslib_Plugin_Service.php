@@ -53,7 +53,6 @@ class Amslib_Plugin_Service
 	protected $isAJAX;
 	protected $data;
 	protected $session;
-	protected $source;
 	protected $handlerList;
 	protected $activeHandler;
 
@@ -70,7 +69,7 @@ class Amslib_Plugin_Service
 	static protected function getHandlerData($plugin,$default,$key)
 	{
 		$plugin = self::pluginToName($plugin);
-		
+
 		if(!self::$handler){
 			//	TODO: move into the logging system intead of here
 			error_log("** ".__METHOD__." ** ".Amslib::var_dump(self::$handler,true)." was invalid");
@@ -337,10 +336,10 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function runHandler($object,$method)
+	public function runHandler($object,$method,&$source)
 	{
 		if(method_exists($object,$method)){
-			return call_user_func(array($object,$method),$this,$this->source);
+			return call_user_func_array(array($object,$method),array($this,&$source));
 		}
 
 		if(!is_object($object)){
@@ -365,7 +364,7 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function runManagedHandler($rules,$object,$method)
+	public function runManagedHandler($rules,$object,$method,&$source)
 	{
 		//	This method needs to exist on the object to retrieve the validation rules
 		$getRules = array($object,"getValidationRules");
@@ -379,7 +378,7 @@ class Amslib_Plugin_Service
 		if(!$rules || !is_array($rules) || empty($rules)) return false;
 
 		//	Now lets execute the handler!
-		$v = new Amslib_Validator($this->source);
+		$v = new Amslib_Validator($source);
 		$v->addRules($rules);
 
 		$s = $v->execute();
@@ -387,10 +386,10 @@ class Amslib_Plugin_Service
 
 		if($s){
 			//	Set the source to the valid data
-			$this->source = $d;
+			$source = $d;
 
 			//	Here we call the handler, this is a SUCCESS only handler, although the data might fail, the data was valid
-			return $this->runHandler($object,$method);
+			return $this->runHandler($object,$method,$source);
 		}else{
 			$service->setValidationData($object,$d);
 			$service->setValidationErrors($object,$v->getErrors());
@@ -415,12 +414,16 @@ class Amslib_Plugin_Service
 			$this->activeHandler = $h;
 
 			//	Set the source to what was requested, or default in any other case to the $_POST array
-			$this->source = isset($h["source"]) && $h["source"] == "get" ? $_GET : $_POST;
+			if(isset($h["source"]) && $h["source"] == "get"){
+				$source = &$_GET;
+			}else{
+				$source = &$_POST;
+			}
 
 			//	Run the handler, either in managed or unmanaged mode
 			$state = isset($h["managed"])
-				? $this->runManagedHandler($h["managed"],$h["object"],$h["method"])
-				: $this->runHandler($h["object"],$h["method"]);
+				? $this->runManagedHandler($h["managed"],$h["object"],$h["method"],$source)
+				: $this->runHandler($h["object"],$h["method"],$source);
 
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($state);

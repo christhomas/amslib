@@ -65,12 +65,14 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function recoverServiceData()
+	protected function recoverServiceData($name=NULL,$handler=0)
 	{
 		Amslib_Plugin_Service::hasData();
-		Amslib_Plugin_Service::processHandler();
+		Amslib_Plugin_Service::processHandler($handler);
 
-		return Amslib_Plugin_Service::getValidationData($this);
+		if(!$name) $name = $this;
+
+		return Amslib_Plugin_Service::getValidationData($name);
 	}
 
 	/**
