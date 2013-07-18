@@ -499,6 +499,9 @@ class Amslib_Plugin
 				{
 					//	import means take "name" route from "plugin" and install it under the "local_name" route
 					if($item["action"] == "import"){
+						//	TODO	we are processing an xml block named "service" but allowing the service to be a route????
+						//	FIXME:	this is obviously fucking stupid....perhaps the block should be called "router" or done
+						//			a different way, because this is obviously not the right way
 						$r = $item["service"] == "true"
 							? Amslib_Router::getService($item["name"],$item["plugin"])
 							: Amslib_Router::getRoute($item["name"],$item["plugin"]);
