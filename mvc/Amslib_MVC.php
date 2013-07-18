@@ -61,6 +61,29 @@ class Amslib_MVC extends Amslib_Mixin
 	protected $plugin;
 
 	/**
+	 * 	method:	getValidatorRules
+	 *
+	 * 	todo: write documentation
+	 */
+	protected function getValidatorRules($group)
+	{
+		return array();
+	}
+
+	/**
+	 * 	method:	recoverServiceData
+	 *
+	 * 	todo: write documentation
+	 */
+	protected function recoverServiceData()
+	{
+		Amslib_Plugin_Service::hasData();
+		Amslib_Plugin_Service::processHandler();
+
+		return Amslib_Plugin_Service::getValidationData($this);
+	}
+
+	/**
 	 * 	method:	getInstance
 	 *
 	 * 	todo: write documentation
@@ -370,6 +393,23 @@ class Amslib_MVC extends Amslib_Mixin
 	public function hasView($id)
 	{
 		return ($id && isset($this->view[$id]));
+	}
+
+	/**
+	 * 	method:	getEmptyData
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getEmptyData($group)
+	{
+		$rules	= Amslib_Array::valid($this->getValidatorRules($group));
+		$values	= array_fill_keys(array_keys($rules),"");
+
+		foreach($rules as $k=>$v) if(isset($v[2]) && isset($v[2]["form_default"])){
+			$values[$k] = $v[2]["form_default"];
+		}
+
+		return $values;
 	}
 
 	/**
