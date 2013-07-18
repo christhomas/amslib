@@ -17,7 +17,7 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
@@ -100,7 +100,7 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		if(is_string($name)){
 			$object = $this->getObject($name,true);
-			
+
 			if(!$object) $object = $this->getAPI($name);
 		}elseif(is_object($name)){
 			$object = $name;
@@ -200,10 +200,10 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		if(is_string($name) && strlen($name)){
 			$this->value[$name] = $value;
-			
+
 			return $value;
 		}
-		
+
 		return NULL;
 	}
 
@@ -313,12 +313,12 @@ class Amslib_MVC extends Amslib_Mixin
 			}else{
 				$o = new $id;
 			}
-			
+
 			//	if this object was valid and has initialiseObject, call it, then return whatever was created
 			if($o && method_exists($o,"initialiseObject") && !$o->isInitialised()){
 				$o->initialiseObject($this);
 			}
-			
+
 			return $o;
 		}
 
@@ -437,7 +437,7 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		return (isset($this->translator[$name])) ? $this->translator[$name] : reset($this->translator);
 	}
-	
+
 	/**
 	 * 	method:	listTranslators
 	 *
@@ -732,7 +732,7 @@ class Amslib_MVC extends Amslib_Mixin
 		//	Step 3: return false, image was not found
 		return false;
 	}
-	
+
 	/**
 	 * 	method:	listImage
 	 *
@@ -770,7 +770,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 */
 	public function getFullURL()
 	{
-		return Amslib_Router::getPath();
+		return Amslib_Website::rel(Amslib_Router::getPath());
 	}
 
 	/**
