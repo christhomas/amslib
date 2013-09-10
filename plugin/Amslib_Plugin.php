@@ -750,12 +750,12 @@ class Amslib_Plugin
 				//	these are instructions about loading, not instructions to ACTUALLY load
 				if(!$prevent && !$replace){
 					$plugin = Amslib_Plugin_Manager::config($node->nodeValue,$this->location);
-				}
 
-				if($plugin){
-					$this->config["requires"][$node->nodeValue] = $plugin;
-				}else{
-					Amslib::errorLog("PLUGIN LOAD FAILURE",$node->nodeValue,$location);
+					if($plugin){
+						$this->config["requires"][$node->nodeValue] = $plugin;
+					}else{
+						Amslib::errorLog("PLUGIN LOAD FAILURE",$node->nodeValue,$location);
+					}
 				}
 			}
 		}
