@@ -69,14 +69,14 @@ class Amslib_Router
 	 *
 	 * 	todo: write documentation
 	 */
-	static protected function finaliseRoute($route,$select,$url)
+	static protected function finaliseRoute($route,$select,$url,$url_params)
 	{
 		//	Don't replace anything if the string is / because it'll nuke all the separators
 		$replace	=	$select == "/" ? "" : $select;
 		$params		=	Amslib::lchop($url,$replace);
 
 		//	Filter out NULL or empty elements and return ONLY a valid array of valid components
-		$route["url_param"] = Amslib_Array::valid(array_filter(explode("/",trim($params,"/ "))));
+		$route["url_param"] = Amslib_Array::valid(array_filter(array_merge($url_params,explode("/",trim($params,"/ ")))));
 
 		//	set the language based on the current route and selected url
 		$route["lang"] = array_search($select,$route["src"]);
@@ -90,19 +90,25 @@ class Amslib_Router
 	 *
 	 * 	todo: write documentation
 	 */
-	static protected function findLongest($list,$url,$group=NULL)
+	static protected function findLongest($list,$url,$group=NULL,&$url_params=array())
 	{
-		$select = "";
+		$select		= "";
+		$url_params	= array();
 
 		foreach(self::$url as $u=>$d){
+			//	Only allow matches against a requested group
+			if($group && $d["group"] != $group) continue;
+
+			//	Easy shortcut, if the u parameter matches EXACTLY the url, stop here, you are going
+			//	to use this one, no point in processing more
+			if($u === $url) return $u;
+
 			if(preg_match("/^".str_replace("/","\/",$u)."/",$url,$matches) && count($matches)){
 				$c = self::$url[$u];
 				$u = $matches[0];
+				$url_params = array_slice($matches,1);
 				self::$url[$u] = $c;
 			}
-
-			//	Only allow matches against a requested group
-			if($group && $d["group"] != $group) continue;
 
 			if($url != "/" && strpos($url,$u) === 0 && strlen($u) >= strlen($select)){
 				$select = $u;
@@ -110,6 +116,15 @@ class Amslib_Router
 				$select = $u;
 			}
 		}
+
+		//	Any matched parameters from the url will be treated like url parameters
+		//	and placed at the front of the url parameter list, any "natural" url
+		//	parameters that are appending to the recognised url, will appear afterwards
+		$refactor = array();
+		foreach($url_params as $parts){
+			$refactor = array_merge($refactor,explode("/",$parts));
+		}
+		$url_params = $refactor;
 
 		return $select;
 	}
@@ -331,16 +346,28 @@ class Amslib_Router
 		$url = strpos($url,"http") !== false ? $url : Amslib_Website::rel($url);
 
 		//	Now we can replace all the wildcard targets in the url with parameters passed into the function
-		$target	=	'(\w+)';
-		$len	=	strlen($target);
+		$target	=	array('(\w+)','(.*?)','(.*)');
+		$append	=	array();
 
 		foreach(Amslib_Array::valid($params) as $k=>$p){
 			//	I copied this replacement code from: http://stackoverflow.com/revisions/1252710/3
-			$pos = strpos($url,$target);
-			if ($pos !== false) $url = substr_replace($url,$p,$pos,$len);
+			$pos = false;
+			foreach($target as $t){
+				$pos = strpos($url,$t);
+				if($pos !== false){
+					$pos = array($pos,strlen($t));
+					break;
+				}
+			}
+
+			if (is_array($pos)){
+				$url = substr_replace($url,$p,$pos[0],$pos[1]);
+			}else{
+				$append[] = $p;
+			}
 		}
 
-		return $url;
+		return Amslib_File::reduceSlashes($url.implode("/",array_filter($append)));
 	}
 
 	/**
@@ -355,12 +382,12 @@ class Amslib_Router
 		$route	=	false;
 
 		//	Obtain the route which is responsible for the url
-		$select = self::findLongest(self::$url,$url,$group);
+		$select = self::findLongest(self::$url,$url,$group,$url_params);
 
 		//	explode the remaining parts of the url into url parameters
 		if(strlen($select) && isset(self::$url[$select])){
 			$route = self::$url[$select];
-			$route = self::finaliseRoute($route,$select,$url);
+			$route = self::finaliseRoute($route,$select,$url,$url_params);
 		}
 
 		return $route;

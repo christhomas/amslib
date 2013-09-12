@@ -45,28 +45,20 @@ class Amslib_Router_URL
 	{
 		return Amslib_Router::getPath();
 	}
-	
+
 	/**
 	 * 	method:	getURL
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getURL($route,$group=NULL)
+	static public function getURL($route=NULL,$group=NULL,$lang="default",$domain=NULL)
 	{
-		if(is_array($route)){
-			$r = array_shift($route);
-			$p = implode("/",array_filter($route));
-		}else{
-			$r = $route;
-			$p = "";
-		}
-	
-		return is_string($r) ? Amslib_Router::getURL($r).$p : "";
+		return Amslib_Router::getURL($route,$group,$lang,$domain);
 	}
 
-	/*	NOTE:	getURL was deactivated because it's defining URL policy for a website to 
+	/*	NOTE:	getURL was deactivated because it's defining URL policy for a website to
 	 * 			automatically include the language inside a URL, thats the applications job
-	 * 
+	 *
 	 * static public function getURL($route=NULL,$group=NULL)
 	{
 		$lang = Amslib_Plugin_Application::getLanguage("website");
@@ -77,7 +69,7 @@ class Amslib_Router_URL
 
 		return $r;
 	}*/
-	
+
 	/**
 	 * 	method:	getService
 	 *
@@ -97,7 +89,7 @@ class Amslib_Router_URL
 	{
 		return Amslib_Router::getServiceURL($route,$group);
 	}
-	
+
 	/**
 	 * 	method:	redirectToRoute
 	 *
@@ -139,7 +131,7 @@ class Amslib_Router_URL
 	{
 		return Amslib_Router::getURLParam($index,$default);
 	}
-	
+
 	/**
 	 * 	method:	decodeURLPairs
 	 *
@@ -149,7 +141,7 @@ class Amslib_Router_URL
 	{
 		return Amslib_Router::decodeURLPairs($offset);
 	}
-	
+
 	/**
 	 * 	method:	externalURL
 	 *
@@ -159,7 +151,7 @@ class Amslib_Router_URL
 	{
 		return (isset($_SERVER['HTTPS'])?'https':'http').'://'.$_SERVER['HTTP_HOST'].$url;
 	}
-	
+
 	//	DEPRECATED METHODS, DO NOT USE THEM
 	/**
 	 * 	method:	getDomain
@@ -168,7 +160,7 @@ class Amslib_Router_URL
 	 */
 	static public function getDomain($url="")
 	{
-		return self::externalURL($url);	
+		return self::externalURL($url);
 	}
 }
 

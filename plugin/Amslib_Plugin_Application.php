@@ -17,7 +17,7 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
@@ -82,7 +82,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 */
 	protected function initialisePlugin()
 	{
-		
+
 	}
 
 	/**
@@ -97,25 +97,25 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		//	Load the required router library and execute it to setup everything it needs
 		$this->executeRouter();
-		
+
 		//	Load all the javascripts and stylesheets automatically set to load into the current url
 		$this->autoloadResources();
-		
+
 		//	Call the getLanguage method for both default translators, this is just a precautionary step.  What
 		//	will happen is, if no language is set, it'll default and store the first language in the approved list
 		//	meaning that both will have a correct code, we don't care about the return code here, cause it's not used
 		self::getLanguage("website");
 		self::getLanguage("content");
-		
+
 		$this->setLanguageKey();
-		
+
 		//	Setup all the translators in other plugins with the correct languages
 		foreach(Amslib_Plugin_Manager::listPlugins() as $plugin){
 			$api = Amslib_Plugin_Manager::getAPI($plugin);
-				
+
 			if($api){
 				$translators = $api->listTranslators(false);
-		
+
 				foreach(Amslib_Array::valid($translators) as $name=>$object){
 					//	Obtain the language the system should use when printing text
 					$object->setLanguage(Amslib_Plugin_Application::getLanguage($name));
@@ -263,15 +263,15 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	/**
 	 * 	method:	addCompletionCallback
-	 * 
+	 *
 	 * 	Add a system-complete callback to the application which will execute when the system has
 	 * 	finished doing everything it needs to start the system
-	 * 
+	 *
 	 * 	parameters:
 	 * 		$function - the function/callback to execute
 	 *
 	 *	notes:
-	 *		-	This is just useful sometimes because some plugins require waiting until the very 
+	 *		-	This is just useful sometimes because some plugins require waiting until the very
 	 *			end in order to know what they should do, this allows them to do that without hacks
 	 *		-	The callback is executed by using call_user_func, therefore any valid function usable with
 	 *			that method is usable here
@@ -286,8 +286,8 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 *
 	 * 	Executes all the stored system-complete callbacks, meaning that after everything has loaded and the system
 	 * 	is ready to run, it'll execute them in the sequence given when loading and those callbacks will do
-	 * 	whatever they are attempting to do such as post-load configuration.  
-	 * 
+	 * 	whatever they are attempting to do such as post-load configuration.
+	 *
 	 * 	See Amslib_Plugin_Application::addCompletionCallback for more details
 	 */
 	public function runCompletionCallbacks()
@@ -327,18 +327,18 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	public function setLanguageKey()
 	{
 		$k = current(Amslib_Array::filter(Amslib_Array::valid($this->config["value"]),"name","lang_key",true));
-		
+
 		//	key wasn't found, do nothing
 		if(empty($k)) return;
-		
+
 		//	key was found, attempt to upgrade old keys to new keys
 		$old = self::$langKey;
 		self::$langKey = $k["value"];
-		
+
 		//	loop through session, find matching keys against the old key, replace with the new keys
 		foreach($_SESSION as $key=>$value) if(strpos($key,$old) !== false){
 			unset($_SESSION[$key]);
-			
+
 			$key = str_replace($old,self::$langKey,$key);
 			Amslib::setSESSION(Amslib_File::reduceSlashes($key),$value);
 		}
@@ -346,22 +346,22 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	/**
 	 * 	method:	setLanguage
-	 * 
+	 *
 	 * 	Set the requested language code (4 character, e.g: en_GB, es_ES) for the specific domain
-	 * 
+	 *
 	 * 	parameters:
 	 * 		$name - The name of the language domain being set, normally "content" or "website"
 	 * 		$langCode - The 4 character code to set, e.g: en_GB, es_ES
-	 * 
+	 *
 	 * 	returns:
 	 * 		Boolean false if setting the code was not executed properly or the 4 character code that was successfully set
-	 * 
+	 *
 	 *	notes:
-	 *		-	Remember, the language system can have multiple "domains" which can be independantly 
-	 * 			controlled in order to mix languages within a single webpage, this might sound 
-	 * 			ridiculous, but imagine a website being administrated in spanish, but viewing 
+	 *		-	Remember, the language system can have multiple "domains" which can be independantly
+	 * 			controlled in order to mix languages within a single webpage, this might sound
+	 * 			ridiculous, but imagine a website being administrated in spanish, but viewing
 	 * 			the english content.
-	 * 		-	The $name, specifies the language code given for a particular "domain", normally 
+	 * 		-	The $name, specifies the language code given for a particular "domain", normally
 	 * 			they are "content" or "website"
 	 */
 	static public function setLanguage($name,$langCode)
@@ -371,7 +371,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		}else{
 			$langCode = false;
 		}
-		
+
 		return $langCode;
 	}
 
@@ -379,27 +379,27 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 * 	method:	getLanguage
 	 *
 	 * 	Obtain the language set in the session for the specific type of language "domain" (normally website or content)
-	 * 
+	 *
 	 * 	parameters:
 	 * 		$name - The name of the language to retrieve
-	 * 
+	 *
 	 * 	returns:
 	 * 		Boolean false if obtaining a language has failed, or the 4 character language code, e.g: en_GB, en_ES
-	 * 
+	 *
 	 * 	notes:
-	 *		-	See the notes from the method Amslib_Plugin_Application::setLanguage for what the 
-	 *			language code, domains terms mean. 
-	 * 		-	Remember also, if a language is not found, the first language in the approved list will be 
+	 *		-	See the notes from the method Amslib_Plugin_Application::setLanguage for what the
+	 *			language code, domains terms mean.
+	 * 		-	Remember also, if a language is not found, the first language in the approved list will be
 	 * 			selected, stored and returned as a sensible default
 	 */
 	static public function getLanguage($name)
 	{
 		$lang = false;
-		
+
 		if(is_string($name) && strlen($name)){
 			$lang = Amslib::getSESSION(Amslib_File::reduceSlashes(self::$langKey."/$name"));
 		}
-		
+
 		if(!$lang) $lang = self::setLanguage($name,current(self::getLanguageList($name)));
 
 		return $lang;
@@ -460,23 +460,23 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				$object	=	isset($h["object"]) ? $api->getObject($h["object"],true) : $api;
 				$method	=	isset($h["method"]) ? $h["method"] : "missingServiceMethod";
 			}
-			
+
 			$record		= true;
 			$global		= false;
 			$failure	= true;
-			
+
 			if(isset($h["record"])){
 				$record = false;
-				
+
 				if(strpos($h["record"],"global")	!== false) 	$global = true;
 				if(strpos($h["record"],"true")		!== false)	$record = true;
 				if(strpos($h["record"],"record")	!==	false)	$record = true;
 			}
-			
+
 			if(isset($h["failure"])){
 				if(strpos($h["failure"],"ignore") !== false) $failure = false;
 			}
-			
+
 			if(!isset($h["source"])) $h["source"] = "post";
 			$h["source"] = strtolower($h["source"]);
 			if(!in_array($h["source"],array("get","post"))) $h["source"] = "post";
