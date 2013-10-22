@@ -409,9 +409,9 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function render($id="default",$parameters=array())
+	public function render($view="default",$params=array())
 	{
-		return $this->renderView($id,$parameters);
+		return $this->renderView($view,$params);
 	}
 
 	/**

@@ -92,6 +92,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 */
 	protected function finalisePlugin()
 	{
+		//	NOTE: admin panel? This is obviously code I included here by accident
 		//	Set the version of the admin this panel is running
 		$this->readVersion();
 
@@ -501,8 +502,15 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		//	If the url executed belonds to a web service, run the service code
 		if(Amslib_Router::isService()) $this->runService();
+		
+		//	Get the current route and acquire the api object for the current route and render it
+		//	NOTE:	we do this so you can render pages from other plugins or the application based
+		//			on what route has been opened, sometimes you want to define webpages in separate
+		//			plugins and render them just based on the url and/or route
+		$route = Amslib_Router::getRoute();
+		$api = Amslib_Plugin_Manager::getAPI($route["group"]);
 
 		//	If the url executed belongs to a page, render the default view of the application
-		print($this->api->render("default",$params));
+		print($api->render("default",$params));
 	}
 }
