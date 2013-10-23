@@ -50,7 +50,7 @@ class Amslib_Plugin_Service
 	protected $failureURL;
 	protected $successCB;
 	protected $failureCB;
-	protected $isAJAX;
+	protected $format;
 	protected $data;
 	protected $session;
 	protected $handlerList;
@@ -104,11 +104,11 @@ class Amslib_Plugin_Service
 	}
 
 	/**
-	 * 	method:	successPOST
+	 * 	method:	successSESSION
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function successPOST()
+	protected function successSESSION()
 	{
 		$_SESSION[self::SR] = $this->session;
 
@@ -116,11 +116,11 @@ class Amslib_Plugin_Service
 	}
 
 	/**
-	 * 	method:	failurePOST
+	 * 	method:	failureSESSION
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function failurePOST()
+	protected function failureSESSION()
 	{
 		$_SESSION[self::SR] = $this->session;
 
@@ -128,21 +128,21 @@ class Amslib_Plugin_Service
 	}
 
 	/**
-	 * 	method:	successAJAX
+	 * 	method:	successJSON
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function successAJAX()
+	protected function successJSON()
 	{
 		Amslib_Website::outputJSON($this->session,true);
 	}
 
 	/**
-	 * 	method:	failureAJAX
+	 * 	method:	failureJSON
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function failureAJAX()
+	protected function failureJSON()
 	{
 		Amslib_Website::outputJSON($this->session,true);
 	}
@@ -180,8 +180,10 @@ class Amslib_Plugin_Service
 		//	blank the appropriate session key to stop previous sessions overlapping
 		Amslib::getSESSION(self::SR,false,true);
 		//	NOTE: this "violates" mixing key types, but it's simpler than not doing it, so I'll "tolerate" it for this situation
+		//	NOTE: I don't actually remember what "mixing key types" means, I need to write a better explanation when I figure it out
 		$this->showFeedback();
-		$this->setAjax(Amslib::postParam("return_ajax",false));
+		//	NOTE: I should update return_ajax to something like "data_format:[json,session]" in the form instead of this
+		$this->setFormat(Amslib::postParam("return_ajax",false) ? "json" : "session");
 	}
 
 	/**
@@ -197,20 +199,39 @@ class Amslib_Plugin_Service
 
 		return $instance;
 	}
-
-	/**
-	 * 	method:	setAjax
-	 *
-	 * 	todo: write documentation
-	 */
-	public function setAjax($status)
+	
+	public function setFormat($format)
 	{
-		$this->isAJAX		=	$status;
-		$this->successCB	=	$this->isAJAX ? "successAJAX" : "successPOST";
-		$this->failureCB	=	$this->isAJAX ? "failureAJAX" : "failurePOST";
-
-		//	When doing ajax calls, you should never show feedback on the next available page
-		if($status) $this->hideFeedback();
+		$this->format = $format;
+		
+		switch($this->format){
+			case "session":{
+				$this->successCB = "successSESSION";
+				$this->failureCB = "failureSESSION";
+			}break;
+			
+			case "json":{
+				$this->successCB = "successJSON";
+				$this->failureCB = "failureJSON";
+				
+				//	When doing ajax calls, you should never show feedback on the next available page
+				$this->hideFeedback();
+			}break;
+			
+			case "xml":{
+				//	NOTE: I just add the code here because it's easy to do, but this isn't supported yet
+				$this->successCB = "successXML";
+				$this->failureCB = "failureXML";
+				
+				//	When doing ajax calls, you should never show feedback on the next available page
+				$this->hideFeedback();
+			}break;
+		}
+	}
+	
+	public function getFormat()
+	{
+		return $this->format;
 	}
 
 	/**
@@ -317,10 +338,11 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setHandler($plugin,$object,$method,$source="post",$record=true,$global=false,$failure=true)
+	public function setHandler($format,$plugin,$object,$method,$source="post",$record=true,$global=false,$failure=true)
 	{
 		//	here we store handlers loaded from the service path before we execute them.
 		$this->handlerList[] = array(
+			"format"	=>	$format,
 			"plugin"	=>	$plugin,
 			"object"	=>	$object,
 			"method"	=>	$method,
@@ -419,6 +441,8 @@ class Amslib_Plugin_Service
 			}else{
 				$source = &$_POST;
 			}
+			
+			$this->setFormat($h["format"]);
 
 			//	Run the handler, either in managed or unmanaged mode
 			$state = isset($h["managed"])
@@ -802,6 +826,10 @@ class Amslib_Plugin_Service
 	//////////////////////////////////////////////////////////////////
 	//	DEPRECATED METHODS
 	//////////////////////////////////////////////////////////////////
+	//	NOTE: use setVar instead
 	public function setTemp($key,$value){	$this->setVar($key,$value);	}
-	public function getTemp($key){ return $this->getVar($key); }
+	//	NOTE: use getVar instead
+	public function getTemp($key){			return $this->getVar($key); }
+	//	NOTE: use setFormat instead
+	public function setAjax($status){		$this->setFormat($status ? "json" : "session");	}
 }
