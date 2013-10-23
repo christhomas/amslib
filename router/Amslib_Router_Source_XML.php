@@ -81,6 +81,14 @@ class Amslib_Router_Source_XML
 		$data = array("javascript"=>array(),"stylesheet"=>array());
 		$data["name"] = $path["attr"]["name"];
 		$data["type"] = $path["tag"];
+		
+		//	If the route is a service, we need to set into the route data the format of data you want to return
+		//	Automatically this will select "session", but the alternative is "json"
+		//	You can manually override this whenever you like, it's just a stable default to fall back on
+		if($data["type"] == "service"){
+			$format = isset($path["attr"]["type"]) ? $path["attr"]["type"] : "session";
+			$data["format"] = in_array($format,array("session","json")) ? $format : "session";
+		}
 
 		foreach(Amslib_Array::valid($child) as $c){
 			//	we array_merge the tag with the attributes here because they don't collide, plus if they do
