@@ -1,6 +1,6 @@
 #	ANTIMATTER STUDIOS HTACCESS FILE
 #
-#	Easy install: search file for "STEP" and follow all instructions
+#	Easy install: You could search this file for (OPTIONAL) and read and change what it says
 #	Hard install: don't follow instructions and randomly change things until it works
 #	Very Hard install: Set computer on fire, blame your pet rabbit, even if you don't have one
 #
@@ -31,24 +31,10 @@ RewriteCond %{REQUEST_URI} (gif|png|jpg|jpeg|ico|css|js|xml|pdf)$ [NC]
 RewriteRule ^(.*)$ - [L]
 
 # -----------------------------------------------------------------------
-#	Set the __AMSLIB_ROUTER_ACTIVE__, depending on the host
-#
-#	STEP 1: edit the domain and testing domain if you have one
-#	STEP 2: edit the path for the website
-#	STEP 3: you can optionally enable multiple configurations by uncommenting and customising the lines below
-#
-#	NOTE: the path that you install here, MUST END WITH A SLASH (thanks tony tzschek)
-#	EX: /path/to/website == wrong, /path/to/website/ == correct
+#	Set the __WEBSITE__ variable depending on the installation location
 # -----------------------------------------------------------------------
-# __AMSLIB_ROUTER_ACTIVE__ equivalent - Production
-RewriteCond %{HTTP_HOST} mydomain.com$
-RewriteRule . - [E=__AMSLIB_ROUTER_ACTIVE__:/path/to/website/]
-
-#RewriteCond %{HTTP_HOST} developer1.local$
-#RewriteRule . - [E=__AMSLIB_ROUTER_ACTIVE__:/somewhere/on/developer/hdd/]
-
-#RewriteCond %{HTTP_HOST} developer2.local$
-#RewriteRule . - [E=__AMSLIB_ROUTER_ACTIVE__:/where/developer/installed/system/]
+RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
+RewriteRule ^(.*) - [E=__AMSLIB_ROUTER_ACTIVE__:%1/]
 
 # enable debugging when you're on testing
 #RewriteCond %{HTTP_HOST} testing.mydomain.com$
@@ -62,9 +48,7 @@ RewriteCond %{REQUEST_URI} !webservice [NC]
 RewriteRule ^(.*)([^/])$ %{ENV:__AMSLIB_ROUTER_ACTIVE__}$1$2/ [L,R=301]
 
 # ------------------------------------------------------------------------------
-# |	Suppressing / Forcing the "www." at the beginning of URLs                  |
-# |																			   |
-# |	STEP 4: decide whether you want to suppress or force showing www in url	   |
+# |	Suppressing / Forcing the "www." at the beginning of URLs (OPTIONAL)       |
 # ------------------------------------------------------------------------------
 
 # The same content should never be available under two different URLs especially
