@@ -843,7 +843,7 @@ class Amslib
 					$_SESSION["/amslib/php/fatal_error/"]	=	$error;
 					//	NOTE: perhaps this won't work, but I'm trying to get the trace to the origin of where the error occured
 					$_SESSION["/amslib/php/backtrace/"]		=	$exception;
-
+					error_log(__FUNCTION__.": ".$url);
 					header("Location: $url");
 				}elseif(function_exists($callback)){
 					$callback($error,$exception);
