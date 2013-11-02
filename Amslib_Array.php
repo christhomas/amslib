@@ -134,16 +134,30 @@ class Amslib_Array
 	 */
 	static public function pluck($array,$key)
 	{
-		if(!is_array($array)) return array();
+		if(!is_array($array))	return array();
+		if(!is_array($key))		$key = array($key);
 
 		$values = array();
 
 		if(self::isMulti($array)){
 			foreach(self::valid($array) as $item){
-				if(isset($item[$key])) $values[] = $item[$key];
+				$v = array();
+				
+				foreach($key as $k){
+					if(isset($item[$k])) $v[$k] = $item[$k];
+				}
+				
+				$values[] = count($v) == 1 ? array_shift($v) : $v;
 			}
 		}else{
-			if(isset($array[$key])) $values[] = $array[$key];
+			$v = array();
+			
+			foreach($key as $k){
+				if(isset($array[$k])) $v[$k] = $array[$k];
+			}
+			
+			$values[] = count($v) == 1 ? array_shift($v) : $v;
+			
 		}
 
 		return $values;
