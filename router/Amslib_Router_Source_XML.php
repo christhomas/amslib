@@ -17,7 +17,7 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
@@ -81,7 +81,7 @@ class Amslib_Router_Source_XML
 		$data = array("javascript"=>array(),"stylesheet"=>array());
 		$data["name"] = $path["attr"]["name"];
 		$data["type"] = $path["tag"];
-		
+
 		//	If the route is a service, we need to set into the route data the format of data you want to return
 		//	Automatically this will select "session", but the alternative is "json"
 		//	You can manually override this whenever you like, it's just a stable default to fall back on
@@ -143,19 +143,33 @@ class Amslib_Router_Source_XML
 	public function __construct($source)
 	{
 		try{
-			$qp = Amslib_QueryPath::qp($f=Amslib_File::find(Amslib_Website::abs($source),true));
+			//	NOTE: This is ugly and I believe it's a failure of Amslib_File::find() to not do this automatically
+			$file = false;
+			if(!$file && file_exists($source)){
+				$file = $source;
+			}
+			if(!$file && file_exists($f=Amslib_File::find(Amslib_Website::rel($source),true))){
+				$file = $f;
+			}
+			if(!$file && file_exists($f=Amslib_File::find(Amslib_Website::abs($source),true))){
+				$file = $f;
+			}
+
+			$qp = Amslib_QueryPath::qp($file);
 
 			//	If there is no router, prevent this source from processing anything
 			$this->route = $qp->branch()->find("router > *[name]");
-
 			//	Find any callback, if one is provided
 			Amslib_Router::setCallback($qp->find("router")->attr("callback"));
-			
 			//	Find any imports and register them for processing later
 			$this->import = $qp->branch()->find("router > import");
 
 			if($this->route->length) return $this;
-		}catch(Exception $e){}
+
+			Amslib::errorLog("Router was loaded, but no routes were found");
+		}catch(Exception $e){
+			Amslib::errorLog("EXCEPTION",$e->getMessage());
+		}
 
 		$this->route	=	false;
 		$this->import	=	false;
@@ -176,7 +190,7 @@ class Amslib_Router_Source_XML
 
 		return $list;
 	}
-	
+
 	/**
 	 * 	method:	getImports
 	 *
@@ -187,9 +201,9 @@ class Amslib_Router_Source_XML
 		if(!$this->import) return false;
 
 		$list = array();
-		
+
 		foreach($this->import as $i) $list[] = $this->toArray($i);
-		
+
 		return $list;
 	}
 }
