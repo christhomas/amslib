@@ -14,7 +14,7 @@ Amslib::showErrors(true);
 Amslib_Router::initialise();
 Amslib_Website::set();
 //	The minimal amount of information we need to manually provide to get the system working
-Amslib::addIncludePath(Amslib_Website::abs("objects"));
+Amslib::addIncludePath("$path/objects");
 //	This will attempt to load any customisations we need to run PER PROJECT before we run this boilerplate code.
 Amslib::includeFile("$path/amslib_customise.php");
 
