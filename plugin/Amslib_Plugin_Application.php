@@ -507,13 +507,20 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//			on what route has been opened, sometimes you want to define webpages in separate
 		//			plugins and render them just based on the url and/or route
 		$route = Amslib_Router::getRoute();
+
+		if(!$route || !isset($route["group"])){
+			Amslib::errorLog("ROUTE OR ROUTE/GROUP DOES NOT EXIST",$route);
+			return;
+		}
+
 		$api = Amslib_Plugin_Manager::getAPI($route["group"]);
 
-		if($api && method_exists($api,"render")){
-			//	If the url executed belongs to a page, render the default view of the application
-			print($api->render("default",$params));
-		}else{
+		if(!$api || !method_exists($api,"render")){
 			Amslib::errorLog("API OR ITS RENDER METHOD DOES NOT EXIST",get_class($api),$route);
+			return;
 		}
+
+		//	If the url executed belongs to a page, render the default view of the application
+		print($api->render("default",$params));
 	}
 }
