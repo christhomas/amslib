@@ -68,11 +68,11 @@ RewriteRule ^(.*)([^/])$ %{ENV:__AMSLIB_ROUTER_ACTIVE__}$1$2/ [L,R=301]
 
 # Option 1: rewrite www.example.com ? example.com
 
-<IfModule mod_rewrite.c>
-    RewriteCond %{HTTPS} !=on
-    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-    RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
-</IfModule>
+#<IfModule mod_rewrite.c>
+#    RewriteCond %{HTTPS} !=on
+#    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+#    RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
+#</IfModule>
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -81,11 +81,11 @@ RewriteRule ^(.*)([^/])$ %{ENV:__AMSLIB_ROUTER_ACTIVE__}$1$2/ [L,R=301]
 # Be aware that the following might not be a good idea if you use "real"
 # subdomains for certain parts of your website.
 
-# <IfModule mod_rewrite.c>
-#    RewriteCond %{HTTPS} !=on
-#    RewriteCond %{HTTP_HOST} !^www\..+$ [NC]
-#    RewriteRule ^ http://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
-# </IfModule>
+ <IfModule mod_rewrite.c>
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP_HOST} !^www\..+$ [NC]
+    RewriteRule ^ http://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+ </IfModule>
 
 # ##############################################################################
 # # PHP									                                       #
@@ -249,7 +249,7 @@ AddDefaultCharset utf-8
 # -----------------------------------------------------------------------
 #	A list of forbidden resources
 # -----------------------------------------------------------------------
-<FilesMatch "\.(htaccess|htpasswd|ini|phps|fla|psd|log|sh|sql|settings|gitignore|project|package.xml)$">
+<FilesMatch "\.(htaccess|htpasswd|phps|settings|gitignore|project|package.xml)$">
 	Order Allow,Deny
 	Deny from all
 </FilesMatch>
