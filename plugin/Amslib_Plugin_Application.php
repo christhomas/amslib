@@ -481,7 +481,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			if(!isset($h["source"])) $h["source"] = "post";
 			$h["source"] = strtolower($h["source"]);
 			if(!in_array($h["source"],array("get","post"))) $h["source"] = "post";
-			
+
 			$service->setHandler($route["format"],$plugin,$object,$method,$h["source"],$record,$global,$failure);
 		}
 
@@ -501,7 +501,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		//	If the url executed belonds to a web service, run the service code
 		if(Amslib_Router::isService()) $this->runService();
-		
+
 		//	Get the current route and acquire the api object for the current route and render it
 		//	NOTE:	we do this so you can render pages from other plugins or the application based
 		//			on what route has been opened, sometimes you want to define webpages in separate
@@ -509,7 +509,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$route = Amslib_Router::getRoute();
 		$api = Amslib_Plugin_Manager::getAPI($route["group"]);
 
-		//	If the url executed belongs to a page, render the default view of the application
-		print($api->render("default",$params));
+		if($api && method_exists($api,"render")){
+			//	If the url executed belongs to a page, render the default view of the application
+			print($api->render("default",$params));
+		}else{
+			Amslib::errorLog("API OR ITS RENDER METHOD DOES NOT EXIST",get_class($api),$route);
+		}
 	}
 }

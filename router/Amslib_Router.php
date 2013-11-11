@@ -136,8 +136,8 @@ class Amslib_Router
 	 */
 	static public function initialise()
 	{
-		//	NOTE: what does AMSLIB_ROUTER do now? this isn't explained and not understandable
-		foreach($_SERVER as $k=>$v){
+		//	Find all the AMSLIB_ROUTER type variables and insert them into the pathList
+		foreach(array_merge($_GET,$_SERVER) as $k=>$v){
 			if(strpos($k,"AMSLIB_ROUTER") !== false) self::$pathList[$k] = $v;
 		}
 
