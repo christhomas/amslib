@@ -112,47 +112,41 @@ class Amslib_Plugin
 		if($absolute) return $resource;
 
 		//	PREPARE THE STRING: expand any parameters inside the resource name
-		$resource		=	self::expandPath($resource);
-		$resource		=	str_replace("__PLUGIN__",$this->location,$resource);
+		$resource	=	self::expandPath($resource);
+		$resource	=	str_replace("__PLUGIN__",$this->location,$resource);
 		//	NOTE: we have to do this to get around a bug in lchop/rchop
-		$query_string	=	($str=Amslib::lchop($resource,"?")) == $resource ? false : $str;
-		$resource		=	Amslib::rchop($resource,"?");
-
-		//	LOLOL: this following code is shit....chris is stupid sometimes..but I can't think of a better way to write it
+		$query		=	($str=Amslib::lchop($resource,"?")) == $resource ? false : $str;
+		$resource	=	Amslib::rchop($resource,"?");
+		$output		=	false;
 
 		//	TEST 1:	look in the package directory for the file
-		$test2 = Amslib_File::reduceSlashes("$this->location/$resource");
-		if(file_exists($test2)){
-			$output = Amslib_File::relative($test2);
-
-			return $query_string ? "$output?$query_string" : $output;
+		$test1 = Amslib_File::reduceSlashes("$this->location/$resource");
+		if(!$output && file_exists($test1)){
+			$output = Amslib_File::relative($test1);
 		}
 
 		//	TEST 2: Test whether the file "exists" without any assistance
-		if(file_exists($resource)){
+		if(!$output && file_exists($resource)){
 			$output = Amslib_File::relative($resource);
-
-			return $query_string ? "$output?$query_string" : $output;
 		}
 
 		//	TEST 3: Does the file exists relative to the document root?
-		$test4 = Amslib_File::absolute($resource);
-		if(file_exists($test4)){
+		$test3 = Amslib_File::absolute($resource);
+		if(!$output && file_exists($test3)){
+			//	Why do we see whether $test3 exists, then discard it and use $resource?
 			$output = Amslib_File::relative($resource);
-
-			return $query_string ? "$output?$query_string" : $output;
 		}
 
 		//	TEST 4:	search the include path for the file
-		$test5 = Amslib_File::find($resource,true);
-		if(file_exists($test5)){
-			$output = Amslib_File::relative($test5);
-
-			return $query_string ? "$output?$query_string" : $output;
+		$test4 = Amslib_File::find($resource,true);
+		if($output && file_exists($test4)){
+			$output = Amslib_File::relative($test4);
 		}
 
-		//	FAILED: you could not find the file
-		return false;
+		//	Return either $output value on it's own, or appended with the query if required
+		//	If output is false or valid string, it'll return $output at minimum,
+		//		only appending the query if it's valid too
+		return $output && $query ? "$output?$query" : $output;
 	}
 
 	/**

@@ -37,11 +37,11 @@
  */
 class Amslib_Plugin_Manager
 {
-	static protected $plugins		=	array();
-	static protected $api			=	array();
+	static protected $plugins	=	array();
+	static protected $api		=	array();
 	static protected $location	=	array();
-	static protected $replace		=	array();
-	static protected $prevent		=	array();
+	static protected $replace	=	array();
+	static protected $prevent	=	array();
 
 	/**
 	 * 	method:	findPlugin
