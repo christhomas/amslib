@@ -761,6 +761,8 @@ class Amslib_MVC extends Amslib_Mixin
 			return $relative ? Amslib_Website::rel($path) : $path;
 		}
 
+		Amslib::errorLog("failed to find image",$id,$relative);
+
 		//	Step 3: return false, image was not found
 		return false;
 	}
