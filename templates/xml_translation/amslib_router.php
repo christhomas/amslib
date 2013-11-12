@@ -12,6 +12,7 @@ Amslib::autoloader();
 Amslib::showErrors(true);
 //	This is needed so non-routed-services will work without modification
 Amslib_Router::initialise();
+//	NOTE: I think that this method is redundant and the system should do it for me
 Amslib_Website::set();
 //	The minimal amount of information we need to manually provide to get the system working
 Amslib::addIncludePath("$path/objects");
