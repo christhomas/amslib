@@ -419,22 +419,22 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function renderView($id,$parameters=array())
+	public function renderView($id,$params=array())
 	{
 		if(is_string($id) && isset($this->view[$id]))
 		{
 			//	What are view parameters for again??
-			if(!empty($parameters)) $this->setViewParam($parameters);
+			if(!empty($params)) $this->setViewParam($params);
 
 			//	TODO: what happens if api, _w and _c are already defined and you just overwrote them?
 			//	NOTE: this shouldn't happen, they are special so nobody should use them
 			//	NOTE: perhaps we can warn people when they do this? or perhaps move our keys to a more unique "namespace"
 			//	FIXME: what if multiple translators of the same type are defined? they would start to clash
-			$parameters["api"]	=	$this;
-			$parameters["_w"]	=	$this->getTranslator("website");
-			$parameters["_c"]	=	$this->getTranslator("content");
+			$params["api"]	=	$this;
+			$params["_w"]	=	$this->getTranslator("website");
+			$params["_c"]	=	$this->getTranslator("content");
 
-			return Amslib::requireFile($this->view[$id],$parameters,true);
+			return Amslib::requireFile($this->view[$id],$params,true);
 		}
 
 		return "";
@@ -761,7 +761,7 @@ class Amslib_MVC extends Amslib_Mixin
 			return $relative ? Amslib_Website::rel($path) : $path;
 		}
 
-		Amslib::errorLog("failed to find image",$id,$relative);
+		Amslib::errorLog("failed to find image",$id,$relative,$path,$this->location);
 
 		//	Step 3: return false, image was not found
 		return false;
