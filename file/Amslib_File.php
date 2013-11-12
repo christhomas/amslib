@@ -44,6 +44,8 @@ class Amslib_File
 	 * 	method:	documentRoot
 	 *
 	 * 	todo: write documentation
+	 * 	SERIOUS TODO:	I need a testing strategy for this code, it's rock solid on
+	 * 					linux hosts and falls to pieces on anything "weird"
 	 */
 	static public function documentRoot($docroot=NULL)
 	{
