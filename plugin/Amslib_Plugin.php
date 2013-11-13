@@ -365,6 +365,8 @@ class Amslib_Plugin
 		$this->search = array(
 			"view",
 			"object",
+			"controller",
+			"model",
 			"service",
 			"image",
 			"javascript",
@@ -377,8 +379,11 @@ class Amslib_Plugin
 		$this->config = array("api"=>false,"model"=>false,"translator"=>false,"requires"=>false,"value"=>false);
 
 		//	This stores where all the types components are stored as part of the application
-		$this->setComponent("view",		"views",	"Vi_");
-		$this->setComponent("object",	"objects",	"");
+		//	WARNING: object is soon to be deprecated
+		$this->setComponent("object",		"objects",		"");
+		$this->setComponent("controller",	"controllers",	"Ct_");
+		$this->setComponent("model",		"models",		"Mo_");
+		$this->setComponent("view",			"views",		"Vi_");
 	}
 
 	//	Type 1 data transfers
@@ -570,6 +575,98 @@ class Amslib_Plugin
 
 			foreach($list as $node){
 				switch($node->nodeName){
+					case "object":{
+						//	NOTE: in the future, objects will disappear, will be split controllers and models
+						$child = $xpath->query("*",$node);
+
+						foreach($child as $c){
+							$p = $this->getAttributeArray($c);
+
+							$p["value"] = $c->nodeValue;
+
+							$file = $this->getComponent("object",$p["value"]);
+							if(file_exists($file)) $p["file"] = $file;
+
+							if(in_array($c->nodeName,array("api","model"))){
+								//	NOTE: this kind of assignment means it's possible to only have one API and Model object
+								$this->config[$c->nodeName] = $p;
+							}else{
+								$this->config[$node->nodeName][$p["value"]] = $p;
+							}
+						}
+					}break;
+
+					case "controller":{
+						$child = $xpath->query("*",$node);
+
+						//	does $node have "directory" attribute?
+						$directory = "{$node->nodeName}s";
+						//	does $node have "prefix" attribute?
+						$prefix = "";
+						//	does $node have "scan" attribute?
+
+						$this->setComponent($node->nodeName,$directory,$prefix);
+
+						foreach($child as $c){
+							$p = $this->getAttributeArray($c);
+
+							$p["value"] = $c->nodeValue;
+
+							$file = $this->getComponent($node->nodeName,$p["value"]);
+							if(file_exists($file)) $p["file"] = $file;
+
+							if($c->nodeName == "api"){
+								//	NOTE: this kind of assignment means it's possible to only have one API
+								$this->config[$c->nodeName] = $p;
+							}else{
+								//	NOTE:	we are overriding this because we want to change the xml and code separately
+								//			whilst we transition from one system to another
+								$this->config["object"][$p["value"]] = $p;
+								//$this->config[$node->nodeName][$p["value"]] = $p;
+							}
+						}
+					}break;
+
+					case "model":{
+						$child = $xpath->query("*",$node);
+
+						//	does $node have "directory" attribute?
+						$directory = "{$node->nodeName}s";
+						//	does $node have "prefix" attribute?
+						$prefix = "";
+						//	does $node have "scan" attribute?
+						//	does $node have "connection" attribute?
+
+						$this->setComponent($node->nodeName,$directory,$prefix);
+
+						//	if this model node has a connection attribute, we need to instruct the system to import
+						//	the model from the plugin name held in the value attribute, but we need to construct
+						//	an array of data which allows us to know this when processing the data
+
+						foreach($child as $c){
+							$p = $this->getAttributeArray($c);
+
+							$p["value"] = $c->nodeValue;
+
+							$file = $this->getComponent($node->nodeName,$p["value"]);
+							if(file_exists($file)) $p["file"] = $file;
+
+							if($c->nodeName == "connection"){
+								//	TODO:	this is a patch whilst I transition to the new [object, controller, model, view]
+								//			xml layout, I have to patch the connection node is actually a model node
+								//			so the rest of the code will continue to run whilst I upgrade to this way of working
+								//			cause also, I have to upgrade all the plugins and then they won't be compatible
+								//			with previous versions of the amslib plugin system
+								$this->config["model"] = $p;
+							}else{
+								//	NOTE:	we are overriding this because we want to change the xml and code separately
+								//			whilst we transition from one system to another
+								$this->config["object"][$p["value"]] = $p;
+								//$this->config[$node->nodeName][$p["value"]] = $p;
+							}
+						}
+					}break;
+
 					case "view":{
 						$child = $xpath->query("name",$node);
 
@@ -671,28 +768,6 @@ class Amslib_Plugin
 								array("name"=>$c->nodeName,"value"=>$c->nodeValue),
 								$p
 							);
-						}
-					}break;
-
-					case "object":{
-						$child = $xpath->query("*",$node);
-
-						foreach($child as $c){
-							$p = $this->getAttributeArray($c);
-
-							$p["value"] = $c->nodeValue;
-
-							$file = $this->getComponent("object",$p["value"]);
-							if(file_exists($file)) $p["file"] = $file;
-
-							//	Make sure generic objects are referenced properly
-							$name = $c->nodeName == "name" ? $p["value"] : $c->nodeName;
-
-							if(in_array($name,array("api","model"))){
-								$this->config[$name] = $p;
-							}else{
-								$this->config[$node->nodeName][$name] = $p;
-							}
 						}
 					}break;
 
