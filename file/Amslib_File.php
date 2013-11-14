@@ -319,14 +319,18 @@ class Amslib_File
 	{
 		$error = false;
 
+		$directory = self::absolute($directory);
+
 		//	NOTE: Perhaps all this checking and copying or directories etc, should be formalised into the api??
 		//	If the destination directory doesnt exist, attempt to create it
 		if($error == false && !is_dir($directory) && !@mkdir($directory,0755,true)){
+			Amslib::errorLog("There was an error with the directory, either permissions, or creating it was not possible",$directory);
 			$error = true;
 		}
 
 		//	It REALLY REALLY should exist now, but lets check just in case
 		if($error == false && !is_dir($directory)){
+			Amslib::errorLog("The directory does not exist, so cannot write to the location",$directory);
 			$error = true;
 		}
 
@@ -337,12 +341,13 @@ class Amslib_File
 
 		//	Try to move the file into the correct destination
 		if($error == false && !rename($src_filename,$destination)){
+			Amslib::errorLog("It was not possible to save to the requested filename",$src_filename,$destination);
 			$error = true;
 		}
 
-		//	If there are no errors, you have uploaded the file ok.
-		if($error == false){
-			chmod($destination,0755);
+		//	If there are no errors, you have uploaded the file ok, however, you could still fail here
+		if($error == false && !@chmod($destination,0755)){
+			Amslib::errorLog("file uploaded ok (apparently), but chmod failed",$destination);
 		}
 
 		return !$error;
