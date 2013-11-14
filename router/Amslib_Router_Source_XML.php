@@ -142,9 +142,10 @@ class Amslib_Router_Source_XML
 	 */
 	public function __construct($source)
 	{
+		$file = false;
+
 		try{
 			//	NOTE: This is ugly and I believe it's a failure of Amslib_File::find() to not do this automatically
-			$file = false;
 			if(!$file && file_exists($source)){
 				$file = $source;
 			}
@@ -159,16 +160,19 @@ class Amslib_Router_Source_XML
 
 			//	If there is no router, prevent this source from processing anything
 			$this->route = $qp->branch()->find("router > *[name]");
-			//	Find any callback, if one is provided
-			Amslib_Router::setCallback($qp->find("router")->attr("callback"));
-			//	Find any imports and register them for processing later
-			$this->import = $qp->branch()->find("router > import");
 
-			if($this->route->length) return $this;
+			if($this->route->length){
+				//	Find any callback, if one is provided
+				Amslib_Router::setCallback($qp->find("router")->attr("callback"));
+				//	Find any imports and register them for processing later
+				$this->import = $qp->branch()->find("router > import");
+
+				return $this;
+			}
 
 			Amslib::errorLog("Router was loaded, but no routes were found");
 		}catch(Exception $e){
-			Amslib::errorLog("EXCEPTION",$e->getMessage());
+			Amslib::errorLog("EXCEPTION",$e->getMessage(),"file=",$file,"source=",$source);
 		}
 
 		$this->route	=	false;
