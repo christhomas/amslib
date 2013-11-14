@@ -32,18 +32,22 @@
  *
  * 	todo:
  * 		write documentation
- * 
+ *
  * 	notes:
  * 		-	this object is getting smaller and smaller whilst it's
  * 			functionality is being absorbed into the parent object
  * 		-	perhaps this means I should work to delete this object
  * 			and redistribute it's code elsewhere.
+ * 		-	I DONT THINK THIS IS THE CORRECT LOCATION FOR THIS FILE
+ * 			SINCE ITS ALMOST 100% NOT A PLUGIN SPECIFIC OBJECT, ITS
+ * 			A DATABASE OBJECT, PERHAPS I CAN CALL IT SOMETHING LIKE
+ * 			Amslib_Database_Model INSTEAD?
  *
  */
 class Amslib_Plugin_Model extends Amslib_Database_MySQL
 {
 	protected $api;
-	
+
 	protected $enableDebug;
 	protected $enableDebugLog;
 
@@ -59,7 +63,7 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		//	TODO: default to an empty object??
 		$this->api = false;
 	}
-	
+
 	/**
 	 * 	method:	isInitialised
 	 *
@@ -68,7 +72,7 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	public function isInitialised()
 	{
 		//	FIXME: this is overly simplistic, but quite realiable.
-		
+
 		return $this->api ? true : false;
 	}
 
@@ -81,14 +85,14 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	{
 		$this->api = $api;
 		$this->copyConnection($this->api->getModel());
-		
+
 		$dd		= $this->api ? $this->api->getValue("debug_database",false) : false;
 		$ddl	= $this->api ? $this->api->getValue("debug_database_log",false) : false;
-		
+
 		$this->enableDebug		=	Amslib::getGET("debug_database",$dd);
 		$this->enableDebugLog	=	Amslib::getGET("debug_database_log",$ddl);
 	}
-	
+
 	/**
 	 * 	method:	selectValue
 	 *
@@ -98,15 +102,15 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	{
 		if($this->enableDebug){
 			$log = Amslib::errorLog("func_offset,3",$query,$numResults,$optimise);
-	
+
 			if($this->enableDebugLog){
 				$this->api->logDebug("DEBUG_DATABASE: {$log["function"]}",$log["data"]);
 			}
 		}
-	
+
 		return parent::selectValue($field,$query,$numResults,$optimise);
 	}
-	
+
 	/**
 	 * 	method:	select
 	 *
@@ -116,15 +120,15 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	{
 		if($this->enableDebug){
 			$log = Amslib::errorLog("func_offset,3",stripslashes($query),$numResults,$optimise);
-	
+
 			if($this->enableDebugLog){
 				$this->api->logDebug("DEBUG_DATABASE: {$log["function"]}",$log["data"]);
 			}
 		}
-	
+
 		return parent::select($query,$numResults,$optimise);
 	}
-	
+
 	/**
 	 * 	method:	select2
 	 *
@@ -134,15 +138,15 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	{
 		if($this->enableDebug){
 			$log = Amslib::errorLog("func_offset,3",stripslashes($query),$numResults,$optimise);
-	
+
 			if($this->enableDebugLog){
 				$this->api->logDebug("DEBUG_DATABASE: {$log["function"]}",$log["data"]);
 			}
 		}
-	
+
 		return parent::select2($query,$numResults,$optimise);
 	}
-	
+
 	/**
 	 * 	method:	insert
 	 *
@@ -153,10 +157,10 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		if($this->enableDebug){
 			$log = Amslib::errorLog("func_offset,3",stripslashes($query));
 		}
-		
+
 		return parent::insert($query);
 	}
-	
+
 	/**
 	 * 	method:	update
 	 *
@@ -167,10 +171,10 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		if($this->enableDebug){
 			$log = Amslib::errorLog("func_offset,3",stripslashes($query),$allow_zero);
 		}
-		
+
 		return parent::update($query,$allow_zero);
 	}
-	
+
 	/**
 	 * 	method:	delete
 	 *
@@ -181,7 +185,7 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		if($this->enableDebug){
 			$log = Amslib::errorLog("func_offset,3",stripslashes($query));
 		}
-		
+
 		return parent::delete($query);
 	}
 }
