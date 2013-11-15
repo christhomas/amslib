@@ -315,7 +315,7 @@ class Amslib_File
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function saveUploadedFile($src_filename,$directory,&$dst_filename)
+	static public function saveUploadedFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		$error = false;
 
@@ -348,6 +348,11 @@ class Amslib_File
 		//	If there are no errors, you have uploaded the file ok, however, you could still fail here
 		if($error == false && !@chmod($destination,0755)){
 			Amslib::errorLog("file uploaded ok (apparently), but chmod failed",$destination);
+		}
+
+		//	Maybe the programmer asked for the fullpath of the file to be returned
+		if($fullpath !== NULL){
+			$fullpath = $destination;
 		}
 
 		return !$error;

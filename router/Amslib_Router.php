@@ -53,16 +53,16 @@ class Amslib_Router
 	static protected $route		=	false;
 	static protected $cache		=	array();
 	static protected $name		=	array();
-	static protected $url			=	array();
+	static protected $url		=	array();
 	static protected $callback	=	array();
-	static protected $export		=	array();
+	static protected $export	=	array();
 
 	/**
 	 * Variable: $domain
 	 *
 	 * The default domain string to use with routes that do not provide their own
 	 */
-	static protected $domain		=	"__LOCAL_DOMAIN__";
+	static protected $domain = "__LOCAL_DOMAIN__";
 
 	/**
 	 * 	method:	finaliseRoute
@@ -142,6 +142,9 @@ class Amslib_Router
 			if(strpos($k,"AMSLIB_ROUTER") !== false) self::$pathList[$k] = $v;
 		}
 
+		//	TODO:	I should use an easier expression than __AMSLIB_ROUTER_ACTIVE__,
+		//			perhaps __WEBSITE__ is more normal, or even __AMSLIB_WEBSITE__
+
 		self::$path	=	NULL;
 		self::$base	=	self::getPath("__AMSLIB_ROUTER_ACTIVE__");
 
@@ -153,6 +156,9 @@ class Amslib_Router
 			self::$path	=	Amslib_File::reduceSlashes("/".self::$path."/");
 		}
 
+		//	Now automatically load the amslib routers configuration as the framework system
+		//	This allows amslib to add routes the system can use to import/export router configurations
+		//	This isn't part of your application, this is part of the system and used to self-configure
 		self::load(Amslib::locate()."/router/router.xml","xml","framework");
 	}
 

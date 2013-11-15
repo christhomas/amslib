@@ -243,6 +243,7 @@ class Amslib_Plugin
 		if(isset($object["cache"])) return $object["cache"];
 		if(isset($object["file"]))	Amslib::requireFile($object["file"],array("require_once"=>true));
 
+		//	Create the generic string for all the errors
 		$error =  "FATAL ERROR(".__METHOD__.") Could not __ERROR__ for plugin '{$this->name}'<br/>";
 
 		$cache = false;
@@ -252,14 +253,18 @@ class Amslib_Plugin
 				if(method_exists($object["value"],"getInstance")){
 					$cache = call_user_func(array($object["value"],"getInstance"));
 				}else{
+					//	your object was not a compatible singleton, we need to find the getInstance method
 					die(str_replace("__ERROR__","find the getInstance method in the API object '{$object["value"]}'",$error));
 				}
 			}else{
 				$cache = new $object["value"];
 			}
 		}else if($dieOnError){
+			//	The class was not found, we cannot continue
+			//	NOTE:	I am not sure why we cannot continue here, it might not be something
+			//			critical and yet we're stopping everything
 			$error = str_replace("__ERROR__","find class '{$object["value"]}'",$error);
-			Amslib::errorLog($error);
+			Amslib::errorLog("stack_trace",$error,$object);
 			die($error);
 		}
 
@@ -350,6 +355,8 @@ class Amslib_Plugin
 				$object->setLanguage(Amslib_Plugin_Application::getLanguage($name));
 				$object->load();
 			}
+
+			$api->finalise();
 		}else{
 			Amslib::errorLog("plugin not found?",$api);
 		}
@@ -414,8 +421,17 @@ class Amslib_Plugin
 		$v = $src->getConfig($key,$value);
 
 		$dst->setConfig($k,$v);
-
 		if($move) $src->removeConfig($key,$value);
+	}
+
+	public function transferOptions($block)
+	{
+		$m	=	isset($block["move"]);
+		$i	=	isset($block["import"]) && $block["import"] != $this->getName() ? $block["import"] : false;
+		$e	=	isset($block["export"]) && $block["export"] != $this->getName() ? $block["export"] : false;
+		$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
+
+		return array($m,$i,$e,$p);
 	}
 
 	/**
@@ -436,24 +452,24 @@ class Amslib_Plugin
 		//	NOTE: ok, I've started to refactor the code as much as I can, but I think I got stuck and can't go further
 		//	NOTE: 08/03/2012: it's getting better :) yeah! finally found a nice way to refactor everything
 		//	NOTE: 24/08/2012: actually, I think it has a problem of being too generic, therefore impossible to refactor correctly
+		//	NOTE: 14/11/2013: I made some progress here by the creation of the transferOptions method, cleans up a bunch of repeated noise
 
 		//	Process all the import/export/transfer requests on all resources
 		//	NOTE: translators don't support the "move" parameter
 		foreach($this->config as $key=>&$block){
-			//	NOTE: perhaps I need to add "object" to here in the future?
+			//	NOTE: perhaps I need to add "object" to here in the future? read the notes at the array("object") block below
 			if(in_array($key,array("model"))){
 			 	//	Models are treated slightly differently because they are singular, not plural
 				//	NOTE: maybe in future models will be plural too, perhaps it's better to make it work plurally anyway
-			 	$m	=	isset($block["move"]);
-			 	$i	=	isset($block["import"]) && $block["import"] != $this->getName() ? $block["import"] : false;
-			 	$e	=	isset($block["export"]) && $block["export"] != $this->getName() ? $block["export"] : false;
-			 	$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
-			 	if(!$p) continue;
-			 	$v1	=	$p->getConfig($key);
-			 	$v2	=	$this->getConfig($key);
+				list($m,$i,$e,$p) = $this->transferOptions($block);
+				if(!$p) continue;
 
-			 	if($i) 			$this->transferData($p,$this,$key,$v1,$m);
-			 	else if($e) 	$this->transferData($this,$p,$key,$v2,$m);
+			 	$s	=	$this;
+			 	$sv	=	$s->getConfig($key);
+			 	$dv	=	$p->getConfig($key);
+
+			 	if($i) 			$this->transferData($p,$s,$key,$dv,$m);
+			 	else if($e) 	$this->transferData($s,$p,$key,$sv,$m);
 			}else if(in_array($key,array("object","view","stylesheet","image","javascript","translator"))){
 				//	NOTE:	transferring objects by name won't work because in the other plugin it won't
 				//			know how to autoload the object from it's class because 99.99% sure the object
@@ -461,37 +477,38 @@ class Amslib_Plugin
 				//			it'll fail
 				//	NOTE:	perhaps therefore, we need to transfer objects like we do models, create the
 				//			object first and transfer that
+				//	NOTE:	Ahhhhh, thats why I documented this above at the top
 				foreach(Amslib_Array::valid($block) as $iname=>$item)
 				{
 					if(in_array($key,array("value","translator"))) $iname = $item["name"];
 
-					$m	=	isset($item["move"]);
-					$i	=	isset($item["import"]) && $item["import"] != $this->getName() ? $item["import"] : false;
-			 		$e	=	isset($item["export"]) && $item["export"] != $this->getName() ? $item["export"] : false;
-			 		$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
+					list($m,$i,$e,$p) = $this->transferOptions($block);
 			 		if(!$p) continue;
-			 		$v	=	$iname;
+
+			 		$s	=	$this;
+			 		$sv	=	$iname;
+			 		$dv	=	$iname;
 
 			 		//	FIXME: I tried to apply this here too, it broke everything I tried :(
 			 		//if($e) unset($block[$iname]);
 
-			 		if($i) 			$this->transferData2($p,$this,$key,$v,$m);
-			 		else if($e) 	$this->transferData2($this,$p,$key,$v,$m);
+			 		if($i) 			$this->transferData2($p,$s,$key,$dv,$m);
+			 		else if($e) 	$this->transferData2($s,$p,$key,$sv,$m);
 				}
 			}else if(in_array($key,array("value"))){
 				foreach(Amslib_Array::valid($block) as $k=>$item)
 				{
-					$m	=	isset($item["move"]);
-					$i	=	isset($item["import"]) && $item["import"] != $this->getName() ? $item["import"] : false;
-					$e	=	isset($item["export"]) && $item["export"] != $this->getName() ? $item["export"] : false;
-					$p	=	Amslib_Plugin_Manager::getPlugin($i ? $i : ($e ? $e : false));
+					list($m,$i,$e,$p) = $this->transferOptions($block);
 					if(!$p) continue;
-					$v	=	$item;
+
+					$s	=	$this;
+					$sv	=	$item;
+					$dv	=	$item;
 
 					if($e) unset($block[$k]);
 
-					if($i) 			$this->transferData($p,$this,$key,$v,$m);
-					else if($e) 	$this->transferData($this,$p,$key,$v,$m);
+					if($i) 			$this->transferData($p,$s,$key,$dv,$m);
+					else if($e) 	$this->transferData($s,$p,$key,$sv,$m);
 				}
 			}else if(in_array($key,array("service"))){
 				foreach(Amslib_Array::valid($block) as $item)

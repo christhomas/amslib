@@ -56,9 +56,9 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	 *
 	 * 	todo: write documentation
 	 */
-	public function __construct()
+	public function __construct($connect=false)
 	{
-		parent::__construct(false);
+		parent::__construct($connect);
 
 		//	TODO: default to an empty object??
 		$this->api = false;
