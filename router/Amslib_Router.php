@@ -374,7 +374,7 @@ class Amslib_Router
 			}
 		}
 
-		return Amslib_File::reduceSlashes($url.implode("/",array_filter($append)));
+		return Amslib_File::reduceSlashes($url.implode("/",array_filter($append))."/");
 	}
 
 	/**
@@ -436,19 +436,36 @@ class Amslib_Router
 	 * 	method:	getServiceURL
 	 *
 	 * 	todo: write documentation
+	 *
+	 *	NOTE:	If the first parameter is an array, it means there are url parameters to insert into the
+	 *			final url, but we need to modify the first section of the array, which holds the name of the
+	 *			route that was requested, since the other elements are just parameters, we don't touch those
 	 */
 	static public function getServiceURL($name,$group=NULL,$lang="default",$domain=NULL)
 	{
-		return self::getURL("service:$name",$group,$lang,$domain);
+		if(is_array($name) && count($name)) $name[0] = "service:{$name[0]}";
+		else $name = "service:$name";
+		//print(Amslib::var_dump(array(__METHOD__,$name,$group),true));
+		return self::getURL($name,$group,$lang,$domain);
 	}
 
 	/**
 	 * 	method:	getService
 	 *
 	 * 	todo: write documentation
+	 *
+	 *	NOTE:	If the first parameter is an array, it means there are url parameters to insert into the
+	 *			final url, but we need to modify the first section of the array, which holds the name of the
+	 *			route that was requested, since the other elements are just parameters, we don't touch those
+	 *
+	 *	NOTE:	It was recognised that even if the $name parameter was an array, containing url parameters
+	 *			those parameters will not be used as part of the url because the getRoute method has
+	 *			no ability to modify the url yet, but it's posted as a future update
 	 */
 	static public function getService($name,$group=NULL)
 	{
+		if(is_array($name) && count($name)) $name[0] = "service:{$name[0]}";
+
 		return self::getRoute("service:$name",$group);
 	}
 
