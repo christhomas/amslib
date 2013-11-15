@@ -167,6 +167,16 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
+	 * 	method:	finalise
+	 *
+	 * 	todo: write documentation
+	 */
+	public function finalise()
+	{
+		//	do nothing
+	}
+
+	/**
 	 * 	method:	setModel
 	 *
 	 * 	todo: write documentation
@@ -835,6 +845,15 @@ class Amslib_MVC extends Amslib_Mixin
 	public function getServiceURL($name,$group=NULL)
 	{
 		return Amslib_Router_URL::getServiceURL($name,$group?$group:$this->getName());
+	}
+
+	public function redirectTo($name,$group=NULL,$is_service=false)
+	{
+		$url = $is_service
+			? $this->getURL($name,$group)
+			: $this->getServiceURL($name,$group);
+
+		Amslib_Website::redirect($url);
 	}
 
 	//	FIXME: we have to formalise what this slot code is supposed to do, opposed to what the view system already does.
