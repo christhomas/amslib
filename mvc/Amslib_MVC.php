@@ -109,6 +109,10 @@ class Amslib_MVC extends Amslib_Mixin
 	/**
 	 * 	method:	addMixin
 	 *
+	 * 	This method allows you to use the getObject call to acquire an object by name instead of passing
+	 * 	it by object, allowing the system to find and return the object for you instead of manually having
+	 * 	to create it first.
+	 *
 	 * 	todo: write documentation
 	 */
 	public function addMixin($name,$reject=array(),$accept=array())

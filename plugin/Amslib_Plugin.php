@@ -480,9 +480,12 @@ class Amslib_Plugin
 				//	NOTE:	Ahhhhh, thats why I documented this above at the top
 				foreach(Amslib_Array::valid($block) as $iname=>$item)
 				{
+					//	NOTE:	I found a bug here I think, or at least, a redundancy
+					//			since key CANNOT have the value "value" since the above block doesn't define it
+					//			as being valid for this particular section of code
 					if(in_array($key,array("value","translator"))) $iname = $item["name"];
 
-					list($m,$i,$e,$p) = $this->transferOptions($block);
+					list($m,$i,$e,$p) = $this->transferOptions($item);
 			 		if(!$p) continue;
 
 			 		$s	=	$this;
@@ -498,7 +501,7 @@ class Amslib_Plugin
 			}else if(in_array($key,array("value"))){
 				foreach(Amslib_Array::valid($block) as $k=>$item)
 				{
-					list($m,$i,$e,$p) = $this->transferOptions($block);
+					list($m,$i,$e,$p) = $this->transferOptions($item);
 					if(!$p) continue;
 
 					$s	=	$this;
