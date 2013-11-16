@@ -11,17 +11,34 @@ class Amslib_Plugin_Object extends Amslib_Mixin
 	/**
 	 * 	method:	isInitialised
 	 *
-	 * 	todo: write documentation
+	 * 	TODO:	write documentation
+	 *
+	 *	FIXME:	this is overly simplistic, but quite realiable.
+	 *
+	 *	NOTE:	still, what constitutes "initialised", just having a handle to
+	 *			the API object? thats it? or there are other factors which are not demonstrated here?
 	 */
 	public function isInitialised()
 	{
-		//	FIXME: this is overly simplistic, but quite realiable.
+
 		return $this->api ? true : false;
 	}
 
 	public function initialiseObject($api)
 	{
 		$this->api = $api;
+	}
+
+	//	I am really not very happy about all this "method-shadowing" that I need to do here
+	//	It feels like I am covering up some design/layout problem
+	public function getAPI($name)
+	{
+		return $this->api->getAPI($name);
+	}
+
+	public function getObject($id,$singleton)
+	{
+		return $this->api->getObject($id,$singleton);
 	}
 
 	/**
@@ -40,9 +57,9 @@ class Amslib_Plugin_Object extends Amslib_Mixin
 	public function addMixin($name,$reject=array(),$accept=array())
 	{
 		if(is_string($name)){
-			$object = $this->api->getObject($name,true);
+			$object = $this->getObject($name,true);
 
-			if(!$object) $object = $this->api->getAPI($name);
+			if(!$object) $object = $this->getAPI($name);
 		}elseif(is_object($name)){
 			$object = $name;
 		}else{
