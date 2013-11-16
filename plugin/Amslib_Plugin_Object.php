@@ -36,7 +36,7 @@ class Amslib_Plugin_Object extends Amslib_Mixin
 		return $this->api->getAPI($name);
 	}
 
-	public function getObject($id,$singleton)
+	public function getObject($id,$singleton=true)
 	{
 		return $this->api->getObject($id,$singleton);
 	}
