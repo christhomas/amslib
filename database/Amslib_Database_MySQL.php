@@ -17,20 +17,20 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
  * 	class:	Amslib_Database_MySQL
- * 
+ *
  *	group:	database
- * 
+ *
  *	file:	Amslib_Database_MySQL.php
- * 
+ *
  *	title:	Antimatter Database: MySQL library
- * 
+ *
  *	description:	This is a small cover object which enhanced the original with some
- * 					new functionality aiming to solve the fatal_error problem but keep returning data 
+ * 					new functionality aiming to solve the fatal_error problem but keep returning data
  *
  * 	todo: write documentation
  */
@@ -152,6 +152,8 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 * 	method:	unescape
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	note: this is generic functionality, it's not mysql specific
 	 */
 	public function unescape($results,$keys="")
 	{
@@ -176,6 +178,8 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 * 	method:	fixColumnEncoding
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	note: this method isn't really mysql specific, apart from calling select, escape and update, these could be API specific but they are abstracted anyway
 	 */
 	public function fixColumnEncoding($src,$dst,$table,$primaryKey,$column)
 	{
@@ -202,7 +206,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 				if($string && is_string($string) && strlen($string)){
 					$string = $this->escape($string);
 
-					$this->update("$table set $column=\"$string\" where $primaryKey=\"{$c[$primaryKey]}\"");
+					$this->update("$table set $column='$string' where $primaryKey='{$c[$primaryKey]}'");
 				}
 			}
 
@@ -251,6 +255,10 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 *
 	 * returns:
 	 * 	A boolean true or false result, depending on the existence of the table
+	 *
+	 * note:	perhaps I should split all of these "db structure" methods into a separate object
+	 * 			but to do that, then you'd need to use this object to acquire the structure object
+	 * 			since it would require a database connection, so it'd have to clone the connection
 	 */
 	public function hasTable($database,$table)
 	{
@@ -278,6 +286,10 @@ HAS_TABLE;
 	 * 	method:	getDBList
 	 *
 	 * 	todo: write documentation
+	 *
+	 * note:	perhaps I should split all of these "db structure" methods into a separate object
+	 * 			but to do that, then you'd need to use this object to acquire the structure object
+	 * 			since it would require a database connection, so it'd have to clone the connection
 	 */
 	public function getDBList()
 	{
@@ -288,6 +300,10 @@ HAS_TABLE;
 	 * 	method:	getDBTables
 	 *
 	 * 	todo: write documentation
+	 *
+	 * note:	perhaps I should split all of these "db structure" methods into a separate object
+	 * 			but to do that, then you'd need to use this object to acquire the structure object
+	 * 			since it would require a database connection, so it'd have to clone the connection
 	 */
 	public function getDBTables($database_name=NULL)
 	{
@@ -305,6 +321,10 @@ HAS_TABLE;
 	 * 	method:	getDBColumns
 	 *
 	 * 	todo: write documentation
+	 *
+	 * note:	perhaps I should split all of these "db structure" methods into a separate object
+	 * 			but to do that, then you'd need to use this object to acquire the structure object
+	 * 			since it would require a database connection, so it'd have to clone the connection
 	 */
 	public function getDBColumns($database_name=NULL,$table_name=NULL)
 	{
@@ -338,6 +358,10 @@ QUERY;
 	 * 	method:	getDBTableFields
 	 *
 	 * 	todo: write documentation
+	 *
+	 * note:	perhaps I should split all of these "db structure" methods into a separate object
+	 * 			but to do that, then you'd need to use this object to acquire the structure object
+	 * 			since it would require a database connection, so it'd have to clone the connection
 	 */
 	public function getDBTableFields($table)
 	{
@@ -350,6 +374,10 @@ QUERY;
 	 * 	method:	getDBTableRowCount
 	 *
 	 * 	todo: write documentation
+	 *
+	 * note:	perhaps I should split all of these "db structure" methods into a separate object
+	 * 			but to do that, then you'd need to use this object to acquire the structure object
+	 * 			since it would require a database connection, so it'd have to clone the connection
 	 */
 	public function getDBTableRowCount($database,$table)
 	{
@@ -398,8 +426,9 @@ QUERY;
 
 		if(!$resultHandle) $resultHandle = $this->getSearchResultHandle();
 		if(!$resultHandle) return false;
-		
+
 		for($a=0;$a<$numResults;$a++){
+			//	BUG: surely this should use $this->fetchMethod ?? wasn't that the whole point?
 			$r = mysql_fetch_assoc($resultHandle);
 			if(!$r) break;
 			$this->lastResult[] = $r;
@@ -418,12 +447,47 @@ QUERY;
 	 * 	method:	releaseMemory
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	If we supply a result handle, free that, or obtain the handle created when you last selected something
 	 */
-	public function releaseMemory()
+	public function releaseMemory($resultHandle=NULL)
 	{
-		$resultHandle = $this->getSearchResultHandle();
+		if(!$resultHandle) $resultHandle = $this->getSearchResultHandle();
+
 		if(!$resultHandle) error_log(__METHOD__.": trying to free an invalid handle");
 		return $resultHandle ? mysql_free_result($resultHandle) : false;
+	}
+
+	/**
+	 * 	method:	beginTransaction
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	note: should I use "start transaction" here instead of just "begin" cause some of the examples I saw it was not clear or obvious
+	 */
+	public function beginTransaction()
+	{
+		mysql_query("begin");
+	}
+
+	/**
+	 * 	method:	commitTransaction
+	 *
+	 * 	todo: write documentation
+	 */
+	public function commitTransaction()
+	{
+		mysql_query("commit");
+	}
+
+	/**
+	 * 	method:	rollbackTransaction
+	 *
+	 * 	todo: write documentation
+	 */
+	public function rollbackTransaction()
+	{
+		mysql_query("rollback");
 	}
 
 	/**
@@ -544,7 +608,7 @@ QUERY;
 
 		return $result;
 	}
-	
+
 	/**
 	 * 	method:	selectField
 	 *
@@ -554,13 +618,13 @@ QUERY;
 	{
 		$table = $this->escape($table);
 		$field = $this->escape($field);
-		
+
 		if(is_string($value))	$value = is_string($value);
 		if(is_numeric($value))	$value = intval($value);
-		
+
 		return $this->selectValue($field,"$field from $table where $field='$value'");
 	}
-	
+
 	/**
 	 * method: selectRandom
 	 *
@@ -595,7 +659,7 @@ QUERY;
 	 * 	method:	selectValue
 	 *
 	 * 	todo: write documentation
-	 * 
+	 *
 	 * 	notes:
 	 * 		Anxo has explained that perhaps it's unnecessary that in the query to put the field if you are going to put
 	 * 		the field you want in the first parameter, so in the query you can just put a "$field $query" and it'll
