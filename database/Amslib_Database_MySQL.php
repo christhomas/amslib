@@ -467,7 +467,7 @@ QUERY;
 	 */
 	public function beginTransaction()
 	{
-		mysql_query("begin");
+		return mysql_query("begin");
 	}
 
 	/**
@@ -477,7 +477,7 @@ QUERY;
 	 */
 	public function commitTransaction()
 	{
-		mysql_query("commit");
+		return mysql_query("commit");
 	}
 
 	/**
@@ -487,7 +487,7 @@ QUERY;
 	 */
 	public function rollbackTransaction()
 	{
-		mysql_query("rollback");
+		return mysql_query("rollback");
 	}
 
 	/**

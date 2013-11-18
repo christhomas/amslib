@@ -17,7 +17,7 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
@@ -30,7 +30,7 @@
  *	title:	Antimatter Database: Base layer
  *
  *	description:
- *		A low level object to collect shared data and methods 
+ *		A low level object to collect shared data and methods
  *		that are common to all database layers
  *
  * 	todo:
@@ -63,7 +63,7 @@ class Amslib_Database
 	protected $storeSearchResult		=	false;
 
 	protected $seq						=	0;
-	
+
 	protected $errors					=	array();
 	protected $maxErrorCount			=	100;
 
@@ -175,7 +175,7 @@ class Amslib_Database
 
 		return $e;
 	}
-	
+
 	/**
 	 * 	method:	setDBErrors
 	 *
@@ -190,14 +190,14 @@ class Amslib_Database
 				"db_error_num"		=>	$errno,
 				"db_last_insert"	=>	$this->lastInsertId,
 				"db_insert_id"		=>	$insert_id,
-				"db_location"		=>	Amslib_Array::filterKey(array_slice(debug_backtrace(),0,5),array("file","line")),
+				"db_location"		=>	Amslib::getStackTrace(0,true)
 		);
-	
+
 		if(count($this->errors) > $this->maxErrorCount){
 			$this->errors = array_slice($this->errors,-($this->maxErrorCount));
 		}
 	}
-	
+
 	/**
 	 * 	method:	getDBErrors
 	 *
@@ -250,12 +250,12 @@ class Amslib_Database
 		$this->storeSearchResult = false;
 	}
 
-	/**	
+	/**
 	 * method:	setTable
-	 * 
+	 *
 	 * Set the table name for this database object, or if there are two parameters, a key=>value arrangement allowing
 	 * you to abstract table names from the names referenced in the code
-	 * 
+	 *
 	 * parameters:
 	 * 	arg1	-	the name of the table, or the name of the key to use for this table
 	 * 	arg2	-	[optional] or the actual name of the table inside the database references by arg1 as the "key"
