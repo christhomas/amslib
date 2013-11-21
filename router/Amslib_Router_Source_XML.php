@@ -86,7 +86,7 @@ class Amslib_Router_Source_XML
 		//	Automatically this will select "session", but the alternative is "json"
 		//	You can manually override this whenever you like, it's just a stable default to fall back on
 		if($data["type"] == "service"){
-			$format = isset($path["attr"]["type"]) ? $path["attr"]["type"] : "session";
+			$format = isset($path["attr"]["format"]) ? $path["attr"]["format"] : "session";
 			$data["format"] = in_array($format,array("session","json")) ? $format : "session";
 		}
 

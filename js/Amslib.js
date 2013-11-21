@@ -14,26 +14,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
+ * file: Amslib.js
+ * title: Antimatter core javascript
+ *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
  *******************************************************************************/
-
-/**
- * 	class:	Amslib
- * 
- *	group:	javascript
- * 
- *	file:	Amslib.js
- * 
- *	title:	Antimatter Studios Core Amslib Javascript
- * 
- *	description:
- *		todo, write description 
- *
- * 	todo:
- * 		write documentation
- */
 var Amslib = my.Amslib = my.Class({
 	__amslibDefaultName:	"Amslib_Default_Controller",
 	__amslibName:			false,
@@ -46,11 +32,6 @@ var Amslib = my.Amslib = my.Class({
 	__events:				false,
 	
 	STATIC: {
-		/**
-		 * 	method:	autoload
-		 *
-		 * 	todo: write documentation
-		 */
 		autoload: function()
 		{
 			// usage: log('inside coolFunc', this, arguments);
@@ -67,14 +48,9 @@ var Amslib = my.Amslib = my.Class({
 			
 			// make it safe to use console.log always
 			(function(b){function c(){}for(var d="assert,count,debug,dir,dirxml,error,exception,group,groupCollapsed,groupEnd,info,log,timeStamp,profile,profileEnd,time,timeEnd,trace,warn".split(","),a;a=d.pop();){b[a]=b[a]||c}})((function(){try
-			{console.log();return window.console;}catch(err){return window.console={};}})());
+			{console.log();return window.console;}catch(err){return window.console={};}})());			 	
 		},
 		
-		/**
-		 * 	method:	getController
-		 *
-		 * 	todo: write documentation
-		 */
 		getController: function(amslib_object)
 		{
 			if(typeof(amslib_object.instances) != "undefined" && amslib_object.instances != false){
@@ -84,35 +60,41 @@ var Amslib = my.Amslib = my.Class({
 			return false;
 		},
 		
-		/**
-		 * 	method:	firebug
-		 *
-		 * 	todo: write documentation
-		 */
 		firebug: function()
 		{
 			//	NOTE: This is suspiciously similar to paulirishes window.log method shown above in the autoload method
 			//	NOTE: apparently some people found this function would cause an error in google chrome, dunno why.
 			if(console && console.log) console.log.apply(console,arguments);
 		},
-
-		/**
-		 * 	method:	locate
-		 *
-		 * 	todo: write documentation
-		 */
+		
+		//	DEPRECATED getPath, use Amslib.locate() instead, it does exactly what I was supposed to do here
+		getPath: function(file)
+		{
+			//	Copied from how scriptaculous does it's "query string" thing
+			var re 		=	new RegExp("^(.*?)"+file.replace(/[-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&")+"$","g");
+			var path	=	false;
+			
+			$("script[src]").each(function(){
+				var matches = re.exec(this.src);
+				
+				if(matches){
+					path = matches[1]; 
+					return false;
+				}
+			});
+			
+			if(!path) Amslib.firebug("requested path["+file+"] using regexp["+re+"] was not found");
+				
+			return path;
+		},
+		
 		locate: function()
 		{
-			Amslib.__location = Amslib.getJSPath("/js/Amslib.js").split("/js/Amslib.js")[0];
+			Amslib.__location = Amslib.js.find("/js/Amslib.js",true);
 			
 			return Amslib.__location || false;
 		},
 
-		/**
-		 * 	method:	getQuery
-		 *
-		 * 	todo: write documentation
-		 */
 		getQuery: function()
 		{
 			var p = function(s){
@@ -145,181 +127,16 @@ var Amslib = my.Amslib = my.Class({
 			return false;
 		},
 		
-		////////////////////////////////////////////////////////////////////
-		//	The load/hasJS API
-		//
-		//	This API will allow you to quickly and simply load a javascript
-		//	and apply a function that will wait until it's loaded to execute
-		//
-		//	NOTE: refactor this against the wait API, it's cleaner
-		////////////////////////////////////////////////////////////////////
-		/**
-		 * 	method:	loadJS
-		 *
-		 * 	todo: write documentation
-		 */
-		loadJS: function(name,file,onReady)
-		{
-			if(typeof(require) != 'function') return;
-			
-			if(typeof(Amslib.loader[name]) == "undefined"){
-				Amslib.__lready[name]	=	false;
-				Amslib.loader[name]		=	require(file);
-			}
+		//	DEPRECATED API, use Amslib.[js,css].* instead
+		loadJS: function(name,file,callback){	Amslib.js.load(name,file,callback);	},
+		hasJS: function(name,callback){			Amslib.js.has(name,callback);		},
+		getJSPath: function(search,path){		return Amslib.js.find(search,path);	},
+		loadCSS: function(file){				Amslib.css.load(file);				},
 		
-			if(typeof onReady == "function") scope(function(){
-				Amslib.waitResolve(name);
-				onReady();
-			},Amslib.loader[name]);
-			
-			scope(function(){
-				Amslib.waitResolve(name);
-				
-				Amslib.__lready[name] = true;
-				
-				if(Amslib.__lcback[name]) for(k in Amslib.__lcback[name]){
-					Amslib.__lcback[name][k]();
-				}
-			},Amslib.loader[name]);
-		},
-		
-		/**
-		 * 	method:	hasJS
-		 *
-		 * 	todo: write documentation
-		 */
-		hasJS: function(name,callback)
-		{
-			if(typeof name == "string") name = new Array(name);
-			
-			var checkGroup = function(){
-				for(n=0;n<name.length;n++){
-					if(!Amslib.__lready[name[n]]) return false;
-
-					Amslib.waitResolve(name[n]);
-				}
-
-				if(callback) $(document).ready(callback);
-				
-				return true;
-			};
-			
-			for(var n=0;n<name.length;n++){
-				try{
-					if(Amslib.__lready[name[n]] && checkGroup()) return true;
-				}catch(e){}
-				
-				if(typeof(Amslib.__lcback[name[n]]) == "undefined"){
-					Amslib.__lcback[name[n]] = new Array();
-				}
-				
-				Amslib.__lcback[name[n]].push(checkGroup);
-			}
-			
-			return false;
-		},
-		
-		/**
-		 * 	method:	getJSPath
-		 *
-		 * 	todo: write documentation
-		 */
-		getJSPath: function(search,path)
-		{
-			var s = $("script[src*='"+search+"']").attr("src");
-			
-			return s && path ? s.split(search)[0] : s;
-		},
-		
-		/**
-		 * 	method:	loadCSS
-		 *
-		 * 	todo: write documentation
-		 */
-		loadCSS: function(file)
-		{
-			$("head").append($("<link/>").attr({
-				rel:	"stylesheet",
-				type:	"text/css",
-				href:	file
-			}));
-		},
-		
-		loader:			{},
-		__lready:		{},
-		__lcback:		{},
 		__urlParams:	[],
-		__location:		false,
-		
-		////////////////////////////////////////////////////////////////////
-		//	The wait object API
-		//
-		//	This object will allow you to set a bunch of string keys and 
-		//	it will create deferred object for each key, when you resolve 
-		//	each key, depending on the combinations requested, it'll trigger
-		//	the done or fail callbacks, allowing you to easily synchronise 
-		//	asychronous actions between objects which are loaded and 
-		//	created dynamically at different times
-		////////////////////////////////////////////////////////////////////
-		waitObject:  false,
-		
-		/**
-		 * 	method:	waitUntil
-		 *
-		 * 	todo: write documentation
-		 */
-		waitUntil:  function()
-		{
-			if(Amslib.waitObject == false) Amslib.waitObject = {};
-			
-			var deferred = [], done = false, fail = false;
-			
-			for(var a=0,len=arguments.length;a<len;a++){
-				var arg = arguments[a];
-				var type = typeof(arg);
-				
-				if(type == "string"){
-					if(typeof(Amslib.waitObject[arg]) == "object"){
-						var d = Amslib.waitObject[arg];
-					}else{
-						var d = $.Deferred();
-						
-						Amslib.waitObject[arg] = d;
-					}
-					
-					deferred.push(d);
-				}else if(type == "function"){
-					if(!done) done = arg;
-					if(!fail) fail = arg;
-				}
-			}
-			
-			var w = $.when.apply($,deferred);
-
-			if(done) w.done(done);
-			if(fail) w.fail(fail);
-
-			return w;
-		},
-		
-		/**
-		 * 	method:	waitResolve
-		 *
-		 * 	todo: write documentation
-		 */
-		waitResolve:  function(name)
-		{
-			if(typeof(Amslib.waitObject[name]) == "object"){
-				Amslib.waitObject[name].resolve();
-			}
-		}
+		__location:		false
 	},	
 	
-	/**
-	 * 	method:	constructor
-	 *
-	 * 	todo: write documentation
-	 */
 	constructor: function(parent,name)
 	{
 		this.parent = $(parent) || false;
@@ -341,11 +158,6 @@ var Amslib = my.Amslib = my.Class({
 		return this;
 	},
 	
-	/**
-	 * 	method:	readMVC
-	 *
-	 * 	todo: write documentation
-	 */
 	readMVC: function()
 	{
 		try{
@@ -380,148 +192,215 @@ var Amslib = my.Amslib = my.Class({
 		}
 	},
 	
-	/**
-	 * 	method:	getAmslibName
-	 *
-	 * 	todo: write documentation
-	 */
 	getAmslibName: function()
 	{
 		return this.__amslibName;
 	},
 	
-	/**
-	 * 	method:	getParentNode
-	 *
-	 * 	todo: write documentation
-	 */
 	getParentNode: function()
 	{
 		return this.parent;
 	},
 	
-	/**
-	 * 	method:	bind
-	 *
-	 * 	todo: write documentation
-	 */
 	bind: function(event,callback,live)
 	{
 		this.__events.bind(event,callback);
 	},
 	
-	/**
-	 * 	method:	on
-	 *
-	 * 	todo: write documentation
-	 */
 	on: function(event,callback)
 	{
 		this.__events.on(event,callback);
 	},
 	
-	/**
-	 * 	method:	live
-	 *
-	 * 	todo: write documentation
-	 */
 	live: function(event,callback)
 	{
 		this.on(event,callback);
 	},
 	
-	/**
-	 * 	method:	trigger
-	 *
-	 * 	todo: write documentation
-	 */
 	trigger: function(event,data)
 	{
 		this.__events.trigger(event,[data]);
 	},
 	
 	//	Getter/Setter for the object values
-	/**
-	 * 	method:	setValue
-	 *
-	 * 	todo: write documentation
-	 */
-	setValue: function(name,value){			
-		this.__value.data(name,value);			
-	},
-	
-	/**
-	 * 	method:	getValue
-	 *
-	 * 	todo: write documentation
-	 */
-	getValue: function(name)
-	{				
-		return this.__value.data(name);			
-	},
+	setValue: function(name,value){			this.__value.data(name,value);			},
+	getValue: function(name){				return this.__value.data(name);			},
 	
 	//	Getter/Setter for web services
-	/**
-	 * 	method:	setService
-	 *
-	 * 	todo: write documentation
-	 */
-	setService: function(name,value)
-	{		
-		this.__services.data(name,value);		
-	},
-	
-	/**
-	 * 	method:	getService
-	 *
-	 * 	todo: write documentation
-	 */
-	getService: function(name)
-	{				
-		return this.__services.data(name);		
-	},
+	setService: function(name,value){		this.__services.data(name,value);		},
+	getService: function(name){				return this.__services.data(name);		},
 	
 	//	Getter/Setter for text translations
-	/**
-	 * 	method:	setTranslation
-	 *
-	 * 	todo: write documentation
-	 */
-	setTranslation: function(name,value)
-	{	
-		this.__translation.data(name,value);	
-	},
-	
-	/**
-	 * 	method:	getTranslation
-	 *
-	 * 	todo: write documentation
-	 */
-	getTranslation: function(name)
-	{			
-		return this.__translation.data(name);	
-	},
+	setTranslation: function(name,value){	this.__translation.data(name,value);	},
+	getTranslation: function(name){			return this.__translation.data(name);	},
 	
 	//	Getter/Setter for images
-	/**
-	 * 	method:	setImage
-	 *
-	 * 	todo: write documentation
-	 */
-	setImage: function(name,value)
-	{			
-		this.__images.data(name,value);			
+	setImage: function(name,value){			this.__images.data(name,value);			},
+	getImage: function(name){				return this.__images.data(name);		}
+});
+
+////////////////////////////////////////////////////////////////////
+//	The wait object API
+//
+//	This object will allow you to set a bunch of string keys and 
+//	it will create deferred object for each key, when you resolve 
+//	each key, depending on the combinations requested, it'll trigger
+//	the done or fail callbacks, allowing you to easily synchronise 
+//	asychronous actions between objects which are loaded and 
+//	created dynamically at different times
+////////////////////////////////////////////////////////////////////
+Amslib.wait = {
+	__handles: false,
+
+	__init: function()
+	{
+		if(Amslib.wait.__handles == false){
+			Amslib.wait.__handles = {};
+		}
+	},
+
+	until: function()
+	{
+		Amslib.wait.__init();
+		
+		var deferred = [];
+		var done = false; 
+		var fail = false;
+		
+		for(var a=0,len=arguments.length;a<len;a++){
+			var arg = arguments[a];
+			var type = typeof(arg);
+			
+			if(type == "string"){
+				if(typeof(Amslib.wait.__handles[arg]) == "object"){
+					var d = Amslib.wait.__handles[arg];
+				}else{
+					var d = $.Deferred();
+					
+					if(typeof(Amslib.wait.__handles[arg]) == "string" && arg == Amslib.wait.__handles[arg]){
+						d.resolve();
+					}
+					
+					Amslib.wait.__handles[arg] = d;
+				}
+				
+				deferred.push(d);
+			}else if(type == "function"){
+				if(!done) done = arg;
+				if(!fail) fail = arg;
+			}
+		}
+		
+		var w = $.when.apply($,deferred);
+	
+		if(done) w.done(done);
+		if(fail) w.fail(fail);
+		
+		if(!done && !fail){
+			console.log("ERROR[Amslib.wait.until]: both done and fail callbacks were not set, so what do we execute when this trigger executes?",arguments);
+		}
+	
+		return w;
 	},
 	
-	/**
-	 * 	method:	getImage
-	 *
-	 * 	todo: write documentation
-	 */
-	getImage: function(name)
-	{				
-		return this.__images.data(name);		
+	resolve: function(name)
+	{
+		Amslib.wait.__init();
+		
+		if(typeof(Amslib.wait.__handles[name]) == "object"){
+			Amslib.wait.__handles[name].resolve();
+		}else{
+			Amslib.wait.__handles[name] = name;
+		}
 	}
-});
+};
+
+////////////////////////////////////////////////////////////////////
+//	The JS API
+//
+//	This API will allow you to quickly and simply load a javascript
+//	and apply a function that will wait until it's loaded to execute
+//
+//	NOTE: refactor this against the wait API, it's cleaner
+//	NOTE: if I can refactor it, I'm having second thoughts
+////////////////////////////////////////////////////////////////////
+Amslib.js = {
+	__loadHandles: false,
+	
+	__init: function(){
+		if(Amslib.js.__loadHandles == false){
+			Amslib.js.__loadHandles = {};
+		}
+	},
+	
+	load: function(name,filename,callback){
+		var self = Amslib.js;
+			
+		self.__init();
+		
+		if(typeof(require) != 'function'){
+			console.log("ERROR[Amslib.js.load]: We cannot proceed because the 'require' function is not available, did you load my.common into your website?");
+			return;
+		}
+		
+		if(typeof(self.__loadHandles[name]) == "undefined"){
+			self.__loadHandles[name] = require(filename);
+		}
+		
+		scope(function(){
+			Amslib.wait.resolve(name);
+			
+			if(typeof(callback) == "function") callback();
+		},self.__loadHandles[name]);
+	},
+	
+	loadSeq: function()
+	{
+		if(arguments.length == 0) return;
+		
+		var prev = arguments[0];
+		if(prev.length == 2) prev[2] = false;
+		Amslib.js.load(prev[0],prev[1],prev[2]);
+
+		for(var a=0;a<arguments.length;a++){
+			var item = arguments[a];
+
+			Amslib.js.has(prev[0],function(){
+				if(item.length == 2) item[2] = false;
+				Amslib.js.load(item[0],item[1],item[2]);
+			});
+			
+			prev = item;
+		}
+	},
+	
+	//	a variable number of names and possible two callbacks for success and failure
+	//	if you pass has(a,b,c,d,function(){}) it'll treat a,b,c,d like names to succeed together and run the function as a success callback
+	has: function(name,callback)
+	{
+		return Amslib.wait.until.apply(null,arguments);
+	},
+	
+	find: function(search,path)
+	{
+		var s = $("script[src*='"+search+"']").attr("src");
+		
+		return s && path ? s.split(search)[0] : s;
+	}
+};
+
+Amslib.css = {
+	load: function(file)
+	{
+		$("head").append($("<link/>").attr({rel:"stylesheet",type:"text/css",href: file}));
+	}		
+};
+
+////////////////////////////////////////////////////////////////////
+//	FUTURE: an mvc api, but this needs to extend Amslib, not be static
+////////////////////////////////////////////////////////////////////
+Amslib.mvc = {
+	
+};
 
 $(document).ready(Amslib.autoload);

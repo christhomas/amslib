@@ -812,6 +812,36 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
+	 * 	method:	getRouteParam
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getRouteParam($name=NULL,$default="")
+	{
+		return Amslib_Router::getRouteParam($name,$default);
+	}
+
+	/**
+	 * 	method:	getRouteName
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getRouteName()
+	{
+		return Amslib_Router::getName();
+	}
+
+	/**
+	 * 	method:	getRouteResource
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getRouteResource()
+	{
+		return Amslib_Router::getResource();
+	}
+
+	/**
 	 * 	method:	getFullURL
 	 *
 	 * 	todo: write documentation
@@ -819,6 +849,16 @@ class Amslib_MVC extends Amslib_Mixin
 	public function getFullURL()
 	{
 		return Amslib_Website::rel(Amslib_Router::getPath());
+	}
+
+	/**
+	 * 	method:	getURLParam
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getURLParam($index=NULL,$default="")
+	{
+		return Amslib_Router::getURLParam($index,$default);
 	}
 
 	/**
