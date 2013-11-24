@@ -279,7 +279,11 @@
 							tds += '<tr>';
 							for ( j = 0; j < d[i].length; j++ ) {
 								// build tbody cells
-								tds += '<td>' + d[i][j] + '</td>';
+								var temp = $("<td>").html(d[i][j]);
+								var inner = temp.find("td");
+								temp = inner.length ? inner : temp.wrap("<div>").parent();
+								
+								tds += temp.wrap("<div>").parent().html();
 							}
 							tds += '</tr>';
 						}
@@ -468,7 +472,10 @@
 			// don't allow rendering multiple times on the same page/size/totalpages/filters/sorts
 			if ( l.page === p.page && l.size === p.size && l.totalPages === p.totalPages &&
 				(l.currentFilters || []).join(',') === (p.currentFilters || []).join(',') &&
-				l.sortList === (c.sortList || []).join(',') ) { return; }
+				l.sortList === (c.sortList || []).join(',') ) {
+				console.log("skipping ajax call, nothing changed");	
+				return;
+				}
 			if (c.debug) {
 				ts.log('Pager changing to page ' + p.page);
 			}
