@@ -38,7 +38,13 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 			},
 			
 			filter:{
+				ajax: {
+					filter_searchDelay: 1000
+				},
 				
+				non_ajax: {
+					
+				}
 			},
 			
 			pager:{
@@ -210,7 +216,13 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		
 		this.options = $.extend(true, {}, o, options);
 		
-		var widgets = this.parent.data(d.widgets).split(",");
+		var widgets		= this.parent.data(d.widgets).split(","),
+			ajaxUrl		= this.parent.data(d.ajax),
+			selector	= this.parent.data(d.pager);
+		
+		var f = ajaxUrl ? this.options.filter.ajax : this.options.filter.non_ajax;
+		this.options.tablesorter.widgetOptions = $.extend(true,{},f);
+		
 		if(widgets && widgets.length){
 			this.options.tablesorter.widgets = widgets;
 		}
@@ -218,11 +230,13 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		this.parent	= this.parent;
 		this.ts		= this.parent.tablesorter(this.options.tablesorter);
 	
-		ajaxURL = this.parent.data(d.ajax);
-		if(ajaxURL) this.setupAjax(ajaxURL);
+		if(ajaxUrl){
+			this.setupAjax(ajaxUrl);
+		}
 		
-		selector = this.parent.data(d.pager);
-		if($(selector).length) this.setupPager(selector);
+		if($(selector).length){
+			this.setupPager(selector);
+		}
 	},
 	
 	setupPager: function(selector)
@@ -241,7 +255,6 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 			
 			o.pager.container	= selector;
 			o.pager.cssGoto		= selector+" "+o.pager.cssGoto;
-			console.log(o.pager);
 			t.ts.tablesorterPager(o.pager);	
 		});
 	},
@@ -269,7 +282,7 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		options.size			= pager.size;			// current size
 		options.totalPages		= pager.totalPages;		// total pages
 		options.currentFilters	= pager.currentFilters;	// any filters
-
+		
 		this.parent.data('pagerLastPage', options.page);
 		this.parent.data('pagerLastSize', options.size);
 	

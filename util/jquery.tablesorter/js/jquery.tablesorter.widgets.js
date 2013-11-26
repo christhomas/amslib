@@ -979,6 +979,7 @@ ts.filter = {
 			clearTimeout(wo.searchTimer);
 			wo.searchTimer = setTimeout(function() {
 				ts.filter.checkFilters(table, external || filter);
+				//	FIXME: stop using hard coded variables, this should all be optional and configurable
 			}, wo.filter_liveSearch ? wo.filter_searchDelay : 10);
 		} else {
 			// skip delay
