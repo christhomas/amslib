@@ -39,7 +39,7 @@ class Amslib_Form
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function selectOptions($array,$selected=NULL,$indexText=NULL,$indexValue=NULL,$createAttributes=true)
+	static public function selectOptions($array,$selected=NULL,$indexText=NULL,$indexValue=NULL,$createAttributes=false)
 	{
 		$options = array();
 
@@ -53,13 +53,13 @@ class Amslib_Form
 			}else{
 				$text = $value = $item;
 			}
-			
+
 			$attributes = array();
 			if($createAttributes && is_array($item) && isset($item[$indexText]) && isset($item[$indexValue])){
 				unset($item[$indexText],$item[$indexValue]);
-				
+
 				foreach($item as $k=>&$v) $v="$k='$v'";
-				
+
 				$attributes = $item;
 			}
 			$attributes = implode(" ",$attributes);
@@ -73,7 +73,7 @@ class Amslib_Form
 
 		return implode("",$options);
 	}
-	
+
 	/**
 	 * 	method:	monthOptions
 	 *
@@ -83,17 +83,17 @@ class Amslib_Form
 	{
 		if($start < 0 || $start > 12) $start = 12;
 		if($stop < 0 || $stop > 12) $stop = 12;
-		
+
 		$keys = range($start,$stop);
-		
+
 		$months = array();
 		foreach($keys as $k){
 			$index = $k;
-			
+
 			if($pad !== NULL && is_string($pad)){
 				$index = str_pad($k,strlen($pad),$pad[0],STR_PAD_LEFT);
 			}
-			
+
 			$months[$index] = date("F",mktime(0,0,0,$k));
 		}
 
