@@ -29,6 +29,8 @@
 			ajaxObject: {
 				dataType: 'json'
 			},
+			
+			ajaxCounter: 0,
 
 			// process ajax so that the following information is returned:
 			// [ total_rows (number), rows (array of arrays), headers (array; optional) ]
@@ -124,6 +126,7 @@
 			p.totalPages = Math.ceil( p.totalRows / sz ); // needed for "pageSize" method
 			p.filteredRows = (f) ? c.$tbodies.eq(0).children('tr:not(.' + t + ')').length : p.totalRows;
 			p.filteredPages = (f) ? Math.ceil( p.filteredRows / sz ) || 1 : p.totalPages;
+
 			if ( Math.min( p.totalPages, p.filteredPages ) >= 0 ) {
 				t = (p.size * p.page > p.filteredRows);
 				p.startRow = (t) ? 1 : (p.filteredRows === 0 ? 0 : p.size * p.page + 1);
@@ -353,8 +356,17 @@
 					renderAjax(null, table, p, xhr, exception);
 					$doc.unbind('ajaxError.pager');
 				});
+
+				var counter = ++p.ajaxCounter;
+
 				p.ajaxObject.url = url; // from the ajaxUrl option and modified by customAjaxUrl
-				p.ajaxObject.success = function(data) {
+				p.ajaxObject.success = function(data)
+				{
+					//	Refuse to process old ajax commands that were overwritten by new ones
+					if(counter < p.ajaxCounter){
+						return;
+					}
+					
 					renderAjax(data, table, p);
 					$doc.unbind('ajaxError.pager');
 					if (typeof p.oldAjaxSuccess === 'function') {
@@ -413,12 +425,17 @@
 				l = rows && rows.length || 0, // rows may be undefined
 				s = ( p.page * p.size ),
 				e = ( s + p.size );
-			if ( l < 1 ) { return; } // empty table, abort!
+			
+			// empty table, !
+			if ( l < 1 ) return;
+
+			// lets not render the table more than once
 			if ( p.page >= p.totalPages ) {
-				// lets not render the table more than once
 				moveToLastPage(table, p);
 			}
-			p.isDisabled = false; // needed because sorting will change the page and re-enable the pager
+			
+			// needed because sorting will change the page and re-enable the pager
+			p.isDisabled = false;
 			if (p.initialized) { $(table).trigger('pagerChange', p); }
 
 			if ( !p.removeRows ) {
@@ -427,11 +444,14 @@
 				if ( e > rows.length ) {
 					e = rows.length;
 				}
+				
 				ts.clearTableBody(table);
 				$tb = ts.processTbody(table, table.config.$tbodies.eq(0), true);
+				
 				for ( i = s; i < e; i++ ) {
 					$tb.append(rows[i]);
 				}
+				
 				ts.processTbody(table, $tb, false);
 			}
 
@@ -472,10 +492,7 @@
 			// don't allow rendering multiple times on the same page/size/totalpages/filters/sorts
 			if ( l.page === p.page && l.size === p.size && l.totalPages === p.totalPages &&
 				(l.currentFilters || []).join(',') === (p.currentFilters || []).join(',') &&
-				l.sortList === (c.sortList || []).join(',') ) {
-				console.log("skipping ajax call, nothing changed");	
-				return;
-				}
+				l.sortList === (c.sortList || []).join(',') ) { return; }
 			if (c.debug) {
 				ts.log('Pager changing to page ' + p.page);
 			}
@@ -552,7 +569,7 @@
 			p.page = $.data(table, 'pagerLastPage') || p.page || 0;
 			p.size = $.data(table, 'pagerLastSize') || parseInt(pg.find('option[selected]').val(), 10) || p.size || 10;
 			pg.val(p.size); // set page size
-			p.totalPages = Math.ceil( Math.min( p.totalPages, p.filteredPages ) / p.size );
+			p.totalPages = Math.ceil( Math.min( p.totalRows, p.filteredRows ) / p.size );
 			if ( triggered ) {
 				$(table).trigger('update');
 				setPageSize(table, p.size, p);
