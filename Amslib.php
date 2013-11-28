@@ -445,6 +445,45 @@ class Amslib
 	}
 
 	/**
+	 * 	method: slugify2
+	 *
+	 * 	A new version which I think will function better than the original
+	 * 	I just don't want to replace it yet without testing it a bit before and
+	 * 	being more confident
+	 *
+	 * 	NOTE: I stole this code from
+	 *
+	 * 	https://github.com/alixaxel/phunction/blob/master/phunction/Text.php
+	 */
+	public static function slugify2($string, $slug = '-', $extra = null)
+	{
+		$string = self::translit($string,$extra);
+		$string = preg_replace('~[^0-9a-z'.preg_quote($extra, '~').']+~i',$slug, $string);
+
+		return strtolower(trim($string, $slug));
+	}
+
+	/**
+	 * 	method: translit
+	 *
+	 * 	A function which strips away the accents and other unwanted characters from
+	 * 	a url, making it accent-crazy-less
+	 *
+	 * 	NOTE: I stole this code from
+	 *
+	 * 	https://github.com/alixaxel/phunction/blob/master/phunction/Text.php
+	 */
+	static public function translit($text,$extra=null)
+	{
+		$text = htmlentities($text, ENT_QUOTES, 'UTF-8');
+		$text = preg_replace('~&([a-z]{1,2})(acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml);~i', '$1', $text);
+		$text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+		$text = preg_replace(array('~[^0-9a-z'.preg_quote($extra,'~').']~i', '~[ -]+~'), ' ', $text);
+
+		return trim($text, ' -');
+	}
+
+	/**
 	 * 	method:	var_dump
 	 *
 	 *	Obtain a var_dump of a variable, but obtain the dump as a string to be printed or manipulated

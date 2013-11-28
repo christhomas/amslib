@@ -29,7 +29,7 @@
  *
  *	description: TODO
  */
-class Amslib_Log
+class Amslib_Log extends Amslib_Mixin
 {
 	protected $logger;
 
@@ -39,14 +39,35 @@ class Amslib_Log
 		"file"	=>	"LoggerAppenderFile"
 	);
 
+	protected function createFileLog(&$filename)
+	{
+		$dirname	= dirname($filename);
+		$basename	= Amslib::slugify2(basename($filename),"-",".");
+		$filename = "$dirname/$basename";
+
+		if(file_exists($filename)) return true;
+
+		if(!is_dir(dirname($filename)) && !mkdir(dirname($filename),0777,true)){
+			return false;
+		}
+
+		if($t=touch($filename) && $c=chmod($filename,0777)){
+			return true;
+		}
+
+		Amslib::errorLog(__METHOD__.", file failed to create, or modify it's permissions","touch=".intval($t),"chmod=".intval($c));
+		return false;
+	}
+
 	public function __construct($name=NULL)
 	{
 		$name = $this->setName($name);
 
 		$this->logger = Logger::getLogger($name);
+		$this->addMixin($this->logger);
 	}
 
-	public function &getInstance($name)
+	static public function &getInstance($name)
 	{
 		static $instance = array();
 
@@ -79,12 +100,12 @@ class Amslib_Log
 	{
 		if(!isset($this->appenderMap[$type])) return false;
 
-		$appender = new $this->appenderMap[$type];
+		$appender = new $this->appenderMap[$type]($name);
 		$appender->setThreshold("all");
 
 		$this->appender[] = $appender;
 
-		return count($this->appender);
+		return count($this->appender)-1;
 	}
 
 	public function setDestination($index, $destination,$append=true)
@@ -93,15 +114,17 @@ class Amslib_Log
 
 		switch(get_class($this->appender[$index])){
 			case "LoggerAppenderFile":{
-				$exists = file_exists($destination);
-
-				if(!$exists){
-					$exists = $this->createFileLog($destination);
-				}
+				$exists = $this->createFileLog($destination);
 
 				if($exists){
 					$this->appender[$index]->setFile($destination);
 					$this->appender[$index]->setAppend($append);
+
+					//	Create a default layout, which you can override later
+					$layout = new LoggerLayoutTTCC();
+					$layout->activateOptions();
+
+					$this->appender[$index]->setLayout($layout);
 				}else{
 					//	Ironically, the logging class fails, so we use the error log :)
 					Amslib::errorLog(__METHOD__.", Failed to find or create the log file that we needed");
@@ -110,13 +133,6 @@ class Amslib_Log
 		}
 
 		return true;
-	}
-
-	protected function createFileLog($destination)
-	{
-		if(file_exists($destination)) return true;
-
-		return touch($destination);
 	}
 
 	public function setThreshold($index,$threshold)
@@ -133,8 +149,50 @@ class Amslib_Log
 		if(!isset($this->appender[$index])) return false;
 
 		$this->appender[$index]->activateOptions();
-		$this->logger->appAppender($this->appender[$index]);
+		$this->logger->addAppender($this->appender[$index]);
 
 		return true;
+	}
+
+	/**	This method is in the docs, but not in the amslib installed version
+	static public function logTrace($logger,$message,$throwable=NULL)
+	{
+		$logger = self::getInstance($logger);
+		$logger->trace($message,$throwable);
+	}*/
+
+	static public function logMessage($logger,$message,$throwable=NULL)
+	{
+		self::logInfo($logger,$message,$throwable);
+	}
+
+	static public function logDebug($logger,$message,$throwable=NULL)
+	{
+		$logger = self::getInstance($logger);
+		$logger->debug($message,$throwable);
+	}
+
+	static public function logInfo($logger,$message,$throwable=NULL)
+	{
+		$logger = self::getInstance($logger);
+		$logger->info($message,$throwable);
+	}
+
+	static public function logWarn($logger,$message,$throwable=NULL)
+	{
+		$logger = self::getInstance($logger);
+		$logger->warn($message,$throwable);
+	}
+
+	static public function logError($logger,$message,$throwable=NULL)
+	{
+		$logger = self::getInstance($logger);
+		$logger->error($message,$throwable);
+	}
+
+	static public function logFatal($logger,$message,$throwable=NULL)
+	{
+		$logger = self::getInstance($logger);
+		$logger->fatal($message,$throwable);
 	}
 }
