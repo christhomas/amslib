@@ -41,6 +41,11 @@ class Amslib_Plugin_Object extends Amslib_Mixin
 		return $this->api->getObject($id,$singleton);
 	}
 
+	public function renderView($id,$params=array())
+	{
+		return $this->api->renderView($id,$params);
+	}
+
 	/**
 	 * 	method:	addMixin
 	 *

@@ -62,7 +62,7 @@ class Amslib_Mixin
 			//	Log the failure to find a method to call to the error log
 			Amslib::errorLog("MIXIN FAILURE","stack_trace",get_class($this),$name);
 			foreach($map as $o=>$l){
-				Amslib::errorLog("MIXIN FAILURE DATA",$o,implode(",",$l));
+				Amslib::errorLog("MIXIN FAILURE DATA",$o,$name,implode(",",$l));
 			}
 		}
 
