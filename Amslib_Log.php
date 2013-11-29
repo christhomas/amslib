@@ -170,6 +170,7 @@ class Amslib_Log extends Amslib_Mixin
 	{
 		$logger = self::getInstance($logger);
 		$logger->debug($message,$throwable);
+		//testing what happens when you edit git files on android tablet
 	}
 
 	static public function logInfo($logger,$message,$throwable=NULL)
