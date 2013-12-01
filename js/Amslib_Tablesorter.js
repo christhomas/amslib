@@ -33,8 +33,9 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 			
 			//	Default options for the tablesorter
 			tablesorter:{
-				sortReset:	true,
-				widgets:	["zebra"]
+				sortReset:		true,
+				widgets:		["zebra"],
+				showProcessing:	true
 			},
 			
 			filter:{
