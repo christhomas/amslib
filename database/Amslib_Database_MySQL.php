@@ -464,10 +464,8 @@ QUERY;
 	 * 	todo: write documentation
 	 *
 	 * 	note: should I use "start transaction" here instead of just "begin" cause some of the examples I saw it was not clear or obvious
-	 */
-	
-	/**
-	 * ALFONSO: I set up  the transactions in obbex as following(tested and works):
+	 *
+	 *	ALFONSO: I set up  the transactions in obbex as following(tested and works):
 	 *  public function startTransaction()  // I used the word start since start transaction is used in the sql code
 	 *	{
 	 *		$q1 = $this->query("SET AUTOCOMMIT=0"); // I red autocommit must be set to 0.
@@ -479,8 +477,34 @@ QUERY;
 	 *			return false;
 	 *		}
 	 *  }
+	 *
+	 *  CHRIS: The articles I read said I don't need to SET AUTOCOMMIT=0 because this is the default, also
+	 *  		I see almost identically where you got your idea from :)
+	 *
+	 *  http://stackoverflow.com/questions/2708237/php-mysql-transactions-examples
+	 *
+	 *  in the comment with 35 upvotes, I got my code from refactoring the code from just below it, I needed transactions
+	 *  just now, in so many years, because I needed to obtain a primary key and update it and it's not possible to do
+	 *  in a single query, but they needed to happen together, hence the reason for the new method calls.
+	 *
+	 *  I think "START TRANSACTION" and "BEGIN" are actually the same
+	 *
+	 *  https://mariadb.com/kb/en/start-transaction/
+	 *
+	 *  They appear to do the same thing...I would change your code to be more compressed, such as
+	 *
+	 *	public function startTransaction()  // I used the word start since start transaction is used in the sql code
+	 *  {
+	 *  	$q1 = $this->query("SET AUTOCOMMIT=0"); // I red autocommit must be set to 0.
+	 *  	$q2 = $this->query("START TRANSACTION");
+	 *  	return $q1 && $q2
+	 *	}
+	 *
+	 *  It's more concise, no? But still understandable, nice to see you're still tracking amslib, there are some nice
+	 *  goodies in here if you look in the right place :) the util directory is getting a bit messy though, I'm trying
+	 *  lots of libraries to see which ones work better, I think I need to "cull" the weaker ones and get rid of them
 	 */
-	
+
 	public function beginTransaction()
 	{
 		return mysql_query("begin");
