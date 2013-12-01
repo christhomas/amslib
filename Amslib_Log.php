@@ -49,19 +49,45 @@ class Amslib_Log extends Amslib_Mixin
 
 		if(file_exists($filename)) return true;
 
-		if(!is_dir(dirname($filename)) && !mkdir(dirname($filename),0777,true)){
+		if(!is_dir(dirname($filename)) && !@mkdir(dirname($filename),0777,true)){
+			Amslib::errorLog(error_get_last(),$dirname,$basename,$filename);
 			return false;
 		}
 
-		if($t=touch($filename) && $c=chmod($filename,0777)){
+		$t=$c=0;
+
+		if($t=@touch($filename) && $c=@chmod($filename,0777)){
 			return true;
 		}
 
-		Amslib::errorLog(__METHOD__.", file failed to create, or modify it's permissions","touch=".intval($t),"chmod=".intval($c));
+		Amslib::errorLog(__METHOD__,"file failed to create, or modify it's permissions",error_get_last(),"touch=".intval($t),"chmod=".intval($c));
+
 		return false;
 	}
 
-	protected function processMessage($list)
+	static protected function processLog($type,$vargs)
+	{
+		if(!in_array($type,array("trace","message","debug","info","warn","error","fatal"))) return false;
+		if(count($vargs) == 0) return false;
+
+		if(is_string($vargs[0]) && strlen($vargs[0])){
+			$logger = self::getInstance($vargs[0]);
+
+			if($logger) array_shift($vargs);
+		}
+
+		if(!$logger){
+			$logger = self::getInstance(self::getDefaultLogger());
+		}
+
+		$message = self::processMessage($vargs);
+
+		foreach($message as $m){
+			$logger->log4php->$type($m);
+		}
+	}
+
+	static protected function processMessage($list)
 	{
 		$data		=	array();
 		$function	=	false;
@@ -81,9 +107,11 @@ class Amslib_Log extends Amslib_Mixin
 					$stack = array_slice($stack,$command[1],$command[2]);
 				}
 
+				$trace = array("\n");
 				foreach($stack as $row){
-					error_log("[STACK TRACE] ".Amslib::var_dump($row));
+					$trace[] = "[STACK TRACE] ".str_replace("\n","",Amslib::var_dump($row));
 				}
+				$data[] = implode("\n",$trace);
 			}else if(is_string($a) && strpos($a,"func_offset") === 0){
 				$command = explode(",",array_shift($list));
 
@@ -129,8 +157,6 @@ class Amslib_Log extends Amslib_Mixin
 				$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
 				//$data[] = Amslib::var_dump($stack);
 			}
-
-			return "[DEBUG] $function, ".implode(", ",$data);
 		}
 
 		$stack = Amslib::getStackTrace();
@@ -168,9 +194,7 @@ class Amslib_Log extends Amslib_Mixin
 			//$data[] = Amslib::var_dump($stack);
 		}
 
-		error_log("[DEBUG] $function, ".implode(", ",$data));
-
-		return array("function"=>$function,"data"=>$data);
+		return $data;
 	}
 
 	public function __construct($name=NULL)
@@ -185,7 +209,8 @@ class Amslib_Log extends Amslib_Mixin
 		static $instance = array();
 
 		if($name === NULL){
-			$name = array_shift(array_keys($instance));
+			$keys = array_keys($instance);
+			$name = array_shift($keys);
 		}
 
 		if(!strlen($name)) $name = self::getDefaultLogger();
@@ -249,6 +274,8 @@ class Amslib_Log extends Amslib_Mixin
 
 					$this->appender[$index]->setLayout($layout);
 				}else{
+					//	We do this to make sure the appender cannot be activated or used
+					unset($this->appender[$index]);
 					//	Ironically, the logging class fails, so we use the error log :)
 					Amslib::errorLog(__METHOD__.", Failed to find or create the log file that we needed");
 				}
@@ -289,14 +316,14 @@ class Amslib_Log extends Amslib_Mixin
 
 	//	NOTE:	this method exists in the online docs, but not in the code,
 	//			so I'm shadowing an "info" debug message for now
-	static public function trace($message)
+	static public function trace($vargs)
 	{
 		$vargs = func_get_args();
 
 		self::processLog("info",$vargs);
 	}
 
-	static public function message($message)
+	static public function message($vargs)
 	{
 		$vargs = func_get_args();
 
@@ -336,25 +363,5 @@ class Amslib_Log extends Amslib_Mixin
 		$vargs = func_get_args();
 
 		self::processLog("fatal",$vargs);
-	}
-
-	static protected function processLog($type,$vargs)
-	{
-		if(!in_array($type,array("trace",""))) return false;
-		if(count($vargs) == 0) return false;
-
-		if(is_string($vargs[0]) && strlen($vargs[0])){
-			$logger = self::getInstance($vargs[0]);
-
-			if($logger) array_shift($vargs);
-		}
-
-		if(!$logger){
-			$logger = self::getInstance(self::getDefaultLogger());
-		}
-
-		$message = $this->processMessage($vargs);
-
-		$logger->log4php->$type($message);
 	}
 }
