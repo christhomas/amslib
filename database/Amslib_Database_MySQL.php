@@ -465,6 +465,22 @@ QUERY;
 	 *
 	 * 	note: should I use "start transaction" here instead of just "begin" cause some of the examples I saw it was not clear or obvious
 	 */
+	
+	/**
+	 * ALFONSO: I set up  the transactions in obbex as following(tested and works):
+	 *  public function startTransaction()  // I used the word start since start transaction is used in the sql code
+	 *	{
+	 *		$q1 = $this->query("SET AUTOCOMMIT=0"); // I red autocommit must be set to 0.
+	 *		$q2 = $this->query("START TRANSACTION");
+	 *		if($q1==true && $q2==true)
+	 *		{
+	 *			return true;
+	 *		}else{
+	 *			return false;
+	 *		}
+	 *  }
+	 */
+	
 	public function beginTransaction()
 	{
 		return mysql_query("begin");
