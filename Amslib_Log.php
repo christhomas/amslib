@@ -31,13 +31,15 @@
  */
 class Amslib_Log extends Amslib_Mixin
 {
-	protected $logger;
+	protected $log4php;
 
 	protected $appender;
 
 	protected $appenderMap = array(
 		"file"	=>	"LoggerAppenderFile"
 	);
+
+	static protected $defaultLogger = "error_log";
 
 	protected function createFileLog(&$filename)
 	{
@@ -59,26 +61,147 @@ class Amslib_Log extends Amslib_Mixin
 		return false;
 	}
 
+	protected function processMessage($list)
+	{
+		$data		=	array();
+		$function	=	false;
+
+		foreach($list as $k=>$a){
+			if(is_string($a) && strpos($a,"stack_trace") === 0){
+				$command = explode(",",$a);
+
+				$stack = Amslib::getStackTrace(NULL,true);
+				$stack = explode("\n",$stack);
+
+				$c = count($command);
+
+				if($c == 2){
+					$stack = array_slice($stack,$command[1]);
+				}else if($c == 3 && $command[2] > 0){
+					$stack = array_slice($stack,$command[1],$command[2]);
+				}
+
+				foreach($stack as $row){
+					error_log("[STACK TRACE] ".Amslib::var_dump($row));
+				}
+			}else if(is_string($a) && strpos($a,"func_offset") === 0){
+				$command = explode(",",array_shift($list));
+
+				if(count($command) == 1) $function = $command[0];
+			}else{
+				if(is_object($a))	$a = array(get_class($a),Amslib::var_dump($a));
+				if(is_array($a)) 	$a = Amslib::var_dump($a);
+				if(is_bool($a))		$a = $a ? "true" : "false";
+				if(is_null($a))		$a = "null";
+
+				$a = trim(preg_replace("/\s+/"," ",$a));
+
+				$data[] = "arg[$k]=> $a";
+			}
+
+			$stack = Amslib::getStackTrace();
+
+			if(!is_numeric($function)) $function = count($stack) > 1 ? 1 : 0;
+
+			$line		= array("line"=>-1);
+			$function	= false;
+
+			if($function == 0){
+				if(isset($stack[$function])){
+					$line		= $stack[$function]["line"];
+					$f			= explode("/",$stack[$function]["file"]);
+					$function	= array("class"=>"","type"=>"","function"=>end($f));
+				}
+			}else{
+				if(isset($stack[$function-1])){
+					$line = $stack[$function-1]["line"];
+				}
+
+				if(isset($stack[$function])){
+					$function = $stack[$function];
+				}
+			}
+
+			if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
+				$function	=	"(ERROR, function invalid: ".Amslib::var_dump($function).")";
+				$data		=	array(Amslib::var_dump($stack));
+			}else{
+				$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
+				//$data[] = Amslib::var_dump($stack);
+			}
+
+			return "[DEBUG] $function, ".implode(", ",$data);
+		}
+
+		$stack = Amslib::getStackTrace();
+
+		if(!is_numeric($function)) $function = count($stack) > 1 ? 1 : 0;
+
+		$line		= array("line"=>-1);
+		$function	= false;
+
+		if($function == 0){
+			if(isset($stack[$function])){
+				$line		= $stack[$function]["line"];
+				$f			= explode("/",$stack[$function]["file"]);
+				$function	= array(
+						"class"=>"",
+						"type"=>"",
+						"function"=>end($f)
+				);
+			}
+		}else{
+			if(isset($stack[$function-1])){
+				$line = $stack[$function-1]["line"];
+			}
+
+			if(isset($stack[$function])){
+				$function = $stack[$function];
+			}
+		}
+
+		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
+			$function	=	"(ERROR, function invalid: ".Amslib::var_dump($function).")";
+			$data		=	array(Amslib::var_dump($stack));
+		}else{
+			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
+			//$data[] = Amslib::var_dump($stack);
+		}
+
+		error_log("[DEBUG] $function, ".implode(", ",$data));
+
+		return array("function"=>$function,"data"=>$data);
+	}
+
 	public function __construct($name=NULL)
 	{
 		$name = $this->setName($name);
 
-		$this->logger = Logger::getLogger($name);
-		$this->addMixin($this->logger);
+		$this->log4php = Logger::getLogger($name);
 	}
 
-	static public function &getInstance($name)
+	static public function &getInstance($name=NULL)
 	{
 		static $instance = array();
 
+		if($name === NULL){
+			$name = array_shift(array_keys($instance));
+		}
+
+		if(!strlen($name)) $name = self::getDefaultLogger();
+
 		if(!isset($instance[$name])){
-			$class	= new self($name);
-			$name	= $class->getName();
+			$object	= new self($name);
+			$name	= $object->getName();
 
 			//	If the instance already exists, we throw away the newly created one
 			//	we can't safely do this before we create the object because it might be invalid and the
 			//	test code for this is inside the class, so in this scenario, we just take a small hit
-			if(!isset($instance[$name])) $instance[$name] = $class;
+			if(!isset($instance[$name])) $instance[$name] = $object;
+
+			if(!self::getDefaultLogger()){
+				self::setDefaultLogger($name);
+			}
 		}
 
 		return $instance[$name];
@@ -149,51 +272,89 @@ class Amslib_Log extends Amslib_Mixin
 		if(!isset($this->appender[$index])) return false;
 
 		$this->appender[$index]->activateOptions();
-		$this->logger->addAppender($this->appender[$index]);
+		$this->log4php->addAppender($this->appender[$index]);
 
 		return true;
 	}
 
-	/**	This method is in the docs, but not in the amslib installed version
-	static public function logTrace($logger,$message,$throwable=NULL)
+	static public function setDefaultLogger($name)
 	{
-		$logger = self::getInstance($logger);
-		$logger->trace($message,$throwable);
-	}*/
-
-	static public function logMessage($logger,$message,$throwable=NULL)
-	{
-		self::logInfo($logger,$message,$throwable);
+		self::$defaultLogger = $name;
 	}
 
-	static public function logDebug($logger,$message,$throwable=NULL)
+	static public function getDefaultLogger()
 	{
-		$logger = self::getInstance($logger);
-		$logger->debug($message,$throwable);
-		//testing what happens when you edit git files on android tablet
+		return self::$defaultLogger;
 	}
 
-	static public function logInfo($logger,$message,$throwable=NULL)
+	//	NOTE:	this method exists in the online docs, but not in the code,
+	//			so I'm shadowing an "info" debug message for now
+	static public function trace($message)
 	{
-		$logger = self::getInstance($logger);
-		$logger->info($message,$throwable);
+		$vargs = func_get_args();
+
+		self::processLog("info",$vargs);
 	}
 
-	static public function logWarn($logger,$message,$throwable=NULL)
+	static public function message($message)
 	{
-		$logger = self::getInstance($logger);
-		$logger->warn($message,$throwable);
+		$vargs = func_get_args();
+
+		self::processLog("info",$vargs);
 	}
 
-	static public function logError($logger,$message,$throwable=NULL)
+	static public function debug($vargs)
 	{
-		$logger = self::getInstance($logger);
-		$logger->error($message,$throwable);
+		$vargs = func_get_args();
+
+		self::processLog("debug",$vargs);
 	}
 
-	static public function logFatal($logger,$message,$throwable=NULL)
+	static public function info($vargs)
 	{
-		$logger = self::getInstance($logger);
-		$logger->fatal($message,$throwable);
+		$vargs = func_get_args();
+
+		self::processLog("info",$vargs);
+	}
+
+	static public function warn($vargs)
+	{
+		$vargs = func_get_args();
+
+		self::processLog("warn",$vargs);
+	}
+
+	static public function error($vargs)
+	{
+		$vargs = func_get_args();
+
+		self::processLog("error",$vargs);
+	}
+
+	static public function fatal($vargs)
+	{
+		$vargs = func_get_args();
+
+		self::processLog("fatal",$vargs);
+	}
+
+	static protected function processLog($type,$vargs)
+	{
+		if(!in_array($type,array("trace",""))) return false;
+		if(count($vargs) == 0) return false;
+
+		if(is_string($vargs[0]) && strlen($vargs[0])){
+			$logger = self::getInstance($vargs[0]);
+
+			if($logger) array_shift($vargs);
+		}
+
+		if(!$logger){
+			$logger = self::getInstance(self::getDefaultLogger());
+		}
+
+		$message = $this->processMessage($vargs);
+
+		$logger->log4php->$type($message);
 	}
 }
