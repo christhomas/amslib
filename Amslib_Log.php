@@ -65,6 +65,48 @@ class Amslib_Log extends Amslib_Mixin
 		return false;
 	}
 
+	//	FIXME:	this method no longer works, it's supposed to obtain the function call which was the first entry point
+	//			into the logging system, so we can record the moment the logging system started, we can report where
+	//			in the code the person should look for the origin of these logging requests, but since I changed
+	//			around a lot the logging system, the assumptions and code it uses is now out of date :(
+	static protected function getLogOrigin()
+	{
+		$stack = Amslib::getStackTrace();
+
+		if(!is_numeric($function)) $function = count($stack) > 1 ? 1 : 0;
+
+		$line		= array("line"=>-1);
+		$function	= false;
+
+		if($function == 0){
+			if(isset($stack[$function])){
+				$line		= $stack[$function]["line"];
+				$f			= explode("/",$stack[$function]["file"]);
+				$function	= array(
+						"class"=>"",
+						"type"=>"",
+						"function"=>end($f)
+				);
+			}
+		}else{
+			if(isset($stack[$function-1])){
+				$line = $stack[$function-1]["line"];
+			}
+
+			if(isset($stack[$function])){
+				$function = $stack[$function];
+			}
+		}
+
+		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
+			$function	=	"(ERROR, function invalid: ".Amslib::var_dump($function).")";
+			$data		=	array(Amslib::var_dump($stack));
+		}else{
+			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
+			//$data[] = Amslib::var_dump($stack);
+		}
+	}
+
 	static protected function processLog($type,$vargs)
 	{
 		if(!in_array($type,array("trace","message","debug","info","warn","error","fatal"))) return false;
@@ -126,73 +168,9 @@ class Amslib_Log extends Amslib_Mixin
 
 				$data[] = "arg[$k]=> $a";
 			}
-
-			$stack = Amslib::getStackTrace();
-
-			if(!is_numeric($function)) $function = count($stack) > 1 ? 1 : 0;
-
-			$line		= array("line"=>-1);
-			$function	= false;
-
-			if($function == 0){
-				if(isset($stack[$function])){
-					$line		= $stack[$function]["line"];
-					$f			= explode("/",$stack[$function]["file"]);
-					$function	= array("class"=>"","type"=>"","function"=>end($f));
-				}
-			}else{
-				if(isset($stack[$function-1])){
-					$line = $stack[$function-1]["line"];
-				}
-
-				if(isset($stack[$function])){
-					$function = $stack[$function];
-				}
-			}
-
-			if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
-				$function	=	"(ERROR, function invalid: ".Amslib::var_dump($function).")";
-				$data		=	array(Amslib::var_dump($stack));
-			}else{
-				$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
-				//$data[] = Amslib::var_dump($stack);
-			}
 		}
 
-		$stack = Amslib::getStackTrace();
-
-		if(!is_numeric($function)) $function = count($stack) > 1 ? 1 : 0;
-
-		$line		= array("line"=>-1);
-		$function	= false;
-
-		if($function == 0){
-			if(isset($stack[$function])){
-				$line		= $stack[$function]["line"];
-				$f			= explode("/",$stack[$function]["file"]);
-				$function	= array(
-						"class"=>"",
-						"type"=>"",
-						"function"=>end($f)
-				);
-			}
-		}else{
-			if(isset($stack[$function-1])){
-				$line = $stack[$function-1]["line"];
-			}
-
-			if(isset($stack[$function])){
-				$function = $stack[$function];
-			}
-		}
-
-		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
-			$function	=	"(ERROR, function invalid: ".Amslib::var_dump($function).")";
-			$data		=	array(Amslib::var_dump($stack));
-		}else{
-			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
-			//$data[] = Amslib::var_dump($stack);
-		}
+		$function = self::getLogOrigin();
 
 		return $data;
 	}
