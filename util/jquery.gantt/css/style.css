@@ -54,7 +54,7 @@
     display: inline-block;
     margin: 0 0 0 5px;
     color: #484A4D;
-    width: 110px;
+    width: 100%;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -109,7 +109,7 @@
 }
 .fn-gantt .day, .fn-gantt .date {
     overflow: visible;
-    width: 24px;
+    width: 25px;
     line-height: 24px;
     text-align: center;
     border-left: 1px solid #DDD;
