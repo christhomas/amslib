@@ -480,6 +480,10 @@ QUERY;
 	 *
 	 *  CHRIS: The articles I read said I don't need to SET AUTOCOMMIT=0 because this is the default, also
 	 *  		I see almost identically where you got your idea from :)
+	 *  
+	 * ALFONSO: Actually from the link you gave https://mariadb.com/kb/en/start-transaction/ says
+	 * "By default, MySQL runs with autocommit mode enabled" but in the end of the day you are right
+	 * since start transaction/begin implicitely sets it to disabled.
 	 *
 	 *  http://stackoverflow.com/questions/2708237/php-mysql-transactions-examples
 	 *
@@ -500,9 +504,15 @@ QUERY;
 	 *  	return $q1 && $q2
 	 *	}
 	 *
-	 *  It's more concise, no? But still understandable, nice to see you're still tracking amslib, there are some nice
+	 *  Chris: It's more concise, no? But still understandable, nice to see you're still tracking amslib, there are some nice
 	 *  goodies in here if you look in the right place :) the util directory is getting a bit messy though, I'm trying
 	 *  lots of libraries to see which ones work better, I think I need to "cull" the weaker ones and get rid of them
+	 *  
+	 *  	Alfonso: Thanks, got this updated, I'll get the rid of autocommit=0 too once tested
+	 *	 -> not sure if commenting here is the right thing to do but
+	 *  there is no space to do it in http://git.antimatter-studios.com/amslib.git/master/
+	 *  
+	 *  You can remove the discussion if you wish.
 	 */
 
 	public function beginTransaction()
