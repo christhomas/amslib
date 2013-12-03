@@ -445,7 +445,7 @@ class Amslib_Router
 	{
 		if(is_array($name) && count($name)) $name[0] = "service:{$name[0]}";
 		else $name = "service:$name";
-		//print(Amslib::var_dump(array(__METHOD__,$name,$group),true));
+
 		return self::getURL($name,$group,$lang,$domain);
 	}
 
