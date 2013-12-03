@@ -733,8 +733,8 @@ class Amslib_Router
 	{
 		//	The raw data source before processing
 		$data = array(
-				"domain"	=>	Amslib_Router_URL::externalURL(self::$base),
-				"cache"		=>	self::$cache
+			"domain"	=>	Amslib_Router_URL::externalURL(self::$base),
+			"cache"		=>	self::$cache
 		);
 
 		//	For each cache block, remove the javascript, stylesheet and any framework routes
@@ -744,7 +744,7 @@ class Amslib_Router
 			unset($r["javascript"]);
 			unset($r["handler"]);
 
-			foreach($r["src"] as &$s) $s = $data["domain"].$s;
+			foreach($r["src"] as &$s) $s = rtrim($data["domain"],"/").$s;
 
 			if(strpos($k,"framework") || !self::getExportRestriction($r["group"])){
 				unset($data["cache"][$k]);
