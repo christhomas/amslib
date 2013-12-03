@@ -6,10 +6,10 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 {
 	STATIC: {
 		autoload: function(){
-			var s = Amslib_Tablesorter,
-				f = s.files.get;
+			var c = Amslib_Tablesorter,
+				f = c.files.get;
 			
-			s.setLocation();
+			c.setLocation();
 			
 			Amslib.css.load(f("theme","normal"));
 			
@@ -19,10 +19,10 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 			);
 			
 			Amslib.js.has("tablesorter","tablesorter.widgets",function(){
-				s.instances = $(s.options.autoload);
+				c.instances = $(c.options.autoload);
 
-				s.instances.each(function(){
-					new s(this,{});
+				c.instances.each(function(){
+					new c(this,{});
 				});
 			});
 		},
@@ -209,11 +209,11 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 	
 	constructor: function(parent,options)
 	{
-		var s = Amslib_Tablesorter,
-			o = s.options,
-			d = s.datakey;
+		var c = Amslib_Tablesorter,
+			o = c.options,
+			d = c.datakey;
 		
-		s.Super.call(this,parent,o.amslibName);
+		c.Super.call(this,parent,o.amslibName);
 		
 		this.options = $.extend(true, {}, o, options);
 		
