@@ -37,13 +37,13 @@
             dow: ["S", "M", "T", "W", "T", "F", "S"],
             navigate: "buttons",
             scale: "days",
+            events: $("<div/>"),
+            attachJSON: false,
+            showDescription: true,
             useCookie: false,
             maxScale: "months",
             minScale: "hours",
             waitText: "Please wait...",
-            onItemClick: function (data) { return; },
-            onAddClick: function (data) { return; },
-            onRender: function() { return; },
             scrollToToday: true
         };
 
@@ -51,9 +51,9 @@
         * Extend options with default values
         */
         if (options) {
-            $.extend(settings, options);
+            settings = $.extend(true, {}, settings, options);
         }
-
+        
         // can't use cookie if don't have `$.cookie`
         settings.useCookie = settings.useCookie && $.isFunction($.cookie);
 
@@ -314,7 +314,7 @@
 
                 $dataPanel.css({ height: $leftPanel.height() });
                 core.waitToggle(element, false);
-                settings.onRender();
+                settings.events.trigger("render");
             },
 
             // Create and return the left panel with labels
@@ -324,23 +324,60 @@
                     .append($('<div class="row spacer"/>')
                     .css("height", tools.getCellSize() * element.headerRows + "px")
                     .css("width", "100%"));
+                
+                /**
+                 * The width variable in this loop has a true && ... at the beginning, this is 
+                 * solving the following problem where we need to decide whether the label is 
+                 * half width or full width using the fn-wide css class, as follows, the combinations are:
+                 * 
+                 * console.log("test",true&&true&&true);	=>	""
+                 * console.log("test",true&&true&&false);	=>	"fn-wide"
+                 * console.log("test",true&&false&&true);	=>	"fn-wide"
+                 * console.log("test",true&&false&&false);	=>	"fn-wide"
+                 * 
+                 * without the first true at the beginning, false&&false == "", this is wrong, we needed "fn-wide"
+                 * the true at the beginning fixes that problem
+                 */
 
                 var entries = [];
-                $.each(element.data, function (i, entry) {
+                $.each(element.data, function (i, entry)
+                {
                     if (i >= element.pageNum * settings.itemsPerPage && i < (element.pageNum * settings.itemsPerPage + settings.itemsPerPage)) {
-                        entries.push('<div class="row name row' + i + (entry.desc ? '' : ' fn-wide') + '" id="rowheader' + i + '" offset="' + i % settings.itemsPerPage * tools.getCellSize() + '">');
-                        entries.push('<span class="fn-label' + (entry.cssClass ? ' ' + entry.cssClass : '') + '">' + entry.name + '</span>');
-                        entries.push('</div>');
+                    	var offset		=	i % settings.itemsPerPage * tools.getCellSize();
+                    	var width		=	true && settings.showDescription && entry.desc.length ? " fn-normal" : " fn-wide";
+                    	var row			=	i + width;
+                    	var cssClass	=	entry.cssClass ? ' ' + entry.cssClass : '';
+                    	
+                    	var label	=	$("<span/>")
+                    						.attr("class","fn-label"+cssClass)
+                    						.text(entry.name);
+                    	
+                    	var node	=	$("<div/>")
+                    						.attr("class","row name row"+row)
+                    						.attr("id","rowheader"+i)
+                    						.attr("offset",offset)
+                    						.append(label);
+                    	
+                    	entries.push(node);
 
-                        if (entry.desc) {
-                            entries.push('<div class="row desc row' + i + ' " id="RowdId_' + i + '" data-id="' + entry.id + '">');
-                            entries.push('<span class="fn-label' + (entry.cssClass ? ' ' + entry.cssClass : '') + '">' + entry.desc + '</span>');
-                            entries.push('</div>');
-                        }
-
+                        if (!entry.desc || !entry.desc.length || !settings.showDescription) return;
+                        
+                    	var label	=	$("<span/>")
+                							.attr("class","fn-label"+cssClass)
+                							.text(entry.desc);
+                	
+                    	var node	=	$("<div/>")
+                							.attr("class","row desc row"+i)
+                							.attr("id","RowdId_"+i)
+                							.data("id",entry.id)
+                							.append(label);
+                    	
+                    	entries.push(node);
                     }
                 });
-                ganttLeftPanel.append(entries.join(""));
+
+                ganttLeftPanel.append(entries);
+
                 return ganttLeftPanel;
             },
 
@@ -404,7 +441,7 @@
 
                     // Dispatch user registered function with the DateTime in ms
                     // and the id if the clicked object is a row
-                    settings.onAddClick(dt, rowId);
+                    settings.events.trigger("add",[dt,rowId]);
                 });
                 return dataPanel;
             },
@@ -933,7 +970,7 @@
             // **Progress Bar**
             // Return an element representing a progress of position within
             // the entire chart
-            createProgressBar: function (days, cls, desc, label, dataObj) {
+            createProgressBar: function (days, cls, desc, label, dataObj, entry){
                 var cellWidth = tools.getCellSize();
                 var barMarg = tools.getProgressBarMargin() || 0;
                 var bar = $('<div class="bar"><div class="fn-label">' + label + '</div></div>')
@@ -942,6 +979,10 @@
                             width: ((cellWidth * days) - barMarg) + 2
                         })
                         .data("dataObj", dataObj);
+                
+                if(settings.attachJSON){
+                	bar.data("json",entry);
+                }
 
                 if (desc) {
                     bar
@@ -962,7 +1003,21 @@
                 }
                 bar.click(function (e) {
                     e.stopPropagation();
-                    settings.onItemClick($(this).data("dataObj"));
+                    var data = $(this).data("dataObj");
+                    
+                    var json = undefined;
+                    if(settings.attachJSON){
+                    	json = $(this).data("json");
+                    	
+                    	for(i in json.values){
+                    		json.values[i].from	=	tools.dateDeserialize(json.values[i].from);
+                    		json.values[i].to	=	tools.dateDeserialize(json.values[i].to);
+                    	}
+                    	
+                    	json.bar = $(this);
+                    }
+
+                    settings.events.trigger("click",[data,json]);
                 });
                 return bar;
             },
@@ -1028,7 +1083,8 @@
                                                 day.customClass ? day.customClass : "",
                                                 day.desc ? day.desc : "",
                                                 day.label ? day.label : "",
-                                                day.dataObj ? day.dataObj : null
+                                                day.dataObj ? day.dataObj : null,
+                                                entry
                                             );
 
                                     // find row
@@ -1067,11 +1123,12 @@
                                     var dl = Math.round((cTo - cFrom) / tools.getCellSize()) + 1;
 
                                     _bar = core.createProgressBar(
-                                             dl,
-                                             day.customClass ? day.customClass : "",
-                                             day.desc ? day.desc : "",
-                                             day.label ? day.label : "",
-                                            day.dataObj ? day.dataObj : null
+                                    		dl,
+                                    		day.customClass ? day.customClass : "",
+                                    		day.desc ? day.desc : "",
+                                    		day.label ? day.label : "",
+                                    		day.dataObj ? day.dataObj : null,
+                                    		entry
                                         );
 
                                     // find row
@@ -1111,7 +1168,8 @@
                                         day.customClass ? day.customClass : "",
                                         day.desc ? day.desc : "",
                                         day.label ? day.label : "",
-                                        day.dataObj ? day.dataObj : null
+                                        day.dataObj ? day.dataObj : null,
+                                        entry
                                     );
 
                                     // find row
@@ -1137,7 +1195,8 @@
                                                 day.customClass ? day.customClass : "",
                                                 day.desc ? day.desc : "",
                                                 day.label ? day.label : "",
-                                                day.dataObj ? day.dataObj : null
+                                                day.dataObj ? day.dataObj : null,
+                                                entry
                                         );
 
                                     // find row
