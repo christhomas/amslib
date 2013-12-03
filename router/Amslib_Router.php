@@ -498,6 +498,7 @@ class Amslib_Router
 
 		//	If domain was not specified, use the local default domain
 		if($domain == NULL) $domain = self::$domain;
+		$domain = rtrim($domain,"/");
 
 		//	store the route data underneath the name so you can explicitly search for it
 		self::$cache[$domain."/$group/$name"]	=	&$route;
@@ -702,7 +703,7 @@ class Amslib_Router
 	{
 		//	acquire the latest route for the export url and construct the url to call the external remote service
 		$route	=	self::getRoute("service:framework:router:export:".$import["attr"]["type"]);
-		$url	=	$import["attr"]["url"].$route["src"]["default"];
+		$url	=	rtrim($import["attr"]["url"],"/").$route["src"]["default"];
 
 		if($import["attr"]["type"] == "json"){
 			//	We are going to install a router using json as a data transfer medium
