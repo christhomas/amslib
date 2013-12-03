@@ -149,6 +149,8 @@ class Amslib_Router_URL
 	 */
 	static public function externalURL($url="")
 	{
+		//	I had another version of this code, I'm not sure which is better without looking in more detail
+		//	EXAMPLE: (isset($_SERVER["HTTPS"]) || (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"]) ? "s" : "")
 		return (isset($_SERVER['HTTPS'])?'https':'http').'://'.$_SERVER['HTTP_HOST'].$url;
 	}
 

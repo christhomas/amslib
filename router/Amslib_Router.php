@@ -731,13 +731,9 @@ class Amslib_Router
 	 */
 	static public function exportRouterShared()
 	{
-		//	Construct the protocol.domain to prepend all the urls with
-		$protocol	=	"http".(isset($_SERVER["HTTPS"]) || (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"]) ? "s" : "")."://";
-		$domain		=	$_SERVER["HTTP_HOST"];
-
 		//	The raw data source before processing
 		$data = array(
-				"domain"	=>	$protocol.$domain,
+				"domain"	=>	Amslib_Router_URL::externalURL(self::$base),
 				"cache"		=>	self::$cache
 		);
 
