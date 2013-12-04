@@ -376,7 +376,13 @@ class Amslib_Router
 			}
 		}
 
-		return Amslib_File::reduceSlashes($url.implode("/",array_filter($append))."/");
+		//	NOTE:	this is pretty dumb, I should try to work out a generic way to deal with all of these
+		//			http-like prefixes so I don't have to keep writing this shitty code everywhere.....
+		$prefix = "";
+		if(strpos($url,"http://") !== false) $prefix = "http://";
+		if(strpos($url,"https://") !== false) $prefix = "https://";
+
+		return $prefix.Amslib_File::reduceSlashes(str_replace($prefix,"",$url).implode("/",array_filter($append))."/");
 	}
 
 	/**
