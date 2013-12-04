@@ -20,7 +20,6 @@ var Amslib_Gantt = my.Amslib_Gantt = my.Class(Amslib,
 			gantt:{
 				navigate: "scroll",
 				maxScale: "hours",
-				itemsPerPage: 1000,
 				attachJSON: false,
 				showDescription: true,
 				events: $("<div/>")
@@ -35,7 +34,8 @@ var Amslib_Gantt = my.Amslib_Gantt = my.Class(Amslib,
 			attach_json:		"amslib-gantt-attach-json",
 			event_click:		"amslib-gantt-event-click",
 			event_add:			"amslib-gantt-event-add",
-			event_render:		"amslib-gantt-event-render"
+			event_render:		"amslib-gantt-event-render",
+			page_length:		"amslib-gantt-page-length"
 		}
 	},
 	
@@ -60,6 +60,9 @@ var Amslib_Gantt = my.Amslib_Gantt = my.Class(Amslib,
 		
 		var show_desc = this.parent.data(d.show_description);
 		this.options.gantt.showDescription = !!show_desc;
+		
+		var page_length = this.parent.data(d.page_length);
+		if(page_length) this.options.gantt.itemsPerPage = page_length;
 		
 		this.readHandler(d.event_click,"click");
 		this.readHandler(d.event_add,"add");
