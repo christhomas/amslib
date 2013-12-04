@@ -866,9 +866,9 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getURL($name=NULL,$group=NULL)
+	public function getURL($name=NULL,$group=NULL,$lang="default",$domain=NULL)
 	{
-		return Amslib_Router_URL::getURL($name,$group?$group:$this->getName());
+		return Amslib_Router_URL::getURL($name,$group?$group:$this->getName(),$lang,$domain);
 	}
 
 	/**
@@ -876,9 +876,9 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getService($name,$group=NULL)
+	public function getService($name,$group=NULL,$domain=NULL)
 	{
-		return Amslib_Router_URL::getService($name,$group?$group:$this->getName());
+		return Amslib_Router_URL::getService($name,$group?$group:$this->getName(),$domain);
 	}
 
 	/**
@@ -886,9 +886,9 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getServiceURL($name,$group=NULL)
+	public function getServiceURL($name,$group=NULL,$lang="default",$domain=NULL)
 	{
-		return Amslib_Router_URL::getServiceURL($name,$group?$group:$this->getName());
+		return Amslib_Router_URL::getServiceURL($name,$group?$group:$this->getName(),$lang,$domain);
 	}
 
 	public function redirectTo($name,$group=NULL,$is_service=false)

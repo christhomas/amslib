@@ -344,6 +344,7 @@ class Amslib_Router
 
 		//	NOTE: I think it's safe to assume sending NULL means you want the default language
 		//	NOTE: otherwise it would never ever match a language and the system would fail worse
+		//	NOTE: although this is silly, cause it means that passing "default" and NULL are the same, why not just use one?
 		if($lang == NULL) $lang = "default";
 
 		$url = isset($route["src"][$lang]) ? $route["src"][$lang] : "";
@@ -352,6 +353,7 @@ class Amslib_Router
 		//	NOTE: perhaps a better way to solve this is to mark routes as absolute, then I don't have to "best guess"
 		$url = strpos($url,"http") !== false ? $url : Amslib_Website::rel($url);
 
+		//	NOTE: perhaps I should move this highly specific code into it's own method so I can keep things small and tidy
 		//	Now we can replace all the wildcard targets in the url with parameters passed into the function
 		$target	=	array('(\w+)','(.*?)','(.*)');
 		$append	=	array();
@@ -413,6 +415,9 @@ class Amslib_Router
 		//	If the domain parameter was NULL, use the default local domain
 		if($domain == NULL) $domain = self::$domain;
 
+		//	Trim the / from the domain so it can be found correctly when concatenated
+		$domain = rtrim($domain,"/");
+
 		//	if you specify a group, look in the name array specifically for that group
 		if($group && is_string($group)){
 			$key = "$domain/$group/$name";
@@ -462,11 +467,11 @@ class Amslib_Router
 	 *			those parameters will not be used as part of the url because the getRoute method has
 	 *			no ability to modify the url yet, but it's posted as a future update
 	 */
-	static public function getService($name,$group=NULL)
+	static public function getService($name,$group=NULL,$domain=NULL)
 	{
 		if(is_array($name) && count($name)) $name[0] = "service:{$name[0]}";
 
-		return self::getRoute("service:$name",$group);
+		return self::getRoute("service:$name",$group,$domain);
 	}
 
 	/**

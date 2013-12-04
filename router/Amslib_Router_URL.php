@@ -75,9 +75,9 @@ class Amslib_Router_URL
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getService($route,$group=NULL)
+	static public function getService($route,$group=NULL,$domain=NULL)
 	{
-		return Amslib_Router::getService($route,$group);
+		return Amslib_Router::getService($route,$group,$domain=NULL);
 	}
 
 	/**
@@ -85,9 +85,9 @@ class Amslib_Router_URL
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getServiceURL($route,$group=NULL)
+	static public function getServiceURL($route,$group=NULL,$lang="default",$domain=NULL)
 	{
-		return Amslib_Router::getServiceURL($route,$group);
+		return Amslib_Router::getServiceURL($route,$group,$lang,$domain);
 	}
 
 	/**
