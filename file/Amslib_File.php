@@ -340,14 +340,14 @@ class Amslib_File
 		$destination	= self::reduceSlashes("$directory/$dst_filename");
 
 		//	Try to move the file into the correct destination
-		if($error == false && !rename($src_filename,$destination)){
-			Amslib::errorLog("It was not possible to save to the requested filename",$src_filename,$destination);
+		if($error == false && !@rename($src_filename,$destination)){
+			Amslib::errorLog("It was not possible to save to the requested filename",error_get_last());
 			$error = true;
 		}
 
 		//	If there are no errors, you have uploaded the file ok, however, you could still fail here
 		if($error == false && !@chmod($destination,0755)){
-			Amslib::errorLog("file uploaded ok (apparently), but chmod failed",$destination);
+			Amslib::errorLog("file uploaded ok (apparently), but chmod failed",$destination,error_get_last());
 		}
 
 		//	Maybe the programmer asked for the fullpath of the file to be returned
