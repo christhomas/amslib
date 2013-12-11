@@ -765,10 +765,13 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		if(!is_string($id)) return false;
 
-		//	Step 1: find the image inside the plugin
+		//	Step 1: Is the image absolute, beginning with http?
+		if(strpos($id,"http") === 0) return $id;
+
+		//	Step 2: find the image inside the plugin
 		if(isset($this->images[$id])) return $this->images[$id];
 
-		//	Step 2: find the image relative to the website base (perhaps it's a path)
+		//	Step 3: find the image relative to the website base (perhaps it's a path)
 		$path = Amslib_Website::abs($this->location.$id);
 
 		if(file_exists($path)){
@@ -777,7 +780,7 @@ class Amslib_MVC extends Amslib_Mixin
 
 		Amslib::errorLog("failed to find image",$id,$relative,$path,$this->location);
 
-		//	Step 3: return false, image was not found
+		//	Step 4: return false, image was not found
 		return false;
 	}
 
