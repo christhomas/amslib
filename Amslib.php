@@ -451,14 +451,21 @@ class Amslib
 	 * 	I just don't want to replace it yet without testing it a bit before and
 	 * 	being more confident
 	 *
-	 * 	NOTE: I stole this code from
+	 * 	parameters:
+	 * 		$string	-	The string to slugify
+	 * 		$slug	-	The character to use when slugifying the parts together
+	 * 		$extra	-	Extra characters you want to allow in the string which normally would be removed
 	 *
-	 * 	https://github.com/alixaxel/phunction/blob/master/phunction/Text.php
+	 * 	NOTE: I stole this code from => https://github.com/alixaxel/phunction/blob/master/phunction/Text.php
 	 */
 	public static function slugify2($string, $slug = '-', $extra = null)
 	{
-		$string = self::translit($string,$extra);
-		$string = preg_replace('~[^0-9a-z'.preg_quote($extra, '~').']+~i',$slug, $string);
+		$string		=	self::translit($string,$extra);
+		$string		=	preg_replace('~[^0-9a-z'.preg_quote($extra, '~').']+~i',$slug, $string);
+		//	This part will clean up the end of the filename, before the extension
+		$parts		=	explode(".",$string);
+		$extension	=	array_pop($parts);
+		$string		=	rtrim(implode(".",$parts),$slug).".$extension";
 
 		return strtolower(trim($string, $slug));
 	}
@@ -469,9 +476,7 @@ class Amslib
 	 * 	A function which strips away the accents and other unwanted characters from
 	 * 	a url, making it accent-crazy-less
 	 *
-	 * 	NOTE: I stole this code from
-	 *
-	 * 	https://github.com/alixaxel/phunction/blob/master/phunction/Text.php
+	 * 	NOTE: I stole this code from => https://github.com/alixaxel/phunction/blob/master/phunction/Text.php
 	 */
 	static public function translit($text,$extra=null)
 	{
@@ -664,9 +669,11 @@ class Amslib
 					$stack = array_slice($stack,$command[1],$command[2]);
 				}
 
-				foreach($stack as $row){
-					error_log("[TRACE] ".Amslib::var_dump($row));
+				foreach($stack as $k=>$row){
+					error_log("[TRACE:$k] $row");
 				}
+			}else if(is_string($a) && strpos($a,"memory_usage") === 0){
+				$data[] = "memory_usage = ".memory_get_usage(true);
 			}else if(is_string($a) && strpos($a,"func_offset") === 0){
 				$command = explode(",",array_shift($args));
 
@@ -1036,6 +1043,16 @@ class Amslib
 		$_SESSION[$key] = $value;
 
 		return $value;
+	}
+
+	/**
+	 * 	method:	delSESSION
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function delSESSION($key)
+	{
+		unset($_SESSION[$key]);
 	}
 
 	/**

@@ -116,6 +116,10 @@ class Amslib_Array
 		$pivot_key = key($array);
 		$pivot = array_shift($array);
 
+		if(!isset($pivot[$index])){
+			Amslib::errorLog("ERROR, PIVOT INDEX DOES NOT EXIST","stack_trace");
+		}
+
 		foreach($array as $k => $v) {
 			if($v[$index] < $pivot[$index]){
 				$left[$k] = $v;
@@ -142,22 +146,22 @@ class Amslib_Array
 		if(self::isMulti($array)){
 			foreach(self::valid($array) as $item){
 				$v = array();
-				
+
 				foreach($key as $k){
 					if(isset($item[$k])) $v[$k] = $item[$k];
 				}
-				
+
 				$values[] = count($v) == 1 ? array_shift($v) : $v;
 			}
 		}else{
 			$v = array();
-			
+
 			foreach($key as $k){
 				if(isset($array[$k])) $v[$k] = $array[$k];
 			}
-			
+
 			$values[] = count($v) == 1 ? array_shift($v) : $v;
-			
+
 		}
 
 		return $values;
@@ -222,7 +226,7 @@ class Amslib_Array
 	 *
 	 * 	returns:
 	 * 		Boolean false if it was not found, or the first match key that was found
-	 * 
+	 *
 	 * 	notes:
 	 * 		-	we should extend this with the ability to find an exact or partial key
 	 */
@@ -637,6 +641,31 @@ class Amslib_Array
 		}
 
 		return implode($join,$spaceList);
+
+
+	}
+
+	/**
+	 * 	method:	wrap
+	 *
+	 * 	todo: write documentation
+	 *
+	 *	NOTE:	Of course, we use a normal separator "," to split the string
+	 *			But if any of the elements in each array element contains a "," character
+	 *			this will break, so in these circumstances, you need to choose a separator
+	 *			which ISNT present in ANY array element, e.g: #array_sep# or something unique
+	 *
+	 *	NOTE:	I am adding slashes to the " character, but this might not be the only character which
+	 *			causes a problem here, we need to investigate any potential others, but I think for now this is ok
+	 */
+	static public function wrap($array,$wrap,$returnArray=true,$sep=",")
+	{
+		$wrap	=	$wrap=="\"" ? addslashes($wrap) : $wrap;
+		$sep	=	addslashes($sep);
+
+		$string = "$wrap".implode("{$wrap}{$sep}{$wrap}",$array)."$wrap";
+
+		return $returnArray ? explode($sep,$string) : $string;
 	}
 
 	/**

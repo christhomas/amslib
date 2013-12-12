@@ -35,6 +35,16 @@ class Amslib_Website
 {
 	static protected $location = NULL;
 
+	static public function saveUploadedFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
+	{
+		return Amslib_File::saveUploadedFile($src_filename,self::rel($directory),$dst_filename,$fullpath);
+	}
+
+	static public function listFiles($dir,$recurse=false,$exit=true)
+	{
+		return Amslib_File::listFiles(self::abs($dir),$recurse,$exit);
+	}
+
 	/**
 	 * 	method:	set
 	 *

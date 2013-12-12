@@ -17,7 +17,7 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
@@ -102,12 +102,14 @@ class Amslib_Validator
 	 * 	method:	__require_one
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	usage: $v->add("has_file","require_one",true,array("select_file","csv_file"));
 	 */
 	protected function __require_one($name,$value,$required,$options)
 	{
 		unset($options["__vobject"]);
 
-		$dest	=	array_pop($options);
+		$dest	=	$name;
 		$valid	=	$this->getValid();
 		$keys	=	array_keys($valid);
 
@@ -1126,7 +1128,7 @@ class Amslib_Validator
 		$this->register("require_one",		array($this,"__require_one"));
 		$this->register("array_number",		array($this,"__array_number"));
 		$this->register("array_text",		array($this,"__array_text"));
-		
+
 		//	Register some popular alternative spellings which keep cropping up to make life easier
 		$this->register("string",			array($this,"__text"));
 		$this->register("numeric",			array($this,"__number"));

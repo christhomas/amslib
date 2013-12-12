@@ -719,7 +719,14 @@ class Amslib_Router
 		if($import["attr"]["type"] == "json"){
 			//	We are going to install a router using json as a data transfer medium
 			//	Acquire the json, decode it and obtain the domain
+			ob_start();
 			$data	= file_get_contents($url);
+			$caught = ob_get_clean();
+
+			if(strlen($caught)){
+				Amslib::errorLog("FAILED TO IMPORT ROUTER, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
+			}
+
 			$data	= json_decode($data,true);
 			$domain	= $data["domain"];
 

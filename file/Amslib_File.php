@@ -239,6 +239,8 @@ class Amslib_File
 	 * 	method:	getList
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	NOTE: This looks very similar to listFiles method just below...
 	 */
 	static public function getList($dir,$recurse=false)
 	{
@@ -298,6 +300,9 @@ class Amslib_File
 	 * 	method:	glob
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	NOTE:	this looks very similar to the listFiles method above, am I going to standardise on one of them?
+	 * 			or formalise multiple similar, but different (perhaps optimal) codepaths
 	 */
 	static public function glob($path,$relative=false)
 	{
@@ -324,20 +329,18 @@ class Amslib_File
 		//	NOTE: Perhaps all this checking and copying or directories etc, should be formalised into the api??
 		//	If the destination directory doesnt exist, attempt to create it
 		if($error == false && !is_dir($directory) && !@mkdir($directory,0755,true)){
-			Amslib::errorLog("There was an error with the directory, either permissions, or creating it was not possible",$directory);
+			Amslib::errorLog("There was an error with the directory, either permissions, or creating it was not possible",$directory,error_get_last());
 			$error = true;
 		}
 
 		//	It REALLY REALLY should exist now, but lets check just in case
 		if($error == false && !is_dir($directory)){
-			Amslib::errorLog("The directory does not exist, so cannot write to the location",$directory);
+			Amslib::errorLog("The directory does not exist, so cannot write to the location",$directory,error_get_last());
 			$error = true;
 		}
 
-		$parts			= explode(".",$dst_filename);
-		$extension		= array_pop($parts);
-		$dst_filename	= Amslib::slugify(implode(".",$parts),"","_").".".$extension;
-		$destination	= self::reduceSlashes("$directory/$dst_filename");
+		$dst_filename	=	Amslib::slugify2(basename($dst_filename),"_",".");
+		$destination	=	self::reduceSlashes("$directory/$dst_filename");
 
 		//	Try to move the file into the correct destination
 		if($error == false && !@rename($src_filename,$destination)){
