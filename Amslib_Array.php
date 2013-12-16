@@ -658,12 +658,12 @@ class Amslib_Array
 	 *	NOTE:	I am adding slashes to the " character, but this might not be the only character which
 	 *			causes a problem here, we need to investigate any potential others, but I think for now this is ok
 	 */
-	static public function wrap($array,$wrap,$returnArray=true,$sep=",")
+	static public function wrap($array,$char,$returnArray=true,$sep=",")
 	{
-		$wrap	=	$wrap=="\"" ? addslashes($wrap) : $wrap;
+		$wrap	=	$char=="\"" ? addslashes($char) : $char;
 		$sep	=	addslashes($sep);
 
-		$string = "$wrap".implode("{$wrap}{$sep}{$wrap}",$array)."$wrap";
+		$string = "$char".implode("{$char}{$sep}{$char}",$array)."$char";
 
 		return $returnArray ? explode($sep,$string) : $string;
 	}
