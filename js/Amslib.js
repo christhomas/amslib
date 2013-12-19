@@ -20,6 +20,10 @@
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
  *******************************************************************************/
+if(typeof(my) == "undefined" || typeof(my.Class) == "undefined"){
+	 throw("Amslib.js: requires my.[class/common] to be loaded first");
+}
+
 var Amslib = my.Amslib = my.Class({
 	__amslibDefaultName:	"Amslib_Default_Controller",
 	__amslibName:			false,

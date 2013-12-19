@@ -29,7 +29,7 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		
 		options:{
 			amslibName:	"Amslib_Tablesorter",
-			autoload: 	"[data-amslib-tablesorter='true']",
+			autoload: 	"[data-role='jquery.tablesorter']",
 			
 			//	Default options for the tablesorter
 			tablesorter:{
@@ -199,11 +199,11 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		},
 		
 		datakey: {
-			pager:		"amslib-tablesorter-pager",
-			length:		"amslib-tablesorter-length",
-			widgets:	"amslib-tablesorter-widgets",
-			ajax:		"amslib-tablesorter-ajax",
-			ajax_auto:	"amslib-tablesorter-ajax-autoload"
+			pager:		"tablesorter-pager",
+			length:		"tablesorter-length",
+			widgets:	"tablesorter-widgets",
+			ajax:		"tablesorter-ajax",
+			ajax_auto:	"tablesorter-ajax-autoload"
 		}
 	},
 	
