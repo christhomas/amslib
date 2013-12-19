@@ -99,7 +99,6 @@
 			endRow: 0,
 			$size: null,
 			last: {}
-
 		};
 
 		var $this = this,

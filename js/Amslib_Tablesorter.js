@@ -1,9 +1,46 @@
-/*
- *	Amslib_Tablesorter
+/*******************************************************************************
+ * Copyright (c) {15/03/2008} {Christopher Thomas}
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contributors/Author:
+ *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *     
+ *******************************************************************************/
+
+/**
+ * 	class:	Amslib_Tablesorter
+ * 
+ *	group:	javascript
+ * 
+ *	file:	Amslib_Tablesorter.js
+ * 
+ *	title:	todo, give title
+ * 
+ *	description:
+ *		todo, write description 
+ *
+ * 	todo:
+ * 		write documentation
  * 
  */
+if(typeof(Amslib) == "undefined") throw("Amslib_Tablesorter.js: requires amslib/my.common to be loaded first");
+
 var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 {
+	debug: false,
+	
 	STATIC: {
 		autoload: function(){
 			var c = Amslib_Tablesorter,
@@ -49,29 +86,15 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 			},
 			
 			pager:{
-				//	target the pager markup - see the HTML block below
-				container:	false,
-				//	starting page of the pager (zero based index)
-				page: 0,				
 				//	Number of visible rows - default is 10
 				size: 25,
 				
-				output:		'{startRow} - {endRow} / {filteredRows} ({totalRows})',
+				output:		'{startRow} - {endRow} / {filteredRows} (total: {totalRows})',
 		
-				//	Default css values for all the pager DOM nodes
-				cssGoto:		"select",				//	select a particular page
-				cssNext:		".next",				//	next page arrow
-				cssPrev:		".prev",				//	previous page arrow
-				cssFirst:		".first",				//	go to first page arrow
-				cssLast:		".last",				//	go to last page arrow
+				//	Overridden defaults for these css elements in the pager
+				cssGoto:		".goto",				//	select a particular page
 				cssPageDisplay:	".display",				//	location of where the "output" is displayed
 				cssPageSize:	".count",				//	page size selector - select dropdown that sets the "size" option
-				cssErrorRow:	"tablesorter-errorRow",	//	error information row
-
-				//	remove rows from the table to speed up the sort of large tables.
-				//	setting this to false, only hides the non-visible rows; needed if 
-				//	you plan to add/remove rows with the pager enabled.
-				removeRows: false
 			},
 			
 			//	There are all the default options when you enable the ajax-pager option
@@ -217,9 +240,9 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		
 		this.options = $.extend(true, {}, o, options);
 		
-		var widgets		= this.parent.data(d.widgets).split(","),
-			ajaxUrl		= this.parent.data(d.ajax),
-			selector	= this.parent.data(d.pager);
+		var widgets	= this.parent.data(d.widgets).split(","),
+			ajaxUrl	= this.parent.data(d.ajax),
+			pager	= this.parent.data(d.pager);
 		
 		var f = ajaxUrl ? this.options.filter.ajax : this.options.filter.non_ajax;
 		this.options.tablesorter.widgetOptions = $.extend(true,{},f);
@@ -231,16 +254,12 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		this.parent	= this.parent;
 		this.ts		= this.parent.tablesorter(this.options.tablesorter);
 	
-		if(ajaxUrl){
-			this.setupAjax(ajaxUrl);
-		}
-		
-		if($(selector).length){
-			this.setupPager(selector);
-		}
+		if(ajaxUrl) this.setupAjax(ajaxUrl);
+	
+		if($(pager).length) this.setupPager(pager);
 	},
 	
-	setupPager: function(selector)
+	setupPager: function(pager)
 	{
 		var s = Amslib_Tablesorter,
 			f = s.files.get,
@@ -254,20 +273,25 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 			var length = t.parent.data(d.length);
 			if(length) o.pager.size = length;
 			
-			o.pager.container	= selector;
-			o.pager.cssGoto		= selector+" "+o.pager.cssGoto;
+			o.pager.container	= pager;
+			o.pager.cssGoto		= pager+" "+o.pager.cssGoto;
 			t.ts.tablesorterPager(o.pager);	
 		});
 	},
 	
-	setupAjax: function(ajaxURL)
+	setupAjax: function(ajaxUrl)
 	{
-		if(typeof(ajaxURL) != "string") return;
+		if(typeof(ajaxUrl) != "string") return;
 		
-		this.options.ajaxPager.ajaxUrl = ajaxURL;
+		//	If there is no query string, append the default one, this is so you know the information in the webservice
+		//	any important information that the pager webservice can use
+		if(ajaxUrl.indexOf("?") == -1){
+			ajaxUrl = ajaxUrl+"?page={page}&size={size}&{sortList:col}&{filterList:fcol}";
+		}
 		
-		var autoload = this.parent.data(Amslib_Tablesorter.datakey.ajax_auto);
-		if(autoload == false){
+		this.options.ajaxPager.ajaxUrl = ajaxUrl;
+		
+		if(this.parent.data(Amslib_Tablesorter.datakey.ajax_auto) == false){
 			this.parent.on('pagerBeforeInitialized', $.proxy(this,"preventAjaxAutoload"));
 		}
 		
