@@ -673,7 +673,7 @@ class Amslib_Plugin
 							if(file_exists($file)){
 								$p["file"] = $file;
 							}else{
-								Amslib::errorLog("Model object not found, serious error",$p,$file)
+								Amslib::errorLog("Model object not found, serious error",$p,$file);
 							}
 
 							if($c->nodeName == "connection"){
