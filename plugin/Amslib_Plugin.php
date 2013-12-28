@@ -669,7 +669,12 @@ class Amslib_Plugin
 							$p["value"] = $c->nodeValue;
 
 							$file = $this->getComponent($node->nodeName,$p["value"]);
-							if(file_exists($file)) $p["file"] = $file;
+
+							if(file_exists($file)){
+								$p["file"] = $file;
+							}else{
+								Amslib::errorLog("Model object not found, serious error",$p,$file)
+							}
 
 							if($c->nodeName == "connection"){
 								//	TODO:	this is a patch whilst I transition to the new [object, controller, model, view]
