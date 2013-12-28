@@ -54,12 +54,19 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 	
 	success: function(handler)
 	{
-		var $this = this;
+		var obj = this;
 		
 		if(typeof(handler) == "function"){
 			this.promise.success(function(json){
-				$this.setJSON(json);
-				handler($this,json);
+				obj.setJSON(json);
+				
+				if(!obj.hasSuccess()){
+					//	TODO: find out how to trigger the error method so I can run that code instead
+					//	NOTE: is it correct to attempt to call the error method in the first place?
+					//obj.promise.abort();
+				}else{
+					handler(obj,json);
+				}
 			});
 		}
 		
@@ -68,12 +75,12 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 	
 	failure: function(handler)
 	{
-		var $this = this;
+		var obj = this;
 		
 		if(typeof(handler) == "function"){
 			this.promise.error(function(json){
-				$this.setJSON(json);
-				handler($this,json);
+				obj.setJSON(json);
+				handler(obj,json);
 			});
 		}
 		
