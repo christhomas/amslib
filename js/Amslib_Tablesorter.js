@@ -144,7 +144,7 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 				//	OR
 				//	return [ total_rows, $rows (jQuery object; optional), headers (array; optional) ]
 				ajaxProcessing: function(data){
-					if (!data || data.hasOwnProperty('rows')) return;
+					if (!data || !data.hasOwnProperty('rows')) return;
 					
 					var r, row, c, d = data.rows,
 					//	total number of rows (required)
@@ -222,11 +222,13 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		},
 		
 		datakey: {
-			pager:		"tablesorter-pager",
-			length:		"tablesorter-length",
-			widgets:	"tablesorter-widgets",
-			ajax:		"tablesorter-ajax",
-			ajax_auto:	"tablesorter-ajax-autoload"
+			pager:			"tablesorter-pager",
+			totalrows:		"tablesorter-totalrows",
+			length:			"tablesorter-length",
+			widgets:		"tablesorter-widgets",
+			ajax:			"tablesorter-ajax",
+			ajax_auto:		"tablesorter-ajax-autoload",
+			pager_format:	"tablesorter-pager-format"
 		}
 	},
 	
@@ -272,6 +274,20 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		Amslib.js.load("tablesorter.pager",f("js","pager"),function(){
 			var length = t.parent.data(d.length);
 			if(length) o.pager.size = length;
+
+			var totalrows = t.parent.data(d.totalrows);
+			if(totalrows){
+				o.pager.totalRows		= totalrows;
+				o.pager.filteredRows	= o.pager.totalRows;
+			}
+			
+			if(totalrows && length){
+				o.pager.totalPages		= Math.ceil(o.pager.totalRows/o.pager.size);
+				o.pager.filteredPages	= o.pager.totalPages;
+			}
+			
+			var format = t.parent.data(d.pager_format);
+			if(format) o.pager.output = format;
 			
 			o.pager.container	= pager;
 			o.pager.cssGoto		= pager+" "+o.pager.cssGoto;
@@ -292,32 +308,10 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		this.options.ajaxPager.ajaxUrl = ajaxUrl;
 		
 		if(this.parent.data(Amslib_Tablesorter.datakey.ajax_auto) == false){
-			this.parent.on('pagerBeforeInitialized', $.proxy(this,"preventAjaxAutoload"));
+			this.options.ajaxPager.processAjaxOnInit = false;
 		}
 		
 		$.extend(true, this.options.pager, this.options.ajaxPager);
-	},
-	
-	preventAjaxAutoload: function(event,options)
-	{
-		var config	= event.currentTarget.config;
-		var pager	= config.pager;
-		
-		options.page			= pager.page;			// current page
-		options.size			= pager.size;			// current size
-		options.totalPages		= pager.totalPages;		// total pages
-		options.currentFilters	= pager.currentFilters;	// any filters
-		
-		this.parent.data('pagerLastPage', options.page);
-		this.parent.data('pagerLastSize', options.size);
-	
-		options.last = {
-			page:			options.page,
-			size:			options.size,
-			sortList:		(config.sortList || []).join(','),
-			totalPages:		options.totalPages,
-			currentFilters:	[]
-		};
 	}
 });
 
