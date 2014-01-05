@@ -175,6 +175,20 @@ class Amslib_Database_MySQL extends Amslib_Database
 	}
 
 	/**
+	 * 	method:	getSQLLimit
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	TODO: this doesn't allow an offset with unlimited length
+	 */
+	public function getSQLLimit($length=NULL,$offset=NULL)
+	{
+		return $length != NULL
+			? ($offset ? "LIMIT $offset,$length" : "LIMIT $length")
+			: "";
+	}
+
+	/**
 	 * 	method:	fixColumnEncoding
 	 *
 	 * 	todo: write documentation
