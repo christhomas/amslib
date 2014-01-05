@@ -15,7 +15,7 @@ var Amslib_Gantt = my.Amslib_Gantt = my.Class(Amslib,
 		options: {
 			amslibName:	"Amslib_Gantt",
 			
-			autoload: 	"[data-amslib-gantt='true']",
+			autoload: 	"[data-role='jquery.gantt']",
 			
 			gantt:{
 				navigate: "scroll",
@@ -27,15 +27,15 @@ var Amslib_Gantt = my.Amslib_Gantt = my.Class(Amslib,
 		},
 		
 		datakey: {
-			source_url:			"amslib-gantt-source-url",
-			source_string:		"amslib-gantt-source-string",
-			source_selector:	"amslib-gantt-source-selector",
-			show_description:	"amslib-gantt-show-description",
-			attach_json:		"amslib-gantt-attach-json",
-			event_click:		"amslib-gantt-event-click",
-			event_add:			"amslib-gantt-event-add",
-			event_render:		"amslib-gantt-event-render",
-			page_length:		"amslib-gantt-page-length"
+			source_url:			"gantt-source-url",
+			source_string:		"gantt-source-string",
+			source_selector:	"gantt-source-selector",
+			show_description:	"gantt-show-description",
+			attach_json:		"gantt-attach-json",
+			event_click:		"gantt-event-click",
+			event_add:			"gantt-event-add",
+			event_render:		"gantt-event-render",
+			page_length:		"gantt-page-length"
 		}
 	},
 	
