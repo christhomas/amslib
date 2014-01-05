@@ -166,6 +166,8 @@ var Amslib = my.Amslib = my.Class({
 	{
 		try{
 			var mvc	=	this.parent.find(".__amslib_mvc_values");
+			
+			if(mvc.length == 0) return;
 
 			var input	=	mvc.find("input[type='hidden']");
 			var data	=	{};
