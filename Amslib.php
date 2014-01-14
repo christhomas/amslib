@@ -1052,7 +1052,11 @@ class Amslib
 	 */
 	static public function delSESSION($key)
 	{
-		unset($_SESSION[$key]);
+		if(is_array($key)){
+			foreach($key as $k) Amslib::delSESSION($k);
+		}else{
+			unset($_SESSION[$key]);
+		}
 	}
 
 	/**

@@ -71,6 +71,8 @@ class Amslib_Database
 	protected $databaseName			=	false;
 	protected $table					=	array();
 
+	protected $connection_details	=	false;
+
 /******************************************************************************
  *	PROTECTED MEMBERS
  *****************************************************************************/
@@ -142,6 +144,21 @@ class Amslib_Database
 		}
 	}
 
+	public function setConnectionDetails($details)
+	{
+		$v = new Amslib_Validator($details);
+		$v->add("username","text",true);
+		$v->add("password","text",true);
+		$v->add("database","text",true);
+		$v->add("server","text",true);
+		$v->add("encoding","text");
+
+		$s = $v->execute();
+		$d = $v->getValidData();
+
+		$this->connection_details = $s ? $d : false;
+	}
+
 	/**
 	 * 	method:	getConnectionDetails
 	 *
@@ -149,6 +166,10 @@ class Amslib_Database
 	 */
 	public function getConnectionDetails()
 	{
+		if($this->connection_details){
+			return $this->connection_details;
+		}
+
 		die("(".basename(__FILE__)." / FATAL ERROR): getConnectionDetails was not defined in your database object, so connection attempt will fail");
 	}
 

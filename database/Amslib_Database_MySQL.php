@@ -56,8 +56,10 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 * 	todo:
 	 * 		-	Need to move the database details to somewhere more secure (like inside the database!! ROFL!! joke, don't do that!!!!)
 	 */
-	public function connect()
+	public function connect($details=false)
 	{
+		$this->setConnectionDetails($details);
+
 		$this->disconnect();
 		$details = $this->getConnectionDetails();
 
