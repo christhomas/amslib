@@ -223,7 +223,7 @@ var Amslib_Google_Map = my.Amslib_Google_Map = my.Class(my.Amslib,
 			$this.centerMap(m);
 			
 			var p = marker.getPosition();
-			$this.trigger("onDrag",p.toUrlValue(48))
+			$this.trigger("onDrag",p.toUrlValue(48));
 	    });
 		
 		this.marker.push(m);	
