@@ -53,16 +53,16 @@ class Amslib_Plugin
 	//	The location of the plugin on the filesystem
 	protected $location;
 
-	//	The API object created by the plugin
+	//	The API object (typically an Amslib_MVC class) created by the plugin
 	protected $api;
 
 	//	The filename on disk with the plugin configuration (typically package.xml)
+	//	-	obviously this won't work if the configuration comes from the database
+	//	-	however, if this is even possible, we need to separate where the configuration comes from
+	//		from the plugin object, meaning we need a "reader" object, or perhaps also a "writer" object
 	protected $filename;
 
-	//	The XPath object used to query the xml configuration
-	protected $xpath;
-
-	//	The Current XML Configuration storing all the data from the package XML file
+	//	The configuration data loaded from the system
 	protected $config;
 
 	//	The list of XML XPath expressions that will be searched for data and stored
@@ -238,14 +238,19 @@ class Amslib_Plugin
 	 */
 	protected function createObject(&$object,$singleton=false,$dieOnError=false)
 	{
+		//	invalid requests get returned false
 		if(!$object || empty($object)) return false;
 
+		//	existing objects just get returned from their cache
 		if(isset($object["cache"])) return $object["cache"];
+
+		//	otherwise, we go through the process of loading them, first of all, make sure the object file is in the system
 		if(isset($object["file"]))	Amslib::requireFile($object["file"],array("require_once"=>true));
 
 		//	Create the generic string for all the errors
 		$error =  "FATAL ERROR(".__METHOD__.") Could not __ERROR__ for plugin '{$this->name}'<br/>";
 
+		//	false by default to signal an error in creation
 		$cache = false;
 
 		if(class_exists($object["value"])){
@@ -257,12 +262,21 @@ class Amslib_Plugin
 					die(str_replace("__ERROR__","find the getInstance method in the API object '{$object["value"]}'",$error));
 				}
 			}else{
+				//	yay! we have a proper object
 				$cache = new $object["value"];
 			}
 		}else if($dieOnError){
 			//	The class was not found, we cannot continue
 			//	NOTE:	I am not sure why we cannot continue here, it might not be something
 			//			critical and yet we're stopping everything
+			//	NOTE:	It's hard to die here because perhaps there is a better way of not dying everytime an object
+			//			which is requested that doesn't exist won't load, we immediately kill everything
+			//			perhaps a nicer way would be to notify the system of the error, but build better code
+			//			so that if an object doesnt exist, we could use a dummy object with a __call interface
+			//			and register all the methods as returning false, therefore hiding the missing object
+			//			but not killing the process, but handling all the failures which happen and properly written code
+			//			which respects the methods that return false, will keep functioning but failing to operating,
+			//			although they will not crash
 			$error = str_replace("__ERROR__","find class '{$object["value"]}'",$error);
 			Amslib::errorLog("stack_trace",$error,$object);
 			die($error);
@@ -308,6 +322,8 @@ class Amslib_Plugin
 		switch($config["type"]){
 			case "xml":{
 				//	Replace __CURRENT_PLUGIN with plugin location and expand any other paths
+				//	NOTE: I don't think I actually use __CURRENT_PLUGIN__...or do I? where is this
+				//	actually used? or even which code actually creates anything using this __CURRENT_PLUGIN__ tag
 				$location = str_replace("__CURRENT_PLUGIN__",$this->location,$config["location"]);
 				$location = Amslib_Plugin::expandPath($location);
 			}break;
@@ -391,6 +407,20 @@ class Amslib_Plugin
 		$this->setComponent("controller",	"controllers",	"Ct_");
 		$this->setComponent("model",		"models",		"Mo_");
 		$this->setComponent("view",			"views",		"Vi_");
+	}
+
+	/**
+	 * 	method:	getInstance
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function &getInstance()
+	{
+		static $instance = NULL;
+
+		if($instance === NULL) $instance = new self();
+
+		return $instance;
 	}
 
 	//	Type 1 data transfers
@@ -651,17 +681,27 @@ class Amslib_Plugin
 						$child = $xpath->query("*",$node);
 
 						//	does $node have "directory" attribute?
+						//	-	this would allow us to customise where on the filesystem the files would be loaded
 						$directory = "{$node->nodeName}s";
 						//	does $node have "prefix" attribute?
+						//	-	this would allow us to customise the filename format for each of the files being loaded
 						$prefix = "";
 						//	does $node have "scan" attribute?
+						//	-	the scan attribute was so you'd just load all the files from a particular directory
+						//		which matched the filename pattern being loaded, so you didn't have to constantly
+						//		update it when you added new objects ot the system
+						//	-	however the scan attribute allows you to make more mistakes by leaving old files on
+						//		the system which are used by accident and you'd have to manually detect these errors
 						//	does $node have "connection" attribute?
+						//	-	I believe this was deprecated in favour or just having an extra xml node <connection>
 
 						$this->setComponent($node->nodeName,$directory,$prefix);
 
 						//	if this model node has a connection attribute, we need to instruct the system to import
 						//	the model from the plugin name held in the value attribute, but we need to construct
 						//	an array of data which allows us to know this when processing the data
+						//	-	this appears to be out of date now, since we have a <connection> xml node which does this,
+						//		it's not an attribute anymore
 
 						foreach($child as $c){
 							$p = $this->getAttributeArray($c);
@@ -1067,19 +1107,5 @@ class Amslib_Plugin
 		$path	=	str_replace("__DOCROOT__",			self::$path["docroot"],		$path);
 
 		return Amslib_File::reduceSlashes($path);
-	}
-
-	/**
-	 * 	method:	getInstance
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function &getInstance()
-	{
-		static $instance = NULL;
-
-		if($instance === NULL) $instance = new self();
-
-		return $instance;
 	}
 }

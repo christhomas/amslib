@@ -136,7 +136,7 @@ class Amslib_Plugin_Manager
 		//	If this plugin is configured to be replaced with another, use the replacement
 		if(isset(self::$replace[$name])) $name = self::$replace[$name];
 
-		//	Config a plugin to be "preloaded" and available
+		//
 		$p = self::config($name,$location);
 
 		//	If the plugin failed to load, you need to return false to indicate an error
@@ -149,7 +149,10 @@ class Amslib_Plugin_Manager
 		$p->load();
 
 		//	Insert the plugin, or remove it if something has failed
-		if(self::insert($name,$p) == false) self::remove($name);
+		if(self::insert($name,$p) == false){
+			//	TODO: a plugin failed to insert, we should trigger some kind of error to be logged
+			self::remove($name);
+		}
 
 		//	Obtain the API object, or false if it doesn't exist
 		return self::getAPI($name);

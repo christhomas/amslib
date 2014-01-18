@@ -232,20 +232,35 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		$this->completionCallback = array();
 
-		//	Preload the plugin manager with the application object
-		Amslib_Plugin_Manager::preload($name,$this);
+		//	Quickly insert this plugin object before we load anything else
+		//	We do this so other plugins that might call the application can access this plugins
+		//	configuration before the entire tree is loaded, because in a tree algorithm, all the
+		//	other plugins are loaded into the system before this one, which causes a problem because
+		//	of course if you need to talk to or through the application object, if you have not fully
+		//	explored the tree, it won't exist, this obviously causes a lot of problems, so we need to
+		//	"insert" a incomplete plugin here, so at least the plugin configurtion is available even
+		//	if the actual API is not, when configuring the plugin tree, we 100% of the time always deal
+		//	with the plugin object, not the API which is created after the plugin is fully loaded
+		Amslib_Plugin_Manager::insert($name,$this);
 
 		//	Set the base locations to load plugins from
+		//	NOTE: this obviously means it's not configurable, since I'm hardcoding the path for this here
 		Amslib_Plugin_Manager::addLocation($location);
 		Amslib_Plugin_Manager::addLocation($location."/plugins");
 
 		//	We can't use Amslib_Plugin_Manager for this, because it's an application plugin
 		$this->config($name,$location);
-		//	Now continue loading the plugin like normal
+		//	Process all the imports and exports so all the plugins contain the correct data
 		$this->transfer();
+		//	Now we have to load all the plugins into the system
 		$this->load();
 
 		$this->runCompletionCallbacks();
+
+		//	NOTE:	after all the plugins are loaded, do we need ot keep the plugin objects in memory, perhaps we should
+		//			dump them all once all the API objects are created
+		//	NOTE:	perhaps we register a completion callback to manually take care of this, it sounds like a useful way
+		//			to save some memory, all those xml objects must take up space and especially the bulky confguration arrays
 	}
 
 	/**
@@ -279,6 +294,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 */
 	public function addCompletionCallback($function)
 	{
+		//	TODO: make sure this is a callable function before you add it, is_callable() ? perhaps ?
 		$this->completionCallback[] = $function;
 	}
 
@@ -294,6 +310,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	public function runCompletionCallbacks()
 	{
 		foreach(Amslib_Array::valid($this->completionCallback) as $cb){
+			//	TODO: we don't guard against possible faulty callbacks
 			call_user_func($cb);
 		}
 	}
@@ -451,6 +468,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			//	Special customisation for framework urls, which normally execute on objects regardless of plugin
 			//	So we just use plugin as the key to trigger this
 			//	NOTE: this means framework has become a system name and cannot be used as a name of any plugin?
+			//	NOTE: perhaps amslib can become a plugin, therefore the plugin will be "amslib" and not "framework" ?
 			if(Amslib_Array::hasKeys($h,array("plugin","object","method")) && $h["plugin"] == "framework"){
 				$plugin	=	$h["plugin"];
 				$object	=	$h["object"];
