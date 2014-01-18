@@ -484,8 +484,50 @@ class Amslib_Array
 		return $returnFiltered ? $filter : $array;
 	}
 
+	/**
+	 * 	method:	filter2
+	 *
+	 * 	todo:	write documentation
+	 *
+	 * 	NOTE:	I am trying to create a better documented, better understood version of this method
+	 * 			cause the above method has gone a little crazy, with me not really understanding why
+	 * 			I added certain code, but I don't want to change it directly in case it subtly breaks
+	 * 			stuff that depends on it's method of operation until I can identify and change them all
+	 */
+	static public function filter2($array,$key,$value,$returnFiltered=false,$similar=false)
+	{
+		$matched = array();
+
+		foreach(self::valid($array) as $k=>$v){
+			$found = false;
+
+			if($key !== NULL && is_array($v) && isset($v[$key])){
+				//	if each array element is an array, we need to search by the key given in each child array
+				$v = $v[$key];
+			}
+
+			if($similar == true && !is_array($v) && strpos($v,$value) !== false){
+				//	similar was enabled, search value was not an array and a fuzzy match was found
+				$found = true;
+			}else if(!is_array($v) && $v == $value){
+				//	similar was not enabled, search value was not an array, and a perfect match was found
+				$found = true;
+			}
+
+			if($found){
+				//	match was found, add it to the matched array and remove it from the unmatched remaining array items
+				$matched[$k] = $v;
+				unset($array[$k]);
+			}
+		}
+
+		//	If you ask for the filtered items, we return either the matched array or the remaining items not matched
+		return $returnFiltered ? $matched : $array;
+	}
+
 	//	TODO: this method is a little open to abuse and in some situations wouldn't do the right thing
 	//	TODO: explain in words what this does and how it should work
+	//	NOTE: I am not sure what the above comment actually means, I should have been more explicit in my explanation
 	/**
 	 * 	method:	countValues
 	 *
