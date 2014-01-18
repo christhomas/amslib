@@ -463,9 +463,12 @@ class Amslib
 		$string		=	self::translit($string,$extra);
 		$string		=	preg_replace('~[^0-9a-z'.preg_quote($extra, '~').']+~i',$slug, $string);
 		//	This part will clean up the end of the filename, before the extension
+		//	But only do it if you find more than one part because there was an extension
 		$parts		=	explode(".",$string);
-		$extension	=	array_pop($parts);
-		$string		=	rtrim(implode(".",$parts),$slug).".$extension";
+		if(count($parts) > 1){
+			$extension	=	array_pop($parts);
+			$string		=	rtrim(implode(".",$parts),$slug).".$extension";
+		}
 
 		return strtolower(trim($string, $slug));
 	}
