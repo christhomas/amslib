@@ -36,7 +36,7 @@
  */
 class Amslib_Router_Source_XML
 {
-	protected $route ;
+	protected $route;
 	protected $import;
 
 	/**
@@ -173,7 +173,8 @@ class Amslib_Router_Source_XML
 			//	NOTE: this proved to be very annoying, so I turned it off
 			//Amslib::errorLog("Router was loaded, but was empty",$file);
 		}catch(Exception $e){
-			Amslib::errorLog("EXCEPTION",$e->getMessage(),"file=",$file,"source=",$source);
+			Amslib::errorLog("Exception: ",$e->getMessage(),"file=",$file,"source=",$source);
+			Amslib::errorLog("stack_trace");
 		}
 
 		$this->route	=	false;
