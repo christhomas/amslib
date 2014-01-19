@@ -42,7 +42,7 @@ class Amslib_Plugin
 	static protected $path;
 
 	//	The ready state of the plugin is true/false depending on whether it has been configured
-	protected $isReady;
+	protected $isConfigured;
 
 	//	The load state of the plugin is true/false depending on whether it has been loaded
 	protected $isLoaded;
@@ -56,17 +56,11 @@ class Amslib_Plugin
 	//	The API object (typically an Amslib_MVC class) created by the plugin
 	protected $api;
 
-	//	The filename on disk with the plugin configuration (typically package.xml)
-	//	-	obviously this won't work if the configuration comes from the database
-	//	-	however, if this is even possible, we need to separate where the configuration comes from
-	//		from the plugin object, meaning we need a "reader" object, or perhaps also a "writer" object
-	protected $filename;
-
 	//	The configuration data loaded from the system
-	protected $config;
+	protected $data;
 
-	//	The list of XML XPath expressions that will be searched for data and stored
-	protected $search;
+	//	The configuration source, where all the data is retrieved from
+	protected $source;
 
 	//	The path prefixes of each component type
 	protected $prefix = array();
@@ -89,16 +83,6 @@ class Amslib_Plugin
 	protected function getComponent($component,$name)
 	{
 		return $this->location.$this->prefix[$component]."$name.php";
-	}
-
-	/**
-	 * 	method:	getPackageFilename
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function getPackageFilename()
-	{
-		return $this->location."/package.xml";
 	}
 
 	/**
@@ -157,7 +141,7 @@ class Amslib_Plugin
 	protected function process()
 	{
 		$this->api = $this->createAPI();
-		$this->api->setModel($this->createObject($this->config["model"],true,true));
+		$this->api->setModel($this->createObject($this->data["model"],true,true));
 
 		//	If the API object is not valid, don't continue to process
 		if(!$this->api) return false;
@@ -166,14 +150,14 @@ class Amslib_Plugin
 
 		foreach($keys as $k=>$v){
 			//	Don't process any keys which are not set, empty or the required method to process it is not available
-			if(!isset($this->config[$v]) || empty($this->config[$v]) || !method_exists($this->api,"set".ucwords($v))){
+			if(!isset($this->data[$v]) || empty($this->data[$v]) || !method_exists($this->api,"set".ucwords($v))){
 				continue;
 			}
 
 			$callback	=	"set".ucwords($v);
 			$func		=	array($this->api,$callback);
 
-			foreach($this->config[$v] as $name=>$c){
+			foreach($this->data[$v] as $name=>$c){
 				//	NOTE: If a parameter is marked for export and has move attribute, don't process it.
 				if(isset($c["export"]) && isset($c["move"])) continue;
 
@@ -253,7 +237,7 @@ class Amslib_Plugin
 		//	false by default to signal an error in creation
 		$cache = false;
 
-		if(class_exists($object["value"])){
+		if(isset($object["value"]) && class_exists($object["value"])){
 			if($singleton){
 				if(method_exists($object["value"],"getInstance")){
 					$cache = call_user_func(array($object["value"],"getInstance"));
@@ -277,7 +261,7 @@ class Amslib_Plugin
 			//			but not killing the process, but handling all the failures which happen and properly written code
 			//			which respects the methods that return false, will keep functioning but failing to operating,
 			//			although they will not crash
-			$error = str_replace("__ERROR__","find class '{$object["value"]}'",$error);
+			$error = str_replace("__ERROR__","find class using configuration ".Amslib::var_dump($object)."'",$error);
 			Amslib::errorLog("stack_trace",$error,$object);
 			die($error);
 		}
@@ -295,7 +279,7 @@ class Amslib_Plugin
 	protected function createAPI()
 	{
 		//	Create the API object
-		$api = $this->createObject($this->config["api"],true,true);
+		$api = $this->createObject($this->data["api"],true,true);
 
 		//	An API Object was not created, so create a default Amslib_MVC object instead
 		if($api == false) $api = new Amslib_MVC();
@@ -329,7 +313,7 @@ class Amslib_Plugin
 			}break;
 
 			case "database":{
-				$database = $this->config["model"]["value"];
+				$database = $this->data["model"]["value"];
 				$location = str_replace("__CURRENT_PLUGIN__",$database,$config["location"]);
 			}break;
 		}
@@ -385,21 +369,7 @@ class Amslib_Plugin
 	 */
 	public function __construct()
 	{
-		$this->search = array(
-			"view",
-			"object",
-			"controller",
-			"model",
-			"service",
-			"image",
-			"javascript",
-			"stylesheet",
-			"font",
-			"value",
-			"translator"
-		);
-
-		$this->config = array("api"=>false,"model"=>false,"translator"=>false,"requires"=>false,"value"=>false);
+		$this->data = array("api"=>false,"model"=>false,"translator"=>false,"requires"=>false,"value"=>false);
 
 		//	This stores where all the types components are stored as part of the application
 		//	WARNING: object is soon to be deprecated
@@ -472,7 +442,7 @@ class Amslib_Plugin
 	public function transfer()
 	{
 		//	Process all child transfers before the parents
-		foreach(Amslib_Array::valid($this->config["requires"]) as $name=>$plugin){
+		foreach(Amslib_Array::valid($this->data["requires"]) as $name=>$plugin){
 			if($plugin && method_exists($plugin,"transfer")) $plugin->transfer();
 			else Amslib_FirePHP::output("failed to call plugin[$name]->transfer",$this);
 		}
@@ -486,13 +456,13 @@ class Amslib_Plugin
 
 		//	Process all the import/export/transfer requests on all resources
 		//	NOTE: translators don't support the "move" parameter
-		foreach($this->config as $key=>&$block){
+		foreach($this->data as $key=>&$block){
 			//	NOTE: perhaps I need to add "object" to here in the future? read the notes at the array("object") block below
 			if(in_array($key,array("model"))){
 			 	//	Models are treated slightly differently because they are singular, not plural
 				//	NOTE: maybe in future models will be plural too, perhaps it's better to make it work plurally anyway
 				list($m,$i,$e,$p) = $this->transferOptions($block);
-				if(!$p) continue;
+				if(!$p || (!$i && !$e)) continue;
 
 			 	$s	=	$this;
 			 	$sv	=	$s->getConfig($key);
@@ -516,7 +486,7 @@ class Amslib_Plugin
 					if(in_array($key,array("value","translator"))) $iname = $item["name"];
 
 					list($m,$i,$e,$p) = $this->transferOptions($item);
-			 		if(!$p) continue;
+			 		if(!$p || (!$i && !$e)) continue;
 
 			 		$s	=	$this;
 			 		$sv	=	$iname;
@@ -532,7 +502,7 @@ class Amslib_Plugin
 				foreach(Amslib_Array::valid($block) as $k=>$item)
 				{
 					list($m,$i,$e,$p) = $this->transferOptions($item);
-					if(!$p) continue;
+					if(!$p || (!$i && !$e)) continue;
 
 					$s	=	$this;
 					$sv	=	$item;
@@ -573,16 +543,318 @@ class Amslib_Plugin
 		}
 	}
 
-	/**
-	 * 	method:	getAttributeArray
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function getAttributeArray($node,$array=array())
+	public function configAPI($name,$array)
 	{
-		foreach($node->attributes as $k=>$v) $array[$k] = $v->nodeValue;
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
-		return $array;
+		//	After we have this object, we must create it
+		//	API Objects therefore cannot do anything in their constructor
+		//	We should modify the API objects so they do their "work" in the "initialiseObject" method
+		//	Therefore we can create the object and then ask it to "configObject" first passing it the config object
+		//	Then once it has the $configuration object, it can ask for it's custom data
+
+		$a			= $array["attr"];
+		$a["value"]	= $array["value"];
+
+		$file = $this->getComponent("object",$array["value"]);
+		if(file_exists($file)) $a["file"] = $file;
+
+		$this->data["api"] = $a;
+	}
+
+	public function configObject($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		//	NOTE: in the future, objects will disappear, will be split controllers and models
+		//	NOTE: this isn't actually true, because objects are sometimes not controllers or models, but just simple objects
+
+		$a			= $array["attr"];
+		$a["value"] = $array["value"];
+
+		$file = $this->getComponent("object",$a["value"]);
+		if(file_exists($file)) $a["file"] = $file;
+
+		$this->data["object"][$a["value"]] = $a;
+	}
+
+	public function configController($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		//	does $node have "directory" attribute?
+		$directory = "controllers";
+		//	does $node have "prefix" attribute?
+		$prefix = "";
+		//	does $node have "scan" attribute?
+		$this->setComponent("controller",$directory,$prefix);
+
+		$a			= $array["attr"];
+		$a["value"] = $array["value"];
+
+		$file = $this->getComponent("controller",$array["value"]);
+
+		if(file_exists($file)){
+			$a["file"] = $file;
+		}else{
+			//Amslib::errorLog
+			print("Controller object not found, serious error: ".Amslib::var_dump(array("array"=>$array,"a"=>$a,"file"=>$file),true));
+		}
+
+		//	NOTE:	we are overriding this because we want to change the xml and code separately
+		//			whilst we transition from one system to another
+		$this->data["object"][$a["value"]] = $a;
+		//$this->data[$node->nodeName][$p["value"]] = $p;
+	}
+
+	/**
+	 *	method:	configModelConnection
+	 *
+	 *	todo:	code documentation
+	 *
+	 *	note:	This code is almost 100% copied from configModel(), see there for the same code documentation
+	 *	note:	I am doing this duplicated like this so I avoid pre-optimisation before I see the final working code
+	 */
+	public function configModelConnection($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		//	if this model node has a connection attribute, we need to instruct the system to import
+		//	the model from the plugin name held in the value attribute, but we need to construct
+		//	an array of data which allows us to know this when processing the data
+		//	-	this appears to be out of date now, since we have a <connection> xml node which does this,
+		//		it's not an attribute anymore
+		$directory = "models";
+		$prefix = "";
+		$this->setComponent("model",$directory,$prefix);
+
+		$a			= $array["attr"];
+		$a["value"]	= $array["value"];
+
+		$file = $this->getComponent("model",$array["value"]);
+
+		if(file_exists($file)){
+			$a["file"] = $file;
+		}else{
+			//Amslib::errorLog
+			print("Model Connection object not found, serious error: ".Amslib::var_dump(array("array"=>$array,"a"=>$a,"file"=>$file),true));
+		}
+
+		//	TODO:	this is a patch whilst I transition to the new [object, controller, model, view]
+		//			xml layout, I have to patch the connection node is actually a model node
+		//			so the rest of the code will continue to run whilst I upgrade to this way of working
+		//			cause also, I have to upgrade all the plugins and then they won't be compatible
+		//			with previous versions of the amslib plugin system
+		$this->data["model"] = $a;
+	}
+
+	public function configModel($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		//	does $node have "directory" attribute?
+		//	-	this would allow us to customise where on the filesystem the files would be loaded
+		$directory = "models";
+		//	does $node have "prefix" attribute?
+		//	-	this would allow us to customise the filename format for each of the files being loaded
+		$prefix = "";
+		//	does $node have "scan" attribute?
+		//	-	the scan attribute was so you'd just load all the files from a particular directory
+		//		which matched the filename pattern being loaded, so you didn't have to constantly
+		//		update it when you added new objects ot the system
+		//	-	however the scan attribute allows you to make more mistakes by leaving old files on
+		//		the system which are used by accident and you'd have to manually detect these errors
+		//	does $node have "connection" attribute?
+		//	-	I believe this was deprecated in favour or just having an extra xml node <connection>
+		$this->setComponent("model",$directory,$prefix);
+
+		$a			= $array["attr"];
+		$a["value"] = $array["value"];
+
+		$file = $this->getComponent("model",$array["value"]);
+
+		if(file_exists($file)){
+			$array["file"] = $file;
+		}else{
+			//Amslib::errorLog
+			print("Model object not found, serious error: ".Amslib::var_dump(array("array"=>$array,"a"=>$a,"file"=>$file),true));
+		}
+
+		$this->data["object"][$array["value"]] = $array;
+	}
+
+	public function configView($name,$array)
+	{
+		$a = array_merge(array("id"=>$array["value"],"value"=>$array["value"]),$array["attr"]);
+
+		$a["value"] = $this->getComponent("view",$array["value"]);
+
+		$this->data["view"][$a["id"]] = $a;
+
+		//print(__METHOD__.": plugin[".$this->getName()."] => ".Amslib::var_dump($this->data["view"],true));
+	}
+
+	public function configService($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		$a				= $array["attr"];
+		$a["action"]	= $name;
+		$a["rename"]	= $array["value"];
+
+		//	You require at minimum these two attributes, or cannot accept it
+		if(!isset($a["plugin"]) || !isset($a["name"])) continue;
+		//	If the rename attribute doesn't exist or is empty, replace it with the name attribute
+		if(!isset($a["rename"]) || !$a["rename"] || strlen($a["rename"])){
+			$a["rename"] = $a["name"];
+		}
+
+		$this->data["service"][] = $a;
+	}
+
+	public function configJavascript($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		$a = $array["attr"];
+
+		$absolute	=	isset($a["absolute"]) ? true : false;
+		$a["value"]	=	$this->findResource($array["value"],$absolute);
+
+		//	If a valid id exists, insert the configuration
+		if(isset($a["id"])) $this->data["javascript"][$a["id"]] = $a;
+	}
+
+	public function configStylesheet($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		$a			=	$array["attr"];
+		$absolute	=	isset($a["absolute"]) ? true : false;
+		$a["value"]	=	$this->findResource($array["value"],$absolute);
+
+		//	If a valid id exists, insert the configuration
+		if(isset($a["id"])) $this->data["stylesheet"][$a["id"]] = $a;
+	}
+
+	public function configImage($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		$a = $array["attr"];
+
+		$absolute	=	isset($a["absolute"]) ? true : false;
+		$a["value"]	=	$this->findResource($array["value"],$absolute);
+
+		//	If a valid id exists, insert the configuration
+		if(isset($a["id"])) $this->data["image"][$a["id"]] = $a;
+	}
+
+	public function configFont($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		foreach($array["child"] as $font){
+			$a			=	$font["attr"];
+			$a["value"]	=	trim($font["value"]);
+			$a["type"]	=	$font["tag"];
+			if(!isset($a["autoload"])) $a["autoload"] = NULL;
+
+			//	If a valid id exists, insert the configuration
+			if(isset($a["id"])) $this->data["font"][$a["id"]] = $a;
+		}
+	}
+
+	public function configTranslator($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		//	Import all the translator parameters, such as import/export
+		$a = $array["attr"];
+
+		foreach($array["child"] as $c){
+			if($c["tag"] == "language"){
+				$a[$c["tag"]][] = $c["value"];
+			}else{
+				$a[$c["tag"]] = $c["value"];
+			}
+		}
+
+		//	Test all required data is present, if so, add the translator to be configured later
+		if(	Amslib_Array::hasKeys($a,array("name","type","location","language")) ||
+					Amslib_Array::hasKeys($a,array("name","import")) ||
+					Amslib_Array::hasKeys($a,array("name","export")))
+		{
+			$this->data["translator"][] = $a;
+		}
+	}
+
+	public function configValue($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		$a = $array["attr"];
+
+		foreach($array["child"] as $c){
+			$this->data["value"][] = array_merge(
+					array("name"=>$c["tag"],"value"=>$c["value"]),
+					$a
+			);
+		}
+	}
+
+	public function configPath($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		foreach($array["child"] as $c){
+			$v = Amslib_Plugin::expandPath($c["value"]);
+
+			if($c["tag"] == "include"){
+				Amslib::addIncludePath(Amslib_File::absolute($v));
+			}else{
+				Amslib_Plugin::setPath($c["tag"],$v);
+
+				switch($c["tag"]){
+					case "plugin":{
+						Amslib_Plugin_Manager::addLocation($v);
+					}break;
+
+					case "docroot":{
+						Amslib_File::documentRoot($v);
+					}break;
+				}
+			}
+		}
+	}
+
+	public function configPlugin($name,$array)
+	{
+		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
+
+		if($this->getName() != $array["value"]){
+			$a = $array["attr"];
+
+			$replace = isset($a["replace"]) ? $a["replace"] : NULL;;
+			if($replace) Amslib_Plugin_Manager::replacePluginLoad($replace,$array["value"]);
+
+			$prevent = isset($a["prevent"]) ? $a["prevent"] : NULL;
+			if($prevent) Amslib_Plugin_Manager::preventPluginLoad($prevent,$array["value"]);
+
+			//	Only process plugins which have no replace or prevent instructions,
+			//	these are instructions about loading, not instructions to ACTUALLY load
+			if($prevent || $replace) return;
+
+			//	Since this plugin is not replaced, nor prevented from loading, lets load it!!
+			$location	=	$this->getLocation();
+			$plugin		=	Amslib_Plugin_Manager::config($array["value"],$location);
+
+			if($plugin){
+				$this->data["requires"][$array["value"]] = $plugin;
+			}else{
+				Amslib::errorLog("PLUGIN LOAD FAILURE: ".$array["value"],$location);
+			}
+		}
 	}
 
 	/**
@@ -590,316 +862,60 @@ class Amslib_Plugin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function config($name,$location)
+	public function config($name)
 	{
-		$this->isReady	=	false;
-		$this->isLoaded	=	false;
-		$this->name		=	$name;
-		$this->location	=	$location;
-		$this->filename	=	$this->getPackageFilename();
+		$this->isConfigured	=	false;
+		$this->isLoaded		=	false;
+		$this->name			=	$name;
 
-		try{
-			$xpath			=	false;
-			$document		=	new DOMDocument('1.0', 'UTF-8');
+		//print("source = ".Amslib::var_dump(array($this->getName(),$this->source),true));
 
-			if($document->load($this->filename)){
-				$document->preserveWhiteSpace = false;
-				$xpath = new DOMXPath($document);
-			}
+		//	NOTE: this obviously won't work if you try to use a database configuration object
+		Amslib_Router::load($this->source->getValue("filename"),"xml",$this->getName());
 
-			if(!$xpath){
-				Amslib::errorLog("xpath failed to load on filename",$this->filename);
+		//	NOTE:	I chose to make this an array because I could allow it to be
+		//			configured and then run it through a generic process step below,
+		//			allowing flexibility in how these sections are loaded and processed
+		$selectors = array(
+			"package > object api"			=>	array($this,"configAPI"),
+			"package > object name"			=>	array($this,"configObject"),
+			"package > controller name"		=>	array($this,"configController"),
+			"package > model connection"	=>	array($this,"configModelConnection"),
+			"package > model name"			=>	array($this,"configModel"),
+			"package > view name"			=>	array($this,"configView"),
+			"package > service import"		=>	array($this,"configService"),
+			"package > service export"		=>	array($this,"configService"),
+			"package > javascript file"		=>	array($this,"configJavascript"),
+			"package > stylesheet file"		=>	array($this,"configStylesheet"),
+			"package > image file"			=>	array($this,"configImage"),
+			"package > font"				=>	array($this,"configFont"),
+			"package > translator"			=>	array($this,"configTranslator"),
+			"package > value"				=>	array($this,"configValue"),
+			"package > path"				=>	array($this,"configPath"),
+			"package > requires plugin"		=>	array($this,"configPlugin")
+		);
 
-				return $this->isReady;
-			}
-		}catch(Exception $e){
-			Amslib::errorLog("exception caught, message",$e->getMessage());
+		$this->source->prepare();
+		foreach($selectors as $s=>$c){
+			$this->source->process($s,$c);
 		}
 
-		//	Load the router, if one is present
-		Amslib_Router::load($this->filename,"xml",$this->getName());
-
-		//	Search each path and store all the configuration data
-		foreach($this->search as $p){
-			$list = $xpath->query("//package/$p");
-
-			foreach($list as $node){
-				switch($node->nodeName){
-					case "object":{
-						//	NOTE: in the future, objects will disappear, will be split controllers and models
-						$child = $xpath->query("*",$node);
-
-						foreach($child as $c){
-							$p = $this->getAttributeArray($c);
-
-							$p["value"] = $c->nodeValue;
-
-							$file = $this->getComponent("object",$p["value"]);
-							if(file_exists($file)) $p["file"] = $file;
-
-							if(in_array($c->nodeName,array("api","model"))){
-								//	NOTE: this kind of assignment means it's possible to only have one API and Model object
-								$this->config[$c->nodeName] = $p;
-							}else{
-								$this->config[$node->nodeName][$p["value"]] = $p;
-							}
-						}
-					}break;
-
-					case "controller":{
-						$child = $xpath->query("*",$node);
-
-						//	does $node have "directory" attribute?
-						$directory = "{$node->nodeName}s";
-						//	does $node have "prefix" attribute?
-						$prefix = "";
-						//	does $node have "scan" attribute?
-
-						$this->setComponent($node->nodeName,$directory,$prefix);
-
-						foreach($child as $c){
-							$p = $this->getAttributeArray($c);
-
-							$p["value"] = $c->nodeValue;
-
-							$file = $this->getComponent($node->nodeName,$p["value"]);
-							if(file_exists($file)) $p["file"] = $file;
-
-							if($c->nodeName == "api"){
-								//	NOTE: this kind of assignment means it's possible to only have one API
-								$this->config[$c->nodeName] = $p;
-							}else{
-								//	NOTE:	we are overriding this because we want to change the xml and code separately
-								//			whilst we transition from one system to another
-								$this->config["object"][$p["value"]] = $p;
-								//$this->config[$node->nodeName][$p["value"]] = $p;
-							}
-						}
-					}break;
-
-					case "model":{
-						$child = $xpath->query("*",$node);
-
-						//	does $node have "directory" attribute?
-						//	-	this would allow us to customise where on the filesystem the files would be loaded
-						$directory = "{$node->nodeName}s";
-						//	does $node have "prefix" attribute?
-						//	-	this would allow us to customise the filename format for each of the files being loaded
-						$prefix = "";
-						//	does $node have "scan" attribute?
-						//	-	the scan attribute was so you'd just load all the files from a particular directory
-						//		which matched the filename pattern being loaded, so you didn't have to constantly
-						//		update it when you added new objects ot the system
-						//	-	however the scan attribute allows you to make more mistakes by leaving old files on
-						//		the system which are used by accident and you'd have to manually detect these errors
-						//	does $node have "connection" attribute?
-						//	-	I believe this was deprecated in favour or just having an extra xml node <connection>
-
-						$this->setComponent($node->nodeName,$directory,$prefix);
-
-						//	if this model node has a connection attribute, we need to instruct the system to import
-						//	the model from the plugin name held in the value attribute, but we need to construct
-						//	an array of data which allows us to know this when processing the data
-						//	-	this appears to be out of date now, since we have a <connection> xml node which does this,
-						//		it's not an attribute anymore
-
-						foreach($child as $c){
-							$p = $this->getAttributeArray($c);
-
-							$p["value"] = $c->nodeValue;
-
-							$file = $this->getComponent($node->nodeName,$p["value"]);
-
-							if(file_exists($file)){
-								$p["file"] = $file;
-							}else{
-								Amslib::errorLog("Model object not found, serious error",$p,$file);
-							}
-
-							if($c->nodeName == "connection"){
-								//	TODO:	this is a patch whilst I transition to the new [object, controller, model, view]
-								//			xml layout, I have to patch the connection node is actually a model node
-								//			so the rest of the code will continue to run whilst I upgrade to this way of working
-								//			cause also, I have to upgrade all the plugins and then they won't be compatible
-								//			with previous versions of the amslib plugin system
-								$this->config["model"] = $p;
-							}else{
-								//	NOTE:	we are overriding this because we want to change the xml and code separately
-								//			whilst we transition from one system to another
-								$this->config["object"][$p["value"]] = $p;
-								//$this->config[$node->nodeName][$p["value"]] = $p;
-							}
-						}
-					}break;
-
-					case "view":{
-						$child = $xpath->query("name",$node);
-
-						foreach($child as $c){
-							$p = array_merge(
-								array("id"=>$c->nodeValue,"value"=>$c->nodeValue),
-								$this->getAttributeArray($c)
-							);
-
-							$p["value"] = $this->getComponent($node->nodeName,$c->nodeValue);
-
-							$this->config[$node->nodeName][$p["id"]] = $p;
-						}
-					}break;
-
-					case "service":{
-						$child = $xpath->query("import|export",$node);
-
-						foreach($child as $c){
-							$p				=	$this->getAttributeArray($c);
-							$p["action"]	=	$c->nodeName;
-							$p["rename"]	=	$c->nodeValue;
-
-							//	You require at minimum these two attributes, or cannot accept it
-							if(!isset($p["plugin"]) || !isset($p["name"])) continue;
-							//	If the rename attribute doesn't exist or is empty, replace it with the name attribute
-							if(!isset($p["rename"]) || !$p["rename"] || strlen($p["rename"])){
-								$p["rename"] = $p["name"];
-							}
-
-							$this->config[$node->nodeName][] = $p;
-						}
-					}break;
-
-					case "javascript":
-					case "stylesheet":
-					case "image":{
-						$child = $xpath->query("file",$node);
-
-						foreach($child as $c){
-							$p = $this->getAttributeArray($c);
-
-							$absolute	=	isset($p["absolute"]) ? true : false;
-							$p["value"]	=	$this->findResource($c->nodeValue,$absolute);
-
-							//	If a valid id exists, insert the configuration
-							if(isset($p["id"])) $this->config[$node->nodeName][$p["id"]] = $p;
-						}
-					}break;
-
-					case "font":{
-						$child = $xpath->query("*",$node);
-
-						foreach($child as $font){
-							$p = $this->getAttributeArray($font);
-
-							$p["value"]	=	trim($font->nodeValue);
-							$p["type"]	=	$font->nodeName;
-							if(!isset($p["autoload"])) $p["autoload"] = NULL;
-
-							//	If a valid id exists, insert the configuration
-							if(isset($p["id"])) $this->config[$node->nodeName][$p["id"]] = $p;
-						}
-					}break;
-
-					case "translator":{
-						$child = $xpath->query("*",$node);
-						//	Import all the translator parameters, such as import/export
-						$p = $this->getAttributeArray($node);
-
-						foreach($child as $c){
-							if($c->nodeName == "language") $p[$c->nodeName][] = $c->nodeValue;
-							else $p[$c->nodeName] = $c->nodeValue;
-						}
-
-						//	Test all required data is present, if so, add the translator to be configured later
-						if(	Amslib_Array::hasKeys($p,array("name","type","location","language")) ||
-							Amslib_Array::hasKeys($p,array("name","import")) ||
-							Amslib_Array::hasKeys($p,array("name","export")))
-						{
-							$this->config[$node->nodeName][] = $p;
-						}
-					}break;
-
-					case "version":{
-						$child = $xpath->query("*",$node);
-
-						foreach($child as $c){
-							$this->config[$node->nodeName][$c->nodeName] = $c->nodeValue;
-						}
-					}break;
-
-					case "value":{
-						$child = $xpath->query("*",$node);
-						$p = $this->getAttributeArray($node);
-
-						foreach($child as $c){
-							$this->config[$node->nodeName][] = array_merge(
-								array("name"=>$c->nodeName,"value"=>$c->nodeValue),
-								$p
-							);
-						}
-					}break;
-
-					case "path":{
-						$child = $xpath->query("*",$node);
-
-						foreach($child as $c){
-							$v = Amslib_Plugin::expandPath($c->nodeValue);
-
-							if($c->nodeName == "include"){
-								Amslib::addIncludePath(Amslib_File::absolute($v));
-							}else{
-								Amslib_Plugin::setPath($c->nodeName,$v);
-
-								switch($c->nodeName){
-									case "plugin":{
-										Amslib_Plugin_Manager::addLocation($v);
-									}break;
-
-									case "docroot":{
-										Amslib_File::documentRoot($v);
-									}break;
-								};
-							}
-						}
-					}break;
-
-					default:{
-						$this->config[$node->nodeName] = Amslib_Plugin::expandPath($node->nodeValue);
-					}break;
-				}
-			}
+		//	NOTE:	There are no implementation of this method as yet
+		//	NOTE:	we need to try creating one for the Power_Panel_Application, for the navigation items
+		//	NOTE: 	Or perhaps we could start by creating notifications and registering the Amstudios_Notifications plugin as the handler?
+		if($this->api){
+			$this->api->configObject($this->source);
 		}
 
-		//	load all the child plugins
-		$list = $xpath->query("//package/requires/plugin");
+		$this->deleteConfigSource();
+		//print("TESTING, config[".$this->getName()."] = ".Amslib::var_dump($this->data,true));
 
-		foreach($list as $node){
-			if($this->getName() != $node->nodeValue){
-				$plugin = false;
-
-				$replace = $node->getAttribute("replace");
-				if($replace) Amslib_Plugin_Manager::replacePluginLoad($replace,$node->nodeValue);
-
-				$prevent = $node->getAttribute("prevent");
-				if($prevent) Amslib_Plugin_Manager::preventPluginLoad($prevent,$node->nodeValue);
-
-				//	Only process plugins which have no replace or prevent instructions,
-				//	these are instructions about loading, not instructions to ACTUALLY load
-				if(!$prevent && !$replace){
-					$plugin = Amslib_Plugin_Manager::config($node->nodeValue,$this->location);
-
-					if($plugin){
-						$this->config["requires"][$node->nodeValue] = $plugin;
-					}else{
-						Amslib::errorLog("PLUGIN LOAD FAILURE",$node->nodeValue,$location);
-					}
-				}
-			}
-		}
-
-		$this->isReady = true;
+		$this->isConfigured = true;
 
 		//	Now the configuration data is loaded, initialise the plugin with any custom requirements
 		$this->initialisePlugin();
 
-		return $this->isReady;
+		return $this->isConfigured;
 	}
 
 	/**
@@ -911,10 +927,10 @@ class Amslib_Plugin
 	{
 		if($this->isLoaded) return $this->api;
 
-		if($this->isReady)
+		if($this->isConfigured)
 		{
 			//	Process all child plugins before the parents
-			foreach(Amslib_Array::valid($this->config["requires"]) as $plugin) $plugin->load();
+			foreach(Amslib_Array::valid($this->data["requires"]) as $plugin) $plugin->load();
 
 			//	run all the configuration into the api object
 			$this->process();
@@ -931,10 +947,37 @@ class Amslib_Plugin
 			return $this->api;
 		}
 
-		//	TODO: This needs to be better than "OMG WE ARE ALL GONNA DIE!!!"
-		print(get_class($this)."::load(): PACKAGE FAILED TO OPEN: file[$this->filename]<br/>");
-
 		return false;
+	}
+
+	public function setConfigSource($config=NULL)
+	{
+		//	If you don't provide a configuration object, provide a default one with everything default
+		if(!$config){
+			$config = new Amslib_Plugin_Config_XML();
+		}
+
+		if($config){
+			$config->setValue("location",$this->getLocation());
+
+			if($config->getStatus()){
+				$this->source = $config;
+			}else{
+				//	The configuration source was setup, however it failed to return that it was ok
+				//	This could be that the actual data source is missing?
+				//	TODO: This needs to be better than "OMG WE ARE ALL GONNA DIE!!!"
+				$filename = $config->getValue("filename");
+				print("[".get_class($this)."/".$this->getName()."]::load(): PACKAGE FAILED TO OPEN: file[$filename]<br/>");
+			}
+		}else{
+			//	There is no valid configuration object created or requested
+			die("NO CONFIGURATION OBJECT DETECTED");
+		}
+	}
+
+	public function deleteConfigSource()
+	{
+		$this->source = NULL;
 	}
 
 	/**
@@ -949,8 +992,8 @@ class Amslib_Plugin
 
 		if($key == "value"){
 			//	Search and update any existing values
-			$this->config[$key] = Amslib_Array::valid($this->config[$key]);
-			foreach($this->config[$key] as &$v){
+			$this->data[$key] = Amslib_Array::valid($this->data[$key]);
+			foreach($this->data[$key] as &$v){
 				if($v["name"] == $value["name"] && !isset($v["export"]) && !isset($v["import"])){
 
 					$v["value"] = $value["value"];
@@ -960,11 +1003,11 @@ class Amslib_Plugin
 			}
 
 			//	The value didnt already exist, so we must create it
-			$this->config[$key][] = $value;
+			$this->data[$key][] = $value;
 		}else if(is_string($key)){
-			$this->config[$key] = $value;
+			$this->data[$key] = $value;
 		}else{
-			$this->config[$key[0]][$key[1]] = $value;
+			$this->data[$key[0]][$key[1]] = $value;
 		}
 	}
 
@@ -977,7 +1020,7 @@ class Amslib_Plugin
 	{
 		switch($key){
 			case "translator":{
-				foreach($this->config[$key] as $t){
+				foreach($this->data[$key] as $t){
 					if($t["name"] == $name){
 						if(isset($t["type"]))	$this->createTranslator($t);
 						if(isset($t["cache"]))	return $t;
@@ -986,18 +1029,18 @@ class Amslib_Plugin
 			}break;
 
 			case "model":{
-				$this->createObject($this->config[$key]);
-				return $this->config[$key];
+				$this->createObject($this->data[$key]);
+				return $this->data[$key];
 			}break;
 
 			default:{
 				if($name === NULL){
-					return isset($this->config[$key]) ? $this->config[$key] : false;
+					return isset($this->data[$key]) ? $this->data[$key] : false;
 				}else{
 					if(is_array($name)) $name = current($name);
 					$name = (string)$name;
 
-					return isset($this->config[$key][$name]) ? $this->config[$key][$name] : false;
+					return isset($this->data[$key][$name]) ? $this->data[$key][$name] : false;
 				}
 			}break;
 		}
@@ -1013,10 +1056,20 @@ class Amslib_Plugin
 	public function removeConfig($type,$id=NULL)
 	{
 		if($id === NULL){
-			unset($this->config[$type]);
+			unset($this->data[$type]);
 		}else if(is_array($type)){
-			unset($this->config[$type][$id]);
+			unset($this->data[$type][$id]);
 		}
+	}
+
+	/**
+	 * 	method:	setLocation
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setLocation($location)
+	{
+		$this->location = $location;
 	}
 
 	/**

@@ -177,7 +177,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function __construct($name,$location)
+	public function __construct($name,$location,$config=NULL)
 	{
 		parent::__construct();
 
@@ -208,8 +208,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		Amslib_Plugin_Manager::addLocation($location);
 		Amslib_Plugin_Manager::addLocation($location."/plugins");
 
+		//	Set the location of the plugin that was found in the hard disk
+		$this->setLocation($location);
+		//	Set the configuration source, so it can read the appropriate data
+		$this->setConfigSource($config);
 		//	We can't use Amslib_Plugin_Manager for this, because it's an application plugin
-		$this->config($name,$location);
+		$this->config($name);
 		//	Process all the imports and exports so all the plugins contain the correct data
 		$this->transfer();
 		//	Now we have to load all the plugins into the system
@@ -284,7 +288,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 */
 	public function setLanguageKey()
 	{
-		$k = current(Amslib_Array::filter(Amslib_Array::valid($this->config["value"]),"name","lang_key",true));
+		$k = current(Amslib_Array::filter(Amslib_Array::valid($this->data["value"]),"name","lang_key",true));
 
 		//	key wasn't found, do nothing
 		if(empty($k)) return;

@@ -117,7 +117,11 @@ class Amslib_Plugin_Manager
 		if($location = self::findPlugin($name,$location)){
 			//	Plugin was not present, so create it, load everything required and return it's API
 			self::$plugins[$name] = new Amslib_Plugin();
-			self::$plugins[$name]->config($name,$location.$name);
+			self::$plugins[$name]->setLocation($location.$name);
+			//	NOTE: This is hardcoding it to only work with an XML config source
+			//	NOTE: The reason for this is because I Don't really have an alternative plan yet
+			self::$plugins[$name]->setConfigSource(new Amslib_Plugin_Config_XML());
+			self::$plugins[$name]->config($name);
 
 			return self::$plugins[$name];
 		}
@@ -162,19 +166,6 @@ class Amslib_Plugin_Manager
 	}
 
 	/**
-	 * 	method:	preload
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function preload($name,$plugin)
-	{
-		//	If this plugin is configured to be replaced with another, use the replacement
-		if(isset(self::$replace[$name])) $name = self::$replace[$name];
-
-		if($name && $plugin) self::$plugins[$name] = $plugin;
-	}
-
-	/**
 	 * 	method:	insert
 	 *
 	 * 	todo: write documentation
@@ -185,11 +176,12 @@ class Amslib_Plugin_Manager
 		if(isset(self::$replace[$name])) $name = self::$replace[$name];
 
 		if($name && $plugin){
+			self::$plugins[$name] = $plugin;
+
 			$api = $plugin->getAPI();
 
 			if($api){
-				self::$api[$name]		=	$api;
-				self::$plugins[$name]	=	$plugin;
+				self::$api[$name] = $api;
 
 				return true;
 			}
@@ -385,5 +377,15 @@ class Amslib_Plugin_Manager
 		$api = self::getAPI($plugin);
 
 		return $api ? $api->addJavascript($javascript) : false;
+	}
+
+	/**
+	 *	DEPRECATED METHOD: preload
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function preload($name,$plugin)
+	{
+		return self::insert($name,$plugin);
 	}
 }
