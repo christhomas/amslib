@@ -41,39 +41,8 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	static protected $version;
 	static protected $langKey = "/amslib/lang/shared";
 	static protected $registeredLanguages = array();
-	static protected $packageName = array();
 
 	protected $completionCallback;
-
-	/**
-	 * 	method:	getPackageFilename
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function getPackageFilename()
-	{
-		foreach(Amslib_Array::valid(self::$packageName) as $host=>$file){
-			if(strpos($_SERVER["HTTP_HOST"],$host) !== false) return "{$this->location}/$file";
-		}
-
-		return parent::getPackageFilename();
-	}
-
-	/**
-	 * 	method:	readVersion
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function readVersion()
-	{
-		if(isset($this->config["version"])){
-			self::$version = array(
-				"date"		=>	$this->config["version"]["date"],
-				"number"	=>	$this->config["version"]["number"],
-				"name"		=>	$this->config["version"]["name"]
-			);
-		}
-	}
 
 	/**
 	 * 	method:	initialisePlugin
@@ -190,16 +159,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 */
 	protected function executeRouter()
 	{
-		//	Initialise and execute the router
-		//	FIXME: allow the use of a database source for routes and not just XML
-		//	FIXME: we already load this in the Amslib_Plugin level, why are we doing it twice??
-		//	NOTE: also we upgraded the router system, so probably this is dead code as well
-		$source = !isset($this->config["router_source"])
-			? $this->filename
-			: str_replace("__SELF__",$this->filename,$this->config["router_source"]);
-
-		//	FIXME: we are hardcoding the source of this to the xml file, what happens when I change to a db router?
-		Amslib_Router::load($source,"xml",$this->getName());
+		//	Finalise the router
 		Amslib_Router::finalise();
 
 		//	NOTE:	we do not do it because webservice urls are typically not enabled with languages
@@ -228,7 +188,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		parent::setPath("docroot",	Amslib_File::documentRoot());
 
 		//	NOTE: router_source? this is a really old and now deprecated configuration node isnt it?
-		$this->search = array_merge(array("path","router_source","version"),$this->search);
+		//$this->search = array_merge(array("path","router_source","version"),$this->search);
 
 		$this->completionCallback = array();
 
@@ -313,26 +273,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			//	TODO: we don't guard against possible faulty callbacks
 			call_user_func($cb);
 		}
-	}
-
-	/**
-	 * 	method:	setPackageFilename
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function setPackageFilename($domain,$file)
-	{
-		self::$packageName[$domain] = $file;
-	}
-
-	/**
-	 * 	method:	getVersion
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function getVersion($element=NULL)
-	{
-		return (!isset(self::$version[$element])) ? self::$version : self::$version[$element];
 	}
 
 	/**
