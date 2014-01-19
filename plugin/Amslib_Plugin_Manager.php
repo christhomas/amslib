@@ -54,6 +54,7 @@ class Amslib_Plugin_Manager
 
 		foreach($search as $location)
 		{
+			//	TODO: this obviously hardcodes the xml configuration filename, perhaps this is not ideal
 			if(file_exists("$location/$name/package.xml")){
 				//	double check that the location starts and ends with a slash
 				//	something this isn't the case and the programmer forgets
@@ -82,13 +83,15 @@ class Amslib_Plugin_Manager
 	 * 	method:	replacePluginLoad
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	note:
+	 * 	-	This function will map plugin1 => plugin2, so any attempt to load plugin1 will
+	 * 		result in loading plugin2
+	 * 	-	This means you need to be able to load plugin2 AT THE POINT IN TIME that plugin1
+	 * 		is loaded, if you require something more, you're going to find trouble.
 	 */
 	static public function replacePluginLoad($plugin1,$plugin2)
 	{
-		//	This function will map plugin1 => plugin2, so any attempt to load plugin1 will result in loading plugin2
-		//	This means you need to be able to load plugin2 AT THE POINT IN TIME that plugin1 is loaded, if you require
-		//	something more, you're going to find trouble.
-
 		if(!is_string($plugin1) && strlen($plugin1) == 0) return false;
 		if(!is_string($plugin2) && strlen($plugin2) == 0) return false;
 
