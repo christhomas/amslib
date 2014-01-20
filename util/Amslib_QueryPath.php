@@ -1,18 +1,18 @@
 <?php
+//	we have to do this here because QueryPath has no constructor we can call, so it can't be autoloaded
+//	this class basically "fixes" that by wrapping it all up in a way that can be autoloaded
+//	it's such a hack :P
+require_once(dirname(__FILE__)."/QueryPath/qp.php");
+
 class Amslib_QueryPath
 {
 	static protected $qp;
 
 	static public function qp($document=NULL, $selector=NULL, $options=array())
 	{
-		//	we have to do this here because QueryPath has no constructor we can call, so it can't be autoloaded
-		//	this class basically "fixes" that by wrapping it all up in a way that can be autoloaded
-		//	it's such a hack :P
-		require_once(dirname(__FILE__)."/QueryPath/QueryPath.php");
-
 		try{
 			ob_start();
-			self::$qp = qp($document,$selector,$options);
+			self::$qp = QueryPath::with($document, $selector, $options);
 			$warnings = ob_get_clean();
 
 			if(strlen($warnings)){
@@ -31,7 +31,9 @@ class Amslib_QueryPath
 	{
 		// I copied and modified the default options from the htmlqp method to provide a custom version for Amslib
 
-		if(is_string($document)) $document = htmlspecialchars($document,ENT_COMPAT,"UTF-8");
+		$document = iconv("ISO8859-1","UTF-8",$document);
+
+		//if(is_string($document)) $document = htmlspecialchars($document,ENT_COMPAT,"UTF-8");
 
 		$options += array(
 			'ignore_parser_warnings'	=>	true,
@@ -42,7 +44,7 @@ class Amslib_QueryPath
 
 		try{
 			ob_start();
-				$html = self::qp($document, $selector, $options);
+				$html = QueryPath::withHTML($document, $selector, $options);
 			$warnings = ob_get_clean();
 
 			if(strlen($warnings)){
