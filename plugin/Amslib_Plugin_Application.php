@@ -61,10 +61,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 */
 	protected function finalisePlugin()
 	{
-		//	NOTE: admin panel? This is obviously code I included here by accident
-		//	Set the version of the admin this panel is running
-		$this->readVersion();
-
 		//	Load the required router library and execute it to setup everything it needs
 		$this->executeRouter();
 
