@@ -633,7 +633,9 @@ class Amslib_Plugin
 
 		$file = $this->getComponent("model",$array["value"]);
 
-		if(file_exists($file)){
+		if(isset($a["import"])){
+			$a["file"] = "import from {$a["import"]}";
+		}else if(file_exists($file)){
 			$a["file"] = $file;
 		}else{
 			//Amslib::errorLog
