@@ -16,20 +16,24 @@ class Amslib_Plugin_Config_XML
 	{
 		if(!$node || $node->count() == 0) return false;
 
-		$data			=	array();
-		$data["attr"]	=	$node->attr();
-		$data["tag"]	=	$node->tag();
-		$childNodes		=	$node->branch()->children();
+		try{
+			$data			=	array();
+			$data["attr"]	=	$node->attr();
+			$data["tag"]	=	$node->tag();
+			$childNodes		=	$node->branch()->children();
 
-		//	recurse to decode the child or merely store the child to process later
-		foreach($childNodes as $c){
-			$data["child"][] = $recursive
-				? $this->toArray($c,$recursive)
-				: array("tag"=>$c->tag(),"child"=>$c);
+			//	recurse to decode the child or merely store the child to process later
+			foreach($childNodes as $c){
+				$data["child"][] = $recursive
+					? $this->toArray($c,$recursive)
+					: array("tag"=>$c->tag(),"child"=>$c);
+			}
+
+			//	If the node doesn't have children, obtain the text and store as it's value
+			if(count($childNodes) == 0) $data["value"] = $node->text();
+		}catch(Exception $e){
+			Amslib::errorLog("QueryPath Exception",$e->getMessage);
 		}
-
-		//	If the node doesn't have children, obtain the text and store as it's value
-		if(count($childNodes) == 0) $data["value"] = $node->text();
 
 		return $data;
 	}
@@ -108,7 +112,11 @@ class Amslib_Plugin_Config_XML
 	{
 		if(!$this->queryPath || !is_callable($callback)) return;
 
-		$results = $this->queryPath->branch()->find($key);
+		try{
+			$results = $this->queryPath->branch()->find($key);
+		}catch(Exception $e){
+			Amslib::errorLog("QueryPath Exception",$e->getMessage);
+		}
 
 		foreach($results as $r){
 			$r = $this->toArray($r);
@@ -121,6 +129,10 @@ class Amslib_Plugin_Config_XML
 	{
 		$filename = $this->getValue("filename");
 
-		$this->queryPath = Amslib_QueryPath::qp($filename);
+		try{
+			$this->queryPath = Amslib_QueryPath::qp($filename);
+		}catch(Exception $e){
+			Amslib::errorLog("QueryPath Exception",$e->getMessage);
+		}
 	}
 }
