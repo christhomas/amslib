@@ -89,8 +89,10 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		$dd		= $this->api ? $this->api->getValue("debug_database",false) : false;
 		$ddl	= $this->api ? $this->api->getValue("debug_database_log",false) : false;
 
-		$this->enableDebug		=	Amslib::getGET("debug_database",$dd);
-		$this->enableDebugLog	=	Amslib::getGET("debug_database_log",$ddl);
+		$this->setDebugStatus(
+			Amslib::getGET("debug_database",$dd),
+			Amslib::getGET("debug_database_log",$ddl)
+		);
 	}
 
 	/**
@@ -187,5 +189,11 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		}
 
 		return parent::delete($query);
+	}
+
+	public function setDebugStatus($debug=false,$log=false)
+	{
+		$this->enableDebug		=	!!$debug;
+		$this->enableDebugLog	=	!!$log;
 	}
 }
