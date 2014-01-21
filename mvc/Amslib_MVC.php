@@ -215,9 +215,9 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getPlugin()
+	public function getPlugin($name=NULL)
 	{
-		return $this->plugin;
+		return $name ? Amslib_Plugin_Manager::getPlugin($name) : $this->plugin;
 	}
 
 	/**

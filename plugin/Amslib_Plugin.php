@@ -557,9 +557,13 @@ class Amslib_Plugin
 		$a["value"]	= $array["value"];
 
 		$file = $this->getComponent("object",$array["value"]);
-		if(file_exists($file)) $a["file"] = $file;
+		if(file_exists($file)){
+			$a["file"] = $file;
+		}
 
 		$this->data["api"] = $a;
+
+		$this->api = $this->createAPI();
 	}
 
 	public function configObject($name,$array)
@@ -905,7 +909,7 @@ class Amslib_Plugin
 		//	NOTE:	There are no implementation of this method as yet
 		//	NOTE:	we need to try creating one for the Power_Panel_Application, for the navigation items
 		//	NOTE: 	Or perhaps we could start by creating notifications and registering the Amstudios_Notifications plugin as the handler?
-		if($this->api){
+		if($this->api && method_exists($this->api,"configObject")){
 			$this->api->configObject($this->source);
 		}
 
