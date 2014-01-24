@@ -36,77 +36,9 @@
  */
 class Amslib_Router_Source_XML
 {
+	protected $filename;
 	protected $route;
 	protected $import;
-
-	/**
-	 * 	method:	processRoute
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function processRoute($node)
-	{
-		$path	=	Amslib_QueryPath::toArray($node);
-		$child	=	isset($path["child"]) ? $path["child"] : false;
-
-		if(!$path) return false;
-
-		$data = array("javascript"=>array(),"stylesheet"=>array());
-		$data["name"] = $path["attr"]["name"];
-		$data["type"] = $path["tag"];
-
-		//	If the route is a service, we need to set into the route data the format of data you want to return
-		//	Automatically this will select "session", but the alternative is "json"
-		//	You can manually override this whenever you like, it's just a stable default to fall back on
-		if($data["type"] == "service"){
-			$format = isset($path["attr"]["format"]) ? $path["attr"]["format"] : "session";
-			$data["format"] = in_array($format,array("session","json")) ? $format : "session";
-		}
-
-		foreach(Amslib_Array::valid($child) as $c){
-			//	we array_merge the tag with the attributes here because they don't collide, plus if they do
-			//	it's probably because the attribute is to override the tag information anyway
-			$c = array_merge($c,$c["attr"]);
-			$t = $c["tag"];
-			//	remove unwanted indexes so we can assign $c directly if we want to
-			unset($c["attr"],$c["tag"]);
-
-			switch($t){
-				case "src":{
-					$lang = isset($c["lang"]) ? $c["lang"] : "default";
-					$data[$t][$lang] = $c["value"];
-
-					//	if there is no default, create one, all routers require a "default source"
-					if(!isset($data[$t]["default"])) $data[$t]["default"] = $c["value"];
-				}break;
-
-				case "resource":{
-					$data[$t] = $c["value"];
-				}break;
-
-				case "parameter":{
-					if(!isset($c["id"])) continue;
-
-					$data["route_param"][$c["id"]] = $c["value"];
-				}break;
-
-				case "handler":{
-					unset($c["value"]);
-
-					$data[$t][] = $c;
-				}break;
-
-				case "stylesheet":
-				case "javascript":{
-					if(!isset($c["plugin"])) $c["plugin"] = "__CURRENT_PLUGIN__";
-
-					$data[$t][] = $c;
-				}break;
-			}
-		}
-
-		return $data;
-	}
 
 	/**
 	 * 	method:	__construct
@@ -115,43 +47,167 @@ class Amslib_Router_Source_XML
 	 */
 	public function __construct($source)
 	{
-		$file = false;
+		$this->filename	=	false;
+		$this->route	=	false;
+		$this->import	=	false;
 
 		try{
 			//	NOTE: This is ugly and I believe it's a failure of Amslib_File::find() to not do this automatically
-			if(!$file && file_exists($source)){
-				$file = $source;
+			if(!$this->filename && file_exists($source)){
+				$this->filename = $source;
 			}
-			if(!$file && file_exists($f=Amslib_File::find(Amslib_Website::rel($source),true))){
-				$file = $f;
+			if(!$this->filename && file_exists($f=Amslib_File::find(Amslib_Website::rel($source),true))){
+				$this->filename = $f;
 			}
-			if(!$file && file_exists($f=Amslib_File::find(Amslib_Website::abs($source),true))){
-				$file = $f;
-			}
-
-			$qp = Amslib_QueryPath::qp($file);
-
-			//	If there is no router, prevent this source from processing anything
-			$this->route = $qp->branch()->find("router > *[name]");
-
-			if($this->route->length){
-				//	Find any callback, if one is provided
-				Amslib_Router::setCallback($qp->find("router")->attr("callback"));
-				//	Find any imports and register them for processing later
-				$this->import = $qp->branch()->find("router > import");
-
-				return $this;
+			if(!$this->filename && file_exists($f=Amslib_File::find(Amslib_Website::abs($source),true))){
+				$this->filename = $f;
 			}
 
-			//	NOTE: this proved to be very annoying, so I turned it off
-			//Amslib::errorLog("Router was loaded, but was empty",$file);
+			if(!$this->filename){
+				Amslib::errorLog("The filename was not valid, we could not getRoutes from this XML Source");
+			}else{
+				Amslib_QueryPath::qp($this->filename);
+				Amslib_QueryPath::execCallback("router > path[name]",		array($this,"configPath"),		$this);
+				Amslib_QueryPath::execCallback("router > service[name]",	array($this,"configService"),	$this);
+				Amslib_QueryPath::execCallback("router > callback",			array($this,"configCallback"),	$this);
+				Amslib_QueryPath::execCallback("router > import",			array($this,"configImport"),	$this);
+			}
 		}catch(Exception $e){
-			Amslib::errorLog("Exception: ",$e->getMessage(),"file=",$file,"source=",$source);
+			Amslib::errorLog("Exception: ",$e->getMessage(),"file=",$this->filename,"source=",$source);
 			Amslib::errorLog("stack_trace");
 		}
+	}
 
-		$this->route	=	false;
-		$this->import	=	false;
+	public function configPath($name,$array,$object)
+	{
+		$array["name"]			=	$array["attr"]["name"];
+		$array["type"]			=	$array["tag"];
+		$array["src"]			=	array();
+		$array["javascript"]	=	array();
+		$array["stylesheet"]	=	array();
+
+		foreach($array["child"] as $child){
+			switch($child["tag"]){
+				case "src":{
+					//	Obtain the language attribute for this path url/source
+					$lang = isset($child["attr"]["lang"]) ? $child["attr"]["lang"] : "default";
+
+					$array[$child["tag"]][$lang] = $child["value"];
+
+					//	if there is no default, create one, all routers require a "default source"
+					if(!isset($array[$child["tag"]]["default"])){
+						$array[$child["tag"]]["default"] = $child["value"];
+					}
+				}break;
+
+				case "resource":{
+					$array[$child["tag"]] = $child["value"];
+				}break;
+
+				case "parameter":{
+					//	If this parameter has no attribute id, you cannot process it
+					if(!isset($child["attr"]["id"])) continue;
+
+					$array["route_param"][$child["attr"]["id"]] = $child["value"];
+				}break;
+
+				case "stylesheet":
+				case "javascript":{
+					//	NOTE: interesting!! could this be the solution to for how to automatically assign the "plugin"
+					//			attribute to routes so the system can identify which route belongs to which plugin?
+					if(!isset($child["attr"]["plugin"])) $child["attr"]["plugin"] = "__CURRENT_PLUGIN__";
+
+					$array[$child["tag"]][] = array("value"=>$child["value"],"plugin"=>$child["attr"]["plugin"]);
+				}break;
+			}
+		}
+
+		//	remove unwanted data that would just clog up the data array
+		unset($array["tag"],$array["attr"],$array["child"]);
+
+		$this->route[] = $array;
+	}
+
+	public function configService($name,$array,$object)
+	{
+		$attr				=	$array["attr"];
+		$array["name"]		=	$attr["name"];
+		$array["type"]		=	$array["tag"];
+		$array["src"]		=	array();
+		$array["handler"]	=	array();
+
+		//	NOTE:	Maybe there is a better way to organise this code, seems we are
+		//			strtolower()ing a bunch of times when perhaps is not necessary
+
+		//	Grab the default route input and output values, in order to potentially use them when setting up the handlers
+		$input	= isset($attr["input"])		? strtolower($attr["input"])	:	"post";
+		$output	= isset($attr["output"])	? strtolower($attr["output"])	:	"session";
+
+		//	Make sure the input source and output targets are valid, otherwise default to sensible values
+		if(!in_array($input,	array("get","post")))		$input	=	"post";
+		if(!in_array($output,	array("json","session")))	$output	=	"session";
+
+		foreach($array["child"] as $child){
+			if($child["tag"] == "src"){
+				$array["src"]["default"] = $child["value"];
+			}else if($child["tag"] == "handler"){
+				$c = $child["attr"];
+				//	Default input source if not found to default route source
+				if(!isset($c["input"])) $c["input"] = strtolower($input);
+				//	Validate it was set to a correct value
+				if(!in_array($c["input"],array("get","post"))) $c["input"] = "post";
+
+				//	By default, record each webservice as they happen, but not globally, separately.
+				if(!isset($c["record"])){
+					$c["record"] = true;
+					$c["global"] = false;
+				}else{
+					//	By default, recording is disabled unless it's enabled by a valid value
+					$record = false;
+
+					//	If the record value was global, per-webservice recording is disabled, but global recording is enabled
+					if(strpos($c["record"],"global")!== false)	$c["global"] = true;
+					//	If the record value was "true" or "record" then obviously turn on per-webservice recording
+					if(strpos($c["record"],"true")	!== false)	$record = true;
+					if(strpos($c["record"],"record")!== false)	$record = true;
+
+					$c["record"] = $record;
+				}
+
+				//	Failure will block unless you tell the system to ignore failure
+				//	A reason for wanting to ignore failures is that you want to accumulate all the results
+				//	and post-process them into a final result, however this requires you setup the webservices with care
+				//	and attention that failures will not cause unpredictable errors, however, that this, it is useful
+				$c["failure"] = isset($c["failure"]) && strpos($c["failure"],"ignore") ? false : true;
+
+				$array["handler"][] = $c;
+			}
+		}
+		//	remove unwanted data that would just clog up the data array
+		unset($array["tag"],$array["attr"],$array["child"]);
+
+		$this->route[] = $array;
+	}
+
+	public function configCallback($name,$array,$object)
+	{
+		if(!isset($array["value"]) || !strlen($array["value"])) return;
+
+		$callback = is_callable($array["value"]) ? $array["value"] : false;
+
+		if($callback && is_sting($callback) && strlen($callback)){
+			Amslib_Router::setCallback($callback);
+		}
+	}
+
+	public function configImport($name,$array,$object)
+	{
+		if(!isset($array["attr"]["output"]) || !isset($array["attr"]["url"])) return;
+
+		$this->import[] = array(
+				"output"	=>	$array["attr"]["output"],
+				"url"		=>	$array["attr"]["url"]
+		);
 	}
 
 	/**
@@ -161,15 +217,7 @@ class Amslib_Router_Source_XML
 	 */
 	public function getRoutes()
 	{
-		if(!$this->route) return false;
-
-		$list = array();
-
-		foreach($this->route as $r){
-			$list[] = $this->processRoute($r);
-		}
-
-		return $list;
+		return Amslib_Array::valid($this->route);
 	}
 
 	/**
@@ -179,14 +227,6 @@ class Amslib_Router_Source_XML
 	 */
 	public function getImports()
 	{
-		if(!$this->import) return false;
-
-		$list = array();
-
-		foreach($this->import as $i){
-			$list[] = Amslib_QueryPath::toArray($i);
-		}
-
-		return $list;
+		return Amslib_Array::valid($this->import);
 	}
 }

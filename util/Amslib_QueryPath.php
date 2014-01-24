@@ -15,6 +15,8 @@ class Amslib_QueryPath
 
 	static public function qp($document=NULL, $selector=NULL, $options=array())
 	{
+		self::$qp = false;
+
 		try{
 			//	NOTE: we do this output buffer trick to contain any output it might make, but strlen the output afterwards
 			//			if there was a problem, surely it'll be non-zero if it outputs anything, but we prevent this
@@ -26,14 +28,15 @@ class Amslib_QueryPath
 
 			if(strlen($warnings)){
 				Amslib::errorLog("FAILED TO OBTAIN CLEAN OUTPUT WHEN PROCESSING DOCUMENT: error = ",$warnings);
-			}else{
-				return self::$qp;
 			}
 		}catch(Exception $e){
 			//	I dunno what to do here
 		}
 
-		return qp();
+		//	Something went wrong, create a dummy object (this hasn't been tested properly)
+		if(!self::$qp) self::$qp = qp();
+
+		return self::$qp;
 	}
 
 	static public function htmlqp($document=NULL,$selector=NULL,$options=array())
@@ -90,6 +93,26 @@ class Amslib_QueryPath
 		}
 
 		return $data;
+	}
+
+	static public function execCallback($key,$callback,$object=NULL)
+	{
+		if(!self::$qp || !is_callable($callback)){
+			print("FAILED CALLBACK = ".Amslib::var_dump($callback,true));
+			return;
+		}
+
+		try{
+			$results = self::$qp->branch()->find($key);
+		}catch(Exception $e){
+			Amslib::errorLog("QueryPath Exception",$e->getMessage);
+		}
+
+		foreach($results as $r){
+			$r = Amslib_QueryPath::toArray($r);
+
+			call_user_func($callback,$r["tag"],$r,$object);
+		}
 	}
 
 	static public function get()

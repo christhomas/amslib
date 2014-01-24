@@ -394,17 +394,32 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		$route = Amslib_Router::getRoute();
 
+		//	NOTE:	Perhaps dying horribly like you just drove off a cliff in your
+		//				lamborghini with a martini in one hand, a hooker blowing you whilst
+		//				smoking an enormous cigar made of 100 dollar bills is NOT the best
+		//				way to handle failure?
+
+		//	NOTE:	However, check all the route data is valid before using it
+
 		if(!$route) die(__FILE__.": route is invalid");
 
-		//	check all the route data is valid before using it
-		if(!isset($route["group"]) || !strlen($route["group"])) die(__FILE__.": route/group is invalid");
-		if(!isset($route["name"]) || !strlen($route["name"])) die(__FILE__.": route/name is invalid");
-		if(!isset($route["handler"]) || !is_array($route["handler"]) || empty($route["handler"])) die(__FILE__.": route/handler is invalid or empty");
+		if(!isset($route["group"]) || !strlen($route["group"])){
+			die(__FILE__.": route/group is invalid");
+		}
+
+		if(!isset($route["name"]) || !strlen($route["name"])){
+			die(__FILE__.": route/name is invalid");
+		}
+
+		if(!isset($route["handler"]) || !is_array($route["handler"]) || empty($route["handler"])){
+			die(__FILE__.": route/handler is invalid or empty");
+		}
 
 		$this->api->setupService($route["group"],$route["name"]);
 
 		$service = Amslib_Plugin_Service::getInstance();
-		foreach(Amslib_Array::valid($route["handler"]) as $h){
+		foreach(Amslib_Array::valid($route["handler"]) as $h)
+		{
 			//	Special customisation for framework urls, which normally execute on objects regardless of plugin
 			//	So we just use plugin as the key to trigger this
 			//	NOTE: this means framework has become a system name and cannot be used as a name of any plugin?
@@ -420,27 +435,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				$method	=	isset($h["method"]) ? $h["method"] : "missingServiceMethod";
 			}
 
-			$record		= true;
-			$global		= false;
-			$failure	= true;
-
-			if(isset($h["record"])){
-				$record = false;
-
-				if(strpos($h["record"],"global")	!== false) 	$global = true;
-				if(strpos($h["record"],"true")		!== false)	$record = true;
-				if(strpos($h["record"],"record")	!==	false)	$record = true;
-			}
-
-			if(isset($h["failure"])){
-				if(strpos($h["failure"],"ignore") !== false) $failure = false;
-			}
-
-			if(!isset($h["source"])) $h["source"] = "post";
-			$h["source"] = strtolower($h["source"]);
-			if(!in_array($h["source"],array("get","post"))) $h["source"] = "post";
-
-			$service->setHandler($route["format"],$plugin,$object,$method,$h["source"],$record,$global,$failure);
+			$service->setHandler($route["output"],$plugin,$object,$method,$h["source"],$h["record"],$h["global"],$h["failure"]);
 		}
 
 		$service->execute();

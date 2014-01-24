@@ -264,11 +264,11 @@ class Amslib_Router
 
 			if($domain == NULL) $domain = self::$domain;
 
-			foreach(Amslib_Array::valid($s->getRoutes()) as $route){
+			foreach($s->getRoutes() as $route){
 				self::setRoute($route["name"],$group,$domain,$route);
 			}
 
-			foreach(Amslib_Array::valid($s->getImports()) as $import){
+			foreach($s->getImports() as $import){
 				self::importRouter($import);
 			}
 		}catch(Exception $e){
@@ -714,10 +714,10 @@ class Amslib_Router
 	static public function importRouter($import)
 	{
 		//	acquire the latest route for the export url and construct the url to call the external remote service
-		$route	=	self::getRoute("service:framework:router:export:".$import["attr"]["type"]);
-		$url	=	rtrim($import["attr"]["url"],"/").$route["src"]["default"];
+		$route	=	self::getRoute("service:framework:router:export:".$import["output"]);
+		$url	=	rtrim($import["url"],"/").$route["src"]["default"];
 
-		if($import["attr"]["type"] == "json"){
+		if($import["output"] == "json"){
 			//	We are going to install a router using json as a data transfer medium
 			//	Acquire the json, decode it and obtain the domain
 			ob_start();
@@ -725,7 +725,7 @@ class Amslib_Router
 			$caught = ob_get_clean();
 
 			if(strlen($caught)){
-				Amslib::errorLog("FAILED TO IMPORT ROUTER, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
+				Amslib::errorLog("FAILED TO IMPORT ROUTER IN JSON FORMAT, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
 			}
 
 			$data	= json_decode($data,true);
@@ -738,8 +738,15 @@ class Amslib_Router
 			foreach(Amslib_Array::valid($data["cache"]) as $route){
 				self::setRoute($route["name"],$route["group"],$domain,$route,false);
 			}
-		}else if($import["attr"]["type"] == "xml"){
-			$data = file_get_contents($url);
+		}else if($import["output"] == "xml"){
+			ob_start();
+				$data = file_get_contents($url);
+			$caught = ob_get_clean();
+
+			if(strlen($caught)){
+				Amslib::errorLog("FAILED TO IMPORT ROUTER IN XML FORMAT, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
+			}
+
 			//	TODO: implement the logic to import from XML
 		}
 	}
