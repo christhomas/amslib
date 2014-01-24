@@ -40,40 +40,13 @@ class Amslib_Router_Source_XML
 	protected $import;
 
 	/**
-	 * 	method:	toArray
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function toArray($node,$recursive=true)
-	{
-		if(!$node || $node->count() == 0) return false;
-
-		$data			=	array();
-		$data["attr"]	=	$node->attr();
-		$data["tag"]	=	$node->tag();
-		$childNodes		=	$node->branch()->children();
-
-		//	recurse to decode the child or merely store the child to process later
-		foreach($childNodes as $c){
-			$data["child"][] = $recursive
-				? $this->toArray($c,$recursive)
-				: array("tag"=>$c->tag(),"child"=>$c);
-		}
-
-		//	If the node doesn't have children, obtain the text and store as it's value
-		if(count($childNodes) == 0) $data["value"] = $node->text();
-
-		return $data;
-	}
-
-	/**
 	 * 	method:	processRoute
 	 *
 	 * 	todo: write documentation
 	 */
 	protected function processRoute($node)
 	{
-		$path	=	$this->toArray($node);
+		$path	=	Amslib_QueryPath::toArray($node);
 		$child	=	isset($path["child"]) ? $path["child"] : false;
 
 		if(!$path) return false;
@@ -192,7 +165,9 @@ class Amslib_Router_Source_XML
 
 		$list = array();
 
-		foreach($this->route as $r) $list[] = $this->processRoute($r);
+		foreach($this->route as $r){
+			$list[] = $this->processRoute($r);
+		}
 
 		return $list;
 	}
@@ -208,7 +183,9 @@ class Amslib_Router_Source_XML
 
 		$list = array();
 
-		foreach($this->import as $i) $list[] = $this->toArray($i);
+		foreach($this->import as $i){
+			$list[] = Amslib_QueryPath::toArray($i);
+		}
 
 		return $list;
 	}
