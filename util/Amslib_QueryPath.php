@@ -79,7 +79,7 @@ class Amslib_QueryPath
 			//	recurse to decode the child or merely store the child to process later
 			foreach($childNodes as $c){
 				$data["child"][] = $recursive
-					? $this->toArray($c,$recursive)
+					? self::toArray($c,$recursive)
 					: array("tag"=>$c->tag(),"child"=>$c);
 			}
 
