@@ -8,37 +8,6 @@ class Amslib_Plugin_Config_XML
 	protected $queryPath;
 
 	/**
-	 * 	method:	toArray
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function toArray($node,$recursive=true)
-	{
-		if(!$node || $node->count() == 0) return false;
-
-		try{
-			$data			=	array();
-			$data["attr"]	=	$node->attr();
-			$data["tag"]	=	$node->tag();
-			$childNodes		=	$node->branch()->children();
-
-			//	recurse to decode the child or merely store the child to process later
-			foreach($childNodes as $c){
-				$data["child"][] = $recursive
-					? $this->toArray($c,$recursive)
-					: array("tag"=>$c->tag(),"child"=>$c);
-			}
-
-			//	If the node doesn't have children, obtain the text and store as it's value
-			if(count($childNodes) == 0) $data["value"] = $node->text();
-		}catch(Exception $e){
-			Amslib::errorLog("QueryPath Exception",$e->getMessage);
-		}
-
-		return $data;
-	}
-
-	/**
 	 * 	method:	__construct
 	 *
 	 * 	parameters:
@@ -119,7 +88,7 @@ class Amslib_Plugin_Config_XML
 		}
 
 		foreach($results as $r){
-			$r = $this->toArray($r);
+			$r = Amslib_QueryPath::toArray($r);
 
 			call_user_func($callback,$r["tag"],$r,$object);
 		}

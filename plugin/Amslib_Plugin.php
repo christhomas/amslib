@@ -373,6 +373,7 @@ class Amslib_Plugin
 
 		//	This stores where all the types components are stored as part of the application
 		//	WARNING: object is soon to be deprecated
+		//	NOTE: this isnt true, i am not, at the end planning to deprecate object
 		$this->setComponent("object",		"objects",		"");
 		$this->setComponent("controller",	"controllers",	"Ct_");
 		$this->setComponent("model",		"models",		"Mo_");
@@ -543,7 +544,7 @@ class Amslib_Plugin
 		}
 	}
 
-	public function configAPI($name,$array)
+	public function configAPI($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -566,7 +567,7 @@ class Amslib_Plugin
 		$this->api = $this->createAPI();
 	}
 
-	public function configObject($name,$array)
+	public function configObject($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -582,7 +583,7 @@ class Amslib_Plugin
 		$this->data["object"][$a["value"]] = $a;
 	}
 
-	public function configController($name,$array)
+	public function configController($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -619,7 +620,7 @@ class Amslib_Plugin
 	 *	note:	This code is almost 100% copied from configModel(), see there for the same code documentation
 	 *	note:	I am doing this duplicated like this so I avoid pre-optimisation before I see the final working code
 	 */
-	public function configModelConnection($name,$array)
+	public function configModelConnection($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -654,7 +655,7 @@ class Amslib_Plugin
 		$this->data["model"] = $a;
 	}
 
-	public function configModel($name,$array)
+	public function configModel($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -689,7 +690,7 @@ class Amslib_Plugin
 		$this->data["object"][$array["value"]] = $array;
 	}
 
-	public function configView($name,$array)
+	public function configView($name,$array,$object)
 	{
 		$a = array_merge(array("id"=>$array["value"],"value"=>$array["value"]),$array["attr"]);
 
@@ -700,7 +701,7 @@ class Amslib_Plugin
 		//print(__METHOD__.": plugin[".$this->getName()."] => ".Amslib::var_dump($this->data["view"],true));
 	}
 
-	public function configService($name,$array)
+	public function configService($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -718,7 +719,7 @@ class Amslib_Plugin
 		$this->data["service"][] = $a;
 	}
 
-	public function configJavascript($name,$array)
+	public function configJavascript($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -731,7 +732,7 @@ class Amslib_Plugin
 		if(isset($a["id"])) $this->data["javascript"][$a["id"]] = $a;
 	}
 
-	public function configStylesheet($name,$array)
+	public function configStylesheet($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -743,7 +744,7 @@ class Amslib_Plugin
 		if(isset($a["id"])) $this->data["stylesheet"][$a["id"]] = $a;
 	}
 
-	public function configImage($name,$array)
+	public function configImage($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -756,7 +757,7 @@ class Amslib_Plugin
 		if(isset($a["id"])) $this->data["image"][$a["id"]] = $a;
 	}
 
-	public function configFont($name,$array)
+	public function configFont($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -771,7 +772,7 @@ class Amslib_Plugin
 		}
 	}
 
-	public function configTranslator($name,$array)
+	public function configTranslator($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -795,7 +796,7 @@ class Amslib_Plugin
 		}
 	}
 
-	public function configValue($name,$array)
+	public function configValue($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -809,7 +810,7 @@ class Amslib_Plugin
 		}
 	}
 
-	public function configPath($name,$array)
+	public function configPath($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -834,7 +835,7 @@ class Amslib_Plugin
 		}
 	}
 
-	public function configPlugin($name,$array)
+	public function configPlugin($name,$array,$object)
 	{
 		//print(__METHOD__.": plugin[".$this->getName()."], name[$name] => ".Amslib::var_dump($array,true));
 
@@ -863,6 +864,18 @@ class Amslib_Plugin
 		}
 	}
 
+	public function configRouter($name,$array,$object)
+	{
+		//	NOTE: is it possible in the future to ask the router to add a parameter by default to each route
+		//	NOTE: if it was, I wouldn't have to add all the time the plugin to the routes that belong to this configuration
+		//	NOTE: which would solve a silly problem which has happened for a long time, but only really happens
+		//			in situations like the power panel, where the route has to know which plugin was responsible
+		//	NOTE: however, this is not true JUST of the power panel, it would matter for ANY plugin based architecture
+		//			where the system would render a plugin, based on a route, you'd obviously need to know the relationship
+		//	NOTE: this obviously won't work if you try to use a database configuration object
+		Amslib_Router::load($this->source->getValue("filename"),"xml",$this->getName());
+	}
+
 	/**
 	 * 	method:	config
 	 *
@@ -873,11 +886,6 @@ class Amslib_Plugin
 		$this->isConfigured	=	false;
 		$this->isLoaded		=	false;
 		$this->name			=	$name;
-
-		//print("source = ".Amslib::var_dump(array($this->getName(),$this->source),true));
-
-		//	NOTE: this obviously won't work if you try to use a database configuration object
-		Amslib_Router::load($this->source->getValue("filename"),"xml",$this->getName());
 
 		//	NOTE:	I chose to make this an array because I could allow it to be
 		//			configured and then run it through a generic process step below,
@@ -898,23 +906,23 @@ class Amslib_Plugin
 			"package > translator"			=>	array($this,"configTranslator"),
 			"package > value"				=>	array($this,"configValue"),
 			"package > path"				=>	array($this,"configPath"),
-			"package > requires plugin"		=>	array($this,"configPlugin")
+			"package > requires plugin"		=>	array($this,"configPlugin"),
+			"package > router"				=>	array($this,"configRouter")
 		);
 
+		//	Prepare and process all the selectors that we do by default
 		$this->source->prepare();
 		foreach($selectors as $s=>$c){
 			$this->source->process($s,$c);
 		}
 
-		//	NOTE:	There are no implementation of this method as yet
-		//	NOTE:	we need to try creating one for the Power_Panel_Application, for the navigation items
-		//	NOTE: 	Or perhaps we could start by creating notifications and registering the Amstudios_Notifications plugin as the handler?
+		//	Now request the plugin process the configuration and any special configuration it might want
 		if($this->api && method_exists($this->api,"configObject")){
 			$this->api->configObject($this->source);
 		}
 
+		//	Save memory, be water my friend, delete unwanted things
 		$this->deleteConfigSource();
-		//print("TESTING, config[".$this->getName()."] = ".Amslib::var_dump($this->data,true));
 
 		$this->isConfigured = true;
 
