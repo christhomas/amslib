@@ -108,7 +108,7 @@ class Amslib_Plugin_Config_XML
 		return false;
 	}
 
-	public function process($key,$callback)
+	public function process($key,$callback,$object=NULL)
 	{
 		if(!$this->queryPath || !is_callable($callback)) return;
 
@@ -121,7 +121,7 @@ class Amslib_Plugin_Config_XML
 		foreach($results as $r){
 			$r = $this->toArray($r);
 
-			call_user_func($callback,$r["tag"],$r);
+			call_user_func($callback,$r["tag"],$r,$object);
 		}
 	}
 
