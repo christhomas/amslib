@@ -662,6 +662,7 @@ class Amslib_Router
 	 * 	method:	decodeURLPairs
 	 *
 	 * 	todo: write documentation
+	 * 	note: probably this doesn't belong here, but in a generic "url, web" object instead
 	 */
 	static public function decodeURLPairs($offset=0)
 	{
