@@ -211,16 +211,19 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	We can't use Amslib_Plugin_Manager for this, because it's an application plugin
 		$this->config($name);
 		//	Process all the imports and exports so all the plugins contain the correct data
-		$this->transfer();
+		Amslib_Plugin_Manager::processImport();
+		Amslib_Plugin_Manager::processExport();
 		//	Now we have to load all the plugins into the system
 		$this->load();
 
-		$this->runCompletionCallbacks();
-
+		//	NOTE:	perhaps we can add a default callback for running the method Amslib_Plugin_Manager::processTransfers
 		//	NOTE:	after all the plugins are loaded, do we need ot keep the plugin objects in memory, perhaps we should
 		//			dump them all once all the API objects are created
 		//	NOTE:	perhaps we register a completion callback to manually take care of this, it sounds like a useful way
 		//			to save some memory, all those xml objects must take up space and especially the bulky confguration arrays
+		//	NOTE:	we currently are deleting it inside the plugin code, perhaps this is not elegant
+
+		$this->runCompletionCallbacks();
 	}
 
 	/**

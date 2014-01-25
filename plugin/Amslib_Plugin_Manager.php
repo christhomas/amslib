@@ -42,6 +42,8 @@ class Amslib_Plugin_Manager
 	static protected $location	=	array();
 	static protected $replace	=	array();
 	static protected $prevent	=	array();
+	static protected $import	=	array();
+	static protected $export	=	array();
 
 	/**
 	 * 	method:	findPlugin
@@ -297,6 +299,124 @@ class Amslib_Plugin_Manager
 	static public function getLocation()
 	{
 		return self::$location;
+	}
+
+	static public function addImport($src,$dst,$key,$value)
+	{
+		$queue = !is_string($src) && is_object($src) ? $src->getName() : $src;
+
+		self::$import[$queue][] = array("src"=>$src,"dst"=>$dst,"key"=>$key,"val"=>$value);
+	}
+
+	static public function addExport($src,$dst,$key,$value)
+	{
+		$queue = !is_string($src) && is_object($src) ? $src->getName() : $src;
+
+		self::$export[$queue][] = array("src"=>$src,"dst"=>$dst,"key"=>$key,"val"=>$value);
+	}
+
+	static public function processImport()
+	{
+		foreach(self::$import as $key=>$list) foreach($list as $value){
+			$src	= self::getPlugin($value["src"]);
+			$dst	= is_string($value["dst"]) ? self::getPlugin($value["dst"]) : $value["dst"];
+			$data	= false;
+
+			if(!$src || !$dst){
+				$sname = is_object($src) ? $src->getName() : $src;
+				$dname = is_object($dst) ? $dst->getName() : $dst;
+
+				Amslib::errorLog("plugin invalid",intval(is_object($src)),intval(is_object($dst)),$sname,$dname);
+				continue;
+			}
+
+			switch($value["key"]){
+				case "view":
+				case "stylesheet":
+				case "javascript":
+				case "font":
+				case "translator":
+				case "value":{
+					die("[DIE]IMPORT[$key] => ".Amslib::var_dump(array($src->getName(),$dst->getName(),$value["key"],$value["val"]),true));
+				}break;
+
+				//	We do nothing special with these entries, we simply pass them
+				case "image":
+				case "model":
+				default:{
+					$data = $src->getValue($value["key"]);
+					$dst->setValue($value["key"],$data);
+				}break;
+
+				case "service":{
+					/*
+					//	TODO	we are processing an xml block named "service" but allowing the service to be a route????
+					//	FIXME:	this is obviously fucking stupid....perhaps the block should be called "router" or done
+					//			a different way, because this is obviously not the right way
+					$r = $item["service"] == "true"
+						? Amslib_Router::getService($item["name"],$item["plugin"])
+						: Amslib_Router::getRoute($item["name"],$item["plugin"]);
+
+					Amslib_Router::setRoute($item["rename"],$this->getName(),NULL,$r,false);
+
+					//	the following parameters are available
+					//
+					//	plugin, name, service, rename
+					//		plugin => src plugin to obtain service from
+					//		name => the service to obtain
+					//		service => whether it's a service or path route
+					//		rename => the local name to store the copy in
+					 */
+				}break;
+			}
+		}
+
+		self::$import = NULL;
+	}
+
+	static public function processExport()
+	{
+		foreach(self::$export as $key=>$list) foreach($list as $name=>$value){
+			$src	= is_string($value["src"]) ? self::getPlugin($value["src"]) : $value["src"];
+			$dst	= is_string($value["dst"]) ? self::getPlugin($value["dst"]) : $value["dst"];
+			$data	=	false;
+
+			if(!$src || !$dst){
+				$sname = is_object($src) ? $src->getName() : $src;
+				$dname = is_object($dst) ? $dst->getName() : $dst;
+
+				Amslib::errorLog("plugin invalid",intval(is_object($src)),intval(is_object($dst)),$sname,$dname);
+				continue;
+			}
+
+			switch($value["key"]){
+				case "stylesheet":
+				case "javascript
+				case "font":{
+					die("[DIE]EXPORT[$key] => ".Amslib::var_dump(array($src->getName(),$dst->getName(),$value["key"],$value["val"]),true));
+				}break;
+
+				case "view":
+				case "value":{
+					$dst->setValue($value["key"],$value["val"]);
+				}break;
+
+				//	We do nothing special with these entries, we simply pass them
+				case "model":
+				case "translator":
+				default:{
+					$data = $src->getValue($value["key"]);
+					$dst->setValue($value["key"],$data);
+				}break;
+
+				case "service":{
+					Amslib_FirePHP::output("export",$item);
+					//	Hmmm, I need a test case cause otherwise I won't know if this works
+				}
+			}
+		}
+
+		self::$export = NULL;
 	}
 
 	/*******************************************************************
