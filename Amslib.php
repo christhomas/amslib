@@ -743,6 +743,11 @@ class Amslib
 	 */
 	static public function __importFile($__r,$__f,$__p=array(),$__b=false)
 	{
+		if(is_array($__f)){
+			Amslib::errorLog("array was passed, string is required",$__f);
+			return false;
+		}
+
 		$path = "";
 
 		if(!file_exists($__f)){
