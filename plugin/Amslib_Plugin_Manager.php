@@ -391,7 +391,7 @@ class Amslib_Plugin_Manager
 
 			switch($value["key"]){
 				case "stylesheet":
-				case "javascript
+				case "javascript":
 				case "font":{
 					die("[DIE]EXPORT[$key] => ".Amslib::var_dump(array($src->getName(),$dst->getName(),$value["key"],$value["val"]),true));
 				}break;
