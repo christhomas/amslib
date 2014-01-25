@@ -757,7 +757,8 @@ class Amslib
 		}
 
 		//	NOTE:	Cannot use Amslib_File::reduceSlashes here, chicken/egg type problem
-		//	NOTE:	Actually, I think it's much more than that, you can't use anything autoloaded here
+		//	NOTE:	Actually, I think it's much more than that, you can't use anything autoloaded
+		//			here because this method is used by the autoloader
 		$__f = preg_replace('#//+#','/',"{$path}$__f");
 
 		if(is_file($__f) && file_exists($__f)){
