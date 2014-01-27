@@ -438,15 +438,21 @@ class Amslib_MVC extends Amslib_Mixin
 		if(is_string($id) && isset($this->view[$id]))
 		{
 			//	What are view parameters for again??
+			//	NOTE: 27/01/2014: I still have no idea, probably I should remove it
 			if(!empty($params)) $this->setViewParam($params);
 
-			//	TODO: what happens if api, _w and _c are already defined and you just overwrote them?
-			//	NOTE: this shouldn't happen, they are special so nobody should use them
-			//	NOTE: perhaps we can warn people when they do this? or perhaps move our keys to a more unique "namespace"
-			//	FIXME: what if multiple translators of the same type are defined? they would start to clash
+			if(Amslib_Array::hasKeys($params,array("api","wt","ct"))){
+				Amslib::errorLog(
+						"ERROR: A reserved key was detected in this array,
+						this might result in subtle errors, please remove 'api', 'wt' or 'ct',
+						they are used by the framework to provide access to the api object, and the translators"
+				);
+			}
+
 			$params["api"]	=	$this;
-			$params["_w"]	=	$this->getTranslator("website");
-			$params["_c"]	=	$this->getTranslator("content");
+			//	FIXME: what if multiple translators of the same type are defined? they would start to clash
+			$params["wt"]	=	$this->getTranslator("website");
+			$params["ct"]	=	$this->getTranslator("content");
 
 			return Amslib::requireFile($this->view[$id],$params,true);
 		}
