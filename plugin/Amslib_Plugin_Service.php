@@ -695,6 +695,14 @@ class Amslib_Plugin_Service
 		}
 	}
 
+	public function serviceWebserviceCatchall($service,$source)
+	{
+		$service->setOutputFormat("json");
+		$service->setData($this,"webservice_found",false);
+
+		return true;
+	}
+
 	/*****************************************************************************
 	 * 	STATIC API TO RETRIEVE SESSION DATA
 	*****************************************************************************/

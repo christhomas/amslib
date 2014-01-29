@@ -14,4 +14,9 @@
 		<src>/amslib/framework/router/export/debug/</src>
 		<handler plugin="framework" object="Amslib_Router" method="serviceExportRouterDEBUG" />
 	</service>
+	
+	<service name="framework:webservice:catchall">
+		<src>/webservice/</src>
+		<handler plugin="framework" object="Amslib_Plugin_Service" method="serviceWebserviceCatchall" />
+	</service>
 </router>
