@@ -130,11 +130,15 @@ class Amslib_Website
 	 * 	method:	outputJSON
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	note: I hate this function name, I think we should change it to something more elegant
 	 */
 	static public function outputJSON($array,$block=true)
 	{
 		header("Cache-Control: no-cache");
 		header("Content-Type: application/json");
+		//	NOTE: perhaps it would be nice to limit this CORS header in the future
+		header("Access-Control-Allow-Origin: *");
 
 		$json = json_encode($array);
 		//	if there is a callback specified, wrap up the json into a jsonp format
