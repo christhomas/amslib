@@ -438,7 +438,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 				$method	=	isset($h["method"]) ? $h["method"] : "missingServiceMethod";
 			}
 
-			$service->setHandler($route["output"],$plugin,$object,$method,$h["source"],$h["record"],$h["global"],$h["failure"]);
+			$service->setHandler($route["output"],$plugin,$object,$method,$h["input"],$h["record"],$h["global"],$h["failure"]);
 		}
 
 		$service->execute();

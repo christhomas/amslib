@@ -130,30 +130,26 @@ class Amslib_Router_Source_XML
 
 	public function configService($name,$array,$object)
 	{
-		$attr				=	$array["attr"];
-		$array["name"]		=	$attr["name"];
-		$array["type"]		=	$array["tag"];
-		$array["src"]		=	array();
-		$array["handler"]	=	array();
-
-		//	NOTE:	Maybe there is a better way to organise this code, seems we are
-		//			strtolower()ing a bunch of times when perhaps is not necessary
+		$a 					=	$array["attr"];
+		$a["type"]			=	$array["tag"];
+		$a["src"]			=	array();
+		$a["handler"]		=	array();
 
 		//	Grab the default route input and output values, in order to potentially use them when setting up the handlers
-		$input	= isset($attr["input"])		? strtolower($attr["input"])	:	"post";
-		$output	= isset($attr["output"])	? strtolower($attr["output"])	:	"session";
+		$a["input"]		= isset($a["input"])	? strtolower($a["input"])	:	"post";
+		$a["output"]	= isset($a["output"])	? strtolower($a["output"])	:	"session";
 
 		//	Make sure the input source and output targets are valid, otherwise default to sensible values
-		if(!in_array($input,	array("get","post")))		$input	=	"post";
-		if(!in_array($output,	array("json","session")))	$output	=	"session";
+		//	TODO: In the future, support "xml"
+		if(!in_array($a["output"],array("json","session"))) $a["output"] = "session";
 
 		foreach($array["child"] as $child){
 			if($child["tag"] == "src"){
-				$array["src"]["default"] = $child["value"];
+				$a["src"]["default"] = $child["value"];
 			}else if($child["tag"] == "handler"){
 				$c = $child["attr"];
 				//	Default input source if not found to default route source
-				if(!isset($c["input"])) $c["input"] = strtolower($input);
+				if(!isset($c["input"])) $c["input"] = $a["input"];
 				//	Validate it was set to a correct value
 				if(!in_array($c["input"],array("get","post"))) $c["input"] = "post";
 
@@ -180,13 +176,11 @@ class Amslib_Router_Source_XML
 				//	and attention that failures will not cause unpredictable errors, however, that this, it is useful
 				$c["failure"] = isset($c["failure"]) && strpos($c["failure"],"ignore") ? false : true;
 
-				$array["handler"][] = $c;
+				$a["handler"][] = $c;
 			}
 		}
-		//	remove unwanted data that would just clog up the data array
-		unset($array["tag"],$array["attr"],$array["child"]);
 
-		$this->route[] = $array;
+		$this->route[] = $a;
 	}
 
 	public function configCallback($name,$array,$object)
