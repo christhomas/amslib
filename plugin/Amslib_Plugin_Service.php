@@ -134,6 +134,7 @@ class Amslib_Plugin_Service
 	 */
 	protected function successJSON()
 	{
+		//	NOTE: I don't like the method name "outputJSON", I think it's ugly and not elegant
 		Amslib_Website::outputJSON($this->session,true);
 	}
 
@@ -155,6 +156,7 @@ class Amslib_Plugin_Service
 	protected function sanitiseURL($url)
 	{
 		//	Capture the http:// part so you can replace it afterwards
+		//	NOTE: what happens if you are running from https:// ?
 		$http = strpos($url,"http://") !== false ? "http://" : "";
 		//	strip away the http:// part first, because it won't survive the reduceSlashes otherwise
 		return $http.Amslib_File::reduceSlashes(str_replace("http://","",$url));
@@ -168,6 +170,7 @@ class Amslib_Plugin_Service
 	public function __construct()
 	{
 		//	FIXME: we are hardcoding a route "home" which might not exist, this could be a bad idea
+		//	NOTE: perhaps url_return, url_success, url_failure is better, because it puts the keyword "url" at the beginning?
 		$default_url	=	Amslib_Router::getURL("home");
 		$return_url		=	Amslib::rchop(Amslib::postParam("return_url",$default_url),"?");
 
@@ -178,12 +181,13 @@ class Amslib_Plugin_Service
 		$this->data		=	array();
 		$this->session	=	array(self::HD=>array());
 		//	blank the appropriate session key to stop previous sessions overlapping
+		//	what if you are using the json output? then there is no key to erase, so you're just creating session keys and not using them
 		Amslib::getSESSION(self::SR,false,true);
 		//	NOTE: this "violates" mixing key types, but it's simpler than not doing it, so I'll "tolerate" it for this situation
 		//	NOTE: I don't actually remember what "mixing key types" means, I need to write a better explanation when I figure it out
 		$this->showFeedback();
 		//	NOTE: I should update return_ajax to something like "data_format:[json,session]" in the form instead of this
-		$this->setFormat(Amslib::postParam("return_ajax",false) ? "json" : "session");
+		$this->setOutputFormat(Amslib::postParam("return_ajax",false) ? "json" : "session");
 	}
 
 	/**
@@ -199,37 +203,37 @@ class Amslib_Plugin_Service
 
 		return $instance;
 	}
-	
-	public function setFormat($format)
+
+	public function setOutputFormat($format)
 	{
 		$this->format = $format;
-		
+
 		switch($this->format){
 			case "session":{
 				$this->successCB = "successSESSION";
 				$this->failureCB = "failureSESSION";
 			}break;
-			
+
 			case "json":{
 				$this->successCB = "successJSON";
 				$this->failureCB = "failureJSON";
-				
+
 				//	When doing ajax calls, you should never show feedback on the next available page
 				$this->hideFeedback();
 			}break;
-			
+
 			case "xml":{
 				//	NOTE: I just add the code here because it's easy to do, but this isn't supported yet
 				$this->successCB = "successXML";
 				$this->failureCB = "failureXML";
-				
+
 				//	When doing ajax calls, you should never show feedback on the next available page
 				$this->hideFeedback();
 			}break;
 		}
 	}
-	
-	public function getFormat()
+
+	public function getOutputFormat()
 	{
 		return $this->format;
 	}
@@ -337,6 +341,9 @@ class Amslib_Plugin_Service
 	 * 	method:	setHandler
 	 *
 	 * 	todo: write documentation
+	 * 	note: is the $format parameter here related with the previous now deprecated method setFormat ?
+	 * 	note: if it is, then perhaps I should change it to $output instead?
+	 * 	note: but $output is very ambiguous...or maybe it just appears that way.
 	 */
 	public function setHandler($format,$plugin,$object,$method,$source="post",$record=true,$global=false,$failure=true)
 	{
@@ -441,8 +448,8 @@ class Amslib_Plugin_Service
 			}else{
 				$source = &$_POST;
 			}
-			
-			$this->setFormat($h["format"]);
+
+			$this->setOutputFormat($h["format"]);
 
 			//	Run the handler, either in managed or unmanaged mode
 			$state = isset($h["managed"])
@@ -830,6 +837,10 @@ class Amslib_Plugin_Service
 	public function setTemp($key,$value){	$this->setVar($key,$value);	}
 	//	NOTE: use getVar instead
 	public function getTemp($key){			return $this->getVar($key); }
-	//	NOTE: use setFormat instead
-	public function setAjax($status){		$this->setFormat($status ? "json" : "session");	}
+	//	NOTE: use setOutputFormat instead
+	public function setAjax($status){		$this->setOutputFormat($status ? "json" : "session");	}
+	//	NOTE: use setOutputFormat instead
+	public function setFormat($format){		$this->setOutputFormat($format);	}
+	//	NOTE: use getOutputFormat instead
+	public function getFormat(){			return $this->getOutputFormat();	}
 }
