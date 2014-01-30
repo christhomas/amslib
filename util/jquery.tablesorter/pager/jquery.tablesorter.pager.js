@@ -616,7 +616,7 @@
 				if (p.savePages && ts.storage) {
 					t = ts.storage(table, 'tablesorter-pager') || {}; // fixes #387
 					p.page = isNaN(t.page) ? p.page : t.page;
-					p.size = ( isNaN(t.size) ? p.size : t.size ) || 10;
+					p.size = ( isNaN(p.size) ? t.size : p.size ) || 10;
 					$.data(table, 'pagerLastSize', p.size);
 				}
 
