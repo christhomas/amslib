@@ -381,7 +381,7 @@ class Amslib_Plugin_Service
 		//	NOTE:	this might seem a little harsh, but it's a critical error, your object doesn't have
 		//			the method you said it would, probably this means something in your code is broken
 		//			and you need to know about it and fix it.
-		die("FAILURE[p:$object][m:$method]-> method did not exist, so could not be called");
+		die("FAILURE[c:$object][m:$method]-> method did not exist, so could not be called");
 	}
 
 	//	NOTE: the code is ready however the system is not
@@ -467,7 +467,7 @@ class Amslib_Plugin_Service
 		call_user_func(array($this,$state ? $this->successCB : $this->failureCB));
 
 		//	If you arrive here, something very seriously wrong has happened
-		die("FAILURE[p:".get_class($plugin)."][m:$method]-> All services should terminate with redirect or json");
+		die("FAILURE: All services should terminate with redirect or json");
 	}
 
 	/**
