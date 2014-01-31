@@ -323,10 +323,10 @@ class Amslib_Plugin_Manager
 			$data	= false;
 
 			if(!$src || !$dst){
-				$sname = is_object($src) ? $src->getName() : $src;
-				$dname = is_object($dst) ? $dst->getName() : $dst;
+				$sname = is_object($src) ? $src->getName() : "searched: {$value["src"]}";
+				$dname = is_object($dst) ? $dst->getName() : "searched: {$value["dst"]}";
 
-				Amslib::errorLog("plugin invalid",intval(is_object($src)),intval(is_object($dst)),$sname,$dname);
+				Amslib::errorLog("plugin invalid",intval(is_object($src)).", ".intval(is_object($dst)),$sname,$dname);
 				continue;
 			}
 
