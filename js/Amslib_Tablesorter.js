@@ -242,7 +242,7 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		
 		this.options = $.extend(true, {}, o, options);
 		
-		var widgets	= this.parent.data(d.widgets).split(","),
+		var widgets	= this.parent.data(d.widgets),
 			ajaxUrl	= this.parent.data(d.ajax),
 			pager	= this.parent.data(d.pager);
 		
@@ -250,7 +250,7 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		this.options.tablesorter.widgetOptions = $.extend(true,{},f);
 		
 		if(widgets && widgets.length){
-			this.options.tablesorter.widgets = widgets;
+			this.options.tablesorter.widgets = widgets.split(",");
 		}
 		
 		this.parent	= this.parent;
