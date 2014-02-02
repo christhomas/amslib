@@ -455,6 +455,8 @@ class Amslib_MVC extends Amslib_Mixin
 			$params["ct"]	=	$this->getTranslator("content");
 
 			return Amslib::requireFile($this->view[$id],$params,true);
+		}else{
+			Amslib::errorLog("Unable to find view in structure",$id,$this->view);
 		}
 
 		return "";
@@ -465,9 +467,9 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function listViews()
+	public function listViews($keys=true)
 	{
-		return array_keys($this->view);
+		return $keys ? array_keys($this->view) : $this->view;
 	}
 
 	/**
@@ -784,7 +786,7 @@ class Amslib_MVC extends Amslib_Mixin
 			return $relative ? Amslib_Website::rel($path) : $path;
 		}
 
-		Amslib::errorLog("failed to find image",$id,$relative,$path,$this->location);
+		Amslib::errorLog("stack_trace","failed to find image",$id,$relative,$path,$this->location);
 
 		//	Step 4: return false, image was not found
 		return false;
