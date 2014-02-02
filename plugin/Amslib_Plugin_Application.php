@@ -240,6 +240,14 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return $instance;
 	}
 
+	public function setConfigSource($config)
+	{
+		parent::setConfigSource($config);
+
+		//	Initialise all the selectors
+		call_user_func(array(get_class($this->source),"initialiseSelectors"));
+	}
+
 	/**
 	 * 	method:	addCompletionCallback
 	 *

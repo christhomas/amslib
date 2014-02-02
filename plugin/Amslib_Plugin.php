@@ -201,6 +201,10 @@ class Amslib_Plugin
 						$params = array($v["name"],$translator);
 					}break;
 
+					case "image":{
+						$params = array($k,$v);
+					}break;
+
 					default:{
 						if(is_object($v)){
 							print("key[$key] = ".Amslib::var_dump($v,true));
@@ -747,6 +751,8 @@ class Amslib_Plugin
 			}else{
 				Amslib::errorLog("PLUGIN LOAD FAILURE: ".$array["value"],$location);
 			}
+		}else{
+			Amslib::errorLog("CONFIGURING ITSELF: {$this->getName()} / {$array["value"]}");
 		}
 	}
 
@@ -762,6 +768,38 @@ class Amslib_Plugin
 		Amslib_Router::load($this->source->getValue("filename"),"xml",$this->getName());
 	}
 
+	public function configExtension($name,$array,$object)
+	{
+		$data = array();
+
+		foreach($array["child"] as &$c){
+			$data[$c["tag"]] = $c["value"];
+		}
+
+		//	We don't have the correct tags, so this extension was invalid
+		if(!isset($data["selector"]) || !isset($data["callback"])){
+			Amslib::errorLog("INVALID CALLBACK",$data);
+			return false;
+		}
+
+		$data["callback"] = explode(",",$data["callback"]);
+
+		//	We don't have one or two parts to the callback, so this extension is invalid
+		if(!in_array(count($data["callback"]),array(1,2))){
+			Amslib::errorLog("INVALID CALLBACK",$data);
+			return false;
+		}
+
+		call_user_func(array(get_class($this->source),"addLoadSelector"),$data["selector"],$data["callback"]);
+	}
+
+	public function configCustom($name,$array,$object)
+	{
+		if($this->api && method_exists($this->api,"configCustom")){
+			$this->api->configCustom($this->source);
+		}
+	}
+
 	/**
 	 * 	method:	config
 	 *
@@ -773,39 +811,17 @@ class Amslib_Plugin
 		$this->isLoaded		=	false;
 		$this->name			=	$name;
 
-		//	NOTE:	I chose to make this an array because I could allow it to be
-		//			configured and then run it through a generic process step below,
-		//			allowing flexibility in how these sections are loaded and processed
-		$selectors = array(
-			//	NOTE: always configure the router before everything else, it's safer this way
-			"package > router"				=>	array($this,"configRouter"),
-			"package > object api"			=>	array($this,"configAPI"),
-			"package > object name"			=>	array($this,"configObject"),
-			"package > controller name"		=>	array($this,"configController"),
-			"package > model connection"	=>	array($this,"configModelConnection"),
-			"package > model name"			=>	array($this,"configModel"),
-			"package > view name"			=>	array($this,"configView"),
-			"package > service import"		=>	array($this,"configService"),
-			"package > service export"		=>	array($this,"configService"),
-			"package > javascript file"		=>	array($this,"configJavascript"),
-			"package > stylesheet file"		=>	array($this,"configStylesheet"),
-			"package > image file"			=>	array($this,"configImage"),
-			"package > font"				=>	array($this,"configFont"),
-			"package > translator"			=>	array($this,"configTranslator"),
-			"package > value"				=>	array($this,"configValue"),
-			"package > path"				=>	array($this,"configPath"),
-			"package > requires plugin"		=>	array($this,"configPlugin")
-		);
-
 		//	Prepare and process all the selectors that we do by default
 		$this->source->prepare();
+
+		$selectors = $this->source->getScanSelectors();
 		foreach($selectors as $s=>$c){
-			$this->source->process($s,$c);
+			$this->source->process($this,$s,$c);
 		}
 
-		//	Now request the plugin process the configuration and any special configuration it might want
-		if($this->api && method_exists($this->api,"configObject")){
-			$this->api->configObject($this->source);
+		$selectors = $this->source->getLoadSelectors();
+		foreach($selectors as $s=>$c){
+			$this->source->process($this,$s,$c);
 		}
 
 		//	Save memory, be water my friend, delete unwanted things
@@ -909,7 +925,10 @@ class Amslib_Plugin
 				$this->data[$key] = $value;
 			}break;
 
-			case "image":
+			case "image":{
+				$this->data[$key][$value["id"]] = $value["value"];
+			}break;
+
 			case "view":{
 				$this->data[$key][$value["id"]] = $value;
 			}break;

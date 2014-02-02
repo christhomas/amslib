@@ -398,6 +398,33 @@ class Amslib_Plugin_Manager
 
 				case "view":
 				case "value":{
+					//	NOTE:	if I could change getValue to this, I could refactor all of these branches
+					//			together maybe into something very generic
+					//	NOTE:	the new import/export system works slightly differently from the old one,
+					//			we push directly into the import/export queues the information that we
+					//			want to pass and it doesn't enter the host plugin, this way, we can skip
+					//			a lot of bullshit with regard to internal data and data which is destined
+					//			for other plugins, the getValue method should in this case, circumstantially
+					//			create objects or just parse the data out of the structure, but it's not
+					//			about "getting" the value from the pluing, the $value variable already has
+					//			it and in many cases we don't need to do anything except return a particular
+					//			key depending on the stucture or type of that data, but in the case of
+					//			translators, objects or models, we need to ask the host plugin to create
+					//			the object on our behalf and then return and use it, because it might be
+					//			that the host plugin is the only plugin which has the correct functionality
+					//			necessary to create that object, in these cases getValue will do more than
+					//			just return a particular key, but will actually process the input data into
+					//			an "output data" to use
+					//$data = $src->getValue($value);
+					$dst->setValue($value["key"],$value["val"]);
+				}break;
+
+				case "service":{
+					Amslib_FirePHP::output("export",$item);
+					//	Hmmm, I need a test case cause otherwise I won't know if this works
+				}break;
+
+				case "image":{
 					$dst->setValue($value["key"],$value["val"]);
 				}break;
 
@@ -405,14 +432,10 @@ class Amslib_Plugin_Manager
 				case "model":
 				case "translator":
 				default:{
+					//	NOTE: I should change $value["key"] here to $value and make "key" something getValue uses internally
 					$data = $src->getValue($value["key"]);
 					$dst->setValue($value["key"],$data);
 				}break;
-
-				case "service":{
-					Amslib_FirePHP::output("export",$item);
-					//	Hmmm, I need a test case cause otherwise I won't know if this works
-				}
 			}
 		}
 
