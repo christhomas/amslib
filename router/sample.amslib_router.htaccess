@@ -33,8 +33,11 @@ RewriteRule ^(.*)$ - [L]
 # -----------------------------------------------------------------------
 #	Set the __WEBSITE__ variable depending on the installation location
 # -----------------------------------------------------------------------
+#	First default this environment variable to the root
+RewriteRule .? - [E=__AMSLIB_ROUTER_ACTIVE__:/]
+#	Then, if a path is found, reset the variable to that path
 RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
-RewriteRule ^(.*) - [E=__AMSLIB_ROUTER_ACTIVE__:%1/]
+RewriteRule .? - [E=__AMSLIB_ROUTER_ACTIVE__:%1/]
 
 # enable debugging when you're on testing
 #RewriteCond %{HTTP_HOST} testing.mydomain.com$
@@ -294,4 +297,4 @@ RewriteRule sample.admin_panel.xml	-	[F]
 #	Perhaps you need to comment out -d from here or not, depends on your website
 RewriteCond %{REQUEST_FILENAME} !-f
 #RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ %{ENV:__AMSLIB_ROUTER_ACTIVE__}amslib_router.php?routed=true [L,QSA]
+RewriteRule .? %{ENV:__AMSLIB_ROUTER_ACTIVE__}amslib_router.php?routed=true&__AMSLIB_ROUTER_ACTIVE__=%{ENV:__AMSLIB_ROUTER_ACTIVE__} [L,QSA]
