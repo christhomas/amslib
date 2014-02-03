@@ -88,7 +88,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 					$object->load();
 				}
 			}else{
-				Amslib::errorLog("plugin not found?",$p);
+				Amslib::errorLog("plugin not found?",$plugin);
 			}
 		}
 
@@ -464,6 +464,8 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	public function execute($params=array())
 	{
 		//	If the url executed belonds to a web service, run the service code
+		//	NOTE:	this isService() call, I think is a bit hacky, I would
+		//			like to do away with it and have the framework do it
 		if(Amslib_Router::isService()) $this->runService();
 
 		//	Get the current route and acquire the api object for the current route and render it
@@ -477,7 +479,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			return;
 		}
 
-		$api = Amslib_Plugin_Manager::getAPI($route["group"]);
+		$api = $this->getAPI($route["group"]);
 
 		if(!$api || !method_exists($api,"render")){
 			Amslib::errorLog("API OR ITS RENDER METHOD DOES NOT EXIST",get_class($api),$route);
