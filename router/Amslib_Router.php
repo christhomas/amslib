@@ -756,8 +756,10 @@ class Amslib_Router
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function exportRouterShared()
+	static public function exportRouterShared($filter=NULL)
 	{
+		if(!in_array($filter,array("path","service"))) $filter = NULL;
+
 		//	The raw data source before processing
 		$data = array(
 			"domain"	=>	Amslib_Router_URL::externalURL(self::$base),
@@ -767,6 +769,11 @@ class Amslib_Router
 		//	For each cache block, remove the javascript, stylesheet and any framework routes
 		//	For each src inside each cache block, prepend the domain to each url making them accessible remotely
 		foreach($data["cache"] as $k=>&$r){
+			if($filter != NULL && $r["type"] != $filter){
+				unset($data["cache"][$k]);
+				continue;
+			}
+
 			unset($r["stylesheet"]);
 			unset($r["javascript"]);
 			unset($r["handler"]);

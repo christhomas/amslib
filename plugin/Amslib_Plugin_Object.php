@@ -20,7 +20,6 @@ class Amslib_Plugin_Object extends Amslib_Mixin
 	 */
 	public function isInitialised()
 	{
-
 		return $this->api ? true : false;
 	}
 
@@ -34,6 +33,11 @@ class Amslib_Plugin_Object extends Amslib_Mixin
 	public function getAPI($name)
 	{
 		return $this->api->getAPI($name);
+	}
+
+	public function getValue($name=NULL,$default=NULL)
+	{
+		return $this->api->getValue($name,$default);
 	}
 
 	public function getObject($id,$singleton=true)
