@@ -742,6 +742,11 @@ class Amslib_Plugin
 			//	these are instructions about loading, not instructions to ACTUALLY load
 			if($prevent || $replace) return;
 
+			//	If the plugin is already created, don't attempt to configure or load it again
+			$plugin		=	Amslib_Plugin_Manager::getPlugin($array["value"]);
+
+			if($plugin) return;
+
 			//	Since this plugin is not replaced, nor prevented from loading, lets load it!!
 			$location	=	$this->getLocation();
 			$plugin		=	Amslib_Plugin_Manager::config($array["value"],$location);
