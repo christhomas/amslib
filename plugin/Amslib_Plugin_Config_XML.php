@@ -77,6 +77,13 @@ class Amslib_Plugin_Config_XML
 			$callback[0] = Amslib_Plugin_Manager::getPlugin($callback[0])->getAPI();
 		}
 
+		//	With XML, we want to anchor each selector to the package tag, sometimes you can nest
+		//	nodes and have nodes which look like they should be part of the amslib package xml
+		//	scheme, but are some custom nodes with the same names.  This replacement stops that problem.
+		if(strpos($selector,"package") === 0){
+			$selector = str_replace("package ","package > ",$selector);
+		}
+
 		self::$selectors[$type][$selector] = $callback;
 
 		return true;
