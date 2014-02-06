@@ -106,7 +106,11 @@ class Amslib_Mixin
 				$this->mixin[$m] = $object;
 			}
 		}else{
-			Amslib::errorLog("MIXIN FAILURE","stack_trace",is_string($object)?$object:get_class($object));
+			$name = $object;
+			if(is_string($object)) $name = is_string($object);
+			if(is_object($object)) $name = get_class($object);
+
+			Amslib::errorLog("MIXIN FAILURE","stack_trace",$name);
 		}
 
 		return $object;
