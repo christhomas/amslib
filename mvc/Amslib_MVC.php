@@ -807,9 +807,9 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getAPI($name)
+	public function getAPI($name=NULL)
 	{
-		return Amslib_Plugin_Manager::getAPI($name);
+		return $name ? Amslib_Plugin_Manager::getAPI($name) : $this;
 	}
 
 	/**
