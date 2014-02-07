@@ -56,6 +56,10 @@ class Amslib
 	//	DEPRECATED: should use findPath instead, makes more sense
 	static protected function findFile($filename){ return self::findPath($filename); }
 
+	//	If the exception autoloader is triggered, this comes with a performance penalty which means we'll output the data into the error log, so people can track down issues
+	//	However, this sometimes is useless information, so we give this flag in order to stop that information from being output
+	static public $silentAutoloader = false;
+
 	/**
 	 * 	method:	findPath
 	 *
@@ -805,7 +809,7 @@ class Amslib
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function autoloader()
+	static public function autoloader($include_exception_autoloader=true)
 	{
 		//	Only register it once.
 		if(function_exists("amslib_autoload")) return;
@@ -845,6 +849,58 @@ class Amslib
 
 		//	register a special autoloader that will include correctly all of the amslib classes
 		spl_autoload_register("amslib_autoload");
+
+		if($include_exception_autoloader){
+			self::autoloader_exception();
+		}
+	}
+
+	/**
+	 *	method: autoloader_exception
+	 *
+	 *	note:		If you could not include the file for some reason, attempt to use an
+	 *				exception to backtrace into the directory and look there, this will
+	 *				fix __SOME__ problems with classes which are not in the include path,
+	 *				but do exist in the same directory as the parent class that it was
+	 *				inherited from, inheriting from or being used from
+	 *
+	 *	warning:	I don't know the performance impact of this code, but better to work slowly, than not at all.
+	 *
+	 *	note:		I purposefully block any class name containing a namespace,
+	 *				since amslib doesn't use them, I can be sure this will fail,
+	 *				why incur the cost of creating an exception when you know it
+	 *				will never load a file
+	 */
+	static public function autoloader_exception()
+	{
+		//	Only register it once.
+		if(function_exists("amslib_autoload_exception")) return;
+
+		function amslib_autoload_exception($c)
+		{
+			if($c == __CLASS__) return false;
+
+			$result = false;
+
+			if(strpos($c,'\\') === false){
+				$e = new Exception();
+				$t = $e->getTrace();
+				if(isset($t[1]) && isset($t[1]["file"])){
+					$result = Amslib::requireFile(dirname($t[1]["file"])."/$c.php");
+
+					if($result && !Amslib::$silentAutoloader){
+						Amslib::errorLog(	"EXCEPTION AUTOLOADER: we loaded the class '$c', maybe you ".
+											"should look into this? (set Amslib::\$silentAutoloader = true ".
+											"in your code [near the top] to remove this warning)");
+					}
+				}
+			}
+
+			return $result;
+		}
+
+		//	register a special autoloader that will include correctly all of the amslib classes
+		spl_autoload_register("amslib_autoload_exception");
 	}
 
 	/**
