@@ -866,10 +866,10 @@ class Amslib
 	 *
 	 *	warning:	I don't know the performance impact of this code, but better to work slowly, than not at all.
 	 *
-	 *	note:		I purposefully block any class name containing a namespace,
-	 *				since amslib doesn't use them, I can be sure this will fail,
-	 *				why incur the cost of creating an exception when you know it
-	 *				will never load a file
+	 *	note:		I purposefully block any class name containing a namespace
+	 *				(I detect the \ character in the class name), since amslib
+	 *				doesn't use them, I can be sure this will fail, why incur
+	 *				the cost of creating an exception when you know it will never load a file
 	 */
 	static public function autoloader_exception()
 	{
