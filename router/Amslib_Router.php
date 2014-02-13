@@ -687,6 +687,24 @@ class Amslib_Router
 	}
 
 	/**
+	 * 	method:	encodeURLPairs
+	 *
+	 * 	todo: write documentation
+	 * 	note: probably this doesn't belong here, but in a generic "url, web" object instead
+	 */
+	static public function encodeURLPairs($array,$separator="/")
+	{
+		$p = array();
+
+		foreach(Amslib_Array::valid($array) as $k=>$v){
+			$p[] = $k;
+			$p[] = $v;
+		}
+
+		return implode($separator,$p);
+	}
+
+	/**
 	 * 	method:	setExportRestriction
 	 *
 	 * 	todo: write documentation
@@ -713,11 +731,18 @@ class Amslib_Router
 	 */
 	static public function importRouter($import)
 	{
-		//	acquire the latest route for the export url and construct the url to call the external remote service
-		$route	=	self::getRoute("service:framework:router:export:".$import["output"]);
-		$url	=	rtrim($import["url"],"/").$route["src"]["default"];
+		$output	=	$import["output"];
+		$url	=	$import["url"];
 
-		if($import["output"] == "json"){
+		unset($import["output"],$import["url"]);
+
+		$params = self::encodeURLPairs($import);
+
+		//	acquire the latest route for the export url and construct the url to call the external remote service
+		$route	=	self::getRoute("service:framework:router:export:".$output);
+		$url	=	rtrim($url,"/").rtrim($route["src"]["default"],"/")."/$params/";
+
+		if($output == "json"){
 			//	We are going to install a router using json as a data transfer medium
 			//	Acquire the json, decode it and obtain the domain
 			ob_start();
@@ -738,7 +763,7 @@ class Amslib_Router
 			foreach(Amslib_Array::valid($data["cache"]) as $route){
 				self::setRoute($route["name"],$route["group"],$domain,$route,false);
 			}
-		}else if($import["output"] == "xml"){
+		}else if($output == "xml"){
 			ob_start();
 				$data = file_get_contents($url);
 			$caught = ob_get_clean();

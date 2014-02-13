@@ -196,12 +196,17 @@ class Amslib_Router_Source_XML
 
 	public function configImport($name,$array,$object)
 	{
-		if(!isset($array["attr"]["output"]) || !isset($array["attr"]["url"])) return;
+		$import = array();
 
-		$this->import[] = array(
-				"output"	=>	$array["attr"]["output"],
-				"url"		=>	$array["attr"]["url"]
-		);
+		foreach($array["child"] as $c){
+			$import[$c["tag"]] = $c["value"];
+		}
+
+		if(!isset($import["output"]) || !isset($import["url"])) return false;
+
+		$this->import[] = $import;
+
+		return true;
 	}
 
 	/**
