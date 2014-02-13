@@ -70,6 +70,10 @@ class Amslib_Plugin_Service
 	{
 		$plugin = self::pluginToName($plugin);
 
+		if(!self::$handler && count(self::$serviceData[self::HD])){
+			self::processHandler();
+		}
+
 		if(!self::$handler){
 			//	TODO: move into the logging system intead of here
 			error_log("** ".__METHOD__." ** ".Amslib::var_dump(self::$handler,true)." was invalid");
@@ -697,8 +701,10 @@ class Amslib_Plugin_Service
 
 	public function serviceWebserviceCatchall($service,$source)
 	{
+		//	NOTE: perhaps this should detect if any, the output method and set the output type accordingly
 		$service->setOutputFormat("json");
-		$service->setData($this,"webservice_found",false);
+
+		$service->setData($this,"webservice_not_found",false);
 
 		return true;
 	}
