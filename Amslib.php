@@ -910,10 +910,6 @@ class Amslib
 	 */
 	static public function shutdown($url,$callback=NULL,$warnings=false)
 	{
-		//	Clean these parameters each page load, cause they are only useful on the error pages, not everywhere else
-		Amslib::getSESSION("/amslib/php/fatal_error/",NULL,true);
-		Amslib::getSESSION("/amslib/php/backtrace/",NULL,true);
-
 		/**
 		 * 	method:	amslib_shutdown
 		 *
@@ -931,34 +927,20 @@ class Amslib
 				$fatal+=array(E_WARNING,E_NOTICE,E_CORE_WARNING,E_USER_WARNING,E_RECOVERABLE_ERROR);
 			}
 
-			if (($e = @error_get_last()) && @is_array($e) && @in_array($e["type"],$fatal)) {
-				$error = array(
-					"err"	=>	array(
-						"code"	=>	isset($e['type']) ? $e['type'] : 0,
-						"msg"	=>	isset($e['message']) ? $e['message'] : '',
-						"file"	=>	isset($e['file']) ? $e['file'] : '',
-						"line"	=>	isset($e['line']) ? $e['line'] : ''),
-					"get"	=>	$_GET,
-					"post"	=>	$_POST,
-					"vars"	=>	get_defined_vars(),
-					"fcns"	=>	get_defined_functions(),
-					"clss"	=>	get_declared_classes()
-				);
+			if(($e = @error_get_last()) && @is_array($e) && @in_array($e["type"],$fatal))
+			{
+				$error = base64_encode(json_encode(array(
+					"code"	=>	isset($e['type']) ? $e['type'] : 0,
+					"msg"	=>	isset($e['message']) ? $e['message'] : '',
+					"file"	=>	isset($e['file']) ? $e['file'] : '',
+					"line"	=>	isset($e['line']) ? $e['line'] : '',
+					"uri"	=>	$_SERVER["REQUEST_URI"],
+					"root"	=>	isset($_SERVER["__AMSLIB_ROUTER_ACTIVE__"]) ? $_SERVER["__AMSLIB_ROUTER_ACTIVE__"] : "/"
+				)));
 
-				//	TODO: write the file to a logging directory
-
-				$exception = new Exception();
-				$exception = $exception->getTrace();
-
-				if($url){
-					$_SESSION["/amslib/php/fatal_error/"]	=	$error;
-					//	NOTE: perhaps this won't work, but I'm trying to get the trace to the origin of where the error occured
-					$_SESSION["/amslib/php/backtrace/"]		=	$exception;
-					error_log(__FUNCTION__.": ".$url);
-					header("Location: $url");
-				}elseif(function_exists($callback)){
-					$callback($error,$exception);
-				}
+				header("Location: $url?data=$error");
+			}else{
+				error_log("SHUTDOWN FUNCTION CALLED BUT NO ERROR COULD BE OUTPUT");
 			}
 		}
 
