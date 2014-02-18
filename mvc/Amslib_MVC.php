@@ -456,7 +456,7 @@ class Amslib_MVC extends Amslib_Mixin
 
 			return Amslib::requireFile($this->view[$id],$params,true);
 		}else{
-			Amslib::errorLog("Unable to find view in structure",$id,$this->view);
+			Amslib::errorLog("stack_trace","Unable to find view in structure",$id,$this->view);
 		}
 
 		return "";
