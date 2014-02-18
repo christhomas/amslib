@@ -915,7 +915,7 @@ class Amslib_MVC extends Amslib_Mixin
 	public function redirectTo($name,$group=NULL,$is_service=false,$url=NULL)
 	{
 		if(!$url){
-			$url = $is_service ? $this->getURL($name,$group) : $this->getServiceURL($name,$group);
+			$url = $is_service ? $this->getServiceURL($name,$group) : $this->getURL($name,$group);
 		}
 
 		Amslib_Website::redirect($url);
