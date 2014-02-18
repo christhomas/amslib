@@ -372,7 +372,9 @@ class Amslib_Router
 			if (is_array($pos)){
 				$url = substr_replace($url,$p,$pos[0],$pos[1]);
 			}else{
-				$append[] = $p;
+				if(!is_array($p)) $p = array($p);
+
+				$append = array_merge($append,$p);
 			}
 		}
 
