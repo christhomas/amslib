@@ -927,7 +927,10 @@ class Amslib
 				$fatal+=array(E_WARNING,E_NOTICE,E_CORE_WARNING,E_USER_WARNING,E_RECOVERABLE_ERROR);
 			}
 
-			if(($e = @error_get_last()) && @is_array($e) && @in_array($e["type"],$fatal))
+			$e = @error_get_last();
+
+
+			if($e && @is_array($e) && @in_array($e["type"],$fatal))
 			{
 				$error = base64_encode(json_encode(array(
 					"code"	=>	isset($e['type']) ? $e['type'] : 0,
@@ -939,8 +942,6 @@ class Amslib
 				)));
 
 				header("Location: $url?data=$error");
-			}else{
-				error_log("SHUTDOWN FUNCTION CALLED BUT NO ERROR COULD BE OUTPUT");
 			}
 		}
 
