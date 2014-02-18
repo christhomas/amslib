@@ -924,6 +924,27 @@ class Amslib_Validator
 		return "ARRAY_INVALID";
 	}
 
+	protected function __csv_number($name,$value,$required,$options)
+	{
+		$error = !is_string($value) || empty($value);
+
+		if($error && !$required) return true;
+
+		$value = explode(",",$value);
+
+		foreach($value as $v){
+			if(!is_numeric($v) && !isset($options["allow_invalid"])) $error = true;
+		}
+
+		if($error && !$required) return true;
+
+		if(!$error){
+			$this->setValid($name,$value);
+		}
+
+		return "CSV_INVALID";
+	}
+
 	/**
 	 * 	method:	__array_text
 	 *
@@ -1128,6 +1149,7 @@ class Amslib_Validator
 		$this->register("require_one",		array($this,"__require_one"));
 		$this->register("array_number",		array($this,"__array_number"));
 		$this->register("array_text",		array($this,"__array_text"));
+		$this->register("csv_number",		array($this,"__csv_number"));
 
 		//	Register some popular alternative spellings which keep cropping up to make life easier
 		$this->register("string",			array($this,"__text"));
