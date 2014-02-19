@@ -916,12 +916,10 @@ class Amslib_Validator
 
 		if($error && !$required) return true;
 
-		if(!$error){
-			$this->setValid($name,$value);
-			return true;
-		}
+		if($error) return "ARRAY_INVALID";
 
-		return "ARRAY_INVALID";
+		$this->setValid($name,$value);
+		return true;
 	}
 
 	protected function __csv_number($name,$value,$required,$options)
@@ -930,19 +928,23 @@ class Amslib_Validator
 
 		if($error && !$required) return true;
 
-		$value = explode(",",$value);
+		$items = explode(",",$value);
 
-		foreach($value as $v){
+		foreach($items as $v){
 			if(!is_numeric($v) && !isset($options["allow_invalid"])) $error = true;
 		}
 
 		if($error && !$required) return true;
 
-		if(!$error){
-			$this->setValid($name,$value);
+		if($error) return "CSV_INVALID";
+
+		if(!isset($options["return_csv"]) || !$options["return_csv"]){
+			$value = $items;
 		}
 
-		return "CSV_INVALID";
+		$this->setValid($name,$value);
+
+		return true;
 	}
 
 	/**
