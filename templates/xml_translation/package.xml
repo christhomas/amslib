@@ -42,16 +42,11 @@
 	</translator>
 	
 	<stylesheet>
-		<file id="html5" autoload="true">__AMSLIB__/css/Amslib.css</file>
+		<file id="bootstrap" autoload="true">__AMSLIB__/util/bootstrap/3.0.2/css/bootstrap.min.css</file>
 	</stylesheet>
 	
 	<javascript>
-		<file id="jquery" autoload="true">__AMSLIB__/util/jquery-1.8.3.min.js</file>
-		<file id="modernizr" autoload="true">__AMSLIB__/util/modernizr-2.6.1.full.js</file>
-		<!-- my.* allows you to create object orientated javascript easily -->
-		<file id="my.common" autoload="true">__AMSLIB__/util/my.common.min.js</file>
-		<file id="my.class" autoload="true">__AMSLIB__/util/my.class.min.js</file>
-		<file id="amslib" autoload="true">__AMSLIB__/js/Amslib.js</file>
+		<file id="jquery" autoload="true">__AMSLIB__/util/bootstrap/3.0.2/js/bootstrap.min.js</file>
 	</javascript>
 	
 	<router>
