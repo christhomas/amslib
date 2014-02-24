@@ -463,6 +463,18 @@ class Amslib_Plugin_Manager
 	}
 
 	/**
+	 * 	method:	renderView
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function renderView($plugin,$view="default",$parameters=array())
+	{
+		$api = self::getAPI($plugin);
+
+		return $api ? $api->renderView($view,$parameters) : false;
+	}
+
+	/**
 	 * 	method:	getObject
 	 *
 	 * 	todo: write documentation
