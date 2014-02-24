@@ -13,18 +13,69 @@
 
 
 <h1>English or Spanish</h1>
-<ul>
-	<li>this_is_some: <?=$wt->t("this_is_some")?></li>
-	<li>you_put_the: <?=$wt->t("you_put_the")?></li>
-	<li>and_then_put: <?=$wt->t("and_then_put")?></li>
-	<li>of_each_translation: <?=$wt->t("of_each_translation")?></li>
-	<li>but_it_is_important: <?=$wt->t("but_it_is_important")?></li>
-	<li>in_how_to_arrange: <?=$wt->t("in_how_to_arrange")?></li>
-	<li>so_that_your_code: <?=$wt->t("so_that_your_code")?></li>
-	<li>so_there_are_some_rules: <?=$wt->t("so_there_are_some_rules")?></li>
-	<li>in_how_to_arrange_your_name_keys: <?=$wt->t("in_how_to_arrange_your_name_keys")?></li>
-	<li>doesnt_break_down: <?=$wt->t("doesnt_break_down")?></li>
-	<li>for_the_name_try: <?=$wt->t("for_the_name_try")?></li>
-	<li>dont_put_spaces: <?=$wt->t("dont_put_spaces")?></li>
-	<li>and_this_will_keep: <?=$wt->t("and_this_will_keep")?></li>
-</ul>
+<table>
+	<tr>
+		<td>this_is_some:</td>
+		<td><?=$wt->t("this_is_some")?></td>
+	</td>
+
+	<tr>
+		<td>you_put_the:</td>
+		<td><?=$wt->t("you_put_the")?></td>
+	</td>
+
+	<tr>
+		<td>and_then_put:</td>
+		<td><?=$wt->t("and_then_put")?></td>
+	</td>
+
+	<tr>
+		<td>of_each_translation:</td>
+		<td><?=$wt->t("of_each_translation")?></td>
+	</td>
+
+	<tr>
+		<td>but_it_is_important:</td>
+		<td><?=$wt->t("but_it_is_important")?></td>
+	</td>
+
+	<tr>
+		<td>in_how_to_arrange:</td>
+		<td><?=$wt->t("in_how_to_arrange")?></td>
+	</td>
+
+	<tr>
+		<td>so_that_your_code:</td>
+		<td><?=$wt->t("so_that_your_code")?></td>
+	</td>
+
+	<tr>
+		<td>so_there_are_some_rules:</td>
+		<td><?=$wt->t("so_there_are_some_rules")?></td>
+	</td>
+
+	<tr>
+		<td>in_how_to_arrange_your_name_keys:</td>
+		<td><?=$wt->t("in_how_to_arrange_your_name_keys")?></td>
+	</td>
+
+	<tr>
+		<td>doesnt_break_down:</td>
+		<td><?=$wt->t("doesnt_break_down")?></td>
+	</td>
+
+	<tr>
+		<td>for_the_name_try:</td>
+		<td><?=$wt->t("for_the_name_try")?></td>
+	</td>
+
+	<tr>
+		<td>dont_put_spaces:</td>
+		<td><?=$wt->t("dont_put_spaces")?></td>
+	</td>
+
+	<tr>
+		<td>and_this_will_keep:</td>
+		<td><?=$wt->t("and_this_will_keep")?></td>
+	</td>
+</table>
