@@ -3,7 +3,7 @@
 <![endif]-->
 
 <!-- Add your site or application content here -->
-<p>XML Translations! This is HTML5 Boilerplate.</p>
+<p>XML Translations!</p>
 
 <p>	Here are all the strings from the configured xml translation files
 
@@ -11,9 +11,12 @@
 	the database translator is capable of loading and then showing any text in any language.
 </p>
 
-
 <h1>English or Spanish</h1>
-<table>
+
+<p>English Site: <a href="/home/">/home/</a></p>
+<p>Spanish Site: <a href="/inicio/">/inicio/</a></p>
+
+<table class="table">
 	<tr>
 		<td>this_is_some:</td>
 		<td><?=$wt->t("this_is_some")?></td>
