@@ -1,20 +1,11 @@
-<!--[if lt IE 7]>
-<p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
-<![endif]-->
-
 <!-- Add your site or application content here -->
-<p>XML Translations!</p>
+<h1>XML Translations: English or Spanish</h1>
 
 <p>	Here are all the strings from the configured xml translation files
 
 	The XML translator is less flexible than the database one, you can only load a single language in a single page,
 	the database translator is capable of loading and then showing any text in any language.
 </p>
-
-<h1>English or Spanish</h1>
-
-<p>English Site: <a href="/home/">/home/</a></p>
-<p>Spanish Site: <a href="/inicio/">/inicio/</a></p>
 
 <table class="table">
 	<tr>

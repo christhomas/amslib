@@ -43,6 +43,7 @@
 	
 	<stylesheet>
 		<file id="bootstrap" autoload="true">__AMSLIB__/util/bootstrap/3.0.2/css/bootstrap.min.css</file>
+		<file id="xml_translation" autoload="true">/resources/xml_translations.css</file>
 	</stylesheet>
 	
 	<javascript>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <database>
-	<translation key="this_is_some">advice on how to use the system:</translation>
+	<translation key="this_is_some">advice on how to use the system</translation>
 	<translation key="you_put_the">name of the key as the name attribute</translation>
 	<translation key="and_then_put">the string of the translation as the text node</translation>
 	<translation key="of_each_translation">that you need</translation>
