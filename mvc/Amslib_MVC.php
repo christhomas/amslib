@@ -461,12 +461,16 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function renderView($id,$params=array())
+	public function renderView($id,$params=NULL)
 	{
 		if(is_string($id) && isset($this->view[$id]))
 		{
-			//	What are view parameters for again??
-			//	NOTE: 27/01/2014: I still have no idea, probably I should remove it
+			if($params == "inherit") $params = $this->getViewParam();
+
+			if(!is_array($params)) $params = array();
+
+			//	Set the parameters that were used for rendering this view,
+			//	useful when wanting to pass along to various child views.
 			if(!empty($params)) $this->setViewParam($params);
 
 			if(Amslib_Array::hasKeys($params,array("api","wt","ct"))){
