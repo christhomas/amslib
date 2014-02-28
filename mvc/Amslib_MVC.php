@@ -64,6 +64,9 @@ class Amslib_MVC extends Amslib_Mixin
 	 * 	method:	recoverServiceData
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	probably this should move to the service object and we should
+	 * 	wrap it up here instead of implementing it here
 	 */
 	protected function recoverServiceData($name=NULL,$handler=0)
 	{
@@ -287,11 +290,20 @@ class Amslib_MVC extends Amslib_Mixin
 		return array_keys($this->value);
 	}
 
-	//	TODO: need to explain the difference between a value and a view param
 	/**
 	 * 	method:	setViewParam
 	 *
-	 * 	todo: write documentation
+	 * 	This method will accept the parameter array which was set when a view was rendered.
+	 * 	The reason this method is useful, is because inside the view, you can use methods
+	 * 	To obtain the view parameters instead of using the array interface.
+	 *
+	 * 	This might seem redundant, but sometimes it's useful to have a second way to access the data
+	 * 	Also, another side effect is you can acquire the entire view parameter array as it was originally set
+	 * 	Meaning you can daisy-chain the parameters to child views you render from the original parent view
+	 * 	Which is sometimes important.
+	 *
+	 * 	params:
+	 * 		$parameters	-	The array of parameters passed to renderView
 	 */
 	public function setViewParam($parameters)
 	{
@@ -301,11 +313,25 @@ class Amslib_MVC extends Amslib_Mixin
 	/**
 	 * 	method:	getViewParam
 	 *
-	 * 	todo: write documentation
+	 * 	This method will return you either a named parameter from that view, or it was missing
+	 * 	a default value, or if no name was given, it'll pass you back the entire parameter array
+	 *
+	 * 	This is useful when wanting to render child views from a parent view, but dont want to manually
+	 * 	request or rebuild the original array
+	 *
+	 * 	params:
+	 * 		$name		-	The name of the parameter to return, or NULL to return everything
+	 * 		$default	-	The value to return, if the named parameter was not found, default: NULL
+	 *
+	 * 	returns:
+	 * 		If name is null, will return the entire array, or if name was found, that
+	 * 		value, or if not found, the default value
 	 */
-	public function getViewParam($name,$default=NULL)
+	public function getViewParam($name=NULL,$default=NULL)
 	{
-		return (isset($this->viewParams[$name])) ? $this->viewParams[$name] : $default;
+		return $name
+			? ((isset($this->viewParams[$name])) ? $this->viewParams[$name] : $default)
+			: $this->viewParams;
 	}
 
 	/**
@@ -411,8 +437,10 @@ class Amslib_MVC extends Amslib_Mixin
 		$rules	= Amslib_Array::valid($this->getValidatorRules($group));
 		$values	= array_fill_keys(array_keys($rules),"");
 
-		foreach($rules as $k=>$v) if(isset($v[2]) && isset($v[2]["form_default"])){
-			$values[$k] = $v[2]["form_default"];
+		foreach($rules as $k=>$v){
+			if(isset($v[2]) && isset($v[2]["form_default"])){
+				$values[$k] = $v[2]["form_default"];
+			}
 		}
 
 		return $values;
