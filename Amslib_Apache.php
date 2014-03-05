@@ -34,6 +34,9 @@
  */
 class Amslib_Apache
 {
+	protected $headers;
+	protected $boundary;
+
 	/**
 	 * 	method:	__construct
 	 *
@@ -41,28 +44,35 @@ class Amslib_Apache
 	 */
 	public function __construct()
 	{
-		//	Request apache headers, so you can find the content length
-		$headers = apache_request_headers();
+		//	Request apache headers, so you can find the content length, etc
+		$this->headers	=	apache_request_headers();
+		$this->boundary	=	false;
+	}
+
+	public function getContentLength()
+	{
 		$cl = "Content-Length";
+
+		return isset($this->headers[$cl])
+			? $this->headers[$cl]
+			: 0;
+	}
+
+	public function getContentBoundary()
+	{
 		$ct = "Content-Type";
 
-		//	return either the content length, or false
-		if(isset($headers[$cl]) && isset($headers[$ct])){
-			$totalBytes = $headers[$cl];
-			
+		$this->boundary = false;
+
+		if($this->headers[$ct] && strpos($this->headers[$ct],"boundary")){
 			//	Extract boundary from content type header
-			$boundary = $headers[$ct];
-			$boundary = explode(";",$boundary);
-			$boundary = $boundary[1];
-			$boundary = explode("=",$boundary);
-			$boundary = $boundary[1];
-			
-			print("boundary length = ".strlen($boundary)."<br/>");
-			print("boundary = ".$boundary."<br/>");
-			
-			return true;
+			$this->boundary = $this->headers[$ct];
+			$this->boundary = explode(";",$this->boundary);
+			$this->boundary = $this->boundary[1];
+			$this->boundary = explode("=",$this->boundary);
+			$this->boundary = trim($this->boundary[1]);
 		}
-				
-		return false;
+
+		return $this->boundary;
 	}
 }
