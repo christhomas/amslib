@@ -137,8 +137,13 @@ class Amslib_Website
 	{
 		header("Cache-Control: no-cache");
 		header("Content-Type: application/json");
+
 		//	NOTE: perhaps it would be nice to limit this CORS header in the future
-		header("Access-Control-Allow-Origin: *");
+		if(isset($_SERVER["HTTP_ORIGIN"])){
+			$origin = $_SERVER["HTTP_ORIGIN"];
+			header("Access-Control-Allow-Origin: $origin");
+			header("Access-Control-Allow-Credentials: true");
+		}
 
 		$json = json_encode($array);
 		//	if there is a callback specified, wrap up the json into a jsonp format

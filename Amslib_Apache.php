@@ -64,7 +64,7 @@ class Amslib_Apache
 
 		$this->boundary = false;
 
-		if($this->headers[$ct] && strpos($this->headers[$ct],"boundary")){
+		if(isset($this->headers[$ct]) && strpos($this->headers[$ct],"boundary")){
 			//	Extract boundary from content type header
 			$this->boundary = $this->headers[$ct];
 			$this->boundary = explode(";",$this->boundary);

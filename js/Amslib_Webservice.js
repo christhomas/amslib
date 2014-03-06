@@ -44,10 +44,24 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 		this.setJSON(false);
 	},
 	
-	post: function(url,data)
+	post: function(url,data,cors)
 	{
-		this.url		=	url;
-		this.promise	=	$.post(this.url,data);
+		this.url = url;
+		
+		var config = {
+			type:		"POST",
+			url:		this.url,
+			data:		data,
+			dataType:	"json"
+		};
+		
+		if(cors){
+			config.xhrFields = {
+				withCredentials: true
+			};
+		}
+		
+		this.promise = $.ajax(config);
 		
 		return this;
 	},
