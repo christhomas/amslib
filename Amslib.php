@@ -1100,10 +1100,14 @@ class Amslib
 	 */
 	static public function delSESSION($key)
 	{
-		if(is_array($key)){
-			foreach($key as $k) Amslib::delSESSION($k);
-		}else{
-			unset($_SESSION[$key]);
+		$key_list = func_get_args();
+
+		foreach($key_list as $item){
+			if(is_array($item)){
+				foreach($item as $k) Amslib::delSESSION($k);
+			}else if(is_string($item){
+				unset($_SESSION[$item]);
+			}
 		}
 	}
 
@@ -1132,11 +1136,18 @@ class Amslib
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function setCOOKIE($key,$value)
+	static public function setCOOKIE($key,$value,$expire_days,$path,$hash=true)
 	{
-		$_COOKIE[$key] = $value;
+		$value = $hash ? Amslib::getRandomCode($value) ? $value;
+
+		setcookie($key,$value,time()+(60*60*24*$expire_days),$path);
 
 		return $value;
+	}
+
+	static public function delCOOKIE($key,$path)
+	{
+		setcookie($key,"",1,$path);
 	}
 
 	/**
@@ -1246,12 +1257,12 @@ class Amslib
 	static public function insertPostParam($key,$value){	self::setPOST($key,$value);		}
 	static public function insertGetParam($key,$value){		self::setGET($key,$value);		}
 
-	static public function postParam($key,$default=NULL,$erase=false){ return self::getPost($key,$default,$erase); }
-	static public function getParam($key,$default=NULL,$erase=false){ return self::getGET($key,$default,$erase); }
-	static public function requestParam($key,$default=NULL,$erase=false){ return self::getREQUEST($key,$default,$erase);	}
-	static public function filesParam($key,$default=NULL,$erase=false){ return self::getFILES($key,$default,$erase);	}
-	static public function cookieParam($key,$default=NULL){ return self::getCOOKIE($key,$default); }
-	static public function sessionParam($key,$default=NULL,$erase=false){ return self::getSESSION($key,$default,$erase); }
+	static public function postParam($key,$default=NULL,$erase=false){		return self::getPost($key,$default,$erase);		}
+	static public function getParam($key,$default=NULL,$erase=false){		return self::getGET($key,$default,$erase);		}
+	static public function requestParam($key,$default=NULL,$erase=false){	return self::getREQUEST($key,$default,$erase);	}
+	static public function filesParam($key,$default=NULL,$erase=false){		return self::getFILES($key,$default,$erase);	}
+	static public function cookieParam($key,$default=NULL){					return self::getCOOKIE($key,$default);			}
+	static public function sessionParam($key,$default=NULL,$erase=false){	return self::getSESSION($key,$default,$erase);	}
 
 	//	DEPRECATED FUNCTION
 	static public function exceptionBacktrace($string=false){
