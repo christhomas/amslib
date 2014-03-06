@@ -1105,7 +1105,7 @@ class Amslib
 		foreach($key_list as $item){
 			if(is_array($item)){
 				foreach($item as $k) Amslib::delSESSION($k);
-			}else if(is_string($item){
+			}else if(is_string($item)){
 				unset($_SESSION[$item]);
 			}
 		}
@@ -1138,7 +1138,7 @@ class Amslib
 	 */
 	static public function setCOOKIE($key,$value,$expire_days,$path,$hash=true)
 	{
-		$value = $hash ? Amslib::getRandomCode($value) ? $value;
+		$value = $hash ? Amslib::getRandomCode($value) : $value;
 
 		setcookie($key,$value,time()+(60*60*24*$expire_days),$path);
 
