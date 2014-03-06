@@ -210,7 +210,7 @@ class Amslib_File_Raw
 
 		fclose($this->output);
 
-		//	Both sides should equal to zero and both answers should be identical (0 == 0)
-		return ($this->str_length - $this->pos_stream) == ($this->str_written - $this->pos_stream);
+		//	The result should be zero, then true, or false
+		return $this->str_length == $this->pos_stream;
 	}
 }
