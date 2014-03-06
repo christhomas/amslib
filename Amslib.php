@@ -1239,10 +1239,15 @@ class Amslib
 	 */
 	static public function getRandomCode($input=NULL)
 	{
-		$salt = '!@£$%^&*()QIDNFOEWBVIEWM:"|}{>|:|()**^$%(&&£NARVOEIUMCWP*£(£%@%*(}|:<>>fka9fgbqpeg';
-		$input = $input !== NULL ? self::var_dump($input,true) : "";
+		$args	=	func_get_args();
+		$salt	=	"34v87tetnseoyrtq".
+					"p3498534978qnxp3".
+					"895vbpq34985ox4r".
+					"gwefijoiwy4cbo9t";
 
-		return sha1($salt.$input.time().mt_rand(0,21387132987).$salt);
+		$input = $input !== NULL ? self::var_dump($args,true) : "";
+
+		return sha1(implode("__",array($salt,$input,microtime(true),mt_rand(0,21387132987),$salt)));
 	}
 
 	//	IDEAS FOR A NEW(ER) SIMPLIFIED API
