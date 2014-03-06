@@ -805,7 +805,14 @@ class Amslib_Router
 			unset($r["javascript"]);
 			unset($r["handler"]);
 
-			foreach($r["src"] as &$s) $s = rtrim($data["domain"],"/").$s;
+			foreach($r["src"] as &$s){
+				//	If the url already contains this, it's an absolute url, you can't possibly add
+				//	the domain to it, cause it already has one although I don't know if this will
+				//	fit all circumstances, perhaps these urls shouldn't be exported
+				if(strpos($s,"http://") !== false) continue;
+
+				$s = rtrim($data["domain"],"/").$s;
+			}
 
 			if(strpos($k,"framework") || !self::getExportRestriction($r["group"])){
 				unset($data["cache"][$k]);
