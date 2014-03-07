@@ -107,6 +107,12 @@ class Amslib_Plugin_Manager
 	 */
 	static public function config($name,$location)
 	{
+		if(!is_string($name) || is_boolean($name)){
+			Amslib::errorLog("stack_trace","Error attempting to configure plugin, invalid name",$name);
+
+			return false;
+		}
+
 		//	If this plugin is configured to not load, return false
 		if(isset(self::$prevent[$name])) return false;
 
