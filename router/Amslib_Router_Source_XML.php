@@ -71,6 +71,7 @@ class Amslib_Router_Source_XML
 				Amslib_QueryPath::execCallback("router > service[name]",	array($this,"configService"),	$this);
 				Amslib_QueryPath::execCallback("router > callback",			array($this,"configCallback"),	$this);
 				Amslib_QueryPath::execCallback("router > import",			array($this,"configImport"),	$this);
+				Amslib_QueryPath::execCallback("router > export",			array($this,"configExport"),	$this);
 			}
 		}catch(Exception $e){
 			Amslib::errorLog("Exception: ",$e->getMessage(),"file=",$this->filename,"source=",$source);
@@ -205,6 +206,17 @@ class Amslib_Router_Source_XML
 		if(!isset($import["output"]) || !isset($import["url"])) return false;
 
 		$this->import[] = $import;
+
+		return true;
+	}
+
+	public function configExport($name,$array,$object)
+	{
+		foreach($array["child"] as $c){
+			if($c["tag"] == "restrict"){
+				Amslib_Router::setExportRestriction($c["value"], false);
+			}
+		}
 
 		return true;
 	}

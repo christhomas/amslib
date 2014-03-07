@@ -385,6 +385,7 @@ class Amslib_Plugin_Manager
 				$sname = is_object($src) ? $src->getName() : "searched: {$value["src"]}";
 				$dname = is_object($dst) ? $dst->getName() : "searched: {$value["dst"]}";
 
+				Amslib::errorLog("plugin list",Amslib_Plugin_Manager::listPlugins());
 				Amslib::errorLog("plugin invalid",intval(is_object($src)).", ".intval(is_object($dst)),$sname,$dname,Amslib_Router::getPath());
 				continue;
 			}
