@@ -27,10 +27,10 @@ class Amslib_QueryPath
 			$warnings = ob_get_clean();
 
 			if(strlen($warnings)){
-				Amslib::errorLog("FAILED TO OBTAIN CLEAN OUTPUT WHEN PROCESSING DOCUMENT: error = ",$warnings);
+				Amslib::errorLog("QueryPath did not produce clean output when processing document, this is not normal",$warnings);
 			}
 		}catch(Exception $e){
-			//	I dunno what to do here
+			Amslib::errorLog("QueryPath trigger an exception processing document",$document,$e->getMessage());
 		}
 
 		//	Something went wrong, create a dummy object (this hasn't been tested properly)
