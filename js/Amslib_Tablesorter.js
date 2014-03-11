@@ -19,6 +19,10 @@
  *     
  *******************************************************************************/
 
+if(typeof(Amslib) == "undefined"){
+	throw("Amslib_Tablesorter.js: requires amslib to be loaded first");
+}
+
 /**
  * 	class:	Amslib_Tablesorter
  * 
@@ -35,8 +39,6 @@
  * 		write documentation
  * 
  */
-if(typeof(Amslib) == "undefined") throw("Amslib_Tablesorter.js: requires amslib/my.common to be loaded first");
-
 var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 {
 	debug: false,
