@@ -861,7 +861,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 */
 	public function getRouteParam($name=NULL,$default="")
 	{
-		return Amslib_Router::getRouteParam($name,$default);
+		return Amslib_Router_URL::getRouteParam($name,$default);
 	}
 
 	/**
@@ -891,7 +891,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 */
 	public function getFullURL()
 	{
-		return Amslib_Website::rel(Amslib_Router::getPath());
+		return Amslib_Router_URL::getFullURL();
 	}
 
 	/**
@@ -901,7 +901,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 */
 	public function getURLParam($index=NULL,$default="")
 	{
-		return Amslib_Router::getURLParam($index,$default);
+		return Amslib_Router_URL::getURLParam($index,$default);
 	}
 
 	/**

@@ -43,17 +43,29 @@ class Amslib_Router_URL
 	 */
 	static public function getFullURL()
 	{
-		return Amslib_Router::getPath();
+		return Amslib_Website::rel(Amslib_Router::getPath());
 	}
 
 	/**
 	 * 	method:	getURL
 	 *
-	 * 	todo: write documentation
+	 *	A method to obtain the url via it's name, group, language and domain
+	 *
+	 *	params
+	 *		$name	-	The name of the route to request
+	 *		$group	-	The group this route belongs to, allows selecting a route with a similar
+	 *					name, specifying the group directly
+	 *		$lang	-	The language for the url to return
+	 *		$domain	-	The domain of the route, this might be because a router from another URI was
+	 *					imported, meaning a router contains multiple routers, each segregated by their domain
+	 *
+	 *	notes:
+	 *		-	The $domain parameter is not really the domain, it's the "location", it CAN BE
+	 *			the domain, but it's not explicitly ONLY THIS, it can be any URI
 	 */
-	static public function getURL($route=NULL,$group=NULL,$lang="default",$domain=NULL)
+	static public function getURL($name=NULL,$group=NULL,$lang="default",$domain=NULL)
 	{
-		return Amslib_Router::getURL($route,$group,$lang,$domain);
+		return Amslib_Router::getURL($name,$group,$lang,$domain);
 	}
 
 	/*	NOTE:	getURL was deactivated because it's defining URL policy for a website to

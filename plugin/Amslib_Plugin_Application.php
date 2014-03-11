@@ -51,7 +51,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 */
 	protected function initialisePlugin()
 	{
-
+		/* do nothing by default */
 	}
 
 	/**
