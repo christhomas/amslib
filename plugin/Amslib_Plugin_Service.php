@@ -184,14 +184,20 @@ class Amslib_Plugin_Service
 		//	Reset the service data and session structures
 		$this->data		=	array();
 		$this->session	=	array(self::HD=>array());
+
 		//	blank the appropriate session key to stop previous sessions overlapping
 		//	what if you are using the json output? then there is no key to erase, so you're just creating session keys and not using them
 		Amslib::getSESSION(self::SR,false,true);
+
 		//	NOTE: this "violates" mixing key types, but it's simpler than not doing it, so I'll "tolerate" it for this situation
 		//	NOTE: I don't actually remember what "mixing key types" means, I need to write a better explanation when I figure it out
 		$this->showFeedback();
-		//	NOTE: I should update return_ajax to something like "data_format:[json,session]" in the form instead of this
-		$this->setOutputFormat(Amslib::postParam("return_ajax",false) ? "json" : "session");
+
+		//	NOTE: I should update return_ajax to something like "output_format:[json,session]" in the form instead of this
+		//	If format was present, sanitise it's either false, json or session, OR set false and the webservice will do it
+		$format = Amslib::postParam("output_format",false);
+		if(!in_array($format,array(false,"json","session"))) $format = false;
+		$this->setOutputFormat($format);
 	}
 
 	/**
@@ -210,6 +216,10 @@ class Amslib_Plugin_Service
 
 	public function setOutputFormat($format)
 	{
+		//	This prevents the output format from being reset after it's set,
+		//	however if you attempt to invalidate it, it will allow you
+		if($format && $this->format) return $this->format;
+
 		$this->format = $format;
 
 		switch($this->format){
@@ -234,7 +244,16 @@ class Amslib_Plugin_Service
 				//	When doing ajax calls, you should never show feedback on the next available page
 				$this->hideFeedback();
 			}break;
+
+			default:{
+				$this->successCB = false;
+				$this->failureCB = false;
+
+				$this->hideFeedback();
+			}break;
 		}
+
+		return $this->format;
 	}
 
 	public function getOutputFormat()
