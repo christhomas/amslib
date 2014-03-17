@@ -308,11 +308,11 @@ class Amslib_Array
 		if(is_string($missing) && strlen($missing))	$missing = array($missing);
 
 		foreach(self::valid($present) as $k){
-			if(!isset($array[$k])) return false;
+			if(!array_key_exists($k,$array)) return false;
 		}
 
 		foreach(self::valid($missing) as $k){
-			if(isset($array[$k])) return false;
+			if(array_key_exists($k,$array)) return false;
 		}
 
 		return true;
