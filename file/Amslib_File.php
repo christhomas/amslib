@@ -150,7 +150,22 @@ class Amslib_File
 	 * returns:
 	 * 	boolean true or false, depending on the whether creation was successful
 	 */
-	static public function mkdir($directory)
+	static public function mkdir($directory,$mode=0777,$recursive=false,&$error_text=NULL)
+	{
+		$status = true;
+
+		ob_start();
+		$exists = is_dir($directory);
+		if(!$exists && !mkdir($directory,$mode,$recursive)){
+			Amslib::errorLog("Failed to create directory requested",$directory);
+			$status = false;
+		}
+		$error_text = ob_get_clean();
+
+		return $status;
+	}
+
+	static public function mkdir_manual($directory,$mode=0777)
 	{
 		$parent = dirname($directory);
 
@@ -158,7 +173,7 @@ class Amslib_File
 			self::mkdir($parent);
 		}
 
-		return mkdir($directory) && chmod($directory,0777);
+		return !is_dir($directory) && mkdir($directory) && chmod($directory,$mode);
 	}
 
 	/**
@@ -331,7 +346,7 @@ class Amslib_File
 
 		//	NOTE: Perhaps all this checking and copying or directories etc, should be formalised into the api??
 		//	If the destination directory doesnt exist, attempt to create it
-		if($error == false && !is_dir($directory) && !mkdir($directory,0755,true)){
+		if($error == false && !is_dir($directory) && !mkdir($directory,0777,true)){
 			Amslib::errorLog("There was an error with the directory, either permissions, or creating it was not possible",$directory,error_get_last());
 			$error = true;
 		}
@@ -352,7 +367,7 @@ class Amslib_File
 		}
 
 		//	If there are no errors, you have uploaded the file ok, however, you could still fail here
-		if($error == false && !chmod($destination,0755)){
+		if($error == false && !chmod($destination,0777)){
 			Amslib::errorLog("file uploaded ok (apparently), but chmod failed",$destination,error_get_last());
 		}
 
@@ -365,11 +380,8 @@ class Amslib_File
 			Amslib::errorLog("Error or warning executing file operations",$output);
 		}
 
-		//	Maybe the programmer asked for the fullpath of the file to be returned
-		//	NOTE: can I just set the variable and it'll work? or I need to do this if statement too?
-		if($fullpath !== NULL){
-			$fullpath = $destination;
-		}
+		//	Set the full path of the file, it's final destination in the filesystem
+		$fullpath = $destination;
 
 		return !$error;
 	}

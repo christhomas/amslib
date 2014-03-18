@@ -35,9 +35,22 @@ class Amslib_Website
 {
 	static protected $location = NULL;
 
-	static public function saveUploadedFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
+	const ERROR_FILE_NOT_FOUND	=	"The src filename was not found, could not be fixed automatically";
+
+	static public function move($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
-		return Amslib_File::saveUploadedFile($src_filename,self::rel($directory),$dst_filename,$fullpath);
+		$s = $src_filename;
+		$d = self::abs($directory);
+
+		if(!file_exists($s) && $a=self::abs($s)){
+			$s = file_exists($a) ? $a : false;
+		}
+
+		if(Amslib_File::move($s,$d,$dst_filename,$fullpath)) return true;
+
+		if(!$s) Amslib::errorLog(self::ERROR_FILE_NOT_FOUND." (s,src_filename) = ",$s,$src_filename);
+
+		return false;
 	}
 
 	static public function listFiles($dir,$recurse=false,$exit=true)
@@ -154,5 +167,12 @@ class Amslib_Website
 		if($block === false)	print($json);
 
 		return $json;
+	}
+
+	//	DEPRECATED METHOD, use move() instead
+	static public function saveUploadedFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL){
+		Amslib::errorLog("DEPRECATED METHOD","stack_trace");
+
+		self::move($src_filename,$directory,$dst_filename,$fullpath);
 	}
 }
