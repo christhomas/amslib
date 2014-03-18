@@ -46,9 +46,11 @@ class Amslib_Website
 			$s = file_exists($a) ? $a : false;
 		}
 
-		if(Amslib_File::move($s,$d,$dst_filename,$fullpath)) return true;
+		if($s && Amslib_File::move($s,$d,$dst_filename,$fullpath)) return true;
 
-		if(!$s) Amslib::errorLog(self::ERROR_FILE_NOT_FOUND." (s,src_filename) = ",$s,$src_filename);
+		if(!$s){
+			Amslib::errorLog(self::ERROR_FILE_NOT_FOUND." (s,src_filename) = ",$s,$src_filename);
+		}
 
 		return false;
 	}
