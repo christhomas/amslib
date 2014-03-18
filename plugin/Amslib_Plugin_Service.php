@@ -170,33 +170,51 @@ class Amslib_Plugin_Service
 	 * 	method:	__construct
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	notes:
+	 * 		-	The object is basically hard coded to ONLY use $_POST as an input source, but this might not be true
+	 * 		-	In situations where $_GET is used, you'd need to post some parameters through $_GET, others $_POST
+	 * 		-	So this should be made more flexible, so the webservice can define the input source and this accomodates
 	 */
 	public function __construct()
 	{
 		//	FIXME: we are hardcoding a route "home" which might not exist, this could be a bad idea
-		//	NOTE: perhaps url_return, url_success, url_failure is better, because it puts the keyword "url" at the beginning?
 		$default_url	=	Amslib_Router::getURL("home");
-		$return_url		=	Amslib::rchop(Amslib::postParam("return_url",$default_url),"?");
 
-		$this->setSuccessURL(Amslib::rchop(Amslib::postParam("success_url",$return_url),"?"));
-		$this->setFailureURL(Amslib::rchop(Amslib::postParam("failure_url",$return_url),"?"));
+		$url_return		=	Amslib::getPOST("url_return",	Amslib::getPOST("return_url",$default_url));
+		$url_return		=	Amslib::rchop($url_return,"?");
+
+		$url_success	=	Amslib::getPOST("url_success",	Amslib::getPOST("success_url",$url_return));
+		$url_success	=	Amslib::rchop($url_success,"?");
+
+		$url_failure	=	Amslib::getPOST("url_failure",	Amslib::getPOST("failure_url",$url_return));
+		$url_failure	=	Amslib::rchop($url_failure,"?");
+
+		$this->setSuccessURL($url_success);
+		$this->setFailureURL($url_failure);
 
 		//	Reset the service data and session structures
 		$this->data		=	array();
 		$this->session	=	array(self::HD=>array());
 
 		//	blank the appropriate session key to stop previous sessions overlapping
-		//	what if you are using the json output? then there is no key to erase, so you're just creating session keys and not using them
+		//	NOTE:	what if you are using the json output? then there is no key to erase,
+		//			so you're just creating session keys and not using them
 		Amslib::getSESSION(self::SR,false,true);
 
-		//	NOTE: this "violates" mixing key types, but it's simpler than not doing it, so I'll "tolerate" it for this situation
-		//	NOTE: I don't actually remember what "mixing key types" means, I need to write a better explanation when I figure it out
+		//	NOTE:	this "violates" mixing key types, but it's simpler than not doing it,
+		//			so I'll "tolerate" it for this situation
+		//	NOTE:	I don't actually remember what "mixing key types" means, I need to
+		//			write a better explanation when I figure it out
 		$this->showFeedback();
 
-		//	NOTE: I should update return_ajax to something like "output_format:[json,session]" in the form instead of this
-		//	If format was present, sanitise it's either false, json or session, OR set false and the webservice will do it
-		$format = Amslib::postParam("output_format",false);
+		//	Obtain the old return_ajax parameter, either as json or false
+		$return_ajax = Amslib::getPOST("return_ajax",false) ? "json" : false;
+		//	Obtain the new output_format parameter, or default to the return_ajax value if not found
+		$format = Amslib::getPOST("output_format",$return_ajax);
+		//	Sanitise the format to be one of three possible options, or default to false
 		if(!in_array($format,array(false,"json","session"))) $format = false;
+		//	Now it should be safe to set the output format, false will of course reset
 		$this->setOutputFormat($format);
 	}
 

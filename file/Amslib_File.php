@@ -315,20 +315,23 @@ class Amslib_File
 		return $list;
 	}
 
-	/**
-	 * 	method:	saveUploadedFile
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function saveUploadedFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
+	static public function copy($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
+	{
+		//	TODO: implement similar code to move() but copying not moving the file
+	}
+
+	static public function move($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		$error = false;
 
 		$directory = self::absolute($directory);
 
+		//	grab warning/error output to stop it breaking the output
+		ob_start();
+
 		//	NOTE: Perhaps all this checking and copying or directories etc, should be formalised into the api??
 		//	If the destination directory doesnt exist, attempt to create it
-		if($error == false && !is_dir($directory) && !@mkdir($directory,0755,true)){
+		if($error == false && !is_dir($directory) && !mkdir($directory,0755,true)){
 			Amslib::errorLog("There was an error with the directory, either permissions, or creating it was not possible",$directory,error_get_last());
 			$error = true;
 		}
@@ -343,21 +346,43 @@ class Amslib_File
 		$destination	=	self::reduceSlashes("$directory/$dst_filename");
 
 		//	Try to move the file into the correct destination
-		if($error == false && !@rename($src_filename,$destination)){
+		if($error == false && !rename($src_filename,$destination)){
 			Amslib::errorLog("It was not possible to save to the requested filename",error_get_last());
 			$error = true;
 		}
 
 		//	If there are no errors, you have uploaded the file ok, however, you could still fail here
-		if($error == false && !@chmod($destination,0755)){
+		if($error == false && !chmod($destination,0755)){
 			Amslib::errorLog("file uploaded ok (apparently), but chmod failed",$destination,error_get_last());
 		}
 
+		//	if the output was not empty, something bad happened, like a warning or error
+		//	when this happens, sometimes with file operations, it can break json, or website output
+		//	so I use an output buffer to grab all the output without it going to the user in some way
+		//	then once I have it, I can do something with it, like output it only to the error log, etc, etc.
+		$output = ob_get_clean();
+		if(strlen($output)){
+			Amslib::errorLog("Error or warning executing file operations",$output);
+		}
+
 		//	Maybe the programmer asked for the fullpath of the file to be returned
+		//	NOTE: can I just set the variable and it'll work? or I need to do this if statement too?
 		if($fullpath !== NULL){
 			$fullpath = $destination;
 		}
 
 		return !$error;
+	}
+
+	/**
+	 * 	DEPRECATED: use move(...) instead
+	 *
+	 * 	method:	saveUploadedFile
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function saveUploadedFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
+	{
+		return self::move($src_filename,$directory,$dst_filename,$fullpath);
 	}
 }
