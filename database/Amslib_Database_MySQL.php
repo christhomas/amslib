@@ -49,6 +49,24 @@ class Amslib_Database_MySQL extends Amslib_Database
 	}
 
 	/**
+	*  method:	setDebugOutput
+	*
+	*  note: When launching the translator object with the option database, when launching the load function 
+	*  an instance of this object is needed. I do not know if you are aware of the problem and you have a way to cope with it.
+	*  I assume you are not aware of the problem since you have to do several installation to see it(in my case) so I am adding this function.
+	*  If you don't want getInstance in here I will create a wrapper "capsule" object for my projects.
+	*/
+	
+	public function getInstance()
+	{
+		static $instance = NULL;
+	
+		if($instance === NULL) $instance = new self();
+		
+		return $instance;
+	}
+	
+	/**
 	 * 	method:	connect
 	 *
 	 * 	Connect to the MYSQL database using various details
