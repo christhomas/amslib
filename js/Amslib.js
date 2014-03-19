@@ -149,7 +149,7 @@ var Amslib = my.Amslib = my.Class({
 		this.__amslibName = name || this.__amslibDefaultName;
 		
 		//	Setup the amslib_controller to make this object available on the node it was associated with
-		this.parent.data(this.__amslibName,this);
+		Amslib.controller.set(this.parent,this.__amslibName,this);
 		
 		this.__value		= $("<div/>");
 		this.__services		= $("<div/>");
@@ -225,7 +225,7 @@ var Amslib = my.Amslib = my.Class({
 	
 	trigger: function(event,data)
 	{
-		this.__events.trigger(event,[data]);
+		this.__events.trigger(event,Array.prototype.slice.call(arguments,1));
 	},
 	
 	//	Getter/Setter for the object values
@@ -244,6 +244,28 @@ var Amslib = my.Amslib = my.Class({
 	setImage: function(name,value){			this.__images.data(name,value);			},
 	getImage: function(name){				return this.__images.data(name);		}
 });
+
+Amslib.controller = {
+	set: function(node,name,controller)
+	{
+		node = $(node);
+		
+		if(node && node.length){
+			node.data(name,controller);
+		}
+	},
+	
+	get: function(node,name)
+	{
+		node = $(node);
+		
+		if(node && node.length){
+			return node.data(name);
+		}
+		
+		return false;
+	}
+};
 
 ////////////////////////////////////////////////////////////////////
 //	The wait object API
