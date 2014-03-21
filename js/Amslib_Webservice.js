@@ -39,6 +39,8 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 {
 	promise:	false,
 	url:		false,
+	cbSuccess:	false,
+	cbFailure:	false,
 	
 	constructor: function(){
 		this.setJSON(false);
@@ -61,25 +63,27 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 			};
 		}
 		
-		this.promise = $.ajax(config);
+		this.promise	=	$.ajax(config);
+		this.cbSuccess	=	[];
+		this.cbFailure	=	[];
 		
 		return this;
 	},
 	
 	success: function(handler)
 	{
-		var obj = this;
+		var _this = this;
 		
 		if(typeof(handler) == "function"){
+			this.cbSuccess.push(handler);
+			
 			this.promise.success(function(json){
-				obj.setJSON(json);
+				_this.setJSON(json);
 				
-				if(!obj.hasSuccess()){
-					//	TODO: find out how to trigger the error method so I can run that code instead
-					//	NOTE: is it correct to attempt to call the error method in the first place?
-					//obj.promise.abort();
+				if(!_this.hasSuccess()){
+					_this.executeFailure(json);
 				}else{
-					handler(obj,json);
+					_this.executeSuccess(json);
 				}
 			});
 		}
@@ -89,16 +93,32 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 	
 	failure: function(handler)
 	{
-		var obj = this;
+		var _this = this;
 		
 		if(typeof(handler) == "function"){
+			this.cbFailure.push(handler);
+			
 			this.promise.error(function(json){
-				obj.setJSON(json);
-				handler(obj,json);
+				_this.setJSON(json);
+				_this.executeFailure(json);
 			});
 		}
 		
 		return this;
+	},
+	
+	executeSuccess: function(json)
+	{
+		if(this.cbSuccess) for(i in this.cbSuccess){
+			this.cbSuccess[i](this,json);
+		}
+	},
+	
+	executeFailure: function(json)
+	{
+		if(this.cbFailure) for(i in this.cbFailure){
+			this.cbFailure[i](this,json);
+		}
 	},
 	
 	getURL: function()
