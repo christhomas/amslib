@@ -80,11 +80,9 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 			this.promise.success(function(json){
 				_this.setJSON(json);
 				
-				if(!_this.hasSuccess()){
-					_this.executeFailure(json);
-				}else{
-					_this.executeSuccess(json);
-				}
+				!_this.hasSuccess()
+					? _this.executeFailure(json)
+					: _this.executeSuccess(json);
 			});
 		}
 		
