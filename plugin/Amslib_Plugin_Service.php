@@ -54,6 +54,7 @@ class Amslib_Plugin_Service
 	protected $data;
 	protected $session;
 	protected $handlerList;
+	protected $terminatorList;
 	protected $activeHandler;
 
 	//	Used in the website to retrieve the session data after processing
@@ -90,11 +91,11 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function storeData($status)
+	protected function storeData($status,$force=false)
 	{
 		$this->setServiceStatus($status);
 
-		if($this->activeHandler["record"]){
+		if($this->activeHandler["record"] || $force){
 			if(!empty($this->data)){
 				$this->session[self::HD][]	= $this->data;
 			}
@@ -167,6 +168,28 @@ class Amslib_Plugin_Service
 	}
 
 	/**
+	 * 	method:	finalise
+	 *
+	 * 	todo: write documentation
+	 */
+	protected function finalise($state)
+	{
+		$source = array();
+
+		$type = $state ? "success" : "failure";
+
+		//	Call the success or failure terminators
+		foreach(Amslib_Array::valid($this->terminatorList["$type"]) as $t){
+			$this->runHandler($t["object"],$t["method"],$source);
+		}
+
+		//	Call the common terminators
+		foreach(Amslib_Array::valid($this->terminatorList["common"]) as $t){
+			$this->runHandler($t["object"],$t["method"],$source);
+		}
+	}
+
+	/**
 	 * 	method:	__construct
 	 *
 	 * 	todo: write documentation
@@ -216,6 +239,9 @@ class Amslib_Plugin_Service
 		if(!in_array($format,array(false,"json","session"))) $format = false;
 		//	Now it should be safe to set the output format, false will of course reset
 		$this->setOutputFormat($format);
+
+		//	Initialise all the terminator groups that can exist
+		$this->terminatorList = array_fill_keys(array("common","success","failure"),array());
 	}
 
 	/**
@@ -378,6 +404,39 @@ class Amslib_Plugin_Service
 		$this->session[self::FB] = false;
 	}
 
+	public function installHandlers($group,$output,$handlerList)
+	{
+		foreach(Amslib_Array::valid($handlerList) as $h)
+		{
+			//	Special customisation for framework urls, which normally execute on objects regardless of plugin
+			//	So we just use plugin as the key to trigger this
+			//	NOTE: this means framework has become a system name and cannot be used as a name of any plugin?
+			//	NOTE: perhaps amslib can become a plugin, therefore the plugin will be "amslib" and not "framework" ?
+			if(Amslib_Array::hasKeys($h,array("plugin","object","method")) && $h["plugin"] == "framework"){
+				$plugin	=	$h["plugin"];
+				$object	=	$h["object"];
+				$method	=	$h["method"];
+			}else{
+				$plugin	=	isset($h["plugin"]) ? $h["plugin"] : $group;
+				$api	=	Amslib_Plugin_Manager::getAPI($plugin);
+				$object	=	isset($h["object"]) ? $api->getObject($h["object"],true) : $api;
+				$method	=	isset($h["method"]) ? $h["method"] : "missingServiceMethod";
+			}
+
+			$params = array($plugin,$object,$method,$h["input"],$h["record"],$h["global"],$h["failure"]);
+
+			if($h["type"] == "service"){
+				$method = "setHandler";
+				array_unshift($params,$output);
+			}else{
+				$method = "setTerminator";
+				array_unshift($params,str_replace("terminator_","",$h["type"]));
+			}
+
+			call_user_func_array(array($this,$method),$params);
+		}
+	}
+
 	/**
 	 * 	method:	setHandler
 	 *
@@ -388,9 +447,33 @@ class Amslib_Plugin_Service
 	 */
 	public function setHandler($format,$plugin,$object,$method,$source="post",$record=true,$global=false,$failure=true)
 	{
+		//	NOTE: perhaps we should check this information before blindly accepting it
+
 		//	here we store handlers loaded from the service path before we execute them.
 		$this->handlerList[] = array(
 			"format"	=>	$format,
+			"plugin"	=>	$plugin,
+			"object"	=>	$object,
+			"method"	=>	$method,
+			"source"	=>	$source,
+			"record"	=>	$record,
+			"global"	=>	$global,
+			"failure"	=>	$failure
+		);
+	}
+
+	/**
+	 * 	method:	setTerminator
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setTerminator($type,$plugin,$object,$method,$source="post",$record=true,$global=false,$failure=true)
+	{
+		//	NOTE: perhaps we should check this information before blindly accepting it
+
+		if(!$type || !is_string($type) || !strlen($type)) return false;
+
+		$this->terminatorList[$type][] = array(
 			"plugin"	=>	$plugin,
 			"object"	=>	$object,
 			"method"	=>	$method,
@@ -503,6 +586,8 @@ class Amslib_Plugin_Service
 			//	OH NOES! we got brokens, have to stop here, cause something failed :(
 			if($h["failure"] && !$state) break;
 		}
+
+		$this->finalise($state);
 
 		//	run the failure or success callback to send data back to the receiver
 		call_user_func(array($this,$state ? $this->successCB : $this->failureCB));
@@ -715,25 +800,15 @@ class Amslib_Plugin_Service
 	 * 	object and import various keys into a new plugin key, ready to use, this is useful when
 	 * 	copying and deleting old data in order to reformat it based on the requirements
 	 */
-	public function cloneResponse($plugin,$data)
+	public function cloneResponse($plugin,$data,$store=false)
 	{
-		$plugin = self::pluginToName($plugin);
+		if(isset($data[self::SD]))	$this->setData($plugin,NULL,$data[self::SD]);
+		if(isset($data[self::SE]))	$this->setError($plugin,NULL,$data[self::SE]);
+		if(isset($data[self::VD]))	$this->setValidationData($plugin,$data[self::VD]);
+		if(isset($data[self::VE]))	$this->setValidationErrors($plugin,$data[self::VE]);
 
-		if(isset($data["service/data"])){
-			$this->setData($plugin,NULL,$data["service/data"]);
-		}
-
-		if(isset($data["service/errors"])){
-			$this->setError($plugin,NULL,$data["service/errors"]);
-		}
-
-		if(isset($data["validation/data"])){
-			$this->setValidationData($plugin,$data["validation/data"]);
-		}
-
-		if(isset($data["validation/errors"])){
-			$this->setValidationErrors($plugin,$data["validation/errors"]);
-		}
+		//	Store the result of the service and make ready to start a new service
+		if($store) $this->storeData($this->getServiceStatus(),true);
 	}
 
 	public function serviceWebserviceCatchall($service,$source)

@@ -136,31 +136,50 @@ class Amslib_Router_Source_XML
 		$a["src"]			=	array();
 		$a["handler"]		=	array();
 
+		//	Allowed handler types
+		$handler_types		=	array(
+			"service",
+			"terminator_common",
+			"terminator_success",
+			"terminator_failure"
+		);
+
 		//	Grab the default route input and output values, in order to potentially use them when setting up the handlers
 		$a["input"]		= isset($a["input"])	? strtolower($a["input"])	:	"post";
 		$a["output"]	= isset($a["output"])	? strtolower($a["output"])	:	"session";
+		$a["record"]	= isset($a["record"])	? strtolower($a["record"])	:	true;
 
 		//	Make sure the input source and output targets are valid, otherwise default to sensible values
 		//	TODO: In the future, support "xml"
 		if(!in_array($a["output"],array("json","session"))) $a["output"] = "session";
 
 		foreach($array["child"] as $child){
-			if($child["tag"] == "src"){
-				$a["src"]["default"] = $child["value"];
-			}else if($child["tag"] == "handler"){
-				$c = $child["attr"];
-				//	Default input source if not found to default route source
-				if(!isset($c["input"])) $c["input"] = $a["input"];
-				//	Validate it was set to a correct value
-				if(!in_array($c["input"],array("get","post"))) $c["input"] = "post";
+			switch($child["tag"]){
+				case "src":{
+					$a["src"]["default"] = $child["value"];
+				}break;
 
-				//	By default, record each webservice as they happen, but not globally, separately.
-				if(!isset($c["record"])){
-					$c["record"] = true;
-					$c["global"] = false;
-				}else{
+				case "handler":
+				case "terminator":{
+					$c = $child["attr"];
+
+					//	Set the type of webservice this will be attached
+					$c["type"] = $child["tag"] == "terminator"
+						? (isset($c["state"]) ? "terminator_{$c["state"]}" : "terminator_common")
+						: "service";
+
+					//	Ignore the webservice type is not valid
+					if(!in_array($c["type"],$handler_types)) continue;
+
+					//	Default input source if not found to default route source
+					if(!isset($c["input"])) $c["input"] = $a["input"];
+					//	Validate it was set to a correct value
+					if(!in_array($c["input"],array("get","post"))) $c["input"] = "post";
+
 					//	By default, recording is disabled unless it's enabled by a valid value
 					$record = false;
+
+					if(!isset($c["record"])) $c["record"] = $a["record"];
 
 					//	If the record value was global, per-webservice recording is disabled, but global recording is enabled
 					if(strpos($c["record"],"global")!== false)	$c["global"] = true;
@@ -169,15 +188,17 @@ class Amslib_Router_Source_XML
 					if(strpos($c["record"],"record")!== false)	$record = true;
 
 					$c["record"] = $record;
-				}
 
-				//	Failure will block unless you tell the system to ignore failure
-				//	A reason for wanting to ignore failures is that you want to accumulate all the results
-				//	and post-process them into a final result, however this requires you setup the webservices with care
-				//	and attention that failures will not cause unpredictable errors, however, that this, it is useful
-				$c["failure"] = isset($c["failure"]) && strpos($c["failure"],"ignore") ? false : true;
+					//	Failure will block unless you tell the system to ignore failure
+					//	A reason for wanting to ignore failures is that you want to accumulate all the results
+					//	and post-process them into a final result, however this requires you setup the webservices with care
+					//	and attention that failures will not cause unpredictable errors, however, that this, it is useful
+					$c["failure"] = isset($c["failure"]) && strpos($c["failure"],"ignore") !== false
+						? false
+						: true;
 
-				$a["handler"][] = $c;
+					$a["handler"][] = $c;
+				}break;
 			}
 		}
 

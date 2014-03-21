@@ -430,26 +430,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->api->setupService($route["group"],$route["name"]);
 
 		$service = Amslib_Plugin_Service::getInstance();
-		foreach(Amslib_Array::valid($route["handler"]) as $h)
-		{
-			//	Special customisation for framework urls, which normally execute on objects regardless of plugin
-			//	So we just use plugin as the key to trigger this
-			//	NOTE: this means framework has become a system name and cannot be used as a name of any plugin?
-			//	NOTE: perhaps amslib can become a plugin, therefore the plugin will be "amslib" and not "framework" ?
-			if(Amslib_Array::hasKeys($h,array("plugin","object","method")) && $h["plugin"] == "framework"){
-				$plugin	=	$h["plugin"];
-				$object	=	$h["object"];
-				$method	=	$h["method"];
-			}else{
-				$plugin	=	isset($h["plugin"]) ? $h["plugin"] : $route["group"];
-				$api	=	Amslib_Plugin_Manager::getAPI($plugin);
-				$object	=	isset($h["object"]) ? $api->getObject($h["object"],true) : $api;
-				$method	=	isset($h["method"]) ? $h["method"] : "missingServiceMethod";
-			}
-
-			$service->setHandler($route["output"],$plugin,$object,$method,$h["input"],$h["record"],$h["global"],$h["failure"]);
-		}
-
+		$service->installHandlers($route["group"],$route["output"],$route["handler"]);
 		$service->execute();
 	}
 
