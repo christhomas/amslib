@@ -147,7 +147,7 @@ class Amslib_Router_Source_XML
 		//	Grab the default route input and output values, in order to potentially use them when setting up the handlers
 		$a["input"]		= isset($a["input"])	? strtolower($a["input"])	:	"post";
 		$a["output"]	= isset($a["output"])	? strtolower($a["output"])	:	"session";
-		$a["record"]	= isset($a["record"])	? strtolower($a["record"])	:	true;
+		$a["record"]	= isset($a["record"])	? strtolower($a["record"])	:	"true";
 
 		//	Make sure the input source and output targets are valid, otherwise default to sensible values
 		//	TODO: In the future, support "xml"
