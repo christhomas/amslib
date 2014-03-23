@@ -176,18 +176,19 @@ class Amslib_Router_Source_XML
 					//	Validate it was set to a correct value
 					if(!in_array($c["input"],array("get","post"))) $c["input"] = "post";
 
-					//	By default, recording is disabled unless it's enabled by a valid value
-					$record = false;
+					//	By default, recording, global is disabled unless it's enabled by a valid value
+					$record = $global = false;
 
 					if(!isset($c["record"])) $c["record"] = $a["record"];
 
 					//	If the record value was global, per-webservice recording is disabled, but global recording is enabled
-					if(strpos($c["record"],"global")!== false)	$c["global"] = true;
+					if(strpos($c["record"],"global")!== false)	$global = true;
 					//	If the record value was "true" or "record" then obviously turn on per-webservice recording
 					if(strpos($c["record"],"true")	!== false)	$record = true;
 					if(strpos($c["record"],"record")!== false)	$record = true;
 
 					$c["record"] = $record;
+					$c["global"] = $global;
 
 					//	Failure will block unless you tell the system to ignore failure
 					//	A reason for wanting to ignore failures is that you want to accumulate all the results
