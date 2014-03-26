@@ -54,13 +54,13 @@ class Amslib_Validator
 	protected $__error;
 
 	/**
-	 * array:	$__items
+	 * array:	$__rules
 	 *
 	 * Contains an array of items to validate from the source data array, the source
 	 * might contain 100 elements, but you only want to validate 20, this is how we know which
 	 * to validate and which to ignore
 	 */
-	protected $__items;
+	protected $__rules;
 
 	/**
 	 * array:	$__source
@@ -1100,8 +1100,11 @@ class Amslib_Validator
 	 */
 	protected function __checkRequiredRules()
 	{
+		//	Easier solution?
+		//	$areRequiredRules = in_array(Amslib_Array::pluck($this->__rules,"required"),true);
+
 		$areRequiredRules = false;
-		foreach($this->__items as $item){
+		foreach($this->__rules as $item){
 			if($item["required"] == true) $areRequiredRules = true;
 		}
 
@@ -1168,7 +1171,7 @@ class Amslib_Validator
 	 */
 	public function __construct($source)
 	{
-		$this->__items				=	array();
+		$this->__rules				=	array();
 		$this->__error				=	array();
 		$this->__source				=	$source;
 		$this->__hasExecuted		=	false;
@@ -1238,7 +1241,7 @@ class Amslib_Validator
 	 * 		right now, the field name is used as the key to the type of validator, we'd have to change that so each key can have
 	 * 		multiple types assigned to it
 	 * -	I think to allow an item to be validated multiple times, we could just move to a system where
-	 * 		we don't use the $name parameter as the key to the __items array, we simply add a new __items[] element
+	 * 		we don't use the $name parameter as the key to the __rules array, we simply add a new __rules[] element
 	 * 		and then loop through them identically, we could move the $name parameter into the array assigned
 	 * 		as the same "name" array index and it should work identically
 	 * -	I think we need to stop assigning validData items to a blank string by default, because if an item
@@ -1252,7 +1255,7 @@ class Amslib_Validator
 	{
 		$required					=	isset($options["required"]) ? $options["required"] : $required;
 		$options["__vobject"]		=	$this;
-		$this->__items[$name]		=	array("name"=>$name,"type"=>$type,"required"=>$required,"options"=>$options);
+		$this->__rules[$name]		=	array("name"=>$name,"type"=>$type,"required"=>$required,"options"=>$options);
 		$this->__validData[$name]	=	"";
 
 		//	Just to be sure, if the value is invalid and you have a default, you should set it now
@@ -1287,7 +1290,7 @@ class Amslib_Validator
 	 */
 	public function remove($name)
 	{
-		unset($this->__items[$name],$this->__validData[$name]);
+		unset($this->__rules[$name],$this->__validData[$name]);
 
 		$this->__checkRequiredRules();
 	}
@@ -1328,9 +1331,6 @@ class Amslib_Validator
 	 * 	-	Call the callback and obtain the success code
 	 * 	-	If failed, then set data into the error array
 	 * 	-	Return the status of the validator (true = no errors)
-	 *
-	 * notes:
-	 * 	-	Rename Amslib_Validator::__items to Amslib_Validator::__rules or something more descriptive
 	 */
 	public function execute()
 	{
@@ -1338,7 +1338,7 @@ class Amslib_Validator
 
 		if(count($this->__source) == 0) return !$this->__hasRequiredRules;
 
-		foreach($this->__items as $name=>$rule){
+		foreach($this->__rules as $name=>$rule){
 			$this->__hasExecuted = true;
 
 			$value	=	$this->__getValue($name,$rule["options"]);
@@ -1475,7 +1475,7 @@ class Amslib_Validator
 	 */
 	public function itemCount()
 	{
-		return count($this->__items);
+		return count($this->__rules);
 	}
 
 	/**
