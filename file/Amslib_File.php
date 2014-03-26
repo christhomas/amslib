@@ -337,6 +337,9 @@ class Amslib_File
 
 	static public function move($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
+		//	You need a valid src filename and directory, otherwise you can't really move files around
+		if(!strlen($src_filename) || !strlen($directory)) return false;
+
 		$error = false;
 
 		$directory = self::absolute($directory);
@@ -356,6 +359,9 @@ class Amslib_File
 			Amslib::errorLog("The directory does not exist, so cannot write to the location",$directory,error_get_last());
 			$error = true;
 		}
+
+		//	If there was not dst_filename given, use the original filename from the src
+		if(!strlen($dst_filename)) $dst_filename = basename($src_filename);
 
 		$dst_filename	=	Amslib::slugify2(basename($dst_filename),"_",".");
 		$destination	=	self::reduceSlashes("$directory/$dst_filename");

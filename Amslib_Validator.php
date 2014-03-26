@@ -1109,6 +1109,56 @@ class Amslib_Validator
 	}
 
 	/**
+	 * 	method:	__setValue
+	 *
+	 * 	Set a specific value into the __source for a particular key
+	 *
+	 * 	parameters:
+	 * 		$name	-	The name of the value to set
+	 * 		$value	-	The value to assign
+	 */
+	protected function __setValue($name,$value)
+	{
+		if($value){
+			$this->__source[$name] = $value;
+		}
+	}
+
+	/**
+	 * 	method:	__getValue
+	 *
+	 *	Obtain the value from the source array, then trim the value ready for use
+	 *
+	 *	parameters:
+	 *		$name		-	The name of the value in the source array
+	 *
+	 *	returns:
+	 *		The value or NULL if not found, trimmed for extra whitespace
+	 */
+	protected function __getValue($name)
+	{
+		return isset($this->__source[$name]) ? trim($this->__source[$name]) : NULL;
+	}
+
+	/**
+	 * 	method:	__setDefaultValue
+	 *
+	 * 	Set the default value, if one is found in the options structure and no value was found in the __source array
+	 *
+	 * 	parameters:
+	 * 		$name		-	The name of the parameter to set
+	 * 		$options	-	The validation rules options structure, containing, if any, a default value
+	 */
+	protected function __setDefaultValue($name,$options)
+	{
+		$value = $this->__getValue($name);
+
+		if($value === NULL && isset($options["default"])){
+			$this->__setValue($name,$options["default"]);
+		}
+	}
+
+	/**
 	 * method:	__construct
 	 *
 	 * Constructs an object that is responsible for validating the information passed through the the parameter $source
@@ -1205,6 +1255,9 @@ class Amslib_Validator
 		$this->__items[$name]		=	array("name"=>$name,"type"=>$type,"required"=>$required,"options"=>$options);
 		$this->__validData[$name]	=	"";
 
+		//	Just to be sure, if the value is invalid and you have a default, you should set it now
+		$this->__setDefaultValue($name,$options);
+
 		if($required === true) $this->__setRequiredRules(true);
 	}
 
@@ -1288,11 +1341,9 @@ class Amslib_Validator
 		foreach($this->__items as $name=>$rule){
 			$this->__hasExecuted = true;
 
-			$value = (isset($this->__source[$name])) ? $this->__source[$name] : NULL;
+			$value	=	$this->__getValue($name,$rule["options"]);
 
-			if(is_string($value)) $value = trim($value);
-
-			$status = call_user_func(
+			$status	=	call_user_func(
 							$this->__types[$rule["type"]],
 							$name,
 							$value,
@@ -1334,11 +1385,9 @@ class Amslib_Validator
 			$r["value"] = $options["default_value"];
 		}
 
-		if(isset($options["return_value"])){
-			$r = isset($r["value"]) ? $r["value"] : $r;
-		}
-
-		return $r;
+		return $r && isset($r["value"]) && isset($options["return_value"])
+			? $r["value"]
+			: $r;
 	}
 
 	/**
@@ -1454,24 +1503,24 @@ class Amslib_Validator
 			//	Phone number tests
 			//	EMPTY PHONE NUMBER
 			array(false,	"",		"phone",	true,	array()),
-			array(true,	"",		"phone",	false,	array()),
-			array(true,	"",		"phone",	true,	array("allow_empty"=>true)),
-			array(true,	"",		"phone",	false,	array("allow_empty"=>false)),
+			array(true,		"",		"phone",	false,	array()),
+			array(true,		"",		"phone",	true,	array("allow_empty"=>true)),
+			array(true,		"",		"phone",	false,	array("allow_empty"=>false)),
 			array(false,	"",		"phone",	true,	array("allow_empty"=>false)),
-			array(true,	"",		"phone",	false,	array("allow_empty"=>true)),
+			array(true,		"",		"phone",	false,	array("allow_empty"=>true)),
 			//	INVALID PHONE NUMBER
-			array(true,	"123",	"phone",	true,	array()),
-			array(true,	"123",	"phone",	false,	array()),
-			array(true,	"123+",	"phone",	true,	array()),
-			array(true,	"123+",	"phone",	false,	array()),
+			array(true,		"123",	"phone",	true,	array()),
+			array(true,		"123",	"phone",	false,	array()),
+			array(true,		"123+",	"phone",	true,	array()),
+			array(true,		"123+",	"phone",	false,	array()),
 			array(false,	"1ad+",	"phone",	true,	array()),
-			array(true,	"1ad+",	"phone",	false,	array()),
+			array(true,		"1ad+",	"phone",	false,	array()),
 			//	INVALID PHONE NUMBER IS LONG ENOUGH
-			array(true,	"123",	"phone",	true,	array("minlength"=>2)),
-			array(true,	"123",	"phone",	false,	array("minlength"=>2)),
+			array(true,		"123",	"phone",	true,	array("minlength"=>2)),
+			array(true,		"123",	"phone",	false,	array("minlength"=>2)),
 			//	INVALID PHONE NUMBER IS TOO SHORT
 			array(false,	"123",	"phone",	true,	array("minlength"=>5)),
-			array(true,	"123",	"phone",	false,	array("minlength"=>5)),
+			array(true,		"123",	"phone",	false,	array("minlength"=>5)),
 			//	TODO: add tests for maxlength
 		);
 
