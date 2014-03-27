@@ -514,6 +514,15 @@ class Amslib
 	 */
 	static public function var_dump($variable,$preformat=false,$hiddenOutput=false)
 	{
+		//	This method sometimes causes php to run out of memory, a problem which is very hard to find
+		//	these two lines, let you increment a counter and die after a certain point, it's a cheap, nasty debugging method
+		//	but you'll eventually find a count where it won't die "out of memory" and the next number up, will die
+		//	then you'll get a stack trace of when it happened
+		//	Yes, it's dumb, but I really don't know a way to get around this problem, PHP gives no tools to do so
+		//	Uncomment these lines to use and comment them back once you're done
+		//static $run = 0;
+		//if(++$run == 4) die(Amslib::getStackTrace(NULL,true));
+
 		ob_start();
 		var_dump($variable);
 		$dump = ob_get_clean();
