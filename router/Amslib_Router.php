@@ -477,9 +477,9 @@ class Amslib_Router
 	 */
 	static public function getService($name,$group=NULL,$domain=NULL)
 	{
-		if(is_array($name) && count($name)) $name[0] = "service:{$name[0]}";
+		$name = "service:".(is_array($name) && count($name) ? $name[0] : $name);
 
-		return self::getRoute("service:$name",$group,$domain);
+		return self::getRoute($name,$group,$domain);
 	}
 
 	/**
