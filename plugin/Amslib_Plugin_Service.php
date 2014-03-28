@@ -45,9 +45,9 @@ class Amslib_Plugin_Service
 	const HD = "handlers";
 	const FB = "feedback";
 	const SC = "success";
+	const US = "url_success";
+	const UF = "url_failure";
 
-	protected $successURL;
-	protected $failureURL;
 	protected $successCB;
 	protected $failureCB;
 	protected $format;
@@ -139,6 +139,7 @@ class Amslib_Plugin_Service
 	 */
 	protected function successJSON()
 	{
+
 		//	NOTE: I don't like the method name "outputJSON", I think it's ugly and not elegant
 		Amslib_Website::outputJSON($this->session,true);
 	}
@@ -201,6 +202,10 @@ class Amslib_Plugin_Service
 	 */
 	public function __construct()
 	{
+		//	Reset the service data and session structures
+		$this->data		=	array();
+		$this->session	=	array(self::HD=>array());
+
 		//	FIXME: we are hardcoding a route "home" which might not exist, this could be a bad idea
 		$default_url	=	Amslib_Router::getURL("home");
 
@@ -215,10 +220,6 @@ class Amslib_Plugin_Service
 
 		$this->setSuccessURL($url_success);
 		$this->setFailureURL($url_failure);
-
-		//	Reset the service data and session structures
-		$this->data		=	array();
-		$this->session	=	array(self::HD=>array());
 
 		//	blank the appropriate session key to stop previous sessions overlapping
 		//	NOTE:	what if you are using the json output? then there is no key to erase,
@@ -312,7 +313,7 @@ class Amslib_Plugin_Service
 	 */
 	public function setSuccessURL($url)
 	{
-		$this->successURL = $this->sanitiseURL($url);
+		$this->session[self::US] = $this->sanitiseURL($url);
 	}
 
 	/**
@@ -322,7 +323,7 @@ class Amslib_Plugin_Service
 	 */
 	public function getSuccessURL()
 	{
-		return $this->successURL;
+		return $this->session[self::US];
 	}
 
 	/**
@@ -332,7 +333,7 @@ class Amslib_Plugin_Service
 	 */
 	public function setFailureURL($url)
 	{
-		$this->failureURL = $this->sanitiseURL($url);
+		$this->session[self::UF] = $this->sanitiseURL($url);
 	}
 
 	/**
@@ -342,7 +343,7 @@ class Amslib_Plugin_Service
 	 */
 	public function getFailureURL()
 	{
-		return $this->failureURL;
+		return $this->session[self::UF];
 	}
 
 	/**
