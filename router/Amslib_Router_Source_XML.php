@@ -81,14 +81,14 @@ class Amslib_Router_Source_XML
 
 	public function configPath($name,$array,$object)
 	{
+		//	Ignore if there are no children
+		if(empty($array["child"])) return;
+
 		$array["name"]			=	$array["attr"]["name"];
 		$array["type"]			=	$array["tag"];
 		$array["src"]			=	array();
 		$array["javascript"]	=	array();
 		$array["stylesheet"]	=	array();
-
-		//	Ignore if there are no children
-		if(empty($array["child"])) return;
 
 		foreach($array["child"] as $child){
 			switch($child["tag"]){
@@ -134,6 +134,9 @@ class Amslib_Router_Source_XML
 
 	public function configService($name,$array,$object)
 	{
+		//	Ignore if there are no children
+		if(empty($array["child"])) return;
+
 		$a 					=	$array["attr"];
 		$a["type"]			=	$array["tag"];
 		$a["src"]			=	array();
