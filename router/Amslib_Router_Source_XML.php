@@ -87,6 +87,9 @@ class Amslib_Router_Source_XML
 		$array["javascript"]	=	array();
 		$array["stylesheet"]	=	array();
 
+		//	Ignore if there are no children
+		if(empty($array["child"])) return;
+
 		foreach($array["child"] as $child){
 			switch($child["tag"]){
 				case "src":{
