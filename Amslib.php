@@ -938,7 +938,6 @@ class Amslib
 
 			$e = @error_get_last();
 
-
 			if($e && @is_array($e) && @in_array($e["type"],$fatal))
 			{
 				$error = base64_encode(json_encode(array(
