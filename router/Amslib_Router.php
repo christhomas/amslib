@@ -675,7 +675,7 @@ class Amslib_Router
 		//	e.g. list/[name]/page/[number] => [list,name],[page,number]
 		$p = array();
 		$k = $v = false;
-		$u = Amslib_Array::valid(self::getURLParam());
+		$u = Amslib_Array::valid(self::getURLParam(NULL,NULL));
 		if($o=intval($offset)) $u = array_slice($u,$o);
 
 		foreach($u as $value){
