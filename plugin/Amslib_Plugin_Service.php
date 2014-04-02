@@ -288,8 +288,6 @@ class Amslib_Plugin_Service
 			default:{
 				$this->successCB = false;
 				$this->failureCB = false;
-
-				$this->hideFeedback();
 			}break;
 		}
 
