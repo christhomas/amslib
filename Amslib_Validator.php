@@ -1122,7 +1122,7 @@ class Amslib_Validator
 	 */
 	protected function __setValue($name,$value)
 	{
-		if($value){
+		if(is_string($name) && strlen($name) && $value){
 			$this->__source[$name] = $value;
 		}
 	}
@@ -1140,7 +1140,10 @@ class Amslib_Validator
 	 */
 	protected function __getValue($name)
 	{
-		return isset($this->__source[$name]) ? trim($this->__source[$name]) : NULL;
+		//	NOTE: I am not sure whether setting ALL empty strings to NULL will cause errors or not
+		$value = isset($this->__source[$name]) ? trim($this->__source[$name]) : "";
+
+		return strlen($value) ? $value : NULL;
 	}
 
 	/**
