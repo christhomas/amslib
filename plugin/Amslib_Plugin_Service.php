@@ -139,7 +139,6 @@ class Amslib_Plugin_Service
 	 */
 	protected function successJSON()
 	{
-
 		//	NOTE: I don't like the method name "outputJSON", I think it's ugly and not elegant
 		Amslib_Website::outputJSON($this->session,true);
 	}
@@ -509,14 +508,15 @@ class Amslib_Plugin_Service
 		die("FAILURE[c:$object][m:$method]-> method did not exist, so could not be called");
 	}
 
-	//	NOTE: the code is ready however the system is not
-	//	NOTE: the problem is that service handlers are not programmed to understand the extra attributes
-	//	NOTE: the other problem is that service import/export definitions are not programmed as well
-	//	NOTE: so the idea will have to stay here until I can dedicate time to implementing those.
 	/**
 	 * 	method:	runManagedHandler
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	NOTE: the code is ready however the system is not
+	 * 	NOTE: the problem is that service handlers are not programmed to understand the extra attributes
+	 * 	NOTE: the other problem is that service import/export definitions are not programmed as well
+	 * 	NOTE: so the idea will have to stay here until I can dedicate time to implementing those.
 	 */
 	public function runManagedHandler($rules,$object,$method,&$source)
 	{
