@@ -225,10 +225,6 @@ class Amslib_Plugin_Service
 		//			so you're just creating session keys and not using them
 		Amslib::getSESSION(self::SR,false,true);
 
-		//	NOTE:	this "violates" mixing key types, but it's simpler than not doing it,
-		//			so I'll "tolerate" it for this situation
-		//	NOTE:	I don't actually remember what "mixing key types" means, I need to
-		//			write a better explanation when I figure it out
 		$this->showFeedback();
 
 		//	Obtain the old return_ajax parameter, either as json or false
@@ -842,7 +838,9 @@ class Amslib_Plugin_Service
 	 */
 	static public function hasData($remove=true)
 	{
-		if(self::$serviceData === NULL || $remove == false) self::$serviceData = Amslib::sessionParam(self::SR,false,$remove);
+		if(self::$serviceData === NULL || $remove == false){
+			self::$serviceData = Amslib::sessionParam(self::SR,false,$remove);
+		}
 
 		return self::$serviceData ? true : false;
 	}
