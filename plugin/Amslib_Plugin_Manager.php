@@ -340,15 +340,20 @@ class Amslib_Plugin_Manager
 				case "stylesheet":
 				case "javascript":
 				case "font":
-				case "translator":
 				case "value":{
 					die("[DIE]IMPORT[$key] => ".Amslib::var_dump(array($src->getName(),$dst->getName(),$value["key"],$value["val"]),true));
+				}break;
+
+				case "translator":{
+					$data = $src->getValue($value["key"],$value["val"]["name"]);
+					$dst->setValue($value["key"],$data);
 				}break;
 
 				//	We do nothing special with these entries, we simply pass them
 				case "image":
 				case "model":
 				default:{
+					//	NOTE: why do I not use $value["val"] here? like I do with translators?
 					$data = $src->getValue($value["key"]);
 					$dst->setValue($value["key"],$data);
 				}break;

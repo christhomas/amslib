@@ -681,7 +681,7 @@ class Amslib_Plugin
 		}else if(Amslib_Array::hasKeys($a,array("name","export"))){
 			$this->addExport($this,$a["export"],"translator",$a);
 		}else if(Amslib_Array::hasKeys($a,array("name","type","location","language"))){
-			$this->data["translator"][] = $a;
+			$this->data["translator"][$a["name"]] = $a;
 		}
 	}
 
@@ -926,6 +926,10 @@ class Amslib_Plugin
 				$this->data[$key] = array_merge($this->data[$key],$value);
 			}break;
 
+			case "translator":{
+				$this->data[$key][$value["name"]] = $value;
+			}break;
+
 			case "model":{
 				$this->data[$key] = $value;
 			}break;
@@ -977,11 +981,9 @@ class Amslib_Plugin
 	{
 		switch($key){
 			case "translator":{
-				foreach($this->data[$key] as $t){
-					if($t["name"] == $name){
-						if(isset($t["type"]))	$this->createTranslator($t);
-						if(isset($t["cache"]))	return $t;
-					}
+				if(isset($this->data[$key][$name]) && $t=$this->data[$key][$name]){
+					if(isset($t["type"]))	$this->createTranslator($t);
+					if(isset($t["cache"]))	return $t;
 				}
 			}break;
 
