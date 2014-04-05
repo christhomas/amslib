@@ -335,25 +335,27 @@ class Amslib_Plugin
 
 		if(!Amslib_Array::hasKeys($config,array("type","language"))) return false;
 
+		//	Create the language translator object and insert it into the api
+		$translator = new Amslib_Translator($config["type"],$config["name"]);
+		$translator->addLanguage($config["language"]);
+
 		switch($config["type"]){
 			case "xml":{
 				//	Replace __CURRENT_PLUGIN with plugin location and expand any other paths
 				//	NOTE: I don't think I actually use __CURRENT_PLUGIN__...or do I? where is this
 				//	actually used? or even which code actually creates anything using this __CURRENT_PLUGIN__ tag
-				$location = str_replace("__CURRENT_PLUGIN__",$this->location,$config["location"]);
+				$location = str_replace("__CURRENT_PLUGIN__",$this->location,$config["directory"]);
 				$location = Amslib_Plugin::expandPath($location);
+
+				$translator->setConfig("directory",$location);
 			}break;
 
 			case "database":{
-				$database = $this->data["model"]["value"];
-				$location = str_replace("__CURRENT_PLUGIN__",$database,$config["location"]);
+				$translator->setConfig("database",		$this->data["model"]["value"]);
+				$translator->setConfig("translation",	$config["translation"]);
+				$translator->setConfig("lang",			$config["lang"]);
 			}break;
 		}
-
-		//	Create the language translator object and insert it into the api
-		$translator = new Amslib_Translator($config["type"],$config["name"]);
-		$translator->addLanguage($config["language"]);
-		$translator->setLocation($location);
 
 		$config["cache"] = $translator;
 
@@ -667,7 +669,7 @@ class Amslib_Plugin
 		//	Import all the translator parameters, such as import/export
 		$a = $array["attr"];
 
-		foreach($array["child"] as $c){
+		if(isset($array["child"])) foreach(Amslib_Array::valid($array["child"]) as $c){
 			if($c["tag"] == "language"){
 				$a[$c["tag"]][] = $c["value"];
 			}else{
@@ -680,8 +682,14 @@ class Amslib_Plugin
 			$this->addImport($a["import"],$this,"translator",$a);
 		}else if(Amslib_Array::hasKeys($a,array("name","export"))){
 			$this->addExport($this,$a["export"],"translator",$a);
-		}else if(Amslib_Array::hasKeys($a,array("name","type","location","language"))){
-			$this->data["translator"][$a["name"]] = $a;
+		}else if(Amslib_Array::hasKeys($a,array("name","type","language"))){
+			//	One of these has to succeed
+			$valid_xml	=	Amslib_Array::hasKeys($a,array("directory"));
+			$valid_db	=	Amslib_Array::hasKeys($a,array("translation","lang"));
+
+			if($valid_xml || $valid_db){
+				$this->data["translator"][$a["name"]] = $a;
+			}
 		}
 	}
 

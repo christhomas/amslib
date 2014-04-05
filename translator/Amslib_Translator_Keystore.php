@@ -36,9 +36,11 @@
  */
 class Amslib_Translator_Keystore extends Amslib_Translator_Source
 {
+	protected $inst;
+	protected $config;
 	protected $store;
-	protected $permittedLanguage;	
-	
+	protected $permittedLanguage;
+
 	/**
 	 * 	method:	sanitise
 	 *
@@ -46,15 +48,15 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	 */
 	protected function sanitise($langCode)
 	{
-		if(in_array($langCode,$this->permittedLanguage)){ 
+		if(in_array($langCode,$this->permittedLanguage)){
 			//	Return the language code, it was found in the permitted list
 			return $langCode;
 		}
-		
+
 		//	The code tested was not found, default to the first added language
 		return current($this->permittedLanguage);
 	}
-	
+
 	/**
 	 * 	method:	__construct
 	 *
@@ -63,18 +65,36 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	public function __construct()
 	{
 		$this->language = false;
-		
+		$this->permittedLanguage = array();
+
 		$this->reset();
 	}
-	
-	//	Set location in the future could mean "set a default set of array information"
+
 	/**
-	 * 	method:	setLocation
+	 * 	method:	setConfig
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setLocation($location){}
-	
+	public function setConfig($name,$value)
+	{
+		if(is_string($name) && strlen($name)){
+			$this->config[$name] = $value;
+		}
+	}
+
+	/**
+	 * 	method:	getConfig
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getConfig($name,$default=false)
+	{
+		return is_string($name) && strlen($name) && isset($this->config[$name])
+			? $this->config[$name]
+			: $default;
+	}
+
+
 	//	NOTE: load has no functionality, since it has nothing to load
 	/**
 	 * 	method:	load
@@ -91,29 +111,33 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	 */
 	public function reset()
 	{
+		//	PROTIP: don't reset the "config" member variable here, it'll stop the translator from working :D
 		$this->store				=	array();
 		$this->permittedLanguage	=	array();
 		$this->defaultKey			=	0;
 	}
-	
+
 	/**
 	 * 	method:	addLanguage
 	 *
-	 * 	todo: write documentation
+	 * 	todo:	write documentation
+	 *
+	 * 	NOTE:	I really dislike the heirarchical key structure for the storage array
+	 * 			the more I think about it, the more I think it should be flatter, using composite keys
 	 */
 	public function addLanguage($langCode)
 	{
 		if(is_string($langCode)){
 			$this->permittedLanguage[] = $langCode;
-			$this->store[$langCode] = array($this->defaultKey=>array());	
+			$this->store[$langCode] = array($this->defaultKey=>array());
 		}
-		
+
 		if(is_array($langCode)){
 			$this->permittedLanguage = array_merge($this->permittedLanguage,$langCode);
-			foreach($langCode as $l) $this->store[$l] = array($this->defaultKey=>array());	
+			foreach($langCode as $l) $this->store[$l] = array($this->defaultKey=>array());
 		}
 	}
-	
+
 	/**
 	 * 	method:	setLanguage
 	 *
@@ -123,7 +147,7 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	{
 		$this->language = $this->sanitise($langCode);
 	}
-	
+
 	/**
 	 * 	method:	getLanguage
 	 *
@@ -133,7 +157,7 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	{
 		return $this->language;
 	}
-	
+
 	/**
 	 * 	method:	getAllLanguages
 	 *
@@ -143,7 +167,7 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	{
 		return $this->permittedLanguage;
 	}
-	
+
 	/**
 	 * 	method:	isLanguage
 	 *
@@ -153,7 +177,7 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	{
 		return ($langCode == $this->language);
 	}
-	
+
 	/**
 	 * 	method:	translateExtended
 	 *
@@ -162,12 +186,12 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	public function translateExtended($n,$i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
-		
-		return is_string($n) && is_numeric($i) && isset($this->store[$l][$i][$n]) 
-			? $this->store[$l][$i][$n] 
+
+		return is_string($n) && is_numeric($i) && isset($this->store[$l][$i][$n])
+			? $this->store[$l][$i][$n]
 			: $n;
 	}
-	
+
 	/**
 	 * 	method:	learnExtended
 	 *
@@ -176,14 +200,14 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	public function learnExtended($n,$i,$v,$l=NULL)
 	{
 		if(!is_int($i)) return false;
-		
+
 		if(!$l) $l = $this->language;
-	
+
 		$this->store[$l][$i][$n] = $v;
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * 	method:	forgetExtended
 	 *
@@ -192,14 +216,14 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	public function forgetExtended($n,$i,$l=NULL)
 	{
 		if(!is_int($i)) return false;
-		
+
 		if(!$l) $l = $this->language;
-	
+
 		unset($this->store[$l][$i][$n]);
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * 	method:	updateKeyExtended
 	 *
@@ -210,7 +234,7 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		$this->learnExtended($nn,$i,$this->translateExtended($n,$i,$l),$l);
 		$this->forgetExtended($n,$i,$l);
 	}
-	
+
 	/**
 	 * 	method:	searchKeyExtended
 	 *
@@ -220,9 +244,9 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	{
 		//	TODO: not implemented yet
 		//	TODO: no extended version yet
-		return array();		
+		return array();
 	}
-	
+
 	/**
 	 * 	method:	searchValueExtended
 	 *
@@ -234,7 +258,7 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 		//	TODO: no extended version yet
 		return array();
 	}
-	
+
 	/**
 	 * 	method:	getKeyListExtended
 	 *
@@ -243,10 +267,10 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	public function getKeyListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
-		
+
 		return array_keys($this->store[$l][$i]);
 	}
-	
+
 	/**
 	 * 	method:	getValueListExtended
 	 *
@@ -255,10 +279,10 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	public function getValueListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
-		
+
 		return array_values($this->store[$l][$i]);
 	}
-	
+
 	/**
 	 * 	method:	getListExtended
 	 *
@@ -267,7 +291,7 @@ class Amslib_Translator_Keystore extends Amslib_Translator_Source
 	public function getListExtended($i,$l=NULL)
 	{
 		if(!$l) $l = $this->language;
-	
+
 		return $this->store[$l][$i];
 	}
 }

@@ -30,7 +30,7 @@
  *	description:
  *		write description
  *
- * 	todo: 
+ * 	todo:
  * 		write documentation
  *
  */
@@ -51,8 +51,9 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	{
 		parent::__construct();
 
-		$this->error = array();
-		$this->xpath = false;
+		$this->error	=	array();
+		$this->xpath	=	false;
+		$this->location	=	false;
 	}
 
 	/**
@@ -78,20 +79,7 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	}
 
 	/**
-	 * 	method:	setLocation
-	 *
-	 * 	todo: write documentation
-	 */
-	public function setLocation($location)
-	{
-		$this->location = $location;
-	}
-
-	/**
 	 * method: load
-	 *
-	 * parameters:
-	 * 	$location	-	The location to load the XML database files from
 	 *
 	 * returns:
 	 * 	Boolean true or false depending on whether it succeeded, there are some codepaths which call setError()
@@ -103,31 +91,28 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	 */
 	public function load()
 	{
-		//	initialise the keystore to empty
-		parent::reset();
-		
-		if($this->language)
-		{
-			$this->database = Amslib_Website::abs(Amslib_File::reduceSlashes("$this->location/{$this->language}.xml"));
+		if(!$this->language) return false;
 
-			if(!file_exists($this->database)) $this->database = Amslib_File::find($this->database,true);
+		//	TODO:	upgrade this XML object to use QueryPath, it'll be cleaner
+		//	NOTE:	also I can use it to write back learned expressions, etc
+		$this->location = $this->getConfig("location");
+		$this->database = Amslib_Website::abs(Amslib_File::reduceSlashes("$this->location/{$this->language}.xml"));
 
-			if(!file_exists($this->database)){
-				$this->setError("LOCATION: '$this->location', DATABASE '$this->database' for LANGUAGE '$this->language' DOES NOT EXIST<br/>");
-			}
+		if(!file_exists($this->database)) $this->database = Amslib_File::find($this->database,true);
 
-			$this->xdoc = new DOMDocument("1.0","UTF-8");
-			if(@$this->xdoc->load($this->database)){
-				$this->xdoc->preserveWhiteSpace = false;
-				$this->xpath = new DOMXPath($this->xdoc);
-
-				return true;
-			}else{
-				$this->setError("LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
-			}
+		if(!file_exists($this->database)){
+			$this->setError("LOCATION: '$this->location', DATABASE '$this->database' for LANGUAGE '$this->language' DOES NOT EXIST<br/>");
 		}
 
-		return false;
+		$this->xdoc = new DOMDocument("1.0","UTF-8");
+		if(@$this->xdoc->load($this->database)){
+			$this->xdoc->preserveWhiteSpace = false;
+			$this->xpath = new DOMXPath($this->xdoc);
+
+			return true;
+		}else{
+			$this->setError("LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
+		}
 	}
 
 	/**
