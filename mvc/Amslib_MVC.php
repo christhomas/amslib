@@ -303,11 +303,11 @@ class Amslib_MVC extends Amslib_Mixin
 	 * 	Which is sometimes important.
 	 *
 	 * 	params:
-	 * 		$parameters	-	The array of parameters passed to renderView
+	 * 		$params	-	The array of parameters passed to renderView
 	 */
-	public function setViewParam($parameters)
+	public function setViewParam($params)
 	{
-		$this->viewParams = $parameters;
+		$this->viewParams = $params;
 	}
 
 	/**
