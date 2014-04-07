@@ -139,20 +139,52 @@ class Amslib_Validator
 	 */
 	protected function __array($name,$value,$required,$options)
 	{
-		if(!isset($options["type"])) return "ARRAY_REQUIRE_TYPE_PARAM";
+		$error = false;
 
-		if(!is_array($value)) return "ARRAY_INVALID";
+		if(!isset($options["type"])) $error = "ARRAY_REQUIRE_TYPE_PARAM";
 
-		$arrayValidator = new self($value);
-		foreach($value as $k=>$v) $arrayValidator->add($k,$options["type"],$required,$options);
+		if(!is_array($value)) $error = "ARRAY_INVALID";
 
-		$data = array(
-			"success"	=>	$arrayValidator->execute(),
-			"valid"		=>	$arrayValidator->getValid(),
-			"errors"	=>	$arrayValidator->getErrors()
-		);
+		if($error === false){
+			$arrayValidator = new self($value);
+			foreach($value as $k=>$v){
+				$arrayValidator->add($k,$options["type"],$required,$options);
+			}
 
-		$this->setValid($name,$data);
+			$data = array(
+				"success"	=>	$arrayValidator->execute(),
+				"valid"		=>	$arrayValidator->getValid(),
+				"errors"	=>	$arrayValidator->getErrors()
+			);
+		}
+
+		if($required == true && $error !== false) return $error;
+
+		if($error === false) $this->setValid($name,$data);
+
+		return true;
+	}
+
+	protected function __json($name,$value,$required,$options)
+	{
+		$error = false;
+
+		if(!is_string($value)) $error = "JSON_INVALID";
+
+		if(!strlen($value) && !isset($options["allow_empty"])) $error = "JSON_EMPTY";
+
+		try{
+			$value = json_decode($value,true);
+
+			if(!is_array($value)) $error = "JSON_INVALID";
+		}catch(Exception $e){
+			$error = "JSON_INVALID";
+		}
+
+		if($required == true && $error !== false) return $error;
+
+		if($error === false) $this->setValid($name,$value);
+
 		return true;
 	}
 
@@ -1140,8 +1172,11 @@ class Amslib_Validator
 	 */
 	protected function __getValue($name)
 	{
-		//	NOTE: I am not sure whether setting ALL empty strings to NULL will cause errors or not
-		$value = isset($this->__source[$name]) ? trim($this->__source[$name]) : "";
+		$value = isset($this->__source[$name]) ? $this->__source[$name] : "";
+
+		if(!is_string($value)) return $value;
+
+		$value = trim($value);
 
 		return strlen($value) ? $value : NULL;
 	}
@@ -1195,6 +1230,7 @@ class Amslib_Validator
 		$this->register("file_exists",		array($this,"__file_exists"));
 		$this->register("array",			array($this,"__array"));
 		$this->register("isbn",				array($this,"__isbn"));
+		$this->register("json",				array($this,"__json"));
 
 		//	Methods to validate spanish national identification document (dni)
 		$this->register("dni",				array($this,"__dni"));
