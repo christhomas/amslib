@@ -1311,6 +1311,11 @@ class Amslib_Validator
 	public function addRules($rules)
 	{
 		foreach(Amslib_Array::valid($rules) as $name=>$r){
+			if(!is_string($name) || is_numeric($name)){
+				Amslib::errorLog("name key was numeric or not a string",$name,$r);
+				continue;
+			}
+
 			$type		= count($r) ? array_shift($r) : NULL;
 			$required	= count($r) ? array_shift($r) : false;
 			$options	= count($r) ? array_shift($r) : array();
