@@ -47,7 +47,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			Amslib_Keystore::set("db_query[{$this->seq}][".microtime(true)."]",Amslib::var_dump($query,true));
 		}
 	}
-	
+
 	/**
 	 * 	method:	connect
 	 *
@@ -101,7 +101,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 		//	TODO: we should implement a try/catch block to easily catch disconnected databases
 		if($connect) $this->connect();
 	}
-	
+
 	/**
 	 *  method:	getInstance
 	 *
@@ -113,9 +113,9 @@ class Amslib_Database_MySQL extends Amslib_Database
 	public function getInstance()
 	{
 		static $instance = NULL;
-	
+
 		if($instance === NULL) $instance = new self();
-	
+
 		return $instance;
 	}
 
@@ -699,7 +699,8 @@ QUERY;
 	 */
 	public function selectValue($field,$query,$numResults=0,$optimise=false)
 	{
-		$values = $this->select($query,$numResults,$optimise);
+		$field	=	trim($field);
+		$values	=	$this->select($query,$numResults,$optimise);
 
 		if($numResults == 1 && $optimise){
 			return isset($values[$field]) ? $values[$field] : NULL;
