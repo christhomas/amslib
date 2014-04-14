@@ -461,37 +461,37 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function renderView($id,$params=NULL)
+	public function renderView($view,$params=NULL)
 	{
-		if(is_string($id) && isset($this->view[$id]))
+		if(!is_string($view) || !isset($this->view[$view]))
 		{
-			if($params == "inherit") $params = $this->getViewParam();
+			Amslib::errorLog("stack_trace","Unable to find view in structure",$view,$this->view);
 
-			if(!is_array($params)) $params = array();
-
-			//	Set the parameters that were used for rendering this view,
-			//	useful when wanting to pass along to various child views.
-			if(!empty($params)) $this->setViewParam($params);
-
-			if(Amslib_Array::hasKeys($params,array("api","wt","ct"))){
-				Amslib::errorLog(
-						"ERROR: A reserved key was detected in this array,
-						this might result in subtle errors, please remove 'api', 'wt' or 'ct',
-						they are used by the framework to provide access to the api object, and the translators"
-				);
-			}
-
-			$params["api"]	=	$this;
-			//	FIXME: what if multiple translators of the same type are defined? they would start to clash
-			$params["wt"]	=	$this->getTranslator("website");
-			$params["ct"]	=	$this->getTranslator("content");
-
-			return Amslib::requireFile($this->view[$id],$params,true);
-		}else{
-			Amslib::errorLog("stack_trace","Unable to find view in structure",$id,$this->view);
+			return "";
 		}
 
-		return "";
+		if($params == "inherit") $params = $this->getViewParam();
+
+		if(!is_array($params)) $params = array();
+
+		//	Set the parameters that were used for rendering this view,
+		//	useful when wanting to pass along to various child views.
+		if(!empty($params)) $this->setViewParam($params);
+
+		if(Amslib_Array::hasKeys($params,array("api","wt","ct"))){
+			Amslib::errorLog(
+					"ERROR: A reserved key was detected in this array,
+					this might result in subtle errors, please remove 'api', 'wt' or 'ct',
+					they are used by the framework to provide access to the api object, and the translators"
+			);
+		}
+
+		$params["api"]	=	$this;
+		//	FIXME: what if multiple translators of the same type are defined? they would start to clash
+		$params["wt"]	=	$this->getTranslator("website");
+		$params["ct"]	=	$this->getTranslator("content");
+
+		return Amslib::requireFile($this->view[$view],$params,true);
 	}
 
 	/**
