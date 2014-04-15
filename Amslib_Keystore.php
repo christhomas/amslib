@@ -57,7 +57,7 @@ class Amslib_Keystore
 	 */
 	static public function setBoolean($name,$value)
 	{
-		self::set($name,is_bool($value)?$value:NULL);
+		return self::set($name,is_bool($value)?$value:NULL);
 	}
 
 	/**
