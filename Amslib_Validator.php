@@ -625,29 +625,34 @@ class Amslib_Validator
 	 */
 	protected function __boolean($name,$value,$required,$options)
 	{
-		if(is_string($value)){
-			$valid = array("1","0","true","false","on","off","yes","no","");
+		$error	=	false;
+		$true	=	array(1,"1",true,"true","on","yes");
+		$false	=	array(0,"0",false,"false","off","no","");
 
-			$value = strtolower($value);
-
-			if(!in_array($value,$valid)) return "BOOLEAN_INVALID";
-
-			$bool = $value === "1" || $value === "true" || $value === "on" || $value === "yes";
-		}else{
-			if($value != 0 && $value != 1) return "BOOLEAN_INVALID";
-
-			$bool = (bool)$value;
+		if($value == NULL && !isset($options["ignorenull"])){
+			$error = "BOOLEAN_IS_NULL";
 		}
+
+		$value	=	strtolower($value);
+
+		if(!in_array($value,array_merge($true,$false))){
+			$error = "BOOLEAN_INVALID";
+		}
+
+		$bool = !!in_array($value,$true);
 
 		if(isset($options["limit-input"]) && !in_array($bool,$options["limit-input"])){
-			return "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT_INPUT";
+			$error = "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT_INPUT";
 		}else if(isset($options["limit-output"]) && !in_array($bool,$options["limit-output"])){
-			return "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT_OUTPUT";
+			$error = "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT_OUTPUT";
 		}
 
-		$this->setValid($name,$bool);
+		//	If there was an error, if you require a valid value, return error, otherwise, true
+		if($error !== false){
+			return $required ? $error : true;
+		}
 
-		if(!$required) return true;
+		$this->setValid($name,$value);
 
 		return true;
 	}
@@ -690,44 +695,41 @@ class Amslib_Validator
 	{
 		$error = false;
 
-		if($error == false && $value == NULL && !isset($options["ignorenull"])){
+		if($value == NULL && !isset($options["ignorenull"])){
 			$error = "NUMBER_IS_NULL";
 		}
 
-		if($error == false && !is_numeric($value)){
+		if(!is_numeric($value)){
 			$error = "NUMBER_NAN";
 		}
 
-		if($error == false && isset($options["minvalue"]) && is_numeric($options["minvalue"])){
+		if(isset($options["minvalue"]) && is_numeric($options["minvalue"])){
 			if($value < $options["minvalue"]) $error = "NUMBER_IS_BELOW_MINIMUM";
 		}
 
-		if($error == false && isset($options["maxvalue"]) && is_numeric($options["maxvalue"])){
+		if(isset($options["maxvalue"]) && is_numeric($options["maxvalue"])){
 			if($value > $options["maxvalue"]) $error = "NUMBER_IS_ABOVE_MAXIMUM";
 		}
 
 		//	TODO: modify this code so it will allow setting the limit-input as a single value and not ONLY as an array
-		if($error == false && isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
+		if(isset($options["limit-input"]) && !in_array($value,$options["limit-input"])){
 			$error = "NUMBER_CANNOT_MATCH_AGAINST_LIMIT";
 		}
 
-		if($error == false && isset($options["length"]) && is_numeric($options["length"])){
+		if(isset($options["length"]) && is_numeric($options["length"])){
 			if(!strlen($value) != $options["length"]) $error = "NUMBER_CANNOT_MATCH_LENGTH";
 		}
 
-		if($error == false && isset($options["minlength"]) && is_numeric($options["minlength"])){
+		if(isset($options["minlength"]) && is_numeric($options["minlength"])){
 			if(!strlen($value) < $options["minlength"]) $error = "NUMBER_CANNOT_MATCH_MINLENGTH";
 		}
 
-		if($error == false && isset($options["maxlength"]) && is_numeric($options["maxlength"])){
+		if(isset($options["maxlength"]) && is_numeric($options["maxlength"])){
 			if(!strlen($value) > $options["maxlength"]) $error = "NUMBER_CANNOT_MATCH_MAXLENGTH";
 		}
 
-		//	If there was an error
-		if($error !== false)
-		{
-			//	If you require the number to be valid, return the error
-			//	If you don't require a valid number, just return true
+		//	If there was an error, if you require a valid value, return error, otherwise, true
+		if($error !== false){
 			return ($required) ? $error : true;
 		}
 
@@ -1154,7 +1156,7 @@ class Amslib_Validator
 	 */
 	protected function __setValue($name,$value)
 	{
-		if(is_string($name) && strlen($name) && $value){
+		if(is_string($name) && strlen($name)){
 			$this->__source[$name] = $value;
 		}
 	}
@@ -1172,7 +1174,7 @@ class Amslib_Validator
 	 */
 	protected function __getValue($name)
 	{
-		$value = isset($this->__source[$name]) ? $this->__source[$name] : "";
+		$value = array_key_exists($name,$this->__source) ? $this->__source[$name] : "";
 
 		if(!is_string($value)) return $value;
 
@@ -1194,7 +1196,7 @@ class Amslib_Validator
 	{
 		$value = $this->__getValue($name);
 
-		if($value === NULL && isset($options["default"])){
+		if($value === NULL && array_key_exists("default",$options)){
 			$this->__setValue($name,$options["default"]);
 		}
 	}
@@ -1209,6 +1211,11 @@ class Amslib_Validator
 	 */
 	public function __construct($source)
 	{
+		if(!is_array($source)){
+			Amslib::errorLog("WARNING: the source given to the validator was not an array, overriding with empty array",$source);
+			$source = array();
+		}
+
 		$this->__rules				=	array();
 		$this->__error				=	array();
 		$this->__source				=	$source;
