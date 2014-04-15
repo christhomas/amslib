@@ -17,7 +17,7 @@
  *
  * Contributors/Author:
  *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
- *     
+ *
  *******************************************************************************/
 
 /**
@@ -48,6 +48,16 @@ class Amslib_Keystore
 		self::$store[$name] = $value;
 
 		return $value;
+	}
+
+	/**
+	 * 	method:	setBoolean
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function setBoolean($name,$value)
+	{
+		self::set($name,is_bool($value)?$value:NULL);
 	}
 
 	/**
