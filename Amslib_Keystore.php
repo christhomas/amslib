@@ -91,9 +91,9 @@ class Amslib_Keystore
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function get($name)
+	static public function get($name,$default=NULL)
 	{
-		return (isset(self::$store[$name])) ? self::$store[$name] : NULL;
+		return (isset(self::$store[$name])) ? self::$store[$name] : $default;
 	}
 
 	/**
