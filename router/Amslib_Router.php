@@ -84,7 +84,8 @@ class Amslib_Router
 		if($route["lang"] == "default"){
 			$src = $route["src"];
 			unset($src["default"]);
-			$route["lang"] = array_shift(array_keys($src));
+			$src = array_keys($src);
+			$route["lang"] = array_shift($src);
 		}
 
 		//	Set the selected url from the src list
