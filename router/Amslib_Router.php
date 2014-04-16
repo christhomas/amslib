@@ -79,7 +79,15 @@ class Amslib_Router
 		$route["url_param"] = Amslib_Array::valid(array_filter(array_merge($url_params,explode("/",trim($params,"/ ")))));
 
 		//	set the language based on the current route and selected url
+		//	NOTE: probably going to need to refactor this block of code at some point
 		$route["lang"] = array_search($select,$route["src"]);
+		if($route["lang"] == "default"){
+			$src = $route["src"];
+			unset($src["default"]);
+			$route["lang"] = array_shift(array_keys($src));
+		}
+
+		//	Set the selected url from the src list
 		$route["src_selected"] = $select;
 
 		return $route;
@@ -320,6 +328,7 @@ class Amslib_Router
 		//	NOTE: what does fullRoute mean??
 		//	NOTE: what does key mean??
 		//	NOTE: what if we are processing languages like /es_ES/route ?
+		//	NOTE: (16/04/2014) => still no idea, those parameters are not even used here.
 
 		return self::getURL(NULL,NULL,$lang);
 	}
