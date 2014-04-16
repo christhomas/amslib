@@ -935,6 +935,30 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
+	 * 	method:	changeLanguage
+	 *
+	 * 	todo: write documentation
+	 */
+	public function changeLanguage($lang,$fullRoute=NULL,$key=NULL)
+	{
+		return Amslib_Router::changeLanguage($lang,$fullRoute,$key);
+	}
+
+	/**
+	 * 	method:	getLanguage
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getLanguage($test=NULL,$success=true,$failure=false)
+	{
+		$lang = Amslib_Router::getLanguage();
+
+		if($test === NULL) return $lang;
+
+		return $lang === $test ? $success : $failure;
+	}
+
+	/**
 	 * 	method: externalURL
 	 *
 	 * todo: write documentation
