@@ -138,7 +138,7 @@ class Amslib_Router
 	{
 		//	Find all the AMSLIB_ROUTER type variables and insert them into the pathList
 		//	NOTE: I probably don't need to scan through $_SERVER and can just optimise this to use $_GET in the future when I'm sure
-		foreach(array_merge($_GET,$_SERVER) as $k=>$v){
+		foreach(array_merge($_SERVER,$_GET) as $k=>$v){
 			if(strpos($k,"AMSLIB_ROUTER") !== false) self::$pathList[$k] = $v;
 		}
 
