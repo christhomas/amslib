@@ -4,15 +4,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>Starter Template for Bootstrap</title>
+    <meta name="description" content="A sample template using the amslib framework">
+    <meta name="author" content="chris thomas, antimatter studios">
 
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.css" rel="stylesheet">
 
-	<title>AMSLIB: XML Translator Template</title>
+	<title>AMSLIB: <?=$api->getValue("title")?></title>
 
 	<link rel="shortcut icon" href="<?=$api->getImage("favicon.ico")?>" />
 
@@ -30,7 +28,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="index.php">Template: XML Translations</a>
+                <a class="navbar-brand" href="index.php">Template: <?=$api->getValue("title")?></a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->

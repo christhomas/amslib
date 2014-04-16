@@ -17,22 +17,10 @@
 		<include>__WEBSITE__/objects/</include>
 	</path>
 	
-	<!-- TRANSLATOR CONFIGURATION: Configure a translator with the required configuration
-		<name>
-			a unique name to reference the "translator" through which
-			all the translations for that system will come from and be stored
-		<type>
-			values: 	'xml', 'database'
-		<location>	
-			database:	'Name_Of_Database_Object/db_table_name'
-			xml:		'/directory_to_the_xml_files/'
-		<language>
-			the language code, e.g. en_GB, es_ES, es_CA, fr_FR, etc
-			
-		NOTE:
-			If you are using a database type, the Name_Of_Database_Object must be in the 
-			include path, therefore will invoke the auto_loader from amslib
-	-->
+	<value>
+		<title>XML Translation</title>
+	</value>
+	
 	<translator>
 		<name>website</name>
 		<type>xml</type>
