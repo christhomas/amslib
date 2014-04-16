@@ -36,7 +36,7 @@
 	<translator>
 		<name>website</name>
 		<type>xml</type>
-		<location>/translations/</location>
+		<directory>/translations/</directory>
 		<language>en_GB</language>
 		<language>es_ES</language>
 	</translator>
