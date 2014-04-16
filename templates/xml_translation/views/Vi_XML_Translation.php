@@ -1,8 +1,8 @@
 <!-- Add your site or application content here -->
 <h1>XML Translations: English or Spanish</h1>
 
-<p>	Here are all the strings from the configured xml translation files
-
+<p>	Here are all the strings from the configured xml translation files<br/>
+	<br/>
 	The XML translator is less flexible than the database one, you can only load a single language in a single page,
 	the database translator is capable of loading and then showing any text in any language.
 </p>
