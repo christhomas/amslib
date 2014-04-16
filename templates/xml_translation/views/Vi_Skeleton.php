@@ -21,7 +21,6 @@
 </head>
 
 <body>
-
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
             <div class="navbar-header">
@@ -37,8 +36,13 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="pull-right collapse navbar-collapse navbar-ex1-collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="<?=$api->getURL("xml_translation",NULL,"en_GB")?>">English</a></li>
-                    <li><a href="<?=$api->getURL("xml_translation",NULL,"es_ES")?>">Spanish</a></li>
+                    <li class="<?=$api->getLanguage("en_GB","active")?>">
+                    	<a href="<?=$api->changeLanguage("en_GB")?>">English</a>
+                    </li>
+
+                    <li class="<?=$api->getLanguage("es_ES","active")?>">
+                    	<a href="<?=$api->changeLanguage("es_ES")?>">Spanish</a>
+                    </li>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
