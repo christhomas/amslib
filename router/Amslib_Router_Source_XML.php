@@ -36,7 +36,6 @@
  */
 class Amslib_Router_Source_XML
 {
-	protected $filename;
 	protected $route;
 	protected $import;
 
@@ -47,26 +46,25 @@ class Amslib_Router_Source_XML
 	 */
 	public function __construct($source)
 	{
-		$this->filename	=	false;
 		$this->route	=	false;
 		$this->import	=	false;
 
+		$filename = false;
+
 		try{
 			//	NOTE: This is ugly and I believe it's a failure of Amslib_File::find() to not do this automatically
-			if(!$this->filename && file_exists($source)){
-				$this->filename = $source;
-			}
-			if(!$this->filename && file_exists($f=Amslib_File::find(Amslib_Website::rel($source),true))){
-				$this->filename = $f;
-			}
-			if(!$this->filename && file_exists($f=Amslib_File::find(Amslib_Website::abs($source),true))){
-				$this->filename = $f;
+			if(file_exists($source)){
+				$filename = $source;
+			}else if(file_exists($f=Amslib_File::find(Amslib_Website::rel($source),true))){
+				$filename = $f;
+			}else if(file_exists($f=Amslib_File::find(Amslib_Website::abs($source),true))){
+				$filename = $f;
 			}
 
-			if(!$this->filename){
+			if(!$filename){
 				Amslib::errorLog("The filename was not valid, we could not getRoutes from this XML Source");
 			}else{
-				Amslib_QueryPath::qp($this->filename);
+				Amslib_QueryPath::qp($filename);
 				Amslib_QueryPath::execCallback("router > path[name]",		array($this,"configPath"),		$this);
 				Amslib_QueryPath::execCallback("router > service[name]",	array($this,"configService"),	$this);
 				Amslib_QueryPath::execCallback("router > callback",			array($this,"configCallback"),	$this);
@@ -74,7 +72,7 @@ class Amslib_Router_Source_XML
 				Amslib_QueryPath::execCallback("router > export",			array($this,"configExport"),	$this);
 			}
 		}catch(Exception $e){
-			Amslib::errorLog("Exception: ",$e->getMessage(),"file=",$this->filename,"source=",$source);
+			Amslib::errorLog("Exception: ",$e->getMessage(),"file=",$filename,"source=",$source);
 			Amslib::errorLog("stack_trace");
 		}
 	}
