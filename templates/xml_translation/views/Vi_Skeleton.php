@@ -14,7 +14,7 @@
 
 	<title>AMSLIB: XML Translator Template</title>
 
-	<link rel="shortcut icon" href="<?=$api->getImage("favicon")?>" />
+	<link rel="shortcut icon" href="<?=$api->getImage("favicon.ico")?>" />
 
 	<?=Amslib_Resource::getStylesheet()?>
 	<?=Amslib_Resource::getJavascript()?>
