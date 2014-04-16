@@ -36,11 +36,7 @@
  */
 class Amslib_Translator_XML extends Amslib_Translator_Keystore
 {
-	protected $database;
-	protected $location;
-	protected $xpath;
-	protected $xdoc;
-	protected $error;
+	protected $qp;
 
 	/**
 	 * 	method:	__construct
@@ -50,32 +46,6 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	public function __construct()
 	{
 		parent::__construct();
-
-		$this->error	=	array();
-		$this->xpath	=	false;
-		$this->location	=	false;
-	}
-
-	/**
-	 * 	method:	setError
-	 *
-	 * 	todo: write documentation
-	 */
-	public function setError($error)
-	{
-		error_log(__METHOD__.": $error");
-
-		$this->error[] = $error;
-	}
-
-	/**
-	 * 	method:	getErrors
-	 *
-	 * 	todo: write documentation
-	 */
-	public function getErrors()
-	{
-		return $this->error;
 	}
 
 	/**
@@ -93,25 +63,29 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	{
 		if(!$this->language) return false;
 
-		//	TODO:	upgrade this XML object to use QueryPath, it'll be cleaner
-		//	NOTE:	also I can use it to write back learned expressions, etc
-		$this->location = $this->getConfig("location");
-		$this->database = Amslib_Website::abs(Amslib_File::reduceSlashes("$this->location/{$this->language}.xml"));
+		$source		=	Amslib_File::reduceSlashes($this->getConfig("directory")."/{$this->language}.xml");
+		$filename	=	false;
 
-		if(!file_exists($this->database)) $this->database = Amslib_File::find($this->database,true);
+		try{
+			//	NOTE: This is ugly and I believe it's a failure of Amslib_File::find() to not do this automatically
+			if(file_exists($source)){
+				$filename = $source;
+			}else if(file_exists($f=Amslib_File::find(Amslib_Website::rel($source),true))){
+				$filename = $f;
+			}else if(file_exists($f=Amslib_File::find(Amslib_Website::abs($source),true))){
+				$filename = $f;
+			}
 
-		if(!file_exists($this->database)){
-			$this->setError("LOCATION: '$this->location', DATABASE '$this->database' for LANGUAGE '$this->language' DOES NOT EXIST<br/>");
-		}
+			if(!$filename){
+				Amslib::errorLog("directory",$dir,"filename",$filename,"language",$this->language);
+			}else{
+				$this->qp = Amslib_QueryPath::qp($filename);
 
-		$this->xdoc = new DOMDocument("1.0","UTF-8");
-		if(@$this->xdoc->load($this->database)){
-			$this->xdoc->preserveWhiteSpace = false;
-			$this->xpath = new DOMXPath($this->xdoc);
-
-			return true;
-		}else{
-			$this->setError("LOCATION: '$this->location', DATABASE: '$this->database' FAILED TO OPEN<br/>");
+				return true;
+			}
+		}catch(Exception $e){
+			Amslib::errorLog("Exception: ",$e->getMessage(),"file=",$filename,"source=",$source);
+			Amslib::errorLog("stack_trace");
 		}
 	}
 
@@ -122,50 +96,39 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	 */
 	public function translateExtended($n,$i,$l=NULL)
 	{
-		if(!$this->xpath){
-			error_log(__METHOD__.": xpath was invalid, db[$this->database], loc[$this->location], lang[$this->language]");
-			return $n;
-		}
-
 		$v = parent::translateExtended($n,$i,$l);
 
 		if($v == $n){
-			$node = $this->xpath->query("//database/translation[@key='$n'][1]");
+			$text = trim($this->qp->find("database translation[key='$n']")->text());
 
-			if($node->length > 0){
-				$v = "";
+			if(strlen($text)){
+				parent::learnExtended($n,$i,$text,$l);
 
-				$node = $node->item(0);
-
-				foreach($node->childNodes as $item) $v .= $this->xdoc->saveXML($item);
-				$v = trim($v);
-
-				//	Now cache the value read from the xml
-				parent::learnExtended($n,$i,$v,$l);
+				return $text;
 			}
 		}
 
 		return $v;
 	}
 
-	//	TODO: we need to add the key/value to the xml database on disk
 	/**
 	 * 	method:	learnExtended
 	 *
-	 * 	todo: write documentation
+	 * 	TODO: write documentation
+	 *	TODO: we need to add the key/value to the xml database on disk
 	 */
 	public function learnExtended($n,$i,$v,$l=NULL)
 	{
 		return parent::learnExtended($n,$i,$v,$l);
 	}
 
-	//	TODO: do the physical remove the key from the xml database
-	//	TODO: do I remove from just a single language, or all of them?
-	//	TODO: perhaps remove all by default, or specify the language to single a particular xml database out.
 	/**
 	 * 	method:	forgetExtended
 	 *
 	 * 	todo: write documentation
+	 *	TODO: do the physical remove the key from the xml database
+	 *	TODO: do I remove from just a single language, or all of them?
+	 *	TODO: perhaps remove all by default, or specify the language to single a particular xml database out.
 	 */
 	public function forgetExtended($n,$i,$l=NULL)
 	{
@@ -200,22 +163,22 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 		return $keys;
 	}
 
-	//	TODO: NOT IMPLEMENTED YET
 	/**
 	 * 	method:	getValueListExtended
 	 *
 	 * 	todo: write documentation
+	 *	TODO: NOT IMPLEMENTED YET
 	 */
 	public function getValueListExtended($i,$l=NULL)
 	{
 		return array();
 	}
 
-	//	TODO: NOT IMPLEMENTED YET
 	/**
 	 * 	method:	getListExtended
 	 *
 	 * 	todo: write documentation
+	 * 	TODO: NOT IMPLEMENTED YET
 	 */
 	public function getListExtended($i,$l=NULL)
 	{
