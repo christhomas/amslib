@@ -36,6 +36,11 @@
  */
 class Amslib_Router
 {
+	/**
+	 * variable: $emptyRoute
+	 *
+	 * The template of an empty route, used when no route is found, we can quickly return this one
+	 */
 	static protected $emptyRoute = array(
 		"name"			=>	false,
 		"resource"		=>	false,
@@ -47,8 +52,20 @@ class Amslib_Router
 		"javascript"	=>	array()
 	);
 
+	/**
+	 * variable: $base
+	 *
+	 * The base path of the website, where it's installed in the document root
+	 */
 	static protected $base		=	false;
+
+	/**
+	 * variable: $path
+	 *
+	 * The path of the website, that is after the base path
+	 */
 	static protected $path		=	false;
+
 	static protected $pathList	=	array();
 	static protected $route		=	false;
 	static protected $cache		=	array();
