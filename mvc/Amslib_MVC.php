@@ -48,7 +48,21 @@ class Amslib_MVC extends Amslib_Mixin
 	protected $model;
 
 	protected $value;
-	protected $viewParams;
+
+	/**
+	 * variable: $globalViewParams
+	 *
+	 * The view parameters which will be given to every view that renders through this API object
+	 */
+	protected $globalViewParams;
+
+	/**
+	 * variable: $tempViewParams
+	 *
+	 * The temporary view parameters which will be overwritten each time a new view is rendered
+	 */
+	protected $tempViewParams;
+
 	protected $routes;
 
 	//	To allow views/html segments to be slotted into an existing layout
@@ -85,14 +99,15 @@ class Amslib_MVC extends Amslib_Mixin
 	 */
 	public function __construct()
 	{
-		$this->object		=	array();
-		$this->view			=	array();
-		$this->stylesheet	=	array();
-		$this->javascript	=	array();
-		$this->translator	=	array();
+		$this->object			=	array();
+		$this->view				=	array();
+		$this->stylesheet		=	array();
+		$this->javascript		=	array();
+		$this->translator		=	array();
 
-		$this->value		=	array();
-		$this->viewParams	=	array();
+		$this->value			=	array();
+		$this->globalViewParams	=	array();
+		$this->tempViewParams	=	array();
 	}
 
 	/**
@@ -304,10 +319,15 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	params:
 	 * 		$params	-	The array of parameters passed to renderView
+	 * 		$global	-	Boolean true/false, whether to set the global or temporary view params
 	 */
-	public function setViewParam($params)
+	public function setViewParam($params,$global=false)
 	{
-		$this->viewParams = $params;
+		if($global){
+			$this->globalViewParams	= $params;
+		}else{
+			$this->tempViewParams	= $params;
+		}
 	}
 
 	/**
@@ -322,16 +342,17 @@ class Amslib_MVC extends Amslib_Mixin
 	 * 	params:
 	 * 		$name		-	The name of the parameter to return, or NULL to return everything
 	 * 		$default	-	The value to return, if the named parameter was not found, default: NULL
+	 * 		$global		-	Boolean true/false, whether to return the value from the global view params or not
 	 *
 	 * 	returns:
 	 * 		If name is null, will return the entire array, or if name was found, that
 	 * 		value, or if not found, the default value
 	 */
-	public function getViewParam($name=NULL,$default=NULL)
+	public function getViewParam($name=NULL,$default=NULL,$global=false)
 	{
-		return $name
-			? ((isset($this->viewParams[$name])) ? $this->viewParams[$name] : $default)
-			: $this->viewParams;
+		$vp = $global ? $this->globalViewParams : $this->tempViewParams;
+
+		return $name ? ((array_key_exists($name,$vp)) ? $vp[$name] : $default) : $vp;
 	}
 
 	/**
@@ -471,8 +492,10 @@ class Amslib_MVC extends Amslib_Mixin
 		}
 
 		if($params == "inherit") $params = $this->getViewParam();
-
 		if(!is_array($params)) $params = array();
+
+		$global = $this->getViewParam(NULL,NULL,true);
+		if(!empty($global)) $params = array_merge($global,$params);
 
 		//	Set the parameters that were used for rendering this view,
 		//	useful when wanting to pass along to various child views.
