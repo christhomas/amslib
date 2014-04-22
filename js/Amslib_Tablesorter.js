@@ -74,7 +74,7 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 			tablesorter:{
 				sortReset:		true,
 				widgets:		["zebra"],
-				showProcessing:	true
+				showProcessing:	true				
 			},
 			
 			filter:{
@@ -90,6 +90,8 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 			pager:{
 				//	Number of visible rows - default is 10
 				size: 25,
+				
+				removeRows: false,
 				
 				output:		'{startRow} - {endRow} / {filteredRows} (total: {totalRows})',
 		
@@ -257,6 +259,8 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		
 		this.parent	= this.parent;
 		this.ts		= this.parent.tablesorter(this.options.tablesorter);
+		
+		this.on("update",$.proxy(this,"update"));
 	
 		if(ajaxUrl) this.setupAjax(ajaxUrl);
 	
@@ -314,6 +318,16 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 		}
 		
 		$.extend(true, this.options.pager, this.options.ajaxPager);
+	},
+	
+	addRow: function(row)
+	{
+		this.parent.trigger("addRows.tablesorter",[row]);
+	},
+	
+	update: function()
+	{	
+		this.parent.trigger("update.tablesorter");
 	}
 });
 
