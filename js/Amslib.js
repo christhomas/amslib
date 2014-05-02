@@ -57,6 +57,7 @@ var Amslib = my.Amslib = my.Class({
 		
 		getController: function(amslib_object)
 		{
+			console.log("POSSIBLY FAULTY CODE DETECTED","getController executed","I don't think this function works");
 			if(typeof(amslib_object.instances) != "undefined" && amslib_object.instances != false){
 				return amslib_object.instances.data(amslib_object.options.amslibName);
 			}
@@ -250,9 +251,9 @@ Amslib.controller = {
 	{
 		node = $(node);
 		
-		if(node && node.length){
-			node.data(name,controller);
-		}
+		return node && node.length
+			? node.data(name,controller)
+			: controller;
 	},
 	
 	get: function(node,name)
@@ -263,7 +264,16 @@ Amslib.controller = {
 			return node.data(name);
 		}
 		
-		return false;
+		console.log("the requested controller was not found",name);
+		
+		return $();
+	},
+	
+	remove: function(node,name)
+	{
+		if(!Amslib.controller.set(node,false)){
+			console.log("the requested controller could not be removed",name);
+		}
 	}
 };
 
@@ -403,7 +413,8 @@ Amslib.js = {
 	},
 	
 	//	a variable number of names and possible two callbacks for success and failure
-	//	if you pass has(a,b,c,d,function(){}) it'll treat a,b,c,d like names to succeed together and run the function as a success callback
+	//	if you pass has(a,b,c,d,function(){}) it'll treat a,b,c,d like names to succeed 
+	//	together and run the function as a success callback
 	has: function(name,callback)
 	{
 		return Amslib.wait.until.apply(null,arguments);

@@ -41,8 +41,11 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 	url:		false,
 	cbSuccess:	false,
 	cbFailure:	false,
+	data:		false,
 	
 	constructor: function(){
+		this.data = {};
+		
 		this.setJSON(false);
 	},
 	
@@ -235,6 +238,17 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 	getValidationErrors: function(plugin,name,handlerindex)
 	{	
 		return this.readData(plugin,"validation/data",name,handlerindex);	
-	}
+	},
+	
 	//	TODO: getDatabaseErrors
+	
+	set: function(name,value)
+	{
+		this.data[name] = value;
+	},
+	
+	get: function(name,defaultValue)
+	{
+		return this.data[name] || defaultValue;
+	}
 });

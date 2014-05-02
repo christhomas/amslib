@@ -331,6 +331,39 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
+	 * 	method:	addViewParam
+	 *
+	 * 	This method will add either an array or a single name/value pair to the existing array
+	 * 	and it will overwrite whatever is already found there, if there is any overlap
+	 *
+	 * 	If you pass true/array as the parameters, it'll merge array into the existing set, meaning you
+	 * 	can pass an entire array if you want to add them all
+	 *
+	 * 	parameters
+	 * 		$name	-	The name of the parameter to add, or true to indicate $value holds an array
+	 * 		$value	-	The value of the parameter to add, or an array of values if $name was true
+	 * 		$global	-	Whether the information should be added to the global or temporal view variables
+	 */
+	public function addViewParam($name,$value,$global=false)
+	{
+		if($name === true && is_array($value)){
+			if($global){
+				$this->globalViewParams	=	array_merge($this->globalViewParams,$value);
+			}else{
+				$this->tempViewParams	=	array_merge($this->tempViewParams,$value);
+			}
+		}else if(is_string($name) && strlen(trim($name))){
+			$name = trim($name);
+
+			if($global){
+				$this->globalViewParams[$name]	=	$value;
+			}else{
+				$this->tempViewParams[$name]	=	$value;
+			}
+		}
+	}
+
+	/**
 	 * 	method:	getViewParam
 	 *
 	 * 	This method will return you either a named parameter from that view, or it was missing
