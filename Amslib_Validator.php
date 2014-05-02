@@ -282,8 +282,13 @@ class Amslib_Validator
 
 		$error = false;
 
-		//	why "permit-empty" when we are using the verb "allow" in other situations? change to allow_empty
-		if($len == 0 && !isset($options["permit-empty"])){
+		//	replace this key with a better named version, but have this code here to patch over code which uses it
+		if(array_key_exists("permit-empty",$options)){
+			Amslib::errorLog("**** DEPRECATED CODE: permit-empty flag detected","stack-trace");
+			$options["allow-empty"] = $options["permit-empty"];
+		}
+
+		if($len == 0 && !isset($options["allow-empty"])){
 			$error = "TEXT_LENGTH_ZERO";
 		}
 
@@ -1415,7 +1420,7 @@ class Amslib_Validator
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function test($value,$type,$required,$options)
+	static public function test($value,$type,$required=false,$options=array())
 	{
 		$v = new self(array("test"=>$value));
 		$v->add("test",$type,$required,$options);
