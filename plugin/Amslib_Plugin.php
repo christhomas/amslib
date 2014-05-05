@@ -904,13 +904,17 @@ class Amslib_Plugin
 			if($config->getStatus()){
 				$this->source = $config;
 			}else{
-			/*******
-			 * Alfonso: In a windows environment and Wamp:
-			 * Amslib_Plugin_Application/]::load(): PACKAGE FAILED TO OPEN: 
-			 *  file[C:\wamp\www/wamp/www/amslib_directory/package.xml]
-			 *  instead of the correct root C:/wamp/www/amslib_directory/package.xml
-			 * I suppose you expect that taking into account your warning message.
-			 */
+				/**
+				 *	Alfonso:	In a windows environment and Wamp:
+				 *
+				 * 				Amslib_Plugin_Application/]::load(): PACKAGE FAILED TO OPEN:
+				 * 				file[C:\wamp\www/wamp/www/amslib_directory/package.xml]
+				 *
+				 * 				instead of the correct root C:/wamp/www/amslib_directory/package.xml
+				 * 				I suppose you expect that taking into account your warning message.
+				 *	====================
+				 *	Chris:		nope, I wasn't, hmm, what do you think is the correct solution? propose it
+				 */
 				//	The configuration source was setup, however it failed to return that it was ok
 				//	This could be that the actual data source is missing?
 				//	TODO: This needs to be better than "OMG WE ARE ALL GONNA DIE!!!"
