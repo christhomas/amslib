@@ -241,12 +241,18 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		return $instance;
 	}
 
-	/****
-	 * Alfonso: I've got the following error in WAMP
-	 * Declaration of Amslib_Plugin_Application::setConfigSource() should be compatible with Amslib_Plugin::setConfigSource($config = NULL)
-	 * I corrected this adding "=NULL"
+	/**
+	 * 	method:	setConfigSource
+	 *
+	 * 	Sets the configuration source and initialises all the selectors to import this source
+	 *
+	 * 	parameters:
+	 * 		$config	-	The configuration source to use
+	 *
+	 * 	notes:
+	 * 		-	Thanks alfonso (05/05/2014) for realising I should have $config=NULL to match the parent method :( oops
 	 */
-	public function setConfigSource($config=NULL) 
+	public function setConfigSource($config=NULL)
 	{
 		parent::setConfigSource($config);
 
