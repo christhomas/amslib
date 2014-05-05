@@ -82,7 +82,7 @@ class Amslib_Plugin
 	 */
 	protected function getComponent($component,$name)
 	{
-		return $this->location.$this->prefix[$component]."$name.php";
+		return $this->getLocation().$this->prefix[$component]."$name.php";
 	}
 
 	/**
@@ -95,16 +95,17 @@ class Amslib_Plugin
 		//	If the resource has an attribute "absolute" don't process it, return it directly
 		if($absolute) return $resource;
 
+		$location	=	$this->getLocation();
+
 		//	PREPARE THE STRING: expand any parameters inside the resource name
 		$resource	=	self::expandPath($resource);
-		$resource	=	str_replace("__PLUGIN__",$this->location,$resource);
 		//	NOTE: we have to do this to get around a bug in lchop/rchop
 		$query		=	($str=Amslib::lchop($resource,"?")) == $resource ? false : $str;
 		$resource	=	Amslib::rchop($resource,"?");
 		$output		=	false;
 
 		//	TEST 1:	look in the package directory for the file
-		$test1 = Amslib_File::reduceSlashes("$this->location/$resource");
+		$test1 = Amslib_File::reduceSlashes("$location/$resource");
 		if(!$output && file_exists($test1)){
 			$output = Amslib_File::relative($test1);
 		}
@@ -141,8 +142,9 @@ class Amslib_Plugin
 	protected function process()
 	{
 		$this->api = $this->createAPI();
-		//	NOTE: Why do we create the model here and not inside the switch statement below? but then comment out the code in the switch statement?
-		//			I'm not sure why I did that...
+		//	NOTE:	Why do we create the model here and not inside the switch
+		//			statement below? but then comment out the code in the
+		//			switch statement? I'm not sure why I did that...
 		$this->api->setModel($this->createObject($this->data["model"],true,true));
 
 		//	If the API object is not valid, don't continue to process
@@ -162,9 +164,11 @@ class Amslib_Plugin
 
 			foreach(Amslib_Array::valid($value) as $k=>$v)
 			{
-				//	NOTE: perhaps this post-processing should be moved to where the data is being imported and stored
-				//			then you wouldn't need to do most of this code and the other code is already very specific
-				//			anyway, so it's just removing unnecessary complexity for no reason.
+				//	NOTE:	perhaps this post-processing should be moved to
+				//			where the data is being imported and stored then
+				//			you wouldn't need to do most of this code and the
+				//			other code is already very specific anyway, so it's
+				//			just removing unnecessary complexity for no reason.
 				switch($key){
 					case "view":{
 						$params = array($k,$v["value"]);
@@ -186,8 +190,9 @@ class Amslib_Plugin
 
 					case "model":{
 						//	NOTE: 25/01/2014: why did I comment this out ?
-						//	We need to change the array layout to make models a plural of one (lulz irony)
-						//	Then we can reenable this code, it'll be simpler, but not ready to work yet.
+						//	We need to change the array layout to make models
+						//	a plural of one (lulz irony) Then we can reenable
+						//	this code, it'll be simpler, but not ready to work yet.
 						//$params = array($this->createObject($v,true,true));
 					}break;
 
@@ -341,11 +346,7 @@ class Amslib_Plugin
 
 		switch($config["type"]){
 			case "xml":{
-				//	Replace __CURRENT_PLUGIN with plugin location and expand any other paths
-				//	NOTE: I don't think I actually use __CURRENT_PLUGIN__...or do I? where is this
-				//	actually used? or even which code actually creates anything using this __CURRENT_PLUGIN__ tag
-				$location = str_replace("__CURRENT_PLUGIN__",$this->location,$config["directory"]);
-				$location = Amslib_Plugin::expandPath($location);
+				$location = self::expandPath($config["directory"]);
 
 				$translator->setConfig("directory",$location);
 			}break;
@@ -1037,6 +1038,11 @@ class Amslib_Plugin
 	public function setLocation($location)
 	{
 		$this->location = $location;
+
+		//	NOTE:	(05/05/2014) why the duplicated name....or more or less
+		//			duplicated, obviously I have old code to fix
+		self::setPath("plugin",$location);
+		self::setPath("current_plugin",$this->location);
 	}
 
 	/**
@@ -1121,10 +1127,9 @@ class Amslib_Plugin
 			$path = str_replace($key, Amslib_Router::getPath($key), $path);
 		}
 
-		$path	=	str_replace("__WEBSITE__",			self::$path["website"],		$path);
-		$path	=	str_replace("__ADMIN__",			self::$path["admin"],		$path);
-		$path	=	str_replace("__AMSLIB__",			self::$path["amslib"],		$path);
-		$path	=	str_replace("__DOCROOT__",			self::$path["docroot"],		$path);
+		foreach(array_keys(self::$path) as $key){
+			$path = str_replace("__".strtoupper($key)."__",self::$path[$key],$path);
+		}
 
 		return Amslib_File::reduceSlashes($path);
 	}
