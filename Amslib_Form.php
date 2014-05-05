@@ -140,9 +140,9 @@ class Amslib_Form
 	 * 	note:	this is a shorter, more compact, easier to remember version of the above and
 	 * 			removes the duplication of having two methods identical functionality with different names
 	 */
-	static public function isChecked($value,$compose)
+	static public function isChecked($value,$compare)
 	{
-		return $value == $compare ? "checked='checked'" : ""
+		return $value == $compare ? "checked='checked'" : "";
 	}
 
 	/**

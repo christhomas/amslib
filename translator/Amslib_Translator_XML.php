@@ -63,7 +63,8 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 	{
 		if(!$this->language) return false;
 
-		$source		=	Amslib_File::reduceSlashes($this->getConfig("directory")."/{$this->language}.xml");
+		$dir		=	$this->getConfig("directory");
+		$source		=	Amslib_File::reduceSlashes("$dir/{$this->language}.xml");
 		$filename	=	false;
 
 		try{
