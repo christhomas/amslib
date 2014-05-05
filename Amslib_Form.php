@@ -133,23 +133,16 @@ class Amslib_Form
 	}
 
 	/**
-	 * 	method:	selectRadioButton
+	 * 	method:	isChecked
 	 *
-	 * 	todo: write documentation
-	 */
-	static public function selectRadioButton($value,$compare)
-	{
-		return ($value == $compare) ? "checked='checked'" : "";
-	}
-
-	/**
-	 * 	method:	selectCheckbox
+	 * 	todo:	write documentation
 	 *
-	 * 	todo: write documentation
+	 * 	note:	this is a shorter, more compact, easier to remember version of the above and
+	 * 			removes the duplication of having two methods identical functionality with different names
 	 */
-	static public function selectCheckbox($value,$compare)
+	static public function isChecked($value,$compose)
 	{
-		return ($value == $compare) ? "checked='checked'" : "";
+		return $value == $compare ? "checked='checked'" : ""
 	}
 
 	/**
@@ -176,14 +169,39 @@ class Amslib_Form
 		return ($file && isset($file["tmp_name"])) ? $file["tmp_name"] : false;
 	}
 
-	//	DEPRECATED METHOD: use selectOptions() instead
 	/**
 	 * 	method:	arrayToSelectOptions
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	DEPRECATED: use selectOptions
 	 */
 	static public function arrayToSelectOptions($array,$keyText,$keyValue,$selected=NULL)
 	{
 		return self::selectOptions($array,$selected,$keyText,$keyValue);
+	}
+
+	/**
+	 * 	method:	selectRadioButton
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	DEPRECATED: use isChecked
+	 */
+	static public function selectRadioButton($value,$compare)
+	{
+		return self::isChecked($value,$compare);
+	}
+
+	/**
+	 * 	method:	selectCheckbox
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	DEPRECATED: use isChecked
+	 */
+	static public function selectCheckbox($value,$compare)
+	{
+		return self::isChecked($value,$compare);
 	}
 }
