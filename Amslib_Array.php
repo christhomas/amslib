@@ -457,7 +457,7 @@ class Amslib_Array
 			//			is still a bug, I either need to codify this to make it official, or fix the bug
 			$search = $key ? $v[$key] : $v;
 
-			if($similar == true && strpos($search,$value) !== false) $found = true;
+			if($similar == true && strlen($value) && strpos($search,$value) !== false) $found = true;
 			else if($search == $value) $found = true;
 			else if(is_array($value)){
 				if($similar == true){

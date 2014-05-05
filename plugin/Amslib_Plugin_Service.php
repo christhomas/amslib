@@ -806,6 +806,19 @@ class Amslib_Plugin_Service
 		if($store) $this->storeData($this->getServiceStatus(),true);
 	}
 
+	/*
+	 * idea to solve this in a general way
+	 * however the side effect is that it'll domainate these paramaters and overwrite whatever was there
+	 * e.g: $service->setPaginatedData($this,$this->api->getTypeList(),$this->api->getTypeCount());
+	 *
+	public function setPaginatedData($name,$list,$length)
+	{
+		$this->setData($name,"item_count",$length);
+		$this->setData($name,"page_count",Amslib_Keystore::getPagerCount($length));
+		$this->setData($name,"list",$list);
+	}
+	*********/
+
 	public function serviceWebserviceCatchall($service,$source)
 	{
 		//	NOTE: perhaps this should detect if any, the output method and set the output type accordingly
