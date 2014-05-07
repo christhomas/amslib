@@ -199,18 +199,25 @@ class Amslib_Array
 	}
 
 	/**
-	 * method: removeKeys
+	 * method:removeKeys
 	 *
 	 * This method is a wrapper around unset to make it easier and less verbose in your code to remove multiple elements
 	 */
 	static public function removeKeys($array,$keys)
 	{
-		if(is_string($keys)) $keys = array($keys);
+		$args	=	func_get_args()+array(array(),"");
 
-		$array	=	self::valid($array);
-		$keys	=	self::valid($keys);
+		$array	=	self::valid(array_shift($args));
+		$keys	=	self::valid($args);
 
-		foreach($keys as $k) unset($array[$k]);
+		foreach($keys as $k){
+			if(is_array($k)){
+				array_unshift($k,$array);
+				$array = call_user_func_array("self::removeKeys",$k);
+			}else if(is_string($k) || is_numeric($k)){
+				unset($array[$k]);
+			}
+		}
 
 		return $array;
 	}

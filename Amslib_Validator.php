@@ -1217,7 +1217,11 @@ class Amslib_Validator
 	public function __construct($source)
 	{
 		if(!is_array($source)){
-			Amslib::errorLog("WARNING: the source given to the validator was not an array, overriding with empty array",$source);
+			Amslib::errorLog(
+				"stack_trace",
+				"WARNING: the source given to the validator was not an array, overriding with empty array",
+				$source
+			);
 			$source = array();
 		}
 
