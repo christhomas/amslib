@@ -156,11 +156,9 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 					//	array of header names (optional)
 					headers = data.headers,
 					//	all rows: array of arrays; each internal array has the table cell data for that row
-					rows = [],
-					//	len should match pager set size (c.size)
-					len = d.length; 
+					rows = [];
 					//	process all the rows rows
-					for(r=0;r<len;r++){
+					for(r in d){
 						//	new row array
 						row = []; 
 						//	process all the cells
@@ -171,7 +169,7 @@ var Amslib_Tablesorter = my.Amslib_Tablesorter = my.Class(Amslib,
 							}
 						}
 						// add new row array to rows array
-						rows.push(row);
+						rows.push(row);						
 					}
 					//	in version 2.10, you can optionally return $(rows) a set of table rows within a jQuery object
 					return [ total, rows, headers ];
