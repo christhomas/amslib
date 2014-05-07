@@ -78,7 +78,7 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 			}
 
 			if(!$filename){
-				Amslib::errorLog("directory",$dir,"filename",$filename,"language",$this->language);
+				Amslib::errorLog("stack_trace","directory",$dir,"filename",$filename,"language",$this->language);
 			}else{
 				$this->qp = Amslib_QueryPath::qp($filename);
 
@@ -88,6 +88,8 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 			Amslib::errorLog("Exception: ",$e->getMessage(),"file=",$filename,"source=",$source);
 			Amslib::errorLog("stack_trace");
 		}
+
+		return false;
 	}
 
 	/**
