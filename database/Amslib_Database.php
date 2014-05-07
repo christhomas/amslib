@@ -146,15 +146,19 @@ class Amslib_Database
 
 	public function setConnectionDetails($details)
 	{
-		$v = new Amslib_Validator($details);
-		$v->add("username","text",true);
-		$v->add("password","text",true);
-		$v->add("database","text",true);
-		$v->add("server","text",true);
-		$v->add("encoding","text");
+		$s = $d = false;
 
-		$s = $v->execute();
-		$d = $v->getValidData();
+		if($details){
+			$v = new Amslib_Validator($details);
+			$v->add("username","text",true);
+			$v->add("password","text",true);
+			$v->add("database","text",true);
+			$v->add("server","text",true);
+			$v->add("encoding","text");
+
+			$s = $v->execute();
+			$d = $v->getValidData();
+		}
 
 		$this->connection_details = $s ? $d : false;
 	}
