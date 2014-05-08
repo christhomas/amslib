@@ -66,21 +66,30 @@ class Amslib_Database_MySQL extends Amslib_Database
 		if($details){
 			$this->databaseName = $details["database"];
 
-			if($c = mysql_connect($details["server"],$details["username"],$details["password"],true))
-			{
-				if(!mysql_select_db($details["database"],$c)){
-					$this->disconnect();
-					$this->setDBErrors("Failed to open database requested '{$details["database"]}'");
-				}else{
-					$this->connection = $c;
+			ob_start();
+				if($c = mysql_connect($details["server"],$details["username"],$details["password"],true))
+				{
+					if(!mysql_select_db($details["database"],$c)){
+						$this->disconnect();
+						$this->setDBErrors("Failed to open database requested '{$details["database"]}'");
+					}else{
+						$this->connection = $c;
 
-					$this->setFetchMethod("mysql_fetch_assoc");
-					$this->setEncoding(isset($details["encoding"]) ? $details["encoding"] : "utf8");
+						$this->setFetchMethod("mysql_fetch_assoc");
+						$this->setEncoding(isset($details["encoding"]) ? $details["encoding"] : "utf8");
+					}
+				}else{
+					// Replace these errors with Amslib_Translator codes instead (language translation)
+					$this->setDBErrors("Failed to connect to database: {$details["database"]}<br/>");
 				}
+			$output = ob_get_clean();
+
+			$details["password"] = "** CENSORED **";
+			if(strlen($output)) Amslib::errorLog("Database failed to connect, this is most likely a fatal error",$details);
+		}else{
 			// Replace these errors with Amslib_Translator codes instead (language translation)
-			}else $this->setDBErrors("Failed to connect to database: {$details["database"]}<br/>");
-		// Replace these errors with Amslib_Translator codes instead (language translation)
-		}else $this->setDBErrors("Failed to find the database connection details, check this information<br/>");
+			$this->setDBErrors("Failed to find the database connection details, check this information<br/>");
+		}
 	}
 
 	/******************************************************************************
@@ -429,14 +438,19 @@ QUERY;
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setDBErrors($data,$error=NULL,$errno=NULL,$insert_id=NULL)
+	public function setDBErrors($data,$error=NULL,$errno=NULL,$id_insert=NULL)
 	{
-		parent::setDBErrors(
-			$data,
-			$error ? $error : mysql_error($this->connection),
-			$errno ? $errno : mysql_errno($this->connection),
-			$insert_id ? $insert_id : mysql_insert_id($this->connection)
-		);
+		if($this->connection){
+			$error		= $error ? $error : mysql_error($this->connection);
+			$errno		= $errno ? $errno : mysql_errno($this->connection);
+			$id_insert	= $id_insert ? $id_insert : mysql_insert_id($this->connection);
+		}else{
+			$error		= $error ? $error : "database not connected";
+			$errno		= $errno ? $errno : "database not connected";
+			$id_insert	= $id_insert ? $id_insert : -1;
+		}
+
+		parent::setDBErrors($data,$error,$errno,$id_insert);
 	}
 
 	/**
