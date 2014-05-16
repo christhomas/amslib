@@ -226,11 +226,21 @@ class Amslib_Database
 	/**
 	 * 	method:	getDBErrors
 	 *
-	 * 	todo: write documentation
+	 * 	Obtain the errors set on the database object due to queries run against it
+	 *
+	 * 	parameters:
+	 * 		$clear	-	Whether or not to clear the errors after obtaining them
+	 *
+	 * 	returns
+	 * 		An array, empty or otherwise, of all the errors that have occured in the system
 	 */
-	public function getDBErrors()
+	public function getDBErrors($clear=false)
 	{
-		return $this->errors;
+		$errors = $this->errors;
+
+		if($clear) $this->errors = array();
+
+		return $errors;
 	}
 
 	/**
