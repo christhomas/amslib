@@ -219,6 +219,28 @@ class Amslib_Database_MySQL extends Amslib_Database
 	}
 
 	/**
+	 * 	method: buildSort
+	 *
+	 * 	A method to build the sorting part of an SQL query from parameters and hide all the complexity inside here
+	 * @param unknown_type $va_args
+	 */
+	public function buildSort($va_args)
+	{
+		$args = func_get_args();
+		$sort = array();
+
+		foreach($args as $pair){
+			if(!count($pair) == 2) continue;
+			if(!strlen($pair[0]) || !is_string($pair[0]) || is_numeric($pair[0])) continue;
+			if(!in_array($pair[1],array("asc","desc"))) continue;
+
+			$sort[] = "{$pair[0]} {$pair[1]}";
+		}
+
+		return "order by ".implode(",",$sort);
+	}
+
+	/**
 	 * 	method:	fixColumnEncoding
 	 *
 	 * 	todo: write documentation
@@ -824,6 +846,31 @@ QUERY;
 		}
 
 		return mysql_affected_rows($this->connection) >= 0;
+	}
+
+	/**
+	 * 	method: countRows
+	 *
+	 * 	A quick method to count the number of rows by selecting a single field, this
+	 * 	is quite a limited method, but in the future I can add more features to it
+	 *
+	 * 	parameters:
+	 * 		$field	-	The field to select
+	 * 		$table	-	The table to query
+	 *
+	 * 	returns:
+	 * 		Returns errors [-1 (field),-2 (table)] when they are invalid,
+	 * 		a positive integer when successful or boolean false for a general failure
+	 */
+	public function countRows($field,$table)
+	{
+		$field = $this->escape($field);
+		$table = $this->escape($table);
+
+		if(!$field || !strlen($field) || is_numeric($field)) return -1;
+		if(!$table || !strlen($table) || is_numeric($table)) return -2;
+
+		return Amslib_Array::pluck($this->selectValue("c","count($field) as c from $table"),"c");
 	}
 
 	/**
