@@ -870,7 +870,7 @@ QUERY;
 		if(!$field || !strlen($field) || is_numeric($field)) return -1;
 		if(!$table || !strlen($table) || is_numeric($table)) return -2;
 
-		return Amslib_Array::pluck($this->selectValue("c","count($field) as c from $table"),"c");
+		return $this->selectValue("c","count($field) as c from $table",1,true);
 	}
 
 	/**

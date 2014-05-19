@@ -170,7 +170,7 @@ class Amslib
 	 *	returns:
 	 *		A string containing the json output, or "FALSE: json invalid" when it fails
 	 */
-	public function formatJSON($json)
+	static public function formatJSON($json)
 	{
 		$error = "FALSE: json invalid";
 
