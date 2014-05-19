@@ -204,11 +204,11 @@ class Amslib_Database_MySQL extends Amslib_Database
 	}
 
 	/**
-	 * 	method:	getSQLLimit
+	 * 	method:	buildLimit
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getSQLLimit($length=NULL,$offset=NULL)
+	public function buildLimit($length=NULL,$offset=NULL)
 	{
 		$length = intval($length);
 		$offset = intval($offset);
@@ -824,5 +824,13 @@ QUERY;
 		}
 
 		return mysql_affected_rows($this->connection) >= 0;
+	}
+
+	/**
+	 * DEPRECATED: use buildLimit instead
+	 */
+	public function getSQLLimit($length=NULL,$offset=NULL)
+	{
+		return $this->buildLimit($length,$offset);
 	}
 }
