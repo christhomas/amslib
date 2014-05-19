@@ -41,7 +41,8 @@ class Amslib_Pager
 
 	static public function count($count)
 	{
-		$length = Amslib_Keystore::get("pager_length");
+		$length	=	intval(Amslib_Keystore::get("pager_length"));
+		$count	=	intval($count);
 
 		return $length ? ceil($count / $length) : $length;
 	}
