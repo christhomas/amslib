@@ -57,7 +57,7 @@ var Amslib = my.Amslib = my.Class({
 		
 		getController: function(amslib_object)
 		{
-			console.log("POSSIBLY FAULTY CODE DETECTED","getController executed","I don't think this function works");
+			console.log("POSSIBLY FAULTY CODE DETECTED","getController executed: I don't think this function works");
 			if(typeof(amslib_object.instances) != "undefined" && amslib_object.instances != false){
 				return amslib_object.instances.data(amslib_object.options.amslibName);
 			}
