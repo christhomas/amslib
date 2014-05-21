@@ -25,6 +25,7 @@ if(typeof(my) == "undefined" || typeof(my.Class) == "undefined"){
 }
 
 var Amslib = my.Amslib = my.Class({
+	parent:					false,
 	__amslibDefaultName:	"Amslib_Default_Controller",
 	__amslibName:			false,
 	//	we "abuse" jquery dom-data functionality to store groups of data
