@@ -199,7 +199,10 @@ class Amslib_File
 	 */
 	static public function getFileExtension($filename)
 	{
-		return strtolower(end(explode(".",$filename)));
+		$part	=	explode(".",$filename);
+		$last	=	end($part);
+
+		return strtolower($last);
 	}
 
 	/**
