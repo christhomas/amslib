@@ -393,11 +393,7 @@ class Amslib_File
 	}
 
 	/**
-	 * 	DEPRECATED: use move(...) instead
-	 *
-	 * 	method:	saveUploadedFile
-	 *
-	 * 	todo: write documentation
+	 * 	DEPRECATED: use move($src_filename,$directory,&$dst_filename,&$fullpath) instead
 	 */
 	static public function saveUploadedFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
