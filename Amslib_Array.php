@@ -411,13 +411,13 @@ class Amslib_Array
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function filterKey($array,$filter,$similar=false)
+	static public function filterKey($array,$filter,$similar=false,$multi=true)
 	{
 		if($similar) return self::filter($array,NULL,$filter,true,true);
 
 		$array = self::valid($array);
 
-		if(self::isMulti($array)){
+		if(self::isMulti($array) && $multi){
 			//	NOTE: perhaps I should recurse here?
 			//	EXAMPLE: foreach($array as &$a) $a = self::FilterKey($a,$filter,$similar);
 			//	NOTE: can we use array_map here??

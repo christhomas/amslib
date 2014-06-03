@@ -55,6 +55,28 @@ class Amslib_Website
 		return false;
 	}
 
+	static public function deleteFile($src_filename)
+	{
+		$s = $src_filename;
+
+		if(!file_exists($s) && $a=self::abs($s)){
+			$s = file_exists($a) ? $a : false;
+		}
+
+		if($s && Amslib_File::deleteFile($s)){
+			Amslib::errorLog(__METHOD__,"success, file was deleted from the disk",$s);
+			return true;
+		}
+
+		if(!$s){
+			Amslib::errorLog("stack_trace",self::ERROR_FILE_NOT_FOUND." (s,src_filename) = ",$s,$src_filename);
+		}
+
+		Amslib::errorLog(__METHOD__,"failed to delete file");
+
+		return false;
+	}
+
 	static public function listFiles($dir,$recurse=false,$exit=true)
 	{
 		return Amslib_File::listFiles(self::abs($dir),$recurse,$exit);

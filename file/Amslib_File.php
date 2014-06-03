@@ -333,12 +333,13 @@ class Amslib_File
 		return $list;
 	}
 
-	static public function copy($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
+	static public function copyFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		//	TODO: implement similar code to move() but copying not moving the file
+		return false;
 	}
 
-	static public function move($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
+	static public function moveFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		//	You need a valid src filename and directory, otherwise you can't really move files around
 		if(!strlen($src_filename) || !strlen($directory)) return false;
@@ -395,11 +396,50 @@ class Amslib_File
 		return !$error;
 	}
 
-	/**
-	 * 	DEPRECATED: use move($src_filename,$directory,&$dst_filename,&$fullpath) instead
-	 */
+	//	NOTE: I had to call this deleteFile because "delete" is a reserved keyword :(
+	static public function deleteFile($filename)
+	{
+		if(!$filename || !is_string($filename) || !file_exists($filename)){
+			die("filename invalid".Amslib::var_dump($filename));
+			return false;
+		}
+
+		$status = false;
+
+		ob_start();
+			$status = unlink($filename);
+		$output = ob_get_clean();
+		//	if the output was not empty, something bad happened, like a warning or error
+		//	when this happens, sometimes with file operations, it can break json, or website output
+		//	so I use an output buffer to grab all the output without it going to the user in some way
+		//	then once I have it, I can do something with it, like output it only to the error log, etc, etc.
+		if(strlen($output)){
+			$status = false;
+			Amslib::errorLog("Error or warning executing file operations",$output);
+		}
+
+		return $status;
+	}
+
+	//	DEPRECATED: use moveFile($src_filename,$directory,&$dst_filename,&$fullpath) instead
 	static public function saveUploadedFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
-		return self::move($src_filename,$directory,$dst_filename,$fullpath);
+		return self::moveFile($src_filename,$directory,$dst_filename,$fullpath);
+	}
+
+	//	DEPRECATED: use copyFile($src_filename,$directory,$dst_filename,$fullpath) instead
+	//	NOTE:	was made to unify the method names, deleteFile, copyFile, moveFile
+	//			(because delete is a reserved word, I didnt want to use it)
+	static public function copy($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
+	{
+		return self::copyFile($src_filename,$directory,$dst_filename,$fullpath);
+	}
+
+	//	DEPRECATED: use moveFile($src_filename,$directory,$dst_filename,$fullpath) instead
+	//	NOTE:	was made to unify the method names, deleteFile, copyFile, moveFile
+	//			(because delete is a reserved word, I didnt want to use it)
+	static public function move($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
+	{
+		return self::moveFile($src_filename,$directory,$dst_filename,$fullpath);
 	}
 }
