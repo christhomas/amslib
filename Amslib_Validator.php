@@ -700,7 +700,7 @@ class Amslib_Validator
 	{
 		$error = false;
 
-		if($value == NULL && !isset($options["ignorenull"])){
+		if($value === NULL && !isset($options["ignorenull"])){
 			$error = "NUMBER_IS_NULL";
 		}
 
@@ -1593,8 +1593,21 @@ class Amslib_Validator
 	}
 
 	/** DEPRECATED METHOD: use getErrors instead */
-	public function getErrorsByFieldName(){ return $this->getErrors(); }
+	public function getErrorsByFieldName()
+	{
+		return $this->getErrors();
+	}
+
 	/**	DEPRECATED METHOD: use getValid instead */
-	public function getValidData($mergeSource=NULL){ return $this->getValid($mergeSource); }
+	public function getValidData($mergeSource=NULL)
+	{
+		return $this->getValid($mergeSource);
+	}
+
+	/** DEPRECATED METHOD: use __logical_one instead */
+	protected function __require_one($name,$value,$required,$options)
+	{
+		return $this->__logical_one($name,$value,$required,$options);
+	}
 }
 ?>
