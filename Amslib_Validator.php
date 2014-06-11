@@ -96,40 +96,67 @@ class Amslib_Validator
 	 */
 	protected $__hasRequiredRules;
 
-	//	NOTE: we ignore the name, it's not used here
-	//	NOTE: I hate this function :( it's so "unstructured"
 	/**
-	 * 	method:	__require_one
+	 * 	method:	__logical_or
 	 *
 	 * 	todo: write documentation
 	 *
-	 * 	usage: $v->add("has_file","require_one",true,array("select_file","csv_file"));
+	 * 	usage: $v->add("has_file","logical_or",true,array("select_file","csv_file"));
 	 */
-	protected function __require_one($name,$value,$required,$options)
+	protected function __logical_or($name,$value,$required,$options)
 	{
 		unset($options["__vobject"]);
 
-		$dest	=	$name;
 		$valid	=	$this->getValid();
 		$keys	=	array_keys($valid);
 
 		foreach($options as $o){
 			//	Make sure the key exists in the array
-			if(in_array($o,$keys)){
-				//	If the key is a string, makes sure it's not empty
-				if(is_string($valid[$o]) && strlen($valid[$o]) == 0) continue;
+			if(!in_array($o,$keys)) continue;
 
-				$this->setValid($dest,$valid[$o]);
+			//	If the key is a string, makes sure it's not empty
+			if(is_string($valid[$o]) && strlen($valid[$o]) == 0) continue;
 
-				return true;
-			}
+			$this->setValid($name,$valid[$o]);
+
+			return true;
 		}
 
 		if(!$required) return true;
 
-		$this->setError($name,"REQUIRE_ONE_FAILED");
+		$this->setError($name,"LOGICAL_OR_FAILED");
 
 		return false;
+	}
+
+	protected function __logical_and($name,$value,$required,$options)
+	{
+		unset($options["__vobject"]);
+
+		$valid	=	$this->getValid();
+		$keys	=	array_keys($valid);
+		$data	=	array();
+
+		foreach($options as $o){
+			//	Make sure the key exists in the array
+			$exists	=	in_array($o,$keys);
+			//	Make sure it's not empty
+			$empty	=	is_string($valid[$o]) && strlen($valid[$o]) == 0;
+
+			if(!$exists || !$empty){
+				if(!$required) return true;
+
+				$this->setError($name,"LOGICAL_AND_FAILED");
+
+				return true;
+			}
+
+			$data[$o] = $valid[$o];
+		}
+
+		$this->setValid($name,$data);
+
+		return true;
 	}
 
 	/**
@@ -305,8 +332,14 @@ class Amslib_Validator
 		}
 
 		//	NOTE: maybe "invalid" should change to "exclude-input" to be closer to the syntax of "limit-input" ?
-		if(isset($options["invalid"]) && in_array($value,$options["invalid"])){
-			$error = "TEXT_INVALID_INPUT";
+		if(isset($options["invalid"])){
+			if(!is_array($options["invalid"])){
+				$options["invalid"] = array($options["invalid"]);
+			}
+
+			if(in_array($value,$options["invalid"])){
+				$error = "TEXT_INVALID_INPUT";
+			}
 		}
 
 		if($required == true && $error !== false) return $error;
@@ -1256,16 +1289,19 @@ class Amslib_Validator
 
 		//	Custom validation methods which do things we all want, but don't
 		//	conform to obvious rules like "number", "text", "date", etc
-		$this->register("require_one",		array($this,"__require_one"));
+		$this->register("logical_and",		array($this,"__logical_and"));
+		$this->register("logical_or",		array($this,"__logical_or"));
 		$this->register("array_number",		array($this,"__array_number"));
 		$this->register("array_text",		array($this,"__array_text"));
 		$this->register("csv_number",		array($this,"__csv_number"));
 
+		//	TODO: I should register when one of these is used and add something to the error log
 		//	Register some popular alternative spellings which keep cropping up to make life easier
 		$this->register("string",			array($this,"__text"));
 		$this->register("numeric",			array($this,"__number"));
 		$this->register("alpha-relaxed",	array($this,"__alpha_relaxed"));
 		$this->register("array_string",		array($this,"__array_text"));
+		$this->register("require_one",		array($this,"__logical_or"));
 	}
 
 	/**

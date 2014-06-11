@@ -208,9 +208,8 @@ class Amslib_Array
 		$args	=	func_get_args()+array(array(),"");
 
 		$array	=	self::valid(array_shift($args));
-		$keys	=	self::valid($args);
 
-		foreach($keys as $k){
+		foreach(self::valid($args) as $k){
 			if(is_array($k)){
 				array_unshift($k,$array);
 				$array = call_user_func_array("self::removeKeys",$k);
