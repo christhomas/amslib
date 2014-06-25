@@ -165,6 +165,8 @@ class Amslib_File
 		return $status;
 	}
 
+	//	NOTE:	what does this method do now? it's old and deprecated?
+	//			or has a specific purpose? but it's not documented
 	static public function mkdir_manual($directory,$mode=0777)
 	{
 		$parent = dirname($directory);
@@ -259,19 +261,18 @@ class Amslib_File
 	 * 	todo: write documentation
 	 *
 	 * 	NOTE: This looks very similar to listFiles method just below...
+	 * 	NOTE: (23/06/2014): I refactored listFiles to use getList since in fact, it's the same identical code
 	 */
 	static public function getList($dir,$recurse=false)
 	{
 		$list = array();
 
 		if(is_dir($dir)){
-			$list = glob("$dir/*");
+			$list = glob(self::reduceSlashes("$dir/*"));
 
 			if($recurse){
 				foreach($list as $l){
-					$subdir = self::getList($l,$recurse);
-
-					$list = array_merge($list,$subdir);
+					$list = array_merge($list,self::getList($l,$recurse));
 				}
 			}
 		}
@@ -287,27 +288,16 @@ class Amslib_File
 	 * parameters:
 	 * 		$dir		-	The directory to scan through
 	 * 		$recurse	-	Whether to recurse into subdirectories
-	 * 		$exit		-	Whether or not this is the outside call, therefore we are now "exiting" the method
 	 *
 	 * returns:
 	 * 		An array of files which were found, or an empty array
 	 */
-	static public function listFiles($dir,$recurse=false,$exit=true)
+	static public function listFiles($dir,$recurse=false)
 	{
-		$list = array();
-
-		if(is_dir($dir)){
-			$list = glob(self::reduceSlashes("$dir/*"));
-
-			if($recurse){
-				foreach($list as $l){
-					$list = array_merge($list,self::listFiles($l,$recurse,false));
-				}
-			}
-		}
+		$list = self::getList($dir,$recurse);
 
 		//	Remove all the directories from the list
-		if($exit) foreach($list as $k=>$v){
+		foreach($list as $k=>$v){
 			if(is_dir($v)) unset($list[$k]);
 		}
 

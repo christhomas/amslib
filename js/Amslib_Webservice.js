@@ -245,6 +245,8 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 	set: function(name,value)
 	{
 		this.data[name] = value;
+		
+		return this;
 	},
 	
 	get: function(name,defaultValue)
