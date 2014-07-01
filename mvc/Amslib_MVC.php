@@ -404,6 +404,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 * 	method:	getObject
 	 *
 	 * 	todo: write documentation
+	 * 	todo: why is singleton=true here and in Amslib_Plugin_Manager::getObject, singleton=false?
 	 */
 	public function getObject($id,$singleton=true)
 	{

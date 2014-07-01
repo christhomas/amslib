@@ -489,6 +489,7 @@ class Amslib_Plugin_Manager
 	 * 	method:	getObject
 	 *
 	 * 	todo: write documentation
+	 * 	todo: why is singleton=false here and in Amslib_MVC::getObject, singleton=true?
 	 */
 	static public function getObject($plugin,$id,$singleton=false)
 	{

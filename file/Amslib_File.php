@@ -118,6 +118,8 @@ class Amslib_File
 	 */
 	static public function absolute($path)
 	{
+		if(strpos($path,"http://") === 0) return $path;
+
 		$root	=	self::documentRoot();
 		$path	=	self::removeWindowsDrive($path);
 		$rel	=	Amslib::lchop($path,$root);
@@ -132,6 +134,8 @@ class Amslib_File
 	 */
 	static public function relative($path)
 	{
+		if(strpos($path,"http://") === 0) return $path;
+
 		$root	=	self::documentRoot();
 		$rel	=	Amslib::lchop($path,$root);
 

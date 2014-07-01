@@ -271,6 +271,8 @@ class Amslib_Database
 	public function storeSearchHandle()
 	{
 		$this->storeSearchResult = $this->selectResult;
+
+		return $this->storeSearchResult;
 	}
 
 	/**
@@ -278,9 +280,15 @@ class Amslib_Database
 	 *
 	 * 	todo: write documentation
 	 */
-	public function restoreSearchHandle()
+	public function restoreSearchHandle($searchResult=NULL)
 	{
-		if($this->storeSearchResult) $this->selectResult = $this->storeSearchResult;
+		if($searchResult && is_resource($searchResult) && stristr($searchResult, "mysql")){
+			$this->storeSearchResults = $searchResults;
+		}
+
+		if($this->storeSearchResult){
+			$this->selectResult = $this->storeSearchResult;
+		}
 
 		$this->storeSearchResult = false;
 	}
