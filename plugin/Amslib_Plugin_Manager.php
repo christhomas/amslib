@@ -353,7 +353,7 @@ class Amslib_Plugin_Manager
 				case "image":
 				case "model":
 				default:{
-					//	NOTE: why do I not use $value["val"] here? like I do with translators?
+					//	NOTE: why do I not use $value["val"]["name"] here? like I do with translators?
 					$data = $src->getValue($value["key"]);
 					$dst->setValue($value["key"],$data);
 				}break;
