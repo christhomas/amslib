@@ -775,8 +775,10 @@ class Amslib
 				foreach($stack as $k=>$row){
 					error_log("[TRACE:$k] $row");
 				}
+			}else if(is_string($a) && strpos($a,"memory_usage_human") === 0){
+				$data[] = "memory_usage_human = ".Amslib::getMemoryUsage(true,true);
 			}else if(is_string($a) && strpos($a,"memory_usage") === 0){
-				$data[] = "memory_usage = ".memory_get_usage(true);
+				$data[] = "memory_usage = ".Amslib::getMemoryUsage(true);
 			}else if(is_string($a) && strpos($a,"func_offset") === 0){
 				$command = explode(",",array_shift($args));
 
@@ -927,6 +929,7 @@ class Amslib
 			if(strpos($c,"Amslib_Mixin")		=== 0)	$c	=	"mvc/$c";
 			if(strpos($c,"Amslib_File")			=== 0)	$c	=	"file/$c";
 			if(strpos($c,"Amslib_QueryPath")	=== 0)	$c	=	"util/$c";
+			if(strpos($c,"Amslib_Webservice")	===	0)	$c	=	"webservice/$c";
 			if(strpos($c,"PiwikTracker")		=== 0)	$c	=	"util/$c";
 			if(strpos($c,"phpQuery")			=== 0)	$c	=	"util/$c/$c";
 			if(strpos($c,"QRcode")				=== 0)	$c	=	"util/phpqrcode/phpqrcode";
@@ -1325,12 +1328,12 @@ class Amslib
 		return $default;
 	}
 
-	//	I wonder if this is true, or it's bullshit? could ask someone to verify whether they think it's safe or not
-	//	TODO: I was told to replace this with a call to crypt()
 	/**
 	 * 	method:	getRandomCode
 	 *
 	 * 	todo: write documentation
+	 *	I wonder if this is true, or it's bullshit? could ask someone to verify whether they think it's safe or not
+	 *	TODO: I was told to replace this with a call to crypt()
 	 */
 	static public function getRandomCode($input=NULL)
 	{
@@ -1343,6 +1346,30 @@ class Amslib
 		$input = $input !== NULL ? self::var_dump($args,true) : "";
 
 		return sha1(implode("__",array($salt,$input,microtime(true),mt_rand(0,21387132987),$salt)));
+	}
+
+	/**
+	 * 	method: getMemoryUsage
+	 *
+	 * 	Return the memory usage that PHP is using, with various filters
+	 *
+	 * 	parameters:
+	 * 		$real	-	Whether to return the real memory usage of PHP, or the value returned from emalloc
+	 * 		$human	-	Whether to return the memory usage as bytes or a human readable string
+	 *
+	 * 	returns:
+	 * 		Either the number of bytes, real or approximated, or a human readable interpretation of that number of bytes
+	 */
+	static public function getMemoryUsage($real=true,$human=false)
+	{
+		$size = memory_get_usage($real);
+
+		if($human){
+			$unit = array('b','kb','mb','gb','tb','pb');
+			$size = @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
+		}
+
+		return $size;
 	}
 
 	//	IDEAS FOR A NEW(ER) SIMPLIFIED API
