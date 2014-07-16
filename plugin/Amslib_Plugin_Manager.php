@@ -306,18 +306,40 @@ class Amslib_Plugin_Manager
 		return self::$location;
 	}
 
-	static public function addImport($src,$dst,$key,$value)
+	/**
+	 *	method: addImport
+	 *
+	 *	Add a new piece of data to be imported from one plugin to another
+	 *
+	 *	parameters:
+	 *		$source			-	the source plugin to import from
+	 *		$destination	-	the destination plugin to import to
+	 *		$key			-	the data key to import
+	 *		$value			-	the value within that data key
+	 */
+	static public function addImport($source,$destination,$key,$value)
 	{
-		$queue = !is_string($src) && is_object($src) ? $src->getName() : $src;
+		$queue = !is_string($source) && is_object($source) ? $source->getName() : $source;
 
-		self::$import[$queue][] = array("src"=>$src,"dst"=>$dst,"key"=>$key,"val"=>$value);
+		self::$import[$queue][] = array("src"=>$source,"dst"=>$destination,"key"=>$key,"val"=>$value);
 	}
 
-	static public function addExport($src,$dst,$key,$value)
+	/**
+	 * 	method:	addExport
+	 *
+	 * 	Add a new piece of data to be exported from one plugin to another
+	 *
+	 * 	parameters:
+	 * 		$source			-	the source plugin to export from
+	 * 		$destination	-	the destination plugin to export to
+	 * 		$key			-	the data key to export
+	 * 		$value			-	the value within that data key
+	 */
+	static public function addExport($source,$destination,$key,$value)
 	{
-		$queue = !is_string($src) && is_object($src) ? $src->getName() : $src;
+		$queue = !is_string($source) && is_object($source) ? $source->getName() : $source;
 
-		self::$export[$queue][] = array("src"=>$src,"dst"=>$dst,"key"=>$key,"val"=>$value);
+		self::$export[$queue][] = array("src"=>$source,"dst"=>$destination,"key"=>$key,"val"=>$value);
 	}
 
 	static public function processImport()
@@ -336,6 +358,8 @@ class Amslib_Plugin_Manager
 			}
 
 			switch($value["key"]){
+				//	The new package format has upgraded a lot of things, these are the non-so-used
+				//	upgrades which havent needed upgrading yet, so I've left them until I have more time.
 				case "view":
 				case "stylesheet":
 				case "javascript":
