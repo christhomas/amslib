@@ -386,6 +386,11 @@ class Amslib_Plugin
 			$translators = $api->listTranslators(false);
 
 			foreach(Amslib_Array::valid($translators) as $name=>$object){
+				if(!$object){
+					Amslib::errorLog(__METHOD__,"we found a translator which was not valid",$name,$object);
+					continue;
+				}
+
 				//	Obtain the language the system should use when printing text
 				$object->setLanguage(Amslib_Plugin_Application::getLanguage($name));
 				$object->load();
@@ -752,7 +757,7 @@ class Amslib_Plugin
 			if($prevent || $replace) return;
 
 			//	If the plugin is already created, don't attempt to configure or load it again
-			$plugin		=	Amslib_Plugin_Manager::getPlugin($array["value"]);
+			$plugin = Amslib_Plugin_Manager::getPlugin($array["value"]);
 
 			if($plugin) return;
 
