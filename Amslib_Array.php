@@ -675,23 +675,6 @@ class Amslib_Array
 	}
 
 	/**
-	 * 	method:	implodeQuote
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function implodeQuote($array,$join=",",$quote="")
-	{
-		$spaceList = array();
-		foreach($array as $s){
-			$spaceList[] = "{$quote}$s{$quote}";
-		}
-
-		return implode($join,$spaceList);
-
-
-	}
-
-	/**
 	 * 	method:	wrap
 	 *
 	 * 	todo: write documentation
@@ -715,13 +698,23 @@ class Amslib_Array
 	}
 
 	/**
+	 * 	method:	implode
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function implode($array,$join=",",$quote="")
+	{
+		return $quote.implode("{$quote}{$join}{$quote}",$array).$quote;
+	}
+
+	/**
 	 * 	method:	implodeQuoteSingle
 	 *
 	 * 	todo: write documentation
 	 */
 	static public function implodeQuoteSingle($array,$join=",")
 	{
-		return self::implodeQuote($array,$join,"'");
+		return self::implode($array,$join,"'");
 	}
 
 	/**
@@ -731,6 +724,6 @@ class Amslib_Array
 	 */
 	static public function implodeQuoteDouble($array,$join=",")
 	{
-		return self::implodeQuote($array,$join,"\"");
+		return self::implode($array,$join,"\"");
 	}
 }
