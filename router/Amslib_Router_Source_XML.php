@@ -225,13 +225,15 @@ class Amslib_Router_Source_XML
 	{
 		$import = array();
 
-		foreach($array["child"] as $c){
-			$import[$c["tag"]] = $c["value"];
+		if(array_key_exists("child",$array)){
+			foreach($array["child"] as $c){
+				$import[$c["tag"]] = $c["value"];
+			}
 		}
 
 		if(!isset($import["output"]) || !isset($import["url"])) return false;
 
-		$this->import[] = $import;
+		if(!empty($import)) $this->import[] = $import;
 
 		return true;
 	}
