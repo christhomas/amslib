@@ -363,9 +363,13 @@ class Amslib_Plugin_Manager
 				case "view":
 				case "stylesheet":
 				case "javascript":
-				case "font":
-				case "value":{
-					die("[DIE]IMPORT[$key] => ".Amslib::var_dump(array($src->getName(),$dst->getName(),$value["key"],$value["val"]),true));
+				case "font":{
+					die("[DIE]IMPORT[$key] => ".Amslib::var_dump(array(
+							$src->getName(),
+							$dst->getName(),
+							$value["key"],
+							$value["val"]
+					),true));
 				}break;
 
 				case "translator":{
@@ -374,6 +378,7 @@ class Amslib_Plugin_Manager
 				}break;
 
 				//	We do nothing special with these entries, we simply pass them
+				case "value":
 				case "image":
 				case "model":
 				default:{
