@@ -651,7 +651,9 @@ class Amslib_Plugin
 
 	public function configFont($name,$array,$object)
 	{
-		foreach($array["child"] as $font){
+		if(!array_key_exists("child",$array)) return;
+
+		foreach(Amslib_Array::valid($array["child"]) as $font){
 			$a			=	$font["attr"];
 			$a["value"]	=	trim($font["value"]);
 			$a["type"]	=	$font["tag"];
@@ -672,10 +674,12 @@ class Amslib_Plugin
 
 	public function configTranslator($name,$array,$object)
 	{
+		if(!array_key_exists("child",$array)) return;
+
 		//	Import all the translator parameters, such as import/export
 		$a = $array["attr"];
 
-		if(isset($array["child"])) foreach(Amslib_Array::valid($array["child"]) as $c){
+		foreach(Amslib_Array::valid($array["child"]) as $c){
 			if($c["tag"] == "language"){
 				$a[$c["tag"]][] = $c["value"];
 			}else{
@@ -701,11 +705,13 @@ class Amslib_Plugin
 
 	public function configValue($name,$array,$object)
 	{
+		if(!array_key_exists("child",$array)) return;
+
 		$a = $array["attr"];
 
 		$value = array();
 
-		foreach($array["child"] as $c){
+		foreach(Amslib_Array::valid($array["child"]) as $c){
 			$value[] = array("name"=>$c["tag"],"value"=>$c["value"]);
 		}
 
@@ -720,7 +726,9 @@ class Amslib_Plugin
 
 	public function configPath($name,$array,$object)
 	{
-		foreach($array["child"] as $c){
+		if(!array_key_exists("child",$array)) return;
+
+		foreach(Amslib_Array::valid($array["child"]) as $c){
 			$v = Amslib_Plugin::expandPath($c["value"]);
 
 			if($c["tag"] == "include"){
@@ -789,9 +797,11 @@ class Amslib_Plugin
 
 	public function configExtension($name,$array,$object)
 	{
+		if(!array_key_exists("child",$array)) return;
+
 		$data = array();
 
-		foreach($array["child"] as &$c){
+		foreach(Amslib_Array::valid($array["child"]) as $c){
 			$data[$c["tag"]] = $c["value"];
 		}
 
