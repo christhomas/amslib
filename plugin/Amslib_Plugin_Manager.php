@@ -460,7 +460,7 @@ class Amslib_Plugin_Manager
 				}break;
 
 				case "service":{
-					Amslib_FirePHP::output("export",$item);
+					//Amslib_FirePHP::output("export",$item);
 					//	Hmmm, I need a test case cause otherwise I won't know if this works
 				}break;
 

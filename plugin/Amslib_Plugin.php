@@ -703,6 +703,15 @@ class Amslib_Plugin
 		}
 	}
 
+	/**
+	 * 	method: configValue
+	 *
+	 * 	Read the XML array of data and add this to the plugin data array, or import/export it somewhere else
+	 *
+	 * 	notes:
+	 * 		-	I would like in the future to support handling import/export information at the value level
+	 * 			because I think this would make the XML definitions more compact and easier to write
+	 */
 	public function configValue($name,$array,$object)
 	{
 		if(!array_key_exists("child",$array)) return;
