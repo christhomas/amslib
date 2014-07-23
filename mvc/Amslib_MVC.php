@@ -520,7 +520,7 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		if(!is_string($view) || !isset($this->view[$view]))
 		{
-			Amslib::errorLog("stack_trace","Unable to find view in structure",$view,$this->view);
+			Amslib::errorLog("stack_trace","Unable to find view in structure",$this->getName(),$view,$this->view);
 
 			return "";
 		}
