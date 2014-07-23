@@ -76,6 +76,6 @@ class Amslib_Webservice
 	{
 		$request = $this->create($url,$params);
 
-		return $request->execute();
+		return $request->execute(self::$debug);
 	}
 }
