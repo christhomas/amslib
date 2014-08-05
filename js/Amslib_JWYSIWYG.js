@@ -30,8 +30,11 @@ var amslib = Amslib.locate();
 if(amslib){
 	var jwysiwyg = amslib+"/util/jwysiwyg/";
 	
-	Amslib.loadCSS(jwysiwyg+"jquery.wysiwyg.css");
-	Amslib.loadJS("jwysiwyg",jwysiwyg+"jquery.wysiwyg.js",function(){
-		Amslib.loadJS("jwysiwyg.link",jwysiwyg+"controls/wysiwyg.link.js");
-	});
+	Amslib.css.load(jwysiwyg+"jquery.wysiwyg.css");
+
+	Amslib.js.loadSeq(
+		"jwysiwyg",
+		["jwysiwyg.core",	jwysiwyg+"jquery.wysiwyg.js"],
+		["jwysiwyg.link",	jwysiwyg+"controls/wysiwyg.link.js"]
+	);
 };

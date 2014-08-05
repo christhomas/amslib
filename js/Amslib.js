@@ -26,8 +26,7 @@ if(typeof(my) == "undefined" || typeof(my.Class) == "undefined"){
 
 var Amslib = my.Amslib = my.Class({
 	parent:					false,
-	__amslibDefaultName:	"Amslib_Default_Controller",
-	__amslibName:			false,
+	__controller:			false,
 	//	we "abuse" jquery dom-data functionality to store groups of data
 	__value:				false,
 	__services:				false,
@@ -54,6 +53,10 @@ var Amslib = my.Amslib = my.Class({
 			// make it safe to use console.log always
 			(function(b){function c(){}for(var d="assert,count,debug,dir,dirxml,error,exception,group,groupCollapsed,groupEnd,info,log,timeStamp,profile,profileEnd,time,timeEnd,trace,warn".split(","),a;a=d.pop();){b[a]=b[a]||c}})((function(){try
 			{console.log();return window.console;}catch(err){return window.console={};}})());			 	
+		},
+		
+		options: {
+			controller: "Amslib_Default_Controller"
 		},
 		
 		getController: function(amslib_object)
@@ -148,16 +151,16 @@ var Amslib = my.Amslib = my.Class({
 		this.parent = $(parent) || false;
 		if(!this.parent) return false;
 		
-		this.__amslibName = name || this.__amslibDefaultName;
+		this.__controller = name || Amslib.options.controller;
 		
 		//	Setup the amslib_controller to make this object available on the node it was associated with
-		Amslib.controller.set(this.parent,this.__amslibName,this);
+		Amslib.controller.set(this.parent,this.__controller,this);
 		
 		this.__value		= $("<div/>");
 		this.__services		= $("<div/>");
 		this.__translation	= $("<div/>");
 		this.__images		= $("<div/>");
-		this.__events		= $("<div/>");
+		this.__events		= this.parent;
 		
 		this.readMVC();
 
@@ -202,7 +205,7 @@ var Amslib = my.Amslib = my.Class({
 	
 	getAmslibName: function()
 	{
-		return this.__amslibName;
+		return this.__controller;
 	},
 	
 	getParentNode: function()
@@ -395,22 +398,43 @@ Amslib.js = {
 	
 	loadSeq: function()
 	{
-		if(arguments.length == 0) return;
+		var args = Array.prototype.slice.call(arguments);
 		
-		var prev = arguments[0];
-		if(prev.length == 2) prev[2] = false;
-		Amslib.js.load(prev[0],prev[1],prev[2]);
-
-		for(var a=0;a<arguments.length;a++){
-			var item = arguments[a];
+		if(args.length < 2) return;
+		
+		var trigger = args.shift();
+		
+		var prev = args.shift();
+		
+		//	If you don't have this, lets be harsh and cancel the whole thing
+		if(typeof(prev) != "object" || prev.length < 2) return;
+		
+		Amslib.js.load.apply(null,prev);
+		
+		var wait = [prev[0]];
+		
+		for(a in args){
+			var item = args[a];
+			
+			//	if this item doesn't have the right parameters, skip it
+			if(typeof(item) != "object" || item.length < 2){
+				continue;
+			}
 
 			Amslib.js.has(prev[0],function(){
-				if(item.length == 2) item[2] = false;
-				Amslib.js.load(item[0],item[1],item[2]);
+				Amslib.js.load.apply(null,item);
 			});
 			
 			prev = item;
+			
+			wait.push(prev[0]);
 		}
+		
+		wait.push(function(){
+			Amslib.wait.resolve(trigger);
+		});
+		
+		Amslib.wait.until.apply(null,wait);
 	},
 	
 	//	a variable number of names and possible two callbacks for success and failure
