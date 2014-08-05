@@ -217,6 +217,13 @@ class Amslib_Plugin_Service
 		$url_failure	=	Amslib::getPOST("url_failure",	Amslib::getPOST("failure_url",$url_return));
 		$url_failure	=	Amslib::rchop($url_failure,"?");
 
+		//	TODO:	I should remove all the url parameters from the source data so it doesn't pass through as data
+		//	NOTE:	well then in this case perhaps I should have to namespace them too so they are in a separate
+		//			part of the source data and not obvious "url_return" might be a bit generic
+		//	NOTE:	but if I namespace them, I don't want to pass that complexity onto the programmer
+		//	NOTE:	perhaps this means I need to add functions to build these parameters for the programmer
+		//			instead of making them build them personally
+
 		$this->setSuccessURL($url_success);
 		$this->setFailureURL($url_failure);
 
@@ -252,6 +259,11 @@ class Amslib_Plugin_Service
 		if($instance === NULL) $instance = new self();
 
 		return $instance;
+	}
+
+	public function getSessionData()
+	{
+		return $this->session;
 	}
 
 	public function setOutputFormat($format)
