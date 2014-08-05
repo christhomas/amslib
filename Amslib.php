@@ -920,6 +920,19 @@ class Amslib
 		{
 			if($c == __CLASS__) return false;
 
+			if(in_array($c,array(
+					"Amslib_COOKIE",
+					"Amslib_FILES",
+					"Amslib_GET",
+					"Amslib_POST",
+					"Amslib_REQUEST",
+					"Amslib_SESSION",
+					"Amslib_GLOBAL"
+			)))
+			{
+				$c = "global/$c";
+			}
+
 			if(strpos($c,"Amslib_Translator")	=== 0)	$c	=	"translator/$c";
 			if(strpos($c,"Amslib_Router")		=== 0) 	$c	=	"router/$c";
 			if(strpos($c,"Amslib_Database")		=== 0)	$c	=	"database/$c";
