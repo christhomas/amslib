@@ -583,6 +583,21 @@ class Amslib_Router
 	}
 
 	/**
+	 *	method:	hasRoute
+	 *
+	 *	Say whether or not there was a detected route, the system will return an empty route
+	 *	if there is nothing matching in the router, we can use this system to know whether
+	 *	the route was valid or not
+	 *
+	 *	returns:
+	 *		Boolean true or false, depending on whether the route was valid (not empty) or not
+	 */
+	static public function hasRoute()
+	{
+		return self::$emptyRoute != self::getRoute();
+	}
+
+	/**
 	 * 	method:	getResource
 	 *
 	 * 	todo: write documentation
