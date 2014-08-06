@@ -122,23 +122,41 @@ class Amslib_Website
 		return Amslib_File::relative(self::$location.$file);
 	}
 
-	//	Return an absolute url for the file to the root directory
-	//	FIXME: if you pass an absolute filename into this method, it won't return the correct filename back
 	/**
 	 * 	method:	abs
 	 *
-	 * 	todo: write documentation
+	 *	Return an absolute url for the file to the root directory
+	 *	FIXME: if you pass an absolute filename into this method, it won't return the correct filename back
 	 */
 	static public function abs($file="")
 	{
 		return Amslib_File::absolute(self::$location.$file);
 	}
 
-	//	NOTE type=0 means no specific header is given, so it'll default to a 302 redirection
+	/**
+	 * 	method:	web
+	 *
+	 * 	Take a url and return a path relative to the website installation, NOT the document root
+	 * 	Useful for knowing which url inside the website has been opened, so you can scan a
+	 * 	database of urls for a match and other similar purposes.
+	 *
+	 * 	parameters:
+	 * 		$file	=	The url to convert to a website relative path
+	 *
+	 * 	returns:
+	 * 		A relative path to the website installation, without the leading part to the document root
+	 */
+	static public function web($file="")
+	{
+		return Amslib_File::reduceSlashes("/".str_replace(self::$location,"","/$file/")."/");
+	}
+
 	/**
 	 * 	method:	redirect
 	 *
 	 * 	todo: write documentation
+	 *
+	 *	note: type=0 means no specific header is given, so it'll default to a 302 redirection
 	 */
 	static public function redirect($location,$block=true,$type=0)
 	{
