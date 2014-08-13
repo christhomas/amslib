@@ -57,10 +57,16 @@ class Amslib_Global
 		array_shift($key_list);
 
 		foreach($key_list as $item){
-			if(is_array($item)){
-				foreach($item as $k) unset($source[$k]);
-			}else if(is_string($item)){
-				unset($_SESSION[$item]);
+			if(!is_array($item)){
+				$item = array($item);
+			}
+
+			foreach($item as $k){
+				if(!isset($source[$k])) continue;
+
+				$source[$k] = NULL;
+
+				unset($source[$k]);
 			}
 		}
 	}
