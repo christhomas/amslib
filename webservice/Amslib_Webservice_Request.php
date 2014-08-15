@@ -70,6 +70,10 @@ class Amslib_Webservice_Request
 
 			$curl = curl_init();
 
+			//	This is just the first version of this code, it works, but it's hardly very elegant.
+			//	Also, I think I need to merge code from Amslib_Plugin_Service because we seem to be duplicating
+			//	it a lot here, perhaps we need to have a common shared object with methods to set and get from
+			//	the storage variable
 			if($this->sharedSession){
 				$key_remote		= "/amslib/webservice/session/remote/";
 				$key_request	= "/amslib/webservice/session/request/";
