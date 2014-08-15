@@ -34,7 +34,6 @@ class Amslib_Webservice_Response
 
 	protected $state;
 	protected $response;
-	protected $request;
 	protected $handler;
 
 	/**
@@ -51,7 +50,7 @@ class Amslib_Webservice_Response
 		}
 
 		if(!$this->handler){
-			//	TODO: move into the logging system intead of here
+			//	TODO: move into the logging system instead of here
 			error_log("** ".__METHOD__." ** ".Amslib::var_dump($this->handler,true)." was invalid");
 			return NULL;
 		}
@@ -74,14 +73,11 @@ class Amslib_Webservice_Response
 		return $plugin;
 	}
 
-	public function __construct($request)
+	public function __construct($response=NULL)
 	{
-		$this->handler = false;
-
-		$this->setRequest($request);
 		$this->setState("raw",false);
 		$this->setState("amslib",true);
-		$this->setResponse(NULL);
+		$this->setResponse($response);
 	}
 
 	public function setState($name,$state)
@@ -96,11 +92,6 @@ class Amslib_Webservice_Response
 	public function getState($name)
 	{
 		return isset($this->state[$name]) ? $this->state[$name] : NULL;
-	}
-
-	public function setRequest($request)
-	{
-		$this->request = $request instanceof Amslib_Webservice_Request ? $request : NULL;
 	}
 
 	public function getResponse($name=NULL)
@@ -156,6 +147,30 @@ class Amslib_Webservice_Response
 
 		//	If amslib is not enabled, just reply the json response
 		return $this->response["json"];
+	}
+
+	public function deleteData($plugin,$name=NULL)
+	{
+		/*$plugin	=	self::pluginToName($plugin);
+		$copy	=	NULL;
+
+		if(isset($this->data[$plugin])){
+			if($name && isset($this->data[$plugin][self::SD][$name])){
+				$copy = $this->data[$plugin][self::SD][$name];
+
+				unset($this->data[$plugin][self::SD][$name]);
+			}else if(!$name){
+				$copy = $this->data[$plugin][self::SD];
+
+				unset($this->data[$plugin][self::SD]);
+			}
+
+			//	clean up empty arrays in the return structure
+			if(empty($this->data[$plugin])) unset($this->data[$plugin]);
+		}
+
+		return $copy;
+		*/
 	}
 
 	/**

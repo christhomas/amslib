@@ -175,7 +175,11 @@ class Amslib_Plugin
 					}break;
 
 					case "object":{
-						if(!isset($v["file"])) continue;
+						if(!isset($v["file"])){
+							Amslib::errorLog("WARNING: object being configured and has no file array index");
+
+							continue;
+						}
 
 						$params = array($k,$v["file"]);
 					}break;
@@ -199,7 +203,10 @@ class Amslib_Plugin
 					case "translator":{
 						$translator	=	$this->createTranslator($v);
 
-						if(!$translator) continue;
+						if(!$translator){
+							Amslib::errorLog("WARNING: a translator was requested, but could not be created",$v);
+							continue;
+						}
 
 						$this->installLanguages($v["name"],$v);
 
@@ -227,7 +234,11 @@ class Amslib_Plugin
 					}break;
 				}
 
-				call_user_func_array($callback,$params);
+				if(!empty($params)){
+					call_user_func_array($callback,$params);
+				}else{
+					Amslib::errorLog("WARNING: {$callback[1]} called with empty parameters",$k,$v);
+				}
 			}
 		}
 	}
