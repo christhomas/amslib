@@ -30,7 +30,7 @@ class Amslib_Webservice_Request
 	public function __construct($url,$params=array(),$sharedSession=false)
 	{
 		$this->setURL($url);
-		$this->setParameters($params);
+		$this->setParams($params);
 		$this->setSharedSessionState($sharedSession);
 		$this->setDebugState(false);
 	}
@@ -45,9 +45,9 @@ class Amslib_Webservice_Request
 		$this->url = $url;
 	}
 
-	public function setParameters($parameters)
+	public function setParams($params)
 	{
-		$this->parameteres = $parameters;
+		$this->params = $params;
 	}
 
 	public function setSharedSessionState($state)
@@ -66,8 +66,6 @@ class Amslib_Webservice_Request
 		try{
 			if(strlen($this->url) == 0) throw new Exception("webservice url was invalid");
 
-			$params = http_build_query(Amslib_Array::valid($this->params));
-
 			$curl = curl_init();
 
 			//	This is just the first version of this code, it works, but it's hardly very elegant.
@@ -81,12 +79,15 @@ class Amslib_Webservice_Request
 				$id_session = Amslib_SESSION::get($key_remote);
 
 				if($id_session){
-					$cookie = "PHPSESSID=$id_session; path=".Amslib_Router_URL::getFullURL();
+					$cookie = "PHPSESSID=$id_session; path=/";//.Amslib_Router_URL::getFullURL();
 					curl_setopt($curl,CURLOPT_COOKIE,$cookie);
+					Amslib_SESSION::set("REQUEST_COOKIE",$cookie);
 				}else{
-					$params[$key_request] = true;
+					$this->params[$key_request] = true;
 				}
 			}
+
+			$params = http_build_query(Amslib_Array::valid($this->params));
 
 			curl_setopt($curl,CURLOPT_URL,				$this->url);
 			curl_setopt($curl,CURLOPT_POST,				true);
