@@ -79,9 +79,9 @@ class Amslib_Form
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function monthOptions($start,$stop,$selected=NULL,$pad=NULL)
+	static public function monthOptions($start=-1,$stop=-1,$selected=NULL,$pad=NULL)
 	{
-		if($start < 0 || $start > 12) $start = 12;
+		if($start < 0 || $start > 12) $start = 1;
 		if($stop < 0 || $stop > 12) $stop = 12;
 
 		$keys = range($start,$stop);
@@ -104,6 +104,8 @@ class Amslib_Form
 	 * 	method:	numericSelectOptions
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	note: is this method deprecated now? seems so?
 	 */
 	static public function numericSelectOptions($start,$stop,$selected=NULL,$pad=NULL)
 	{
