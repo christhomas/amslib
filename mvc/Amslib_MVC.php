@@ -182,6 +182,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 * 	method:	initialise
 	 *
 	 * 	todo: write documentation
+	 * 	note: I'm fairly sure this shouldn't need to return this, it's useless
 	 */
 	public function initialise()
 	{
@@ -395,6 +396,10 @@ class Amslib_MVC extends Amslib_Mixin
 	 */
 	public function setObject($id,$name)
 	{
+		$args = func_get_args();
+		if(count($args) != 2){
+			Amslib::errorLog("stack_trace",$args);
+		}
 		if(!$id || strlen($id) == 0) $id = $name;
 
 		$this->object[$id] = $name;

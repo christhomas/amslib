@@ -587,6 +587,12 @@ class Amslib_Plugin_Service
 				? $this->runManagedHandler($h["managed"],$h["object"],$h["method"],$source)
 				: $this->runHandler($h["object"],$h["method"],$source);
 
+			//	Need to somehow merge against Amslib_Webservice_* classes
+			//	because now some of this code is overlapping a lot
+			if(isset($source["/amslib/webservice/session/request/"])){
+				$this->session["/amslib/webservice/session/remote/"] = session_id();
+			}
+
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($state);
 

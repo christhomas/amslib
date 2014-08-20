@@ -764,12 +764,12 @@ class Amslib
 				$stack = Amslib::getStackTrace(NULL,true);
 				$stack = explode("\n",$stack);
 
-				$c = count($command);
-
-				if($c == 2){
-					$stack = array_slice($stack,$command[1]);
-				}else if($c == 3 && $command[2] > 0){
-					$stack = array_slice($stack,$command[1],$command[2]);
+				if(isset($command[1])){
+					$stack = array_slice(
+						$stack,
+						intval($command[1]),
+						isset($command[2]) ? intval($command[2]) : NULL
+					);
 				}
 
 				foreach($stack as $k=>$row){
@@ -921,13 +921,13 @@ class Amslib
 			if($c == __CLASS__) return false;
 
 			if(in_array($c,array(
-					"Amslib_COOKIE",
-					"Amslib_FILES",
-					"Amslib_GET",
-					"Amslib_POST",
-					"Amslib_REQUEST",
-					"Amslib_SESSION",
-					"Amslib_GLOBAL"
+				"Amslib_COOKIE",
+				"Amslib_FILES",
+				"Amslib_GET",
+				"Amslib_POST",
+				"Amslib_REQUEST",
+				"Amslib_SESSION",
+				"Amslib_GLOBAL"
 			)))
 			{
 				$c = "global/$c";

@@ -69,5 +69,7 @@ class Amslib_Global
 				unset($source[$k]);
 			}
 		}
+
+		return self::getIndex($source,$key);
 	}
 }
