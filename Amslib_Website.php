@@ -152,6 +152,30 @@ class Amslib_Website
 	}
 
 	/**
+	 * 	method:	reduceSlashes
+	 *
+	 * 	A method to reduceSlashes but take care of urls like http:// so they don't break
+	 *
+	 * 	params:
+	 * 		$string	-	The string to reduce the slashes in
+	 * 		$token	-	The token to split the string on, this should
+	 * 					only exist once in the string and the right
+	 * 					side will be reduced and the left side will not
+	 * 					defaults: "://"
+	 *
+	 * 	returns:
+	 * 		A string with any // or ///[n+] reduced to /
+	 */
+	static public function reduceSlashes($string,$token="://")
+	{
+		list($prefix,$postfix) = explode($token,$string) + array(NULL,NULL);
+
+		if($postfix) $string = $postfix;
+
+		return ($postfix ? "{$prefix}{$token}" : "").Amslib_File::reduceSlashes($string);
+	}
+
+	/**
 	 * 	method:	redirect
 	 *
 	 * 	todo: write documentation

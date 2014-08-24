@@ -101,10 +101,10 @@ class Amslib_Webservice_Request
 
 			$response = new Amslib_Webservice_Response();
 			$response->setState("raw",$raw);
-			$response->setResponse($reply);
+			$response->setData($reply);
 
 			if($this->sharedSession && !$id_session){
-				$data = $response->getRawData();
+				$data = $response->getData("amslib");
 				if(isset($data[$key_remote])){
 					Amslib_SESSION::set($key_remote,$data[$key_remote]);
 				}

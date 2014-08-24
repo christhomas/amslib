@@ -77,7 +77,7 @@ class Amslib_Webservice_Response
 	{
 		$this->setState("raw",false);
 		$this->setState("amslib",true);
-		$this->setResponse($response);
+		$this->setData($response);
 	}
 
 	public function setState($name,$state)
@@ -94,14 +94,14 @@ class Amslib_Webservice_Response
 		return isset($this->state[$name]) ? $this->state[$name] : NULL;
 	}
 
-	public function getResponse($name=NULL)
+	public function getData($name=NULL)
 	{
 		return strlen($name) && isset($this->response[$name])
 			? $this->response[$name]
 			: ($name === NULL ? $this->response : NULL);
 	}
 
-	public function setResponse($response)
+	public function setData($response)
 	{
 		$this->response = array_fill_keys(array("amslib","json","raw"),false);
 
@@ -177,21 +177,10 @@ class Amslib_Webservice_Response
 	 * 	method:	hasData
 	 *
 	 * 	todo: write documentation
-	 * 	note: we have a parameter "remove" and yet nothing uses it?
 	 */
-	public function hasData($remove=true)
+	public function hasData($name="amslib")
 	{
-		return $this->response["amslib"] && !!$this->response["amslib"];
-	}
-
-	/**
-	 * 	method:	getRawData
-	 *
-	 * 	todo: write documentation
-	 */
-	public function getRawData()
-	{
-		return $this->response["amslib"];
+		return isset($this->response[$name]) && $this->response[$name] && !!$this->response[$name];
 	}
 
 	/**

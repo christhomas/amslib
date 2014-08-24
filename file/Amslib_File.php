@@ -250,16 +250,6 @@ class Amslib_File
 	}
 
 	/**
-	 * 	method:	reduceSlashes
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function reduceSlashes($string)
-	{
-		return preg_replace('#//+#','/',$string);
-	}
-
-	/**
 	 * 	method:	getList
 	 *
 	 * 	todo: write documentation
@@ -435,5 +425,11 @@ class Amslib_File
 	static public function move($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		return self::moveFile($src_filename,$directory,$dst_filename,$fullpath);
+	}
+
+	//	DEPRECATED: use Amslib_String::reduceSlashes($string) instead
+	static public function reduceSlashes($string)
+	{
+		return Amslib_String::reduceSlashes($string);
 	}
 }
