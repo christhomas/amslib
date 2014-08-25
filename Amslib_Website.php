@@ -97,7 +97,7 @@ class Amslib_Website
 			self::$location = Amslib_Router::getBase();
 		}else{
 			//	Make sure the location has a slash at both front+back (ex: /location/, not /location or location/)
-			self::$location = Amslib_File::reduceSlashes("/".Amslib_File::relative($path)."/");
+			self::$location = self::reduceSlashes("/".Amslib_File::relative($path)."/");
 		}
 
 		//	NOTE:	Special case having a single slash as the location to being a blank string
@@ -148,7 +148,7 @@ class Amslib_Website
 	 */
 	static public function web($url="")
 	{
-		return Amslib_File::reduceSlashes("/".str_replace(self::$location,"","/$url/")."/");
+		return self::reduceSlashes("/".str_replace(self::$location,"","/$url/")."/");
 	}
 
 	/**
