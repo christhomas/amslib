@@ -168,7 +168,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 		}
 
 		if(!$this->getConnectionStatus()){
-			print("unsafe string escape: database not connected<br/>\n");
+			print(__METHOD__.", unsafe string escape: database not connected<br/>\n");
 			print("it is not safe to continue, corruption might occur<br/>\n");
 			Amslib::errorLog("stack_trace,2","not connected to database");
 			die("DYING");
