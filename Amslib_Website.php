@@ -117,9 +117,9 @@ class Amslib_Website
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function rel($file="")
+	static public function rel($url="")
 	{
-		return Amslib_File::relative(self::$location.$file);
+		return Amslib_File::relative(self::$location.$url);
 	}
 
 	/**
@@ -128,9 +128,9 @@ class Amslib_Website
 	 *	Return an absolute url for the file to the root directory
 	 *	FIXME: if you pass an absolute filename into this method, it won't return the correct filename back
 	 */
-	static public function abs($file="")
+	static public function abs($url="")
 	{
-		return Amslib_File::absolute(self::$location.$file);
+		return Amslib_File::absolute(self::$location.$url);
 	}
 
 	/**
@@ -141,14 +141,14 @@ class Amslib_Website
 	 * 	database of urls for a match and other similar purposes.
 	 *
 	 * 	parameters:
-	 * 		$file	=	The url to convert to a website relative path
+	 * 		$url	=	The url to convert to a website relative path
 	 *
 	 * 	returns:
 	 * 		A relative path to the website installation, without the leading part to the document root
 	 */
-	static public function web($file="")
+	static public function web($url="")
 	{
-		return Amslib_File::reduceSlashes("/".str_replace(self::$location,"","/$file/")."/");
+		return Amslib_File::reduceSlashes("/".str_replace(self::$location,"","/$url/")."/");
 	}
 
 	/**
