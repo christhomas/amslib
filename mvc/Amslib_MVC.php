@@ -601,7 +601,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setStylesheet($id,$file,$conditional=NULL,$autoload=NULL,$media=NULL)
+	public function setStylesheet($id,$file,$conditional=NULL,$autoload=NULL,$media=NULL,$position=NULL)
 	{
 		if(!is_string($id) && $file) return;
 
@@ -609,7 +609,8 @@ class Amslib_MVC extends Amslib_Mixin
 			"file"			=>	$file,
 			"conditional"	=>	$conditional,
 			"media"			=>	$media,
-			"autoload"		=>	$autoload
+			"autoload"		=>	$autoload,
+			"position"		=>	$position
 		);
 	}
 
@@ -621,12 +622,9 @@ class Amslib_MVC extends Amslib_Mixin
 	public function addStylesheet($id)
 	{
 		if(isset($this->stylesheet[$id])){
-			Amslib_Resource::addStylesheet(
-				$id,
-				$this->stylesheet[$id]["file"],
-				$this->stylesheet[$id]["conditional"],
-				$this->stylesheet[$id]["media"]
-			);
+			$s = $this->stylesheet[$id];
+
+			Amslib_Resource::addStylesheet($id,$s["file"],$s["conditional"],$s["media"],$s["position"]);
 		}else{
 			Amslib::errorLog(__METHOD__,"stylesheet not found",$id);
 		}
@@ -669,14 +667,15 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setJavascript($id,$file,$conditional=NULL,$autoload=NULL)
+	public function setJavascript($id,$file,$conditional=NULL,$autoload=NULL,$position=NULL)
 	{
 		if(!is_string($id) && $file) return;
 
 		$this->javascript[$id] = array(
 			"file"			=>	$file,
 			"conditional"	=>	$conditional,
-			"autoload"		=>	$autoload
+			"autoload"		=>	$autoload,
+			"position"		=>	$position
 		);
 	}
 
@@ -688,11 +687,9 @@ class Amslib_MVC extends Amslib_Mixin
 	public function addJavascript($id)
 	{
 		if(isset($this->javascript[$id])){
-			Amslib_Resource::addJavascript(
-				$id,
-				$this->javascript[$id]["file"],
-				$this->javascript[$id]["conditional"]
-			);
+			$j = $this->javascript[$id];
+
+			Amslib_Resource::addJavascript($id,$j["file"],$j["conditional"],$j["position"]);
 		}else{
 			Amslib::errorLog(__METHOD__,"javascript not found",$id);
 		}

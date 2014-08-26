@@ -223,7 +223,9 @@ class Amslib_Router_Source_XML
 
 	public function configImport($name,$array,$object)
 	{
-		$import = array();
+		$import = $array["attr"];
+
+		if(!isset($import["name"])) $import["name"] = "import_".count($this->import);
 
 		if(array_key_exists("child",$array)){
 			foreach($array["child"] as $c){

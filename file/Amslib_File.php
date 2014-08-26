@@ -112,6 +112,51 @@ class Amslib_File
 	}
 
 	/**
+	 * 	note:
+	 * 		-	I got the basics of this method from: http://stackoverflow.com/a/14883803/279147
+	 */
+	static public function resolvePath($path)
+	{
+		if(strpos($path,"..") === false) return $path;
+
+		list($protocol,$url) = explode("://",$path) + array(NULL,NULL);
+
+		if($url){
+			//	protocol was valid, so domain is the first element
+			$array = explode("/",$url);
+			$domain = array_shift($array);
+			$prefix = "{$protocol}://{$domain}/";
+		}else{
+			$array = explode("/",$path);
+			//	If the path begins with a / then the final result path has to have one too
+			$prefix = $path[0] == "/" ? "/" : "";
+		}
+
+		$parents = array();
+		foreach($array as $dir) {
+			switch($dir) {
+				case '.':
+					// Don't need to do anything here
+				break;
+
+				case '..':
+					if(count($parents)){
+						array_pop($parents);
+					}
+				break;
+
+				default:
+					$parents[] = $dir;
+				break;
+			}
+		}
+
+		$url = $prefix.implode("/",$parents);
+
+		return Amslib_Website::reduceSlashes($url);
+	}
+
+	/**
 	 * 	method:	absolute
 	 *
 	 * 	todo: write documentation

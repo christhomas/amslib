@@ -41,16 +41,22 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function addStylesheet($id,$file,$conditional=NULL,$media=NULL)
+	static public function addStylesheet($id,$file,$conditional=NULL,$media=NULL,$position=NULL)
 	{
+		if(!$position) $position = "common";
+		if(!isset(self::$stylesheet[$position])) self::$stylesheet[$position] = array();
+		$p = &self::$stylesheet[$position];
+
 		if($id && $file){
 			$media = $media ? "media='$media'" : "";
-			self::$stylesheet[$id] = "<link rel='stylesheet' type='text/css' href='$file' $media />";
+			$p[$id] = "<link rel='stylesheet' type='text/css' href='$file' $media />";
 
 			if(is_string($conditional) && strlen($conditional)){
-				self::$stylesheet[$id] = "<!--[$conditional]>".self::$stylesheet[$id]."<![endif]-->";
+				$p[$id] = "<!--[$conditional]>{$p[$id]}<![endif]-->";
 			}
 		}
+
+		unset($p); // release the reference (prevents problems with loops)
 	}
 
 	/**
@@ -58,9 +64,15 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getStylesheet()
+	static public function getStylesheet($position="common")
 	{
-		return implode("\n",self::$stylesheet);
+		if(isset(self::$stylesheet[$position])){
+			return implode("\n",self::$stylesheet[$position]);
+		}
+
+		Amslib::errorLog(__METHOD__,"the requested position to obtain the stylesheets from was not valid");
+
+		return "";
 	}
 
 	/**
@@ -68,9 +80,15 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function removeStylesheet($id)
+	static public function removeStylesheet($id,$position="common")
 	{
-		unset(self::$stylesheet[$id]);
+		if(!isset(self::$stylesheet[$position])){
+			Amslib::errorLog(__METHOD__,"position requested to remove stylesheet from is not exist");
+		}else if(!isset(self::$stylesheet[$position][$id])){
+			Amslib::errorLog(__METHOD__,"index requested to remove from stylesheet array is not valid");
+		}else{
+			unset(self::$stylesheet[$position][$id]);
+		}
 	}
 
 	/**
@@ -78,15 +96,21 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function addJavascript($id,$file,$conditional=NULL)
+	static public function addJavascript($id,$file,$conditional=NULL,$position=NULL)
 	{
+		if(!$position) $position = "common";
+		if(!isset(self::$javascript[$position])) self::$javascript[$position] = array();
+		$p = &self::$javascript[$position];
+
 		if($id && $file){
-			self::$javascript[$id] = "<script type='text/javascript' src='$file'></script>";
+			$p[$id] = "<script type='text/javascript' src='$file'></script>";
 
 			if(is_string($conditional) && strlen($conditional)){
-				self::$javascript[$id] = "<!--[$conditional]>".self::$javascript[$id]."<![endif]-->";
+				$p[$id] = "<!--[$conditional]>{$p[$id]}<![endif]-->";
 			}
 		}
+
+		unset($p); // release the reference (prevents problems with loops)
 	}
 
 	/**
@@ -94,9 +118,15 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getJavascript()
+	static public function getJavascript($position="common")
 	{
-		return implode("\n",self::$javascript);
+		if(isset(self::$javascript[$position])){
+			return implode("\n",self::$javascript[$position]);
+		}
+
+		Amslib::errorLog(__METHOD__,"the requested position to obtain the javascripts from was not valid");
+
+		return "";
 	}
 
 	/**
@@ -104,9 +134,15 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function removeJavascript($id)
+	static public function removeJavascript($id,$position="common")
 	{
-		unset(self::$javascript[$id]);
+		if(!isset(self::$javascript[$position])){
+			Amslib::errorLog(__METHOD__,"position requested to remove javascript from is not valid");
+		}else if(!isset(self::$javascript[$position][$id])){
+			Amslib::errorLog(__METHOD__,"index requested to remove from javascript array is not valid");
+		}else{
+			unset(self::$javascript[$position][$id]);
+		}
 	}
 
 	/**

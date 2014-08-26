@@ -72,6 +72,8 @@ class Amslib_Router
 	static protected $name		=	array();
 	static protected $url		=	array();
 	static protected $callback	=	array();
+
+	static protected $import	=	array();
 	static protected $export	=	array();
 
 	/**
@@ -739,16 +741,63 @@ class Amslib_Router
 	 * 	todo: write documentation
 	 * 	note: probably this doesn't belong here, but in a generic "url, web" object instead
 	 */
-	static public function encodeURLPairs($array,$separator="/")
+	static public function encodeURLPairs($array,$separator="/",$ignore=array())
 	{
 		$p = array();
 
+		if(!is_array($ignore)) $ignore = array();
+
 		foreach(Amslib_Array::valid($array) as $k=>$v){
+			if(!empty($ignore) && in_array($k,$ignore)) continue;
+
 			$p[] = $k;
 			$p[] = $v;
 		}
 
 		return implode($separator,$p);
+	}
+
+	/**
+	 * 	method:	setImportData
+	 *
+	 * 	Set the import data we received from the data source
+	 *
+	 * 	params:
+	 * 		$name	-	The name of the import
+	 * 		$data	-	The import data
+	 *
+	 * 	notes:
+	 * 		-	If the $name given is not a valid or empty string, it
+	 * 			will still be added, but the name set will be similar to
+	 * 			error_0, error_1, etc.
+	 */
+	static public function setImportData($name,$data)
+	{
+		if(!is_string($name) || !strlen($name)) $name = "error_".count(self::$import);
+
+		self::$import[$name] = $data;
+	}
+
+	/**
+	 * 	method:	getImportData
+	 *
+	 * 	Obtain the import data by a particular name, returning a default if not found, or the entire import data if set to NULL/false
+	 *
+	 * 	params:
+	 * 		$name		-	The name of the import data to retrieve
+	 * 		$default	-	The data to return if nothing was found
+	 *
+	 * 	notes:
+	 * 		-	If the $default parameter is not an array e.g: NULL, it will act to return the entire import data
+	 * 		-	If the $name given is not a valid or empty string, it will just immediately return all the import data
+	 */
+	static public function getImportData($name=NULL,$default=array())
+	{
+		if(!is_string($name) || !strlen($name)) return self::$import;
+
+		return isset(self::$import[$name])
+			? self::$import[$name]
+			: (is_array($default) ? $default : self::$import);
 	}
 
 	/**
@@ -778,22 +827,18 @@ class Amslib_Router
 	 */
 	static public function importRouter($import)
 	{
-		$output	=	$import["output"];
-		$url	=	$import["url"];
-
-		unset($import["output"],$import["url"]);
-
-		$params = self::encodeURLPairs($import);
+		$params = self::encodeURLPairs($import,"/",array("output","url","name"));
 
 		//	acquire the latest route for the export url and construct the url to call the external remote service
-		$route	=	self::getRoute("service:framework:router:export:".$output);
-		$url	=	rtrim($url,"/").rtrim($route["src"]["default"],"/")."/$params/";
+		$route				=	self::getRoute("service:framework:router:export:".$import["output"]);
+		$import["url"]		=	Amslib_File::resolvePath(Amslib_Website::expandPath($import["url"]));
+		$import["url_full"] =	rtrim($import["url"],"/").rtrim($route["src"]["default"],"/")."/$params/";
 
-		if($output == "json"){
+		if($import["output"] == "json"){
 			//	We are going to install a router using json as a data transfer medium
 			//	Acquire the json, decode it and obtain the domain
 			ob_start();
-			$data	= file_get_contents($url);
+			$data	= file_get_contents($import["url_full"]);
 			$caught = ob_get_clean();
 
 			if(strlen($caught)){
@@ -810,9 +855,13 @@ class Amslib_Router
 			foreach(Amslib_Array::valid($data["cache"]) as $route){
 				self::setRoute($route["name"],$route["group"],$domain,$route,false);
 			}
-		}else if($output == "xml"){
+
+			//	Record that we imported something so we can possibly use this information
+			self::setImportData($import["name"],$import);
+
+		}else if($import["output"] == "xml"){
 			ob_start();
-				$data = file_get_contents($url);
+				$data = file_get_contents($import["url"]);
 			$caught = ob_get_clean();
 
 			if(strlen($caught)){

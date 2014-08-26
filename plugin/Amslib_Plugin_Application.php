@@ -178,14 +178,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		parent::__construct();
 
-		parent::setPath("amslib",	Amslib::locate());
-		parent::setPath("website",	"__WEBSITE__");
-		parent::setPath("admin",	"__ADMIN__");
-		parent::setPath("plugin",	"__PLUGIN__");
-		parent::setPath("docroot",	Amslib_File::documentRoot());
-
-		//	NOTE: router_source? this is a really old and now deprecated configuration node isnt it?
-		//$this->search = array_merge(array("path","router_source","version"),$this->search);
+		parent::setPath("amslib",		Amslib::locate());
+		parent::setPath("website",		Amslib_Router::getBase());
+		parent::setPath("website_ext",	Amslib_Router_URL::externalURL(Amslib_Router::getBase()));
+		parent::setPath("admin",		"__ADMIN__");
+		parent::setPath("plugin",		"__PLUGIN__");
+		parent::setPath("docroot",		Amslib_File::documentRoot());
 
 		$this->completionCallback = array();
 

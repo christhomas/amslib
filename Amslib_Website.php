@@ -33,9 +33,25 @@
  */
 class Amslib_Website
 {
+	static protected $path = array();
+
 	static protected $location = NULL;
 
 	const ERROR_FILE_NOT_FOUND	=	"The src filename was not found, could not be fixed automatically";
+
+	static public function setPath($name,$path)
+	{
+		self::$path[$name] = $path;
+	}
+
+	static public function expandPath($path)
+	{
+		foreach(array_keys(self::$path) as $key){
+			$path = str_replace("__".strtoupper($key)."__",self::$path[$key],$path);
+		}
+
+		return self::reduceSlashes($path);
+	}
 
 	static public function move($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{

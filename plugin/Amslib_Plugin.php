@@ -217,7 +217,9 @@ class Amslib_Plugin
 						$params = array($k,$v);
 					}break;
 
-					default:{
+					case "stylesheet":{
+						//	NOTE (25/08/2014):	I'm not sure why I wrote this protection code,
+						//						maybe it's old logic not needed anymore?
 						if(is_object($v)){
 							print("key[$key] = ".Amslib::var_dump($v,true));
 							print("callback = ".Amslib::var_dump(array($callback[0]->getName(),$callback[1]),true));
@@ -229,8 +231,32 @@ class Amslib_Plugin
 						$condition	=	isset($v["condition"])	? $v["condition"]	: NULL;
 						$autoload	=	isset($v["autoload"])	? $v["autoload"]	: NULL;
 						$media		=	isset($v["media"])		? $v["media"]		: NULL;
+						$position	=	isset($v["position"])	? $v["position"]	: NULL;
 
-						$params		=	array($k,$value,$condition,$autoload,$media);
+						$params		=	array($k,$value,$condition,$autoload,$media,$position);
+					}break;
+
+					case "javascript":{
+						//	NOTE (25/08/2014):	I'm not sure why I wrote this protection code,
+						//						maybe it's old logic not needed anymore?
+						if(is_object($v)){
+							print("key[$key] = ".Amslib::var_dump($v,true));
+							print("callback = ".Amslib::var_dump(array($callback[0]->getName(),$callback[1]),true));
+							print("value was object, cannot continue");
+							continue;
+						}
+
+						$value		=	isset($v["value"])		? $v["value"]		: NULL;
+						$condition	=	isset($v["condition"])	? $v["condition"]	: NULL;
+						$autoload	=	isset($v["autoload"])	? $v["autoload"]	: NULL;
+						$position	=	isset($v["position"])	? $v["position"]	: NULL;
+
+						$params		=	array($k,$value,$condition,$autoload,$position);
+					}break;
+
+					default:{
+						Amslib::errorLog("WARNING: unrecognised key '$key' being processed, ignoring");
+						continue;
 					}break;
 				}
 
@@ -1157,7 +1183,7 @@ class Amslib_Plugin
 	 */
 	static protected function setPath($name,$path)
 	{
-		self::$path[$name] = $path;
+		Amslib_Website::setPath($name,$path);
 	}
 
 	/**
@@ -1172,9 +1198,7 @@ class Amslib_Plugin
 			$path = str_replace($key, Amslib_Router::getPath($key), $path);
 		}
 
-		foreach(array_keys(self::$path) as $key){
-			$path = str_replace("__".strtoupper($key)."__",self::$path[$key],$path);
-		}
+		$path = Amslib_Website::expandPath($path);
 
 		return Amslib_File::reduceSlashes($path);
 	}
