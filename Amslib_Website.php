@@ -135,6 +135,13 @@ class Amslib_Website
 	 */
 	static public function rel($url="")
 	{
+		if(strpos($url,"://") !== false){
+			$l = list($protocol,$domain,$url) = self::parseURL($url);
+
+			//	Because we have a url with a protocol, it must mean the url parsed is already relative
+			return $url;
+		}
+
 		return Amslib_File::relative(self::$location.$url);
 	}
 
@@ -161,10 +168,32 @@ class Amslib_Website
 	 *
 	 * 	returns:
 	 * 		A relative path to the website installation, without the leading part to the document root
+	 *
+	 * 	notes:
+	 * 		-	This method will not process any url with protocol token (://) and will return the same url
 	 */
 	static public function web($url="")
 	{
-		return self::reduceSlashes("/".str_replace(self::$location,"","/$url/")."/");
+		$url = self::rel($url);
+		$url = str_replace(self::$location,"","/$url/");
+
+		return self::reduceSlashes("/$url/");
+	}
+
+	static public function parseURL($url)
+	{
+		list($protocol,$right) = explode("://",$url) + array(NULL,NULL);
+
+		//	No protocol was detected, just return the string as a uri
+		if(!$right) return array(NULL,NULL,$url);
+
+		$parts = explode("/",$right);
+
+		return array(
+				$protocol,
+				$parts[1],
+				self::reduceSlashes("/".implode("/",array_slice($parts,1))."/")
+		);
 	}
 
 	/**

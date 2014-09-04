@@ -161,10 +161,33 @@ class Amslib_Array
 			}
 
 			$values[] = count($v) == 1 ? array_shift($v) : $v;
-
 		}
 
 		return $values;
+	}
+
+	static public function pluck2($array,$keys)
+	{
+		if (!is_array($keys)) {
+			$keys = func_get_args();
+			array_shift($keys);
+		}
+
+		return array_intersect_key($array,array_flip($keys));
+	}
+
+	static public function pluckMulti2($array,$keys)
+	{
+		if (!is_array($keys)) {
+			$keys = func_get_args();
+			array_shift($keys);
+		}
+
+		foreach($array as &$item){
+			$item = self::pluck2($item,$keys);
+		}
+
+		return $array;
 	}
 
 	/**
@@ -250,7 +273,7 @@ class Amslib_Array
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function reindexByKey($array,$key)
+	static public function reindexByKey($array,$key,$optimise=false)
 	{
 		$array = self::valid($array);
 
