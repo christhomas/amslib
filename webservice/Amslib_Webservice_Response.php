@@ -32,7 +32,7 @@ class Amslib_Webservice_Response
 	const FB = "feedback";
 	const SC = "success";
 
-	protected $state;
+	protected $mode;
 	protected $response;
 	protected $handler;
 
@@ -73,25 +73,66 @@ class Amslib_Webservice_Response
 		return $plugin;
 	}
 
+	protected function setAmslibKey($type,$value=NULL)
+	{
+		if(!is_array($this->response)){
+			$this->response = $this->getEmptyResponse();
+		}
+
+		if(!isset($this->response["amslib"])){
+			$this->response["amslib"] = array();
+		}
+
+		if(!isset($this->response["amslib"][$type])){
+			$this->response["amslib"][$type] = $value;
+		}
+	}
+
+	protected function getAmslibKey($key,$default=NULL)
+	{
+		if(!$this->response || !is_array($this->response)){
+			return $default;
+		}
+
+		if(!isset($this->response["amslib"]) || !is_array($this->response["amslib"])){
+			return $default;
+		}
+
+		$a = $this->response["amslib"];
+		if(is_string($key)) $key = array($key);
+		foreach($key as $index){
+			if(!isset($a[$index])) return $default;
+
+			$a = $a[$index];
+		}
+
+		return $a;
+	}
+
 	public function __construct($response=NULL)
 	{
-		$this->setState("raw",false);
-		$this->setState("amslib",true);
+		$this->setMode("raw",false);
+		$this->setMode("amslib",true);
 		$this->setData($response);
 	}
 
-	public function setState($name,$state)
+	public function setMode($name,$mode)
 	{
 		if(is_string($name) && strlen($name)){
-			$this->state[$name] = !!$state;
+			$this->mode[$name] = !!$mode;
 		}
 
-		if($name == "amslib") $this->setState("json",true);
+		if($name == "amslib") $this->setMode("json",true);
 	}
 
-	public function getState($name)
+	public function getMode($name)
 	{
-		return isset($this->state[$name]) ? $this->state[$name] : NULL;
+		return isset($this->mode[$name]) ? $this->mode[$name] : NULL;
+	}
+
+	public function getEmptyResponse()
+	{
+		return array_fill_keys(array("amslib","json","raw"),false);
 	}
 
 	public function getData($name=NULL)
@@ -103,7 +144,7 @@ class Amslib_Webservice_Response
 
 	public function setData($response)
 	{
-		$this->response = array_fill_keys(array("amslib","json","raw"),false);
+		$this->response = $this->getEmptyResponse();
 
 		if(!strlen($response)){
 			if($response !== NULL){
@@ -113,13 +154,13 @@ class Amslib_Webservice_Response
 			return false;
 		}
 
-		if($this->getState("raw")){
+		if($this->getMode("raw")){
 			$this->response["raw"] = $response;
 
 			return $this->response["raw"];
 		}
 
-		if($this->getState("json")){
+		if($this->getMode("json")){
 			if(is_array($response)){
 				$this->response["json"] = $response;
 			}else{
@@ -133,7 +174,7 @@ class Amslib_Webservice_Response
 			}
 		}
 
-		if($this->getState("amslib")){
+		if($this->getMode("amslib")){
 			$j = $this->response["json"];
 
 			if($j && is_array($j) && isset($j["success"]) && isset($j["handlers"])){
@@ -180,7 +221,7 @@ class Amslib_Webservice_Response
 	 */
 	public function hasData($name="amslib")
 	{
-		return isset($this->response[$name]) && $this->response[$name] && !!$this->response[$name];
+		return $name && $this->response && isset($this->response[$name]) && is_array($this->response[$name]);
 	}
 
 	/**
@@ -190,7 +231,27 @@ class Amslib_Webservice_Response
 	 */
 	public function countHandler()
 	{
-		return $this->response["amslib"] ? count($this->response["amslib"][self::HD]) : false;
+		if(!$this->response["amslib"] || !isset($this->response["amslib"][self::HD])){
+			return false;
+		}
+
+		return count($this->response["amslib"][self::HD]);
+	}
+
+	public function setHandler($id,$data)
+	{
+		if(!is_array($data)) return false;
+
+		$this->setAmslibKey(self::HD,array());
+
+		$id = intval($id);
+
+		$this->response["amslib"][self::HD][$id] = $data;
+	}
+
+	public function addHandler($data)
+	{
+		$this->setHandler($this->countHandler(),$data);
 	}
 
 	/**
@@ -200,11 +261,14 @@ class Amslib_Webservice_Response
 	 */
 	public function processHandler($id=0)
 	{
-		$this->handler = $this->response["amslib"] && isset($this->response["amslib"][self::HD][$id])
-			? Amslib_Array::valid($this->response["amslib"][self::HD][$id])
-			: array();
+		$this->handler = Amslib_Array::valid($this->getAmslibKey(array(self::HD,$id),array()));
 
 		return array_keys($this->handler);
+	}
+
+	public function setStatus($status)
+	{
+		$this->setAmslibKey(self::SC,!!$status);
 	}
 
 	/**
@@ -214,9 +278,7 @@ class Amslib_Webservice_Response
 	 */
 	public function getStatus()
 	{
-		return $this->response["amslib"] && isset($this->response["amslib"][self::SC])
-			? $this->response["amslib"][self::SC]
-			: false;
+		return $this->getAmslibKey(self::SC,false);
 	}
 
 	/**
