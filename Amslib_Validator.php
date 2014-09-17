@@ -183,6 +183,10 @@ class Amslib_Validator
 				"valid"		=>	$arrayValidator->getValid(),
 				"errors"	=>	$arrayValidator->getErrors()
 			);
+
+			if(!isset($options["optimise"]) || !$options["optimise"]){
+				$data = $data["valid"];
+			}
 		}
 
 		if($required == true && $error !== false) return $error;
