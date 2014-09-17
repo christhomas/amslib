@@ -133,7 +133,7 @@ class Amslib_Website
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function rel($url="")
+	static public function rel($url="",$resolve=false)
 	{
 		if(strpos($url,"://") !== false){
 			$l = list($protocol,$domain,$url) = self::parseURL($url);
@@ -142,7 +142,11 @@ class Amslib_Website
 			return $url;
 		}
 
-		return Amslib_File::relative(self::$location.$url);
+		$url = Amslib_File::relative(self::$location.$url);
+
+		if($resolve) $url = Amslib_File::resolvePath($url);
+
+		return $url;
 	}
 
 	/**

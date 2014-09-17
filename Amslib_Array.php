@@ -187,6 +187,12 @@ class Amslib_Array
 			$item = self::pluck2($item,$keys);
 		}
 
+		if(count($keys) == 1){
+			foreach($array as &$r){
+				$r = $r[$keys[0]];
+			}
+		}
+
 		return $array;
 	}
 

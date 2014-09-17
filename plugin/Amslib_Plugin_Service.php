@@ -369,10 +369,12 @@ class Amslib_Plugin_Service
 	 */
 	public function setVar($key,$data)
 	{
-		if($key == NULL && is_array($data)){
+		if($key === NULL && is_array($data)){
 			self::$var = array_merge(self::$var,$data);
 		}else if(is_string($key) && strlen($key)){
 			self::$var[$key] = $data;
+		}else if($data === NULL){
+			self::$var = array();
 		}
 	}
 

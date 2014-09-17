@@ -271,6 +271,17 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
+	 * 	method:	getValueIfEmpty
+	 *
+	 * 	A small addition that will check the string is not/has (NULL,false) or
+	 * 	has a string length before looking to obtain a configuration of default value
+	 */
+	public function getValueIfEmpty($value,$name=NULL,$default=NULL)
+	{
+		return $value !== NULL || $value !== false || strlen($value) ? $value : $this->getValue($name,$value);
+	}
+
+	/**
 	 * 	method:	setFields
 	 *
 	 * 	todo: write documentation
