@@ -105,8 +105,6 @@ class Amslib_Validator
 	 */
 	protected function __logical_or($name,$value,$required,$options)
 	{
-		unset($options["__vobject"]);
-
 		$valid	=	$this->getValid();
 		$keys	=	array_keys($valid);
 
@@ -131,8 +129,6 @@ class Amslib_Validator
 
 	protected function __logical_and($name,$value,$required,$options)
 	{
-		unset($options["__vobject"]);
-
 		$valid	=	$this->getValid();
 		$keys	=	array_keys($valid);
 		$data	=	array();
@@ -315,7 +311,7 @@ class Amslib_Validator
 
 		//	replace this key with a better named version, but have this code here to patch over code which uses it
 		if(array_key_exists("permit-empty",$options)){
-			Amslib::errorLog("**** DEPRECATED CODE: permit-empty flag detected","stack-trace");
+			Amslib_Debug::errorlog("**** DEPRECATED CODE: permit-empty flag detected","stack-trace");
 			$options["allow-empty"] = $options["permit-empty"];
 		}
 
@@ -1085,7 +1081,7 @@ class Amslib_Validator
 	 */
 	protected function __file($name,$value,$required,$options)
 	{
-		$value = Amslib::filesParam($name);
+		$value = Amslib_FILES::get($name);
 		$valid = true;
 
 		if($value !== NULL){
@@ -1253,12 +1249,14 @@ class Amslib_Validator
 	 */
 	public function __construct($source)
 	{
+		//	NOTE: not sure whether I want to put this code her or not, but it seems a reasonably good idea
 		if(!is_array($source)){
-			Amslib::errorLog(
-				"stack_trace",
-				"WARNING: the source given to the validator was not an array, overriding with empty array",
-				$source
+			Amslib_Debug::errorlog(
+					"stack_trace",
+					"WARNING: the source attempting to be validating was not an array, setting empty array",
+					$source
 			);
+
 			$source = array();
 		}
 
@@ -1349,7 +1347,6 @@ class Amslib_Validator
 	public function add($name,$type,$required=false,$options=array())
 	{
 		$required					=	isset($options["required"]) ? $options["required"] : $required;
-		$options["__vobject"]		=	$this;
 		$this->__rules[$name]		=	array("name"=>$name,"type"=>$type,"required"=>$required,"options"=>$options);
 		$this->__validData[$name]	=	"";
 
@@ -1368,7 +1365,7 @@ class Amslib_Validator
 	{
 		foreach(Amslib_Array::valid($rules) as $name=>$r){
 			if(!is_string($name) || is_numeric($name)){
-				Amslib::errorLog("name key was numeric or not a string",$name,$r);
+				Amslib_Debug::errorlog("name key was numeric or not a string",$name,$r);
 				continue;
 			}
 

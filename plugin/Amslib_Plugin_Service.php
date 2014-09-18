@@ -77,7 +77,7 @@ class Amslib_Plugin_Service
 
 		if(!self::$handler){
 			//	TODO: move into the logging system intead of here
-			error_log("** ".__METHOD__." ** ".Amslib::var_dump(self::$handler,true)." was invalid");
+			error_log("** ".__METHOD__." ** ".Amslib_Debug::var_dump(self::$handler,true)." was invalid");
 			return NULL;
 		}
 
@@ -208,14 +208,14 @@ class Amslib_Plugin_Service
 		//	FIXME: we are hardcoding a route "home" which might not exist, this could be a bad idea
 		$default_url	=	Amslib_Router::getURL("home");
 
-		$url_return		=	Amslib::getPOST("url_return",	Amslib::getPOST("return_url",$default_url));
-		$url_return		=	Amslib::rchop($url_return,"?");
+		$url_return		=	Amslib_POST::get("url_return",	Amslib_POST::get("return_url",$default_url));
+		$url_return		=	Amslib_String::rchop($url_return,"?");
 
-		$url_success	=	Amslib::getPOST("url_success",	Amslib::getPOST("success_url",$url_return));
-		$url_success	=	Amslib::rchop($url_success,"?");
+		$url_success	=	Amslib_POST::get("url_success",	Amslib_POST::get("success_url",$url_return));
+		$url_success	=	Amslib_String::rchop($url_success,"?");
 
-		$url_failure	=	Amslib::getPOST("url_failure",	Amslib::getPOST("failure_url",$url_return));
-		$url_failure	=	Amslib::rchop($url_failure,"?");
+		$url_failure	=	Amslib_POST::get("url_failure",	Amslib_POST::get("failure_url",$url_return));
+		$url_failure	=	Amslib_String::rchop($url_failure,"?");
 
 		//	TODO:	I should remove all the url parameters from the source data so it doesn't pass through as data
 		//	NOTE:	well then in this case perhaps I should have to namespace them too so they are in a separate
@@ -230,14 +230,14 @@ class Amslib_Plugin_Service
 		//	blank the appropriate session key to stop previous sessions overlapping
 		//	NOTE:	what if you are using the json output? then there is no key to erase,
 		//			so you're just creating session keys and not using them
-		Amslib::getSESSION(self::SR,false,true);
+		Amslib_SESSION::get(self::SR,false,true);
 
 		$this->showFeedback();
 
 		//	Obtain the old return_ajax parameter, either as json or false
-		$return_ajax = Amslib::getPOST("return_ajax",false) ? "json" : false;
+		$return_ajax = Amslib_POST::get("return_ajax",false) ? "json" : false;
 		//	Obtain the new output_format parameter, or default to the return_ajax value if not found
-		$format = Amslib::getPOST("output_format",$return_ajax);
+		$format = Amslib_POST::get("output_format",$return_ajax);
 		//	Sanitise the format to be one of three possible options, or default to false
 		if(!in_array($format,array(false,"json","session"))) $format = false;
 		//	Now it should be safe to set the output format, false will of course reset
@@ -504,7 +504,7 @@ class Amslib_Plugin_Service
 		}
 
 		if(!is_object($object)){
-			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib::var_dump($object));
+			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib_Debug::var_dump($object));
 			$object = "__INVALID_OBJECT__";
 		}else{
 			$object = get_class($object);
@@ -870,7 +870,7 @@ class Amslib_Plugin_Service
 	static public function hasData($remove=true)
 	{
 		if(self::$serviceData === NULL || $remove == false){
-			self::$serviceData = Amslib::sessionParam(self::SR,false,$remove);
+			self::$serviceData = Amslib_SESSION::get(self::SR,false,$remove);
 		}
 
 		return self::$serviceData ? true : false;

@@ -167,7 +167,7 @@ class Amslib_File
 
 		$root	=	self::documentRoot();
 		$path	=	self::removeWindowsDrive($path);
-		$rel	=	Amslib::lchop($path,$root);
+		$rel	=	Amslib_String::lchop($path,$root);
 
 		return self::reduceSlashes("$root/$rel");
 	}
@@ -182,7 +182,7 @@ class Amslib_File
 		if(strpos($path,"http://") === 0) return $path;
 
 		$root	=	self::documentRoot();
-		$rel	=	Amslib::lchop($path,$root);
+		$rel	=	Amslib_String::lchop($path,$root);
 
 		return self::reduceSlashes("/$rel");
 	}
@@ -206,7 +206,7 @@ class Amslib_File
 		ob_start();
 		$exists = is_dir($directory);
 		if(!$exists && !mkdir($directory,$mode,$recursive)){
-			Amslib::errorLog("Failed to create directory requested",$directory);
+			Amslib_Debug::errorlog("Failed to create directory requested",$directory);
 			$status = false;
 		}
 		$error_text = ob_get_clean();
@@ -264,7 +264,7 @@ class Amslib_File
 	static public function find($filename,$includeFilename=false)
 	{
 		if(@file_exists($filename)){
-			return ($includeFilename) ? $filename : Amslib::rchop($filename,"/");
+			return ($includeFilename) ? $filename : Amslib_String::rchop($filename,"/");
 		}
 
 		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
@@ -383,31 +383,31 @@ class Amslib_File
 		//	NOTE: Perhaps all this checking and copying or directories etc, should be formalised into the api??
 		//	If the destination directory doesnt exist, attempt to create it
 		if($error == false && !is_dir($directory) && !mkdir($directory,0777,true)){
-			Amslib::errorLog("There was an error with the directory, either permissions, or creating it was not possible",$directory,error_get_last());
+			Amslib_Debug::errorlog("There was an error with the directory, either permissions, or creating it was not possible",$directory,error_get_last());
 			$error = true;
 		}
 
 		//	It REALLY REALLY should exist now, but lets check just in case
 		if($error == false && !is_dir($directory)){
-			Amslib::errorLog("The directory does not exist, so cannot write to the location",$directory,error_get_last());
+			Amslib_Debug::errorlog("The directory does not exist, so cannot write to the location",$directory,error_get_last());
 			$error = true;
 		}
 
 		//	If there was not dst_filename given, use the original filename from the src
 		if(!strlen($dst_filename)) $dst_filename = basename($src_filename);
 
-		$dst_filename	=	Amslib::slugify2(basename($dst_filename),"_",".");
+		$dst_filename	=	Amslib_String::slugify2(basename($dst_filename),"_",".");
 		$destination	=	self::reduceSlashes("$directory/$dst_filename");
 
 		//	Try to move the file into the correct destination
 		if($error == false && !rename($src_filename,$destination)){
-			Amslib::errorLog("It was not possible to save to the requested filename",error_get_last());
+			Amslib_Debug::errorlog("It was not possible to save to the requested filename",error_get_last());
 			$error = true;
 		}
 
 		//	If there are no errors, you have uploaded the file ok, however, you could still fail here
 		if($error == false && !chmod($destination,0777)){
-			Amslib::errorLog("file uploaded ok (apparently), but chmod failed",$destination,error_get_last());
+			Amslib_Debug::errorlog("file uploaded ok (apparently), but chmod failed",$destination,error_get_last());
 		}
 
 		//	if the output was not empty, something bad happened, like a warning or error
@@ -416,7 +416,7 @@ class Amslib_File
 		//	then once I have it, I can do something with it, like output it only to the error log, etc, etc.
 		$output = ob_get_clean();
 		if(strlen($output)){
-			Amslib::errorLog("Error or warning executing file operations",$output);
+			Amslib_Debug::errorlog("Error or warning executing file operations",$output);
 		}
 
 		//	Set the full path of the file, it's final destination in the filesystem
@@ -429,7 +429,7 @@ class Amslib_File
 	static public function deleteFile($filename)
 	{
 		if(!$filename || !is_string($filename) || !file_exists($filename)){
-			die("filename invalid".Amslib::var_dump($filename));
+			die("filename invalid".Amslib_Debug::var_dump($filename));
 			return false;
 		}
 
@@ -444,7 +444,7 @@ class Amslib_File
 		//	then once I have it, I can do something with it, like output it only to the error log, etc, etc.
 		if(strlen($output)){
 			$status = false;
-			Amslib::errorLog("Error or warning executing file operations",$output);
+			Amslib_Debug::errorlog("Error or warning executing file operations",$output);
 		}
 
 		return $status;

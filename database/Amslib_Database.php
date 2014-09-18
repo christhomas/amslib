@@ -215,7 +215,7 @@ class Amslib_Database
 				"db_error_num"		=>	$errno,
 				"db_last_insert"	=>	$this->lastInsertId,
 				"db_insert_id"		=>	$insert_id,
-				"db_location"		=>	Amslib::getStackTrace(0,true)
+				"db_location"		=>	Amslib_Debug::getStackTrace(0,true)
 		);
 
 		if(count($this->errors) > $this->maxErrorCount){

@@ -140,7 +140,7 @@ class Amslib_XML
 			}
 		}
 
-		return __METHOD__.Amslib::var_dump($data,true);
+		return __METHOD__.Amslib_Debug::var_dump($data,true);
 	}
 
 	/**
@@ -169,7 +169,7 @@ class Amslib_XML
 		$nodes = array();
 		foreach($this->queryResults as $c){
 			if($c->hasChildNodes()) foreach($c as $n){
-				print(Amslib::var_dump($n->nodeName,true));
+				print(Amslib_Debug::var_dump($n->nodeName,true));
 			}else print("No Child Nodes: ".$c->nodeName);
 		}
 
@@ -222,7 +222,7 @@ class Amslib_XML
 			if($attributes) $data[$c->nodeName]["__attr"] = $this->getArray($c->attributes);
 		}
 
-		print(__METHOD__.": data = ".Amslib::var_dump($data,true));
+		print(__METHOD__.": data = ".Amslib_Debug::var_dump($data,true));
 		return $data;
 	}
 }

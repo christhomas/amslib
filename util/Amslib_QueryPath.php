@@ -27,15 +27,15 @@ class Amslib_QueryPath
 			$warnings = ob_get_clean();
 
 			if(strlen($warnings)){
-				Amslib::errorLog("QueryPath did not produce clean output when processing document, this is not normal",$warnings);
+				Amslib_Debug::errorlog("QueryPath did not produce clean output when processing document, this is not normal",$warnings);
 			}
 		}catch(Exception $e){
-			Amslib::errorLog("QueryPath trigger an exception processing document",$document,$e->getMessage());
+			Amslib_Debug::errorlog("QueryPath trigger an exception processing document",$document,$e->getMessage());
 		}
 
 		//	Something went wrong, create a dummy object (this hasn't been tested properly)
 		if(!self::$qp){
-			Amslib::errorLog("QueryPath was invalid, creating a dummy object to prevent code break");
+			Amslib_Debug::errorlog("QueryPath was invalid, creating a dummy object to prevent code break");
 			self::$qp = qp();
 		}
 
@@ -58,7 +58,7 @@ class Amslib_QueryPath
 			$warnings = ob_get_clean();
 
 			if(strlen($warnings)){
-				Amslib::errorLog("FAILED TO OBTAIN CLEAN OUTPUT WHEN PROCESSING HTML: error = ",$warnings);
+				Amslib_Debug::errorlog("FAILED TO OBTAIN CLEAN OUTPUT WHEN PROCESSING HTML: error = ",$warnings);
 			}
 		}catch(Exception $e){
 			//	I dunno what to do here
@@ -92,7 +92,7 @@ class Amslib_QueryPath
 			//	If the node doesn't have children, obtain the text and store as it's value
 			if(count($childNodes) == 0) $data["value"] = $node->text();
 		}catch(Exception $e){
-			Amslib::errorLog("QueryPath Exception",$e->getMessage);
+			Amslib_Debug::errorlog("QueryPath Exception",$e->getMessage);
 		}
 
 		return $data;
@@ -101,14 +101,14 @@ class Amslib_QueryPath
 	static public function execCallback($key,$callback,$object=NULL)
 	{
 		if(!self::$qp || !is_callable($callback)){
-			print("FAILED CALLBACK = ".Amslib::var_dump($callback,true));
+			print("FAILED CALLBACK = ".Amslib_Debug::var_dump($callback,true));
 			return;
 		}
 
 		try{
 			$results = self::$qp->branch()->find($key);
 		}catch(Exception $e){
-			Amslib::errorLog("QueryPath Exception",$e->getMessage);
+			Amslib_Debug::errorlog("QueryPath Exception",$e->getMessage);
 		}
 
 		foreach($results as $r){

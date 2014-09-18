@@ -117,7 +117,7 @@ class Amslib_Array
 		$pivot = array_shift($array);
 
 		if(!isset($pivot[$index])){
-			Amslib::errorLog("ERROR, PIVOT INDEX DOES NOT EXIST","stack_trace");
+			Amslib_Debug::errorlog("ERROR, PIVOT INDEX DOES NOT EXIST","stack_trace");
 		}
 
 		foreach($array as $k => $v) {

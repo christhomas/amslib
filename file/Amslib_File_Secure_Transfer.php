@@ -135,7 +135,7 @@ class Amslib_File_Secure_Transfer
 	 */
 	static public function decrypt()
 	{
-		$base64		=	Amslib::getGET("encrypted");
+		$base64		=	Amslib_GET::get("encrypted");
 
 		if(!$base64) self::message(false,"missing parameter");
 

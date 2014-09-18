@@ -289,7 +289,7 @@ class Amslib_Image
 	public function getError()
 	{
 		return is_array($this->error)
-			? Amslib::var_dump($this->error)
+			? Amslib_Debug::var_dump($this->error)
 			: $this->error;
 	}
 
@@ -348,7 +348,7 @@ class Amslib_Image
 		if(is_array($source)){
 			$this->commands = $source;
 		}elseif(is_string($source)){
-			$this->commands = explode("/",trim(Amslib::rchop($source,"?"),"/"));
+			$this->commands = explode("/",trim(Amslib_String::rchop($source,"?"),"/"));
 		}else{
 			return $this->setError(self::COMMAND_SEQUENCE_INVALID);
 		}

@@ -51,7 +51,7 @@ class Amslib_Webservice_Response
 
 		if(!$this->handler){
 			//	TODO: move into the logging system instead of here
-			error_log("** ".__METHOD__." ** ".Amslib::var_dump($this->handler,true)." was invalid");
+			error_log("** ".__METHOD__." ** ".Amslib_Debug::var_dump($this->handler,true)." was invalid");
 			return NULL;
 		}
 
@@ -148,7 +148,7 @@ class Amslib_Webservice_Response
 
 		if(!strlen($response)){
 			if($response !== NULL){
-				Amslib::errorLog(__METHOD__,"response was empty string");
+				Amslib_Debug::errorlog(__METHOD__,"response was empty string");
 			}
 
 			return false;
@@ -167,7 +167,7 @@ class Amslib_Webservice_Response
 				try{
 					$this->response["json"] = json_decode($response,true);
 				}catch(Exception $e){
-					Amslib::errorLog(__METHOD__,"response was not a valid json string or had a problem to decode");
+					Amslib_Debug::errorlog(__METHOD__,"response was not a valid json string or had a problem to decode");
 
 					return false;
 				}

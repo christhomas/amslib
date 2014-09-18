@@ -92,7 +92,7 @@ class Amslib_Router
 	{
 		//	Don't replace anything if the string is / because it'll nuke all the separators
 		$replace	=	$select == "/" ? "" : $select;
-		$params		=	Amslib::lchop($url,$replace);
+		$params		=	Amslib_String::lchop($url,$replace);
 
 		//	Filter out NULL or empty elements and return ONLY a valid array of valid components
 		$route["url_param"] = Amslib_Array::valid(array_filter(array_merge($url_params,explode("/",trim($params,"/ ")))));
@@ -179,8 +179,8 @@ class Amslib_Router
 		if(self::$base){
 			//	Obtain the path within the website, without the website base
 			//	we use this to calculate the path inside the website, not relative to the document root
-			self::$path	=	Amslib::lchop($_SERVER["REQUEST_URI"],self::$base);
-			self::$path =	Amslib::rchop(self::$path,"?");
+			self::$path	=	Amslib_String::lchop($_SERVER["REQUEST_URI"],self::$base);
+			self::$path =	Amslib_String::rchop(self::$path,"?");
 			self::$path	=	Amslib_File::reduceSlashes("/".self::$path."/");
 		}
 
@@ -842,7 +842,7 @@ class Amslib_Router
 			$caught = ob_get_clean();
 
 			if(strlen($caught)){
-				Amslib::errorLog("FAILED TO IMPORT ROUTER IN JSON FORMAT, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
+				Amslib_Debug::errorlog("FAILED TO IMPORT ROUTER IN JSON FORMAT, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
 			}
 
 			$data	= json_decode($data,true);
@@ -865,7 +865,7 @@ class Amslib_Router
 			$caught = ob_get_clean();
 
 			if(strlen($caught)){
-				Amslib::errorLog("FAILED TO IMPORT ROUTER IN XML FORMAT, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
+				Amslib_Debug::errorlog("FAILED TO IMPORT ROUTER IN XML FORMAT, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
 			}
 
 			//	TODO: implement the logic to import from XML
@@ -945,7 +945,7 @@ class Amslib_Router
 	 */
 	static public function serviceExportRouterDEBUG($service,$source)
 	{
-		die(Amslib::var_dump(self::exportRouterShared(),true));
+		die(Amslib_Debug::var_dump(self::exportRouterShared(),true));
 	}
 
 	/**

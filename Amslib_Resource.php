@@ -70,7 +70,7 @@ class Amslib_Resource
 			return implode("\n",self::$stylesheet[$position]);
 		}
 
-		Amslib::errorLog(__METHOD__,"the requested position to obtain the stylesheets from was not valid");
+		Amslib_Debug::errorlog(__METHOD__,"the requested position to obtain the stylesheets from was not valid");
 
 		return "";
 	}
@@ -83,9 +83,9 @@ class Amslib_Resource
 	static public function removeStylesheet($id,$position="common")
 	{
 		if(!isset(self::$stylesheet[$position])){
-			Amslib::errorLog(__METHOD__,"position requested to remove stylesheet from is not exist");
+			Amslib_Debug::errorlog(__METHOD__,"position requested to remove stylesheet from is not exist");
 		}else if(!isset(self::$stylesheet[$position][$id])){
-			Amslib::errorLog(__METHOD__,"index requested to remove from stylesheet array is not valid");
+			Amslib_Debug::errorlog(__METHOD__,"index requested to remove from stylesheet array is not valid");
 		}else{
 			unset(self::$stylesheet[$position][$id]);
 		}
@@ -124,7 +124,7 @@ class Amslib_Resource
 			return implode("\n",self::$javascript[$position]);
 		}
 
-		Amslib::errorLog(__METHOD__,"the requested position to obtain the javascripts from was not valid");
+		Amslib_Debug::errorlog(__METHOD__,"the requested position to obtain the javascripts from was not valid");
 
 		return "";
 	}
@@ -137,9 +137,9 @@ class Amslib_Resource
 	static public function removeJavascript($id,$position="common")
 	{
 		if(!isset(self::$javascript[$position])){
-			Amslib::errorLog(__METHOD__,"position requested to remove javascript from is not valid");
+			Amslib_Debug::errorlog(__METHOD__,"position requested to remove javascript from is not valid");
 		}else if(!isset(self::$javascript[$position][$id])){
-			Amslib::errorLog(__METHOD__,"index requested to remove from javascript array is not valid");
+			Amslib_Debug::errorlog(__METHOD__,"index requested to remove from javascript array is not valid");
 		}else{
 			unset(self::$javascript[$position][$id]);
 		}

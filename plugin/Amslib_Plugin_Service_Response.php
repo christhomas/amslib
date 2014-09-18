@@ -34,7 +34,7 @@ class Amslib_Plugin_Service_Response
 
 		if(!$this->handler){
 			//	TODO: move into the logging system intead of here
-			error_log("** ".__METHOD__." ** ".Amslib::var_dump($this->handler,true)." was invalid");
+			error_log("** ".__METHOD__." ** ".Amslib_Debug::var_dump($this->handler,true)." was invalid");
 			return NULL;
 		}
 
@@ -64,7 +64,7 @@ class Amslib_Plugin_Service_Response
 		if($this->isValid($source)){
 			$this->source = $source;
 		}else{
-			$session = Amslib::sessionParam(self::SR,false,$remove);
+			$session = Amslib_SESSION::get(self::SR,false,$remove);
 
 			if($this->isValid($session)) $this->source = $session;
 		}

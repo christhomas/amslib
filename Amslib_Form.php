@@ -154,7 +154,7 @@ class Amslib_Form
 	 */
 	static public function getFilename($name)
 	{
-		$file = Amslib::filesParam($name);
+		$file = Amslib_FILES::get($name);
 
 		return ($file && isset($file["name"])) ? $file["name"] : false;
 	}
@@ -166,7 +166,7 @@ class Amslib_Form
 	 */
 	static public function getTempFilename($name)
 	{
-		$file = Amslib::filesParam($name);
+		$file = Amslib_FILES::get($name);
 
 		return ($file && isset($file["tmp_name"])) ? $file["tmp_name"] : false;
 	}

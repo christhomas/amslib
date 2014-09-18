@@ -161,14 +161,14 @@ class Amslib_Plugin_Config_XML
 		}
 
 		if(!$this->queryPath || !is_callable($callback)){
-			Amslib::errorLog("QueryPath or callback not valid",$plugin->getName(),$key,$callback[0],$callback[1]);
+			Amslib_Debug::errorlog("QueryPath or callback not valid",$plugin->getName(),$key,$callback[0],$callback[1]);
 			return;
 		}
 
 		try{
 			$results = $this->queryPath->branch()->find($key);
 		}catch(Exception $e){
-			Amslib::errorLog("QueryPath Exception",$e->getMessage);
+			Amslib_Debug::errorlog("QueryPath Exception",$e->getMessage);
 		}
 
 		foreach($results as $r){
@@ -185,7 +185,7 @@ class Amslib_Plugin_Config_XML
 		try{
 			$this->queryPath = Amslib_QueryPath::qp($filename);
 		}catch(Exception $e){
-			Amslib::errorLog("QueryPath Exception",$e->getMessage);
+			Amslib_Debug::errorlog("QueryPath Exception",$e->getMessage);
 		}
 	}
 }

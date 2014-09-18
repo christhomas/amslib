@@ -88,8 +88,8 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 					$object->load();
 				}
 			}else{
-				Amslib::errorLog("plugin list",Amslib_Plugin_Manager::listPlugins());
-				Amslib::errorLog("plugin for translator not found?",$plugin);
+				Amslib_Debug::errorlog("plugin list",Amslib_Plugin_Manager::listPlugins());
+				Amslib_Debug::errorlog("plugin for translator not found?",$plugin);
 			}
 		}
 
@@ -109,7 +109,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			if($p){
 				$p->autoloadResources();
 			}else{
-				Amslib::errorLog("plugin not found?",$p);
+				Amslib_Debug::errorlog("plugin not found?",$p);
 			}
 		}
 
@@ -319,7 +319,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			unset($_SESSION[$key]);
 
 			$key = str_replace($old,self::$langKey,$key);
-			Amslib::setSESSION(Amslib_File::reduceSlashes($key),$value);
+			Amslib_SESSION::set(Amslib_File::reduceSlashes($key),$value);
 		}
 	}
 
@@ -346,7 +346,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	static public function setLanguage($name,$langCode)
 	{
 		if(is_string($name) && strlen($name) && in_array($langCode,self::getLanguageList($name))){
-			Amslib::setSESSION(Amslib_File::reduceSlashes(self::$langKey."/$name"),$langCode);
+			Amslib_SESSION::set(Amslib_File::reduceSlashes(self::$langKey."/$name"),$langCode);
 		}else{
 			$langCode = false;
 		}
@@ -376,7 +376,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$lang = false;
 
 		if(is_string($name) && strlen($name)){
-			$lang = Amslib::getSESSION(Amslib_File::reduceSlashes(self::$langKey."/$name"));
+			$lang = Amslib_SESSION::get(Amslib_File::reduceSlashes(self::$langKey."/$name"));
 		}
 
 		if(!$lang) $lang = self::setLanguage($name,current(self::getLanguageList($name)));
@@ -466,14 +466,14 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$route = Amslib_Router::getRoute();
 
 		if(!$route || !isset($route["group"])){
-			Amslib::errorLog("ROUTE OR ROUTE/GROUP DOES NOT EXIST",$route);
+			Amslib_Debug::errorlog("ROUTE OR ROUTE/GROUP DOES NOT EXIST",$route);
 			return;
 		}
 
 		$api = $this->getAPI($route["group"]);
 
 		if(!$api || !method_exists($api,"render")){
-			Amslib::errorLog("API OR ITS RENDER METHOD DOES NOT EXIST",get_class($api),$route);
+			Amslib_Debug::errorlog("API OR ITS RENDER METHOD DOES NOT EXIST",get_class($api),$route);
 			return;
 		}
 

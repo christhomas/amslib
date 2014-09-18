@@ -44,13 +44,13 @@ class Amslib_Log extends Amslib_Mixin
 	protected function createFileLog(&$filename)
 	{
 		$dirname	= dirname($filename);
-		$basename	= Amslib::slugify2(basename($filename),"-",".");
+		$basename	= Amslib_String::slugify2(basename($filename),"-",".");
 		$filename = "$dirname/$basename";
 
 		if(file_exists($filename)) return true;
 
 		if(!is_dir(dirname($filename)) && !@mkdir(dirname($filename),0777,true)){
-			Amslib::errorLog(error_get_last(),$dirname,$basename,$filename);
+			Amslib_Debug::errorlog(error_get_last(),$dirname,$basename,$filename);
 			return false;
 		}
 
@@ -60,7 +60,7 @@ class Amslib_Log extends Amslib_Mixin
 			return true;
 		}
 
-		Amslib::errorLog(__METHOD__,"file failed to create, or modify it's permissions",error_get_last(),"touch=".intval($t),"chmod=".intval($c));
+		Amslib_Debug::errorlog(__METHOD__,"file failed to create, or modify it's permissions",error_get_last(),"touch=".intval($t),"chmod=".intval($c));
 
 		return false;
 	}
@@ -71,7 +71,7 @@ class Amslib_Log extends Amslib_Mixin
 	//			around a lot the logging system, the assumptions and code it uses is now out of date :(
 	static protected function getLogOrigin()
 	{
-		$stack = Amslib::getStackTrace();
+		$stack = Amslib_Debug::getStackTrace();
 
 		if(!is_numeric($function)) $function = count($stack) > 1 ? 1 : 0;
 
@@ -99,11 +99,11 @@ class Amslib_Log extends Amslib_Mixin
 		}
 
 		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
-			$function	=	"(ERROR, function invalid: ".Amslib::var_dump($function).")";
-			$data		=	array(Amslib::var_dump($stack));
+			$function	=	"(ERROR, function invalid: ".Amslib_Debug::var_dump($function).")";
+			$data		=	array(Amslib_Debug::var_dump($stack));
 		}else{
 			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
-			//$data[] = Amslib::var_dump($stack);
+			//$data[] = Amslib_Debug::var_dump($stack);
 		}
 	}
 
@@ -138,7 +138,7 @@ class Amslib_Log extends Amslib_Mixin
 			if(is_string($a) && strpos($a,"stack_trace") === 0){
 				$command = explode(",",$a);
 
-				$stack = Amslib::getStackTrace(NULL,true);
+				$stack = Amslib_Debug::getStackTrace(NULL,true);
 				$stack = explode("\n",$stack);
 
 				$c = count($command);
@@ -151,7 +151,7 @@ class Amslib_Log extends Amslib_Mixin
 
 				$trace = array("\n");
 				foreach($stack as $row){
-					$trace[] = "[STACK TRACE] ".str_replace("\n","",Amslib::var_dump($row));
+					$trace[] = "[STACK TRACE] ".str_replace("\n","",Amslib_Debug::var_dump($row));
 				}
 				$data[] = implode("\n",$trace);
 			}else if(is_string($a) && strpos($a,"func_offset") === 0){
@@ -159,8 +159,8 @@ class Amslib_Log extends Amslib_Mixin
 
 				if(count($command) == 1) $function = $command[0];
 			}else{
-				if(is_object($a))	$a = array(get_class($a),Amslib::var_dump($a));
-				if(is_array($a)) 	$a = Amslib::var_dump($a);
+				if(is_object($a))	$a = array(get_class($a),Amslib_Debug::var_dump($a));
+				if(is_array($a)) 	$a = Amslib_Debug::var_dump($a);
 				if(is_bool($a))		$a = $a ? "true" : "false";
 				if(is_null($a))		$a = "null";
 
@@ -255,7 +255,7 @@ class Amslib_Log extends Amslib_Mixin
 					//	We do this to make sure the appender cannot be activated or used
 					unset($this->appender[$index]);
 					//	Ironically, the logging class fails, so we use the error log :)
-					Amslib::errorLog(__METHOD__.", Failed to find or create the log file that we needed");
+					Amslib_Debug::errorlog(__METHOD__.", Failed to find or create the log file that we needed");
 				}
 			}break;
 		}

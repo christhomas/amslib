@@ -1,9 +1,7 @@
 <?php
 //	Change this to the correct path if required
 require_once("amslib/Amslib.php");
-
-Amslib::autoloader();
-Amslib::showErrors();
+Amslib_Debug::showErrors();
 
 //	If you need language support, follow this pattern
 Amslib_Router_Language::add("en_GB","en",true);
