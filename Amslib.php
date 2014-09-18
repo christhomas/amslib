@@ -430,5 +430,9 @@ class Amslib
 //	Amslib is going to be difficult to use without it,
 //	it would be required to manually include all sorts
 //	of files and cause unnecessary complexity
+//
+//		============================================
+//	You can turn off the autoloaders by using
+//		Amslib::autoloader(false,false);
 //////////////////////////////////////////////////////////////
 Amslib::autoloader(true,true);
