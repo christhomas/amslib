@@ -7,44 +7,156 @@
  */
 class Amslib_Debug
 {
-	static protected $showErrorTrigger		=	false;
-	static protected $originalErrorHandler	=	false;
+	static public $dumpLimit = 1;
+	/**
+	 * 	method:	dump
+	 *
+	 * 	Use var_dump to dump to a string variables so they can be inspected
+	 *
+	 * 	parameters:
+	 * 		$variable	-	The variable to dump, however, this function uses
+	 * 						func_get_args so you can pass a list of them if you wanted
+	 *
+	 * 	NOTES:
+	 * 		-	INCLUDES A VERY CRUDE DEBUGGING TOOL
+	 * 			If var_dump attempts to dump something that is huge, it'll run out of memory,
+	 * 			causing your PHP script to fail and when this happens, you don't really get
+	 * 			any information that is useful, WHICH variable was too large.
+	 * 			This simple counter will let you die after a certain number of calls to this method
+	 * 			YES, I TOLD YOU IT WAS CRUDE.....Alter the dumpLimit static member variable in order to adjust
+	 * 			_when_ to die, meaning you can run the code and when it dies here, you know the code up to
+	 * 			that point is ok then you increase or decrease the limit until your code runs out of memory
+	 * 			and you know the call which was responsible for running out of memory.
+	 * 			I felt a bit dirty just writing this code.....
+	 */
+	static public function dump($variable)
+	{
+		//	NOTE: uncomment these lines to run the dirty nasty dump debugger :(
+		//static $run = 0;
+		//if(++$run == self::$dumpLimit) die(self::getStackTrace(NULL,true));
+
+		//	Obtain the variables to dump
+		$args = func_get_args();
+
+		//	var_dump all the variables and capture everything
+		ob_start();
+		array_map("var_dump",$args);
+		return ob_get_clean();
+	}
 
 	/**
-	 * 	method:	var_dump
+	 *	method:	pdump
 	 *
-	 *	Obtain a var_dump of a variable, but obtain the dump as a string to be printed or manipulated
-	 *	with extra options for hiding the output from the browser
+	 *	Print the dumping of various variables with optional hidden visibility for the browser
 	 *
-	 *	parameters:
-	 *		$variable - the variable to var_dump
-	 *		$preformat - whether or not to wrap up the dump in a HTML <pre> tag
-	 *		$hiddenOutput - whether or not to apply a css style display none to the <pre> tag
+	 *	params:
+	 *		$visible	-	Boolean true or false, to print the data out in a browser visible or invisible form (<pre display:none>)
 	 *
-	 * 	notes:
-	 * 		-	Perhaps $preformat by default should be true ? would make more sense,
-	 * 			otherwise why not just use var_dump directly??
-	 * 		-	this function can cause out of memory problems if the variable is huge but
-	 * 			it's not known how it is possible to test for this before attempting it
+	 *	returns:
+	 *		A string containing the data, html or not ready to be output somewhere
 	 */
-	static public function var_dump($variable,$preformat=false,$hiddenOutput=false)
+	static public function pdump($visible,$vargs)
 	{
-		//	This method sometimes causes php to run out of memory, a problem which is very hard to find
-		//	these two lines, let you increment a counter and die after a certain point, it's a cheap, nasty debugging method
-		//	but you'll eventually find a count where it won't die "out of memory" and the next number up, will die
-		//	then you'll get a stack trace of when it happened
-		//	Yes, it's dumb, but I really don't know a way to get around this problem, PHP gives no tools to do so
-		//	Uncomment these lines to use and comment them back once you're done
-		//static $run = 0;
-		//if(++$run == 4) die(self::getStackTrace(NULL,true));
+		$hidden = $visible ? "" : "style='display:none'";
 
-		ob_start();
-		var_dump($variable);
-		$dump = ob_get_clean();
+		//	Obtain the variables to dump
+		$vargs = func_get_args();
+		array_shift($vargs);
 
-		$hiddenOutput = $hiddenOutput ? "style='display:none'" : "";
+		$dump = call_user_func_array("Amslib_Debug::dump",$vargs);
 
-		return ($preformat) ? "<pre $hiddenOutput>$dump</pre>" : $dump;
+		return "<pre $hidden>$dump</pre>";
+	}
+
+	/**
+	 * 	method:	log
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function log()
+	{
+		$args		=	func_get_args();
+		$data		=	array();
+		$maxlength	=	8912;
+		$function	=	false;
+
+		foreach($args as $k=>$a){
+			if(is_string($a) && strpos($a,"stack_trace") === 0){
+				$command = explode(",",$a);
+
+				$stack = self::getStackTrace(NULL,true);
+				$stack = explode("\n",$stack);
+
+				$c = count($command);
+
+				if($c == 2){
+					$stack = array_slice($stack,$command[1]);
+				}else if($c == 3 && $command[2] > 0){
+					$stack = array_slice($stack,$command[1],$command[2]);
+				}
+
+				foreach($stack as $k=>$row){
+					error_log("[TRACE:$k] $row");
+				}
+			}else if(is_string($a) && strpos($a,"memory_usage_human") === 0){
+				$data[] = "memory_usage_human = ".self::getMemoryUsage(true,true);
+			}else if(is_string($a) && strpos($a,"memory_usage") === 0){
+				$data[] = "memory_usage = ".self::getMemoryUsage(true);
+			}else if(is_string($a) && strpos($a,"func_offset") === 0){
+				$command = explode(",",array_shift($args));
+
+				if(count($command) == 1) $function = $command[0];
+			}else{
+				if(is_object($a))	$a = array(get_class($a),self::dump($a));
+				if(is_array($a)) 	$a = self::dump($a);
+				if(is_bool($a))		$a = $a ? "true" : "false";
+				if(is_null($a))		$a = "null";
+
+				$a = trim(preg_replace("/\s+/"," ",$a));
+
+				if(strlen($a) > $maxlength) $a = substr($a,0,$maxlength-50)."...[array too large to display]";
+
+				$data[] = "arg[$k]=> $a";
+			}
+		}
+
+		$stack = self::getStackTrace();
+
+		if(!is_numeric($function)) $function = count($stack) > 1 ? 1 : 0;
+
+		$line		= array("line"=>-1);
+		$function	= false;
+
+		if($function == 0 && isset($stack[$function]) && Amslib_Array::hasKeys($stack[$function],array("line","file")))
+		{
+			$line		= $stack[$function]["line"];
+			$f			= explode("/",$stack[$function]["file"]);
+			$function	= array(
+					"class"=>"",
+					"type"=>"",
+					"function"=>end($f)
+			);
+		}else{
+			if(isset($stack[$function-1])){
+				$line = $stack[$function-1]["line"];
+			}
+
+			if(isset($stack[$function])){
+				$function = $stack[$function];
+			}
+		}
+
+		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
+			$function	=	"(ERROR, function invalid: ".self::dump($function).")";
+			$data		=	array(self::dump($stack));
+		}else{
+			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
+			//$data[] = self::dump($stack);
+		}
+
+		error_log("[DEBUG] $function, ".implode(", ",$data));
+
+		return array("function"=>$function,"data"=>$data);
 	}
 
 	/**
@@ -94,41 +206,6 @@ class Amslib_Debug
 	}
 
 	/**
-	 * 	method:	backtrace
-	 *
-	 *	a method to obtain a debug backtrace of the current PHP function stack with options to
-	 *	slice a part of the array
-	 *
-	 *	this function uses variable arguments, it will only slice the string if it first two
-	 *	parameters are integer numbers after that, all the arguments will be tested whether
-	 *	they are a string and if so, they will be used to filter each array stack element to
-	 *	return only the keys which match the strings, dropping all the unwanted keys from
-	 *	each array stack element
-	 *
-	 *	parameters:
-	 *		$start - The starting offset to slice from the array stack
-	 *		$finish - the ending offset to slice from the array stack
-	 *		vargs - any number of string variables which will be used to filter each array index to reutrn only the keys requested
-	 *
-	 *	notes:
-	 *		-	The function is really really memory hungry, use Amslib_Debug::getStackTrace if you can
-	 *		-	This is a really ancient function, it's hard to know what it's trying to do
-	 	*/
-	static public function backtrace()
-	{
-		$args	=	func_get_args();
-		$bt		=	debug_backtrace();
-
-		$slice	=	array($bt);
-		if(count($args) && is_numeric($args[0])) $slice[] = array_shift($args);
-		if(count($args) && is_numeric($args[0])) $slice[] = array_shift($args);
-
-		if(count($slice) > 1) $bt = call_user_func_array("array_slice",$slice);
-
-		return Amslib_Array::filterKey($bt,Amslib_Array::filterType($args,"is_string"));
-	}
-
-	/**
 	 * 	method:	getStackTrace
 	 *
 	 * 	Obtains a PHP exceptions stack trace, with optional starting index and string output facilities
@@ -156,7 +233,7 @@ class Amslib_Debug
 			$t = $string
 			//	NOTE: why in array_slice do we request a length of 1? we only want one return value??
 			? current(array_slice(explode("\n",$t),$index,1))
-			: ($var_dump ? self::var_dump($t[$index]) : $t[$index]);
+			: ($var_dump ? self::dump($t[$index]) : $t[$index]);
 
 			if($string || $var_dump){
 				$t = htmlspecialchars($t,ENT_QUOTES,"UTF-8");
@@ -171,98 +248,6 @@ class Amslib_Debug
 		}
 
 		return $t;
-	}
-
-	/**
-	 * 	method:	errorLog
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function errorLog()
-	{
-		$args		=	func_get_args();
-		$data		=	array();
-		$maxlength	=	8912;
-		$function	=	false;
-
-		foreach($args as $k=>$a){
-			if(is_string($a) && strpos($a,"stack_trace") === 0){
-				$command = explode(",",$a);
-
-				$stack = self::getStackTrace(NULL,true);
-				$stack = explode("\n",$stack);
-
-				$c = count($command);
-
-				if($c == 2){
-					$stack = array_slice($stack,$command[1]);
-				}else if($c == 3 && $command[2] > 0){
-					$stack = array_slice($stack,$command[1],$command[2]);
-				}
-
-				foreach($stack as $k=>$row){
-					error_log("[TRACE:$k] $row");
-				}
-			}else if(is_string($a) && strpos($a,"memory_usage_human") === 0){
-				$data[] = "memory_usage_human = ".self::getMemoryUsage(true,true);
-			}else if(is_string($a) && strpos($a,"memory_usage") === 0){
-				$data[] = "memory_usage = ".self::getMemoryUsage(true);
-			}else if(is_string($a) && strpos($a,"func_offset") === 0){
-				$command = explode(",",array_shift($args));
-
-				if(count($command) == 1) $function = $command[0];
-			}else{
-				if(is_object($a))	$a = array(get_class($a),self::var_dump($a));
-				if(is_array($a)) 	$a = self::var_dump($a);
-				if(is_bool($a))		$a = $a ? "true" : "false";
-				if(is_null($a))		$a = "null";
-
-				$a = trim(preg_replace("/\s+/"," ",$a));
-
-				if(strlen($a) > $maxlength) $a = substr($a,0,$maxlength-50)."...[array too large to display]";
-
-				$data[] = "arg[$k]=> $a";
-			}
-		}
-
-		$stack = self::getStackTrace();
-
-		if(!is_numeric($function)) $function = count($stack) > 1 ? 1 : 0;
-
-		$line		= array("line"=>-1);
-		$function	= false;
-
-		if($function == 0){
-			if(isset($stack[$function])){
-				$line		= $stack[$function]["line"];
-				$f			= explode("/",$stack[$function]["file"]);
-				$function	= array(
-						"class"=>"",
-						"type"=>"",
-						"function"=>end($f)
-				);
-			}
-		}else{
-			if(isset($stack[$function-1])){
-				$line = $stack[$function-1]["line"];
-			}
-
-			if(isset($stack[$function])){
-				$function = $stack[$function];
-			}
-		}
-
-		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
-			$function	=	"(ERROR, function invalid: ".self::var_dump($function).")";
-			$data		=	array(self::var_dump($stack));
-		}else{
-			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
-			//$data[] = self::var_dump($stack);
-		}
-
-		error_log("[DEBUG] $function, ".implode(", ",$data));
-
-		return array("function"=>$function,"data"=>$data);
 	}
 
 	/**
@@ -290,7 +275,7 @@ class Amslib_Debug
 	}
 
 	/**
-	 * 	method:	showErrors
+	 * 	method:	enable
 	 *
 	 * 	A method to turn on, off PHP's error reporting and display errors.  All this does is
 	 * 	convert a two liner into a one liner, but also might be enhanced in the future with
@@ -299,15 +284,14 @@ class Amslib_Debug
 	 * 	parameters:
 	 * 		$state - Whether or not to turn showing errors on or off.
 	 */
-	static public function showErrors($state=true)
+	static public function enable($state=true)
 	{
-		error_reporting(E_ALL);
-
 		if($state){
-			ini_set("display_errors",true);
-			self::$showErrorTrigger = true;
+			ini_set("display_errors",$state);
+			error_reporting(E_ALL);
 		}else{
-			ini_set("display_errors",false);
+			ini_set("display_errors",$state);
+			error_reporting(intval($state));
 		}
 	}
 
@@ -319,11 +303,21 @@ class Amslib_Debug
 	 *	if it is required to do so
 	 *
 	 *	parameters:
-	 *		$handler - The function call to make when an error occurs
+	 *		$handler	-	The function call to make when an error occurs
+	 *		$reset		-	Whether to override the initial handler and set the new handler regardless
+	 *
+	 *	returns:
+	 *		The handler that was set
 	 */
-	static public function setErrorHandler($handler)
+	static public function setErrorHandler($handler,$reset=false)
 	{
-		self::$originalErrorHandler = set_error_handler($handler);
+		static $handler = NULL;
+
+		if($handler === NULL || $reset){
+			$handler = set_error_handler($handler);
+		}
+
+		return $handler;
 	}
 
 	/**
@@ -425,5 +419,65 @@ class Amslib_Debug
 		}
 
 		return $result;
+	}
+
+	static private function _______DEPRECATED_METHODS_BELOW_THIS_LINE(){}
+
+	//	DEPRECATED, BUT STILL USED EVERYWHERE
+	static public function var_dump($variable,$print=false,$hidden=false)
+	{
+		return $print
+			? self::pdump($hidden,$variable)
+			: self::dump($variable);
+	}
+
+	static public function errorLog()
+	{
+		$args = func_get_args();
+
+		return call_user_func_array("Amslib_Debug::log",$args);
+	}
+
+	/**
+	 * 	method:	backtrace
+	 *
+	 *	a method to obtain a debug backtrace of the current PHP function stack with options to
+	 *	slice a part of the array
+	 *
+	 *	this function uses variable arguments, it will only slice the string if it first two
+	 *	parameters are integer numbers after that, all the arguments will be tested whether
+	 *	they are a string and if so, they will be used to filter each array stack element to
+	 *	return only the keys which match the strings, dropping all the unwanted keys from
+	 *	each array stack element
+	 *
+	 *	parameters:
+	 *		$start - The starting offset to slice from the array stack
+	 *		$finish - the ending offset to slice from the array stack
+	 *		vargs - any number of string variables which will be used to filter each array index to reutrn only the keys requested
+	 *
+	 *	notes:
+	 *		-	The function is really really memory hungry, use Amslib_Debug::getStackTrace if you can
+	 *		-	This is a really ancient function, it's hard to know what it's trying to do
+	 	*/
+	static public function backtrace()
+	{
+		//	Find out who is using this method so I can upgrade it's code and delete this
+		self::log("stack_trace");
+
+		$args	=	func_get_args();
+		$bt		=	debug_backtrace();
+
+		$slice	=	array($bt);
+		if(count($args) && is_numeric($args[0])) $slice[] = array_shift($args);
+		if(count($args) && is_numeric($args[0])) $slice[] = array_shift($args);
+
+		if(count($slice) > 1) $bt = call_user_func_array("array_slice",$slice);
+
+		return Amslib_Array::filterKey($bt,Amslib_Array::filterType($args,"is_string"));
+	}
+
+	static public function showErrors($state=true)
+	{
+		self::enable($state);
 	}
 }

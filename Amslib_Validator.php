@@ -39,71 +39,70 @@
 class Amslib_Validator
 {
 	/**
-	 * array:	$__types
+	 * 	number:	$errorLimit
 	 *
-	 * Contains all the registered types that are allowed to validate, in order to add a new validator
-	 * you must register it's type in the constructor
+	 * 	The number of errors this object will tolerate before it's going to kill your code stone cold dead
+	 *
+	 * 	value: 1000
 	 */
-	protected $__types;
+	protected $errorLimit = 1000;
 
 	/**
-	 * array:	$__error
+	 * array:	$custom
+	 *
+	 * Contains all the custom validator types that are allowed to validate, in order to
+	 * add a new validator you must register it's type in the constructor and provide the callback
+	 */
+	protected $custom;
+
+	/**
+	 * array:	$error
 	 *
 	 * Contains an array of strings which represent data elements which failed to validate
 	 */
-	protected $__error;
+	protected $error;
 
 	/**
-	 * array:	$__rules
+	 * array:	$rules
 	 *
 	 * Contains an array of items to validate from the source data array, the source
 	 * might contain 100 elements, but you only want to validate 20, this is how we know which
 	 * to validate and which to ignore
 	 */
-	protected $__rules;
+	protected $rules;
 
 	/**
-	 * array:	$__source
+	 * array:	$source
 	 *
 	 * The source array of data to validate according to the rules attached to the items
 	 */
-	protected $__source;
+	protected $source;
 
 	/**
-	 * array:	$__validData
+	 * array:	$validData
 	 *
 	 * The data from the source array which was validated correctly, this is wanted usually to refill the form with information
 	 * after a failed validation has occured, to stop the user from having to retype all the form again
 	 */
-	protected $__validData;
+	protected $validData;
 
 	/**
-	 * boolean:	$__hasExecuted
+	 * boolean:	$hasExecuted
 	 *
 	 * A toggle to know whether the validator has run or not, sometimes this is wanted to know whether or not to bother obtaining
 	 * information about the status of validation, because it's simple to check whether any validation information retrieved would
 	 * be correct or unnecessary
 	 */
-	protected $__hasExecuted;
+	protected $hasExecuted;
 
 	/**
-	 * boolean: $__hasRequiredRules
-	 *
-	 * This flag indicates whether there are some rules which are required to pass validation in order to return success from
-	 * the execute method, this is to fix an issue where if the data source was empty, the default action was to return true
-	 * but if there are required rules, then empty data source means that actually, the source failed to validate, so should
-	 * return false
-	 */
-	protected $__hasRequiredRules;
-
-	/**
-	 * 	method:	__logical_or
+	 * 	method:	validate_logical_or
 	 *
 	 * 	todo: write documentation
 	 *
 	 * 	usage: $v->add("has_file","logical_or",true,array("select_file","csv_file"));
 	 */
-	protected function __logical_or($name,$value,$required,$options)
+	protected function validate_logical_or($name,$value,$required,$options)
 	{
 		$valid	=	$this->getValid();
 		$keys	=	array_keys($valid);
@@ -127,7 +126,7 @@ class Amslib_Validator
 		return false;
 	}
 
-	protected function __logical_and($name,$value,$required,$options)
+	protected function validate_logical_and($name,$value,$required,$options)
 	{
 		$valid	=	$this->getValid();
 		$keys	=	array_keys($valid);
@@ -156,11 +155,11 @@ class Amslib_Validator
 	}
 
 	/**
-	 * 	method:	__array
+	 * 	method:	validate_array
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function __array($name,$value,$required,$options)
+	protected function validate_array($name,$value,$required,$options)
 	{
 		$error = false;
 
@@ -192,7 +191,7 @@ class Amslib_Validator
 		return true;
 	}
 
-	protected function __json($name,$value,$required,$options)
+	protected function validate_json($name,$value,$required,$options)
 	{
 		$error = false;
 
@@ -216,19 +215,19 @@ class Amslib_Validator
 	}
 
 	/**
-	 * 	method:	__isbn
+	 * 	method:	isbn
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function __isbn($name,$value,$required,$options)
+	protected function validate_isbn($name,$value,$required,$options)
 	{
 		//	strip out some characters we know might be present, but have to be removed
 		$options["original_value"] = $value;
 		$value = str_replace(array("isbn","-"," ",".",","),"",strtolower($value));
 
 		if(is_string($value)){
-			if(strlen($value) == 10)	return $this->__isbn10($name,$value,$required,$options);
-			if(strlen($value) == 13)	return $this->__isbn13($name,$value,$required,$options);
+			if(strlen($value) == 10)	return $this->validate_isbn10($name,$value,$required,$options);
+			if(strlen($value) == 13)	return $this->validate_isbn13($name,$value,$required,$options);
 
 			if($required) return "ISBN_INVALID";
 		}
@@ -239,11 +238,11 @@ class Amslib_Validator
 	}
 
 	/**
-	 * 	method:	__isbn10
+	 * 	method:	isbn10
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function __isbn10($name,$value,$required,$options)
+	protected function validate_isbn10($name,$value,$required,$options)
 	{
 		//	Disclaimer, I took this code from the isbn wikipedia article
     	$check = 0;
@@ -258,11 +257,11 @@ class Amslib_Validator
 	}
 
 	/**
-	 * 	method:	__isbn13
+	 * 	method:	isbn13
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function __isbn13($name,$value,$required,$options)
+	protected function validate_isbn13($name,$value,$required,$options)
 	{
 		//	Disclaimer, I took this code from the isbn wikipedia article
 		$check = 0;
@@ -276,7 +275,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * method:	__text
+	 * method:	text
 	 *
 	 * Validate a text field using the information passed to it
 	 *
@@ -290,7 +289,7 @@ class Amslib_Validator
 	 * 	If failed with the string length is zero and required being enabled, return "TEXT_LENGTH_ZERO"
 	 * 	If failed with string length being below minimum length, return "TEXT_LENGTH_IS_BELOW_MINIMUM"
 	 * 	If failed with string length being above maximum length, return "TEXT_LENGTH_IS_ABOVE_MAXIMUM"
-	 * 	If successful, will return true and assign the valid data into the $__validData array for retrieval later
+	 * 	If successful, will return true and assign the valid data into the $validData array for retrieval later
 	 *
 	 * operations:
 	 * 	-	Find the length of the string
@@ -303,7 +302,7 @@ class Amslib_Validator
 	 * notes:
 	 * 	-	we should create a shared method for doing simple calculations, like "checkLength" to see whether the value passes this test or not
 	 */
-	protected function __text($name,$value,$required,$options)
+	protected function validate_text($name,$value,$required,$options)
 	{
 		$len = strlen(trim($value));
 
@@ -350,7 +349,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * method:	__alpha
+	 * method:	validate_alpha
 	 *
 	 * Validate a text field contains only alphabetical (A-Za-z) characters
 	 *
@@ -362,15 +361,15 @@ class Amslib_Validator
 	 *
 	 * returns:
 	 * 	If failed, will return a text string representing the error (this can be used to represent a language translation key)
-	 * 	If successful, will return true and assign the valid data into the $__validData array for retrieval later
+	 * 	If successful, will return true and assign the valid data into the $validData array for retrieval later
 	 *
 	 * operations:
 	 * 	-	Otherwise, validate as a alphabetical string only
 	 * 	-	If success, validation passed, set the validData to store the data and return true
 	 */
-	protected function __alpha($name,$value,$required,$options)
+	protected function validate_alpha($name,$value,$required,$options)
 	{
-		$status = $this->__text($name,$value,$required,$options);
+		$status = $this->validate_text($name,$value,$required,$options);
 
 		//	Text validation failed, drop out here
 		if($status !== true) return $status;
@@ -383,7 +382,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * method:	__alpha_relaxed
+	 * method:	validate_alpha_relaxed
 	 *
 	 * Validate a text field contains alphabetical (A-Za-z) characters and some other normal human text characters
 	 *
@@ -395,11 +394,11 @@ class Amslib_Validator
 	 *
 	 * returns:
 	 * 	If failed, will return a text string representing the error (this can be used to represent a language translation key)
-	 * 	If successful, will return true and assign the valid data into the $__validData array for retrieval later
+	 * 	If successful, will return true and assign the valid data into the $validData array for retrieval later
 	 */
-	protected function __alpha_relaxed($name,$value,$required,$options)
+	protected function validate_alpha_relaxed($name,$value,$required,$options)
 	{
-		$status = $this->__text($name,$value,$required,$options);
+		$status = $this->validate_text($name,$value,$required,$options);
 
 		//	Text validation failed, drop out here
 		if($status !== true) return $status;
@@ -414,25 +413,25 @@ class Amslib_Validator
 	}
 
 	/**
-	 * 	method:	__password
+	 * 	method:	validate_password
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function __password($name,$value,$required,$options)
+	protected function validate_password($name,$value,$required,$options)
 	{
 		if(isset($options["p1"]) && isset($options["p2"])){
 			$f1 = $options["p1"];
 			$f2 = $options["p2"];
 
 			//	Are the fields even available? If not, there is an error
-			if((!isset($this->__source[$f1]) || !isset($this->__source[$f2]))){
+			if((!isset($this->source[$f1]) || !isset($this->source[$f2]))){
 				if($required) return "PASSWORD_FIELDS_MISSING";
 
 				return true;
 			}
 
-			$p1 = $this->__source[$f1];
-			$p2 = $this->__source[$f2];
+			$p1 = $this->source[$f1];
+			$p2 = $this->source[$f2];
 
 			//	If strings are not identical, there is an error
 			if($p1 != $p2){
@@ -453,15 +452,15 @@ class Amslib_Validator
 				return "PASSWORDS_EMPTY";
 			}
 
-			//	Make the password to test through the __text validator equal to one of the fields
+			//	Make the password to test through the text validator equal to one of the fields
 			$value = $p1;
 		}
 
-		return $this->__text($name,$value,$required,$options);
+		return $this->validate_text($name,$value,$required,$options);
 	}
 
 	/**
-	 * method:	__dni
+	 * method:	validate_dni
 	 *
 	 * Validate a Spanish DNI number.  DNI is not the 100% correct technical name for this, but it's hard to give a name
 	 * to it since some people call it DNI or others NIF/CIF, it was decided to call it DNI because it made the most sense,
@@ -476,25 +475,25 @@ class Amslib_Validator
 	 *
 	 * returns:
 	 *	If code does not match any DNI like profile, will return "DNI_INVALID"
-	 * 	If code does match, look for __nif, __cif or __nie for the return information, it completely delegates everything
+	 * 	If code does match, look for nif, cif or nie for the return information, it completely delegates everything
 	 *
 	 * returns:
 	 * 	Will set the valid value, or return VALIDATOR_DNI_INVALID for a invalid code
 	 */
-	protected function __dni($name,$code,$required,$options)
+	protected function validate_dni($name,$code,$required,$options)
 	{
 		$code = strtoupper($code);
 
 		if(preg_match("/[a-wyz][0-9]{7}[0-9a-z]/i",$code)){
-			return $this->__cif($name,$code,$required,$options);
+			return $this->validate_cif($name,$code,$required,$options);
 		}
 
 		if(preg_match("/[x][0-9]{7,8}[a-z]/i",$code)){
-			return $this->__nie($name,$code,$required,$options);
+			return $this->validate_nie($name,$code,$required,$options);
 		}
 
 		if(preg_match("/[0-9]{8}[a-z]/i",$code)){
-			return $this->__nif($name,$code,$required,$options);
+			return $this->validate_nif($name,$code,$required,$options);
 		}
 
 		if(!$required) return true;
@@ -503,7 +502,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * function: __nif
+	 * function: validate_nif
 	 *
 	 * Validate a Spanish NIF identication code
 	 *
@@ -521,7 +520,7 @@ class Amslib_Validator
 	 * 	-	The result, will be an array index into a list of validation characters
 	 * 	-	If the end letter from the dni was the same letter as the validation character then the DNI is valid
 	 */
-	protected function __nif($name,$code,$required,$options)
+	protected function validate_nif($name,$code,$required,$options)
 	{
 		$letter		=	substr($code,strlen($code)-1);
 		$numbers	=	intval(substr($code,0,-1));
@@ -543,7 +542,7 @@ class Amslib_Validator
 
 
 	/**
-	 * function: __cif
+	 * function: validate_cif
 	 *
 	 * Validate a Spanish CIF identification code
 	 *
@@ -561,7 +560,7 @@ class Amslib_Validator
 	 * 	-	obtain the modulus of the resulting sum as the control (obtain the modulus of the that as well (in case of sum = 10)
 	 * 	-	If the control equals the last value, or the letter at that index, then return positively, otherwise, failure
 	 */
-	protected function __cif($name,$code,$required,$options)
+	protected function validate_cif($name,$code,$required,$options)
 	{
 		$lastLetter = array("J", "A", "B", "C", "D", "E", "F", "G", "H", "I");
 
@@ -600,7 +599,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * function: __nie
+	 * function: validate_nie
 	 *
 	 * Validate a Spanish NIE identification code
 	 *
@@ -615,13 +614,13 @@ class Amslib_Validator
 	 * 	-	This is a proxy method for validateNIF, which is identical in calculation, except we need to remove the
 	 * 		X from the front of the NIE and then check the remaining string (which is a valid NIE, or should be)
 	 */
-	protected function __nie($name,$code,$required,$options)
+	protected function validate_nie($name,$code,$required,$options)
 	{
 		$firstCharacter = substr($code,0,1);
 		if($firstCharacter == "X"){
 			$nif = substr($code,1);
 
-			if($this->__nif($name,$nif,$required,$options) === true){
+			if($this->validate_nif($name,$nif,$required,$options) === true){
 				$this->setValid($name,$code);
 
 				return true;
@@ -634,7 +633,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * method:	__boolean
+	 * method:	validate_boolean
 	 *
 	 * Validate a boolean value that is correctly representing a boolean value (and not a string such as "1998")
 	 *
@@ -661,7 +660,7 @@ class Amslib_Validator
 	 * 		chris reply: thanks for fixing it! I didnt realise it would do that
 	 * 		chris seez: I changed it again, it seems that the version was returning invalid when it found boolean false :)
 	 */
-	protected function __boolean($name,$value,$required,$options)
+	protected function validate_boolean($name,$value,$required,$options)
 	{
 		$error	=	false;
 		$true	=	array(1,"1",true,"true","on","yes");
@@ -696,7 +695,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * method:	__number
+	 * method:	validate_number
 	 *
 	 * Validate a numerical value
 	 *
@@ -729,7 +728,7 @@ class Amslib_Validator
 	 * 	-	else set the validData array and return true
 	 *
 	 */
-	protected function __number($name,$value,$required,$options)
+	protected function validate_number($name,$value,$required,$options)
 	{
 		$error = false;
 
@@ -777,7 +776,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * method:	__email
+	 * method:	validate_email
 	 *
 	 * Validate a string against an email template, if the value matches the pattern, will validate successfully
 	 *
@@ -800,7 +799,7 @@ class Amslib_Validator
 	 * 	-	If failed, but required is NOT true, return true anyway
 	 * 	-	If required, but failed all tests, return "EMAIL_INVALID"
 	 */
-	protected function __email($name,$value,$required,$options)
+	protected function validate_email($name,$value,$required,$options)
 	{
 		$error	=	false;
 		$value	=	trim($value);
@@ -822,7 +821,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * method:	__domain
+	 * method:	validate_domain
 	 *
 	 * Validate a domain name by performing a DNS lookup on the given information
 	 *
@@ -841,7 +840,7 @@ class Amslib_Validator
 	 * 	-	It is possible that this method will fail with VALID domains, because they do not respond in time
 	 * 	-	This method required a DNS lookup, which might be expensive if performed lots of times.
 	 */
-	protected function __domain($name,$value,$required,$options)
+	protected function validate_domain($name,$value,$required,$options)
 	{
 		$value = trim($value);
 
@@ -860,7 +859,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * method:	__phone
+	 * method:	validate_phone
 	 *
 	 * Validate a phone number
 	 *
@@ -884,7 +883,7 @@ class Amslib_Validator
 	 * 	-	If the string length is NOT zero, it means that alphabetical characters are found, like abcddef, etc, this is invalid, we should only have numerical characters in the string
 	 * 	-	if the string length was zero, we contained a minimum length string, that only contained numerical characters, this is valid, set the validData and return true
 	 */
-	protected function __phone($name,$value,$required,$options)
+	protected function validate_phone($name,$value,$required,$options)
 	{
 		$error = false;
 
@@ -925,7 +924,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * method:	__date
+	 * method:	validate_date
 	 *
 	 * Very simple method to convert a data to a UNIX timestamp using strtotime
 	 *
@@ -940,7 +939,7 @@ class Amslib_Validator
 	 * 	Boolean true is required was false
 	 * 	Boolean false if one of those conditions is not supported
 	 */
-	protected function __date($name,$value,$required,$options)
+	protected function validate_date($name,$value,$required,$options)
 	{
 		//	If a numeric field is asked to validate against a date, it'll first be
 		//	converted assuming it's a unix timestamp normally I dislike the idea of
@@ -972,11 +971,11 @@ class Amslib_Validator
 	}
 
 	/**
-	 * 	method:	__array_number
+	 * 	method:	validate_array_number
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function __array_number($name,$value,$required,$options)
+	protected function validate_array_number($name,$value,$required,$options)
 	{
 		$error = !is_array($value) || empty($value);
 
@@ -994,7 +993,7 @@ class Amslib_Validator
 		return true;
 	}
 
-	protected function __csv_number($name,$value,$required,$options)
+	protected function validate_csv_number($name,$value,$required,$options)
 	{
 		$error = !is_string($value) || empty($value);
 
@@ -1020,11 +1019,11 @@ class Amslib_Validator
 	}
 
 	/**
-	 * 	method:	__array_text
+	 * 	method:	validate_array_text
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function __array_text($name,$value,$required,$options)
+	protected function validate_array_text($name,$value,$required,$options)
 	{
 		$error = !is_array($value) || empty($value);
 
@@ -1045,7 +1044,7 @@ class Amslib_Validator
 	}
 
 	/**
-	 * method:	__file
+	 * method:	validate_file
 	 *
 	 * Validates the presence of a file in the uploaded data
 	 * (this only works in PHP by extracting the info from the $_FILES superglobal)
@@ -1079,7 +1078,7 @@ class Amslib_Validator
 	 * 		when it was expected, it's not an error, it's just a warning)
 	 * 	-	If none of these match, then return "FILE_NOT_FOUND"
 	 */
-	protected function __file($name,$value,$required,$options)
+	protected function validate_file($name,$value,$required,$options)
 	{
 		$value = Amslib_FILES::get($name);
 		$valid = true;
@@ -1134,11 +1133,11 @@ class Amslib_Validator
 	}
 
 	/**
-	 * 	method:	__file_exists
+	 * 	method:	file_exists
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function __file_exists($name,$value,$required,$options)
+	protected function validate_file_exists($name,$value,$required,$options)
 	{
 		if($options["absolute"] == true) $value = Amslib_File::absolute($value);
 
@@ -1155,52 +1154,35 @@ class Amslib_Validator
 	/**
 	 * For description: read the member variables related to this method, they explain all
 	 */
+
 	/**
-	 * 	method:	__setRequiredRules
+	 * 	method:	checkRequiredRules
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function __setRequiredRules($state)
+	protected function hasRequiredRules()
 	{
-		$this->__hasRequiredRules = $state;
+		return in_array(Amslib_Array::pluck($this->rules,"required"),true);
 	}
 
 	/**
-	 * 	method:	__checkRequiredRules
+	 * 	method:	setValue
 	 *
-	 * 	todo: write documentation
-	 */
-	protected function __checkRequiredRules()
-	{
-		//	Easier solution?
-		//	$areRequiredRules = in_array(Amslib_Array::pluck($this->__rules,"required"),true);
-
-		$areRequiredRules = false;
-		foreach($this->__rules as $item){
-			if($item["required"] == true) $areRequiredRules = true;
-		}
-
-		$this->__hasRequiredRules = $areRequiredRules;
-	}
-
-	/**
-	 * 	method:	__setValue
-	 *
-	 * 	Set a specific value into the __source for a particular key
+	 * 	Set a specific value into the source for a particular key
 	 *
 	 * 	parameters:
 	 * 		$name	-	The name of the value to set
 	 * 		$value	-	The value to assign
 	 */
-	protected function __setValue($name,$value)
+	protected function setValue($name,$value)
 	{
 		if(is_string($name) && strlen($name)){
-			$this->__source[$name] = $value;
+			$this->source[$name] = $value;
 		}
 	}
 
 	/**
-	 * 	method:	__getValue
+	 * 	method:	getValue
 	 *
 	 *	Obtain the value from the source array, then trim the value ready for use
 	 *
@@ -1210,9 +1192,9 @@ class Amslib_Validator
 	 *	returns:
 	 *		The value or NULL if not found, trimmed for extra whitespace
 	 */
-	protected function __getValue($name)
+	protected function getValue($name)
 	{
-		$value = array_key_exists($name,$this->__source) ? $this->__source[$name] : "";
+		$value = array_key_exists($name,$this->source) ? $this->source[$name] : "";
 
 		if(!is_string($value)) return $value;
 
@@ -1222,25 +1204,25 @@ class Amslib_Validator
 	}
 
 	/**
-	 * 	method:	__setDefaultValue
+	 * 	method:	setDefaultValue
 	 *
-	 * 	Set the default value, if one is found in the options structure and no value was found in the __source array
+	 * 	Set the default value, if one is found in the options structure and no value was found in the source array
 	 *
 	 * 	parameters:
 	 * 		$name		-	The name of the parameter to set
 	 * 		$options	-	The validation rules options structure, containing, if any, a default value
 	 */
-	protected function __setDefaultValue($name,$options)
+	protected function setDefaultValue($name,$options)
 	{
-		$value = $this->__getValue($name);
+		$value = $this->getValue($name);
 
 		if($value === NULL && array_key_exists("default",$options)){
-			$this->__setValue($name,$options["default"]);
+			$this->setValue($name,$options["default"]);
 		}
 	}
 
 	/**
-	 * method:	__construct
+	 * method:	construct
 	 *
 	 * Constructs an object that is responsible for validating the information passed through the the parameter $source
 	 *
@@ -1252,58 +1234,18 @@ class Amslib_Validator
 		//	NOTE: not sure whether I want to put this code her or not, but it seems a reasonably good idea
 		if(!is_array($source)){
 			Amslib_Debug::errorlog(
-					"stack_trace",
-					"WARNING: the source attempting to be validating was not an array, setting empty array",
-					$source
+				"stack_trace",
+				"WARNING: the source attempting to be validating was not an array, setting empty array",
+				$source
 			);
 
 			$source = array();
 		}
 
-		$this->__rules				=	array();
-		$this->__error				=	array();
-		$this->__source				=	$source;
-		$this->__hasExecuted		=	false;
-
-		$this->__setRequiredRules(false);
-
-		$this->register("text",				array($this,"__text"));
-		$this->register("alpha",			array($this,"__alpha"));
-		$this->register("alpha_relaxed",	array($this,"__alpha_relaxed"));
-		$this->register("password",			array($this,"__password"));
-		$this->register("boolean",			array($this,"__boolean"));
-		$this->register("number",			array($this,"__number"));
-		$this->register("email",			array($this,"__email"));
-		$this->register("domain",			array($this,"__domain"));
-		$this->register("phone",			array($this,"__phone"));
-		$this->register("date",				array($this,"__date"));
-		$this->register("file",				array($this,"__file"));
-		$this->register("file_exists",		array($this,"__file_exists"));
-		$this->register("array",			array($this,"__array"));
-		$this->register("isbn",				array($this,"__isbn"));
-		$this->register("json",				array($this,"__json"));
-
-		//	Methods to validate spanish national identification document (dni)
-		$this->register("dni",				array($this,"__dni"));
-		$this->register("cif",				array($this,"__cif"));
-		$this->register("nif",				array($this,"__nif"));
-		$this->register("nie",				array($this,"__nie"));
-
-		//	Custom validation methods which do things we all want, but don't
-		//	conform to obvious rules like "number", "text", "date", etc
-		$this->register("logical_and",		array($this,"__logical_and"));
-		$this->register("logical_or",		array($this,"__logical_or"));
-		$this->register("array_number",		array($this,"__array_number"));
-		$this->register("array_text",		array($this,"__array_text"));
-		$this->register("csv_number",		array($this,"__csv_number"));
-
-		//	TODO: I should register when one of these is used and add something to the error log
-		//	Register some popular alternative spellings which keep cropping up to make life easier
-		$this->register("string",			array($this,"__text"));
-		$this->register("numeric",			array($this,"__number"));
-		$this->register("alpha-relaxed",	array($this,"__alpha_relaxed"));
-		$this->register("array_string",		array($this,"__array_text"));
-		$this->register("require_one",		array($this,"__logical_or"));
+		$this->rules		=	array();
+		$this->error		=	array();
+		$this->source		=	$source;
+		$this->hasExecuted	=	false;
 	}
 
 	/**
@@ -1313,7 +1255,7 @@ class Amslib_Validator
 	 */
 	public function setValid($name,$value)
 	{
-		$this->__validData[$name] = $value;
+		$this->validData[$name] = $value;
 	}
 
 	/**
@@ -1334,7 +1276,7 @@ class Amslib_Validator
 	 * 		right now, the field name is used as the key to the type of validator, we'd have to change that so each key can have
 	 * 		multiple types assigned to it
 	 * -	I think to allow an item to be validated multiple times, we could just move to a system where
-	 * 		we don't use the $name parameter as the key to the __rules array, we simply add a new __rules[] element
+	 * 		we don't use the $name parameter as the key to the rules array, we simply add a new rules[] element
 	 * 		and then loop through them identically, we could move the $name parameter into the array assigned
 	 * 		as the same "name" array index and it should work identically
 	 * -	I think we need to stop assigning validData items to a blank string by default, because if an item
@@ -1346,35 +1288,34 @@ class Amslib_Validator
 	 */
 	public function add($name,$type,$required=false,$options=array())
 	{
-		$required					=	isset($options["required"]) ? $options["required"] : $required;
-		$this->__rules[$name]		=	array("name"=>$name,"type"=>$type,"required"=>$required,"options"=>$options);
-		$this->__validData[$name]	=	"";
+		if(is_array($name) && $rules=Amslib_Array::valid($name)){
+			foreach($rules as $name=>$r){
+				$type		= count($r) ? array_shift($r) : NULL;
+				$required	= count($r) ? array_shift($r) : false;
+				$options	= count($r) ? array_shift($r) : array();
 
-		//	Just to be sure, if the value is invalid and you have a default, you should set it now
-		$this->__setDefaultValue($name,$options);
-
-		if($required === true) $this->__setRequiredRules(true);
-	}
-
-	/**
-	 * 	method:	addRules
-	 *
-	 * 	todo: write documentation
-	 */
-	public function addRules($rules)
-	{
-		foreach(Amslib_Array::valid($rules) as $name=>$r){
-			if(!is_string($name) || is_numeric($name)){
-				Amslib_Debug::errorlog("name key was numeric or not a string",$name,$r);
-				continue;
+				if($type) $this->add($name,$type,$required,$options);
 			}
 
-			$type		= count($r) ? array_shift($r) : NULL;
-			$required	= count($r) ? array_shift($r) : false;
-			$options	= count($r) ? array_shift($r) : array();
-
-			if($type) $this->add($name,$type,$required,$options);
+			return;
 		}
+
+		if(!strlen($type) || !strlen($name)){
+			Amslib_Debug::log(__METHOD__.", name or type parameters were not non-zero-length strings",$name);
+			return;
+		}
+
+		if($this->errorLimit-- == 0){
+			Amslib_Debug::log("stack_trace");
+			die(__METHOD__.	", error limit reached, terminating code because it appears an infinite loop");
+		}
+
+		$required				=	isset($options["required"]) ? $options["required"] : $required;
+		$this->rules[$name]		=	array("name"=>$name,"type"=>$type,"required"=>$required,"options"=>$options);
+		$this->validData[$name]	=	"";
+
+		//	Just to be sure, if the value is invalid and you have a default, you should set it now
+		$this->setDefaultValue($name,$options);
 	}
 
 	/**
@@ -1387,9 +1328,9 @@ class Amslib_Validator
 	 */
 	public function remove($name)
 	{
-		unset($this->__rules[$name],$this->__validData[$name]);
+		unset($this->rules[$name],$this->validData[$name]);
 
-		$this->__checkRequiredRules();
+		$this->checkRequiredRules();
 	}
 
 	/**
@@ -1404,7 +1345,14 @@ class Amslib_Validator
 	 */
 	public function register($name,$callback)
 	{
-		$this->__types[$name] = $callback;
+		//	Maybe this should use the validation functions instead of duplicating these kinds of tests all the time
+		if(strlen($name) && is_string($name) && is_callable($callback)){
+			$this->custom[$name] = $callback;
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -1431,60 +1379,34 @@ class Amslib_Validator
 	 */
 	public function execute()
 	{
-		$this->__hasExecuted = false;
+		$this->hasExecuted = false;
 
-		if(count($this->__source) == 0) return !$this->__hasRequiredRules;
+		//	TODO? investigate whether I should also stop processing here if there are no rules to process
+		if(!count($this->source) && $this->hasRequiredRules()){
+			return false;
+		}
 
-		foreach($this->__rules as $name=>$rule){
-			$this->__hasExecuted = true;
+		foreach($this->rules as $name=>$rule){
+			$value		=	$this->getValue($name,$rule["options"]);
 
-			$value	=	$this->__getValue($name,$rule["options"]);
+			$callback	=	isset($this->custom[$rule["type"]])
+				? $this->custom[$rule["type"]]
+				: array($this,"validate_{$rule["type"]}");
 
-			$status	=	call_user_func(
-							$this->__types[$rule["type"]],
-							$name,
-							$value,
-							$rule["required"],
-							$rule["options"]
-						);
+			if(is_callable($callback)){
+				$status = call_user_func($callback,$name,$value,$rule["required"],$rule["options"]);
 
-			if($status !== true){
-				$this->setError($name,$value,$status);
+				if($status !== true){
+					$this->setError($name,$value,$status);
+				}
+			}else{
+				Amslib_Debug::log("stack_trace","validator method missing or not callable",$rule["type"]);
 			}
 		}
 
+		$this->hasExecuted = true;
+
 		return $this->getStatus();
-	}
-
-	/**
-	 * 	method:	test
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function test($value,$type,$required=false,$options=array())
-	{
-		$v = new self(array("test"=>$value));
-		$v->add("test",$type,$required,$options);
-
-		$r = array();
-		$r["status"] = $v->execute();
-
-		if($r["status"]){
-			$d = $v->getValidData();
-			$r["value"] = $d["test"];
-		}else{
-			$e = $v->getErrors();
-			$r["error"] = $e["test"]["code"];
-			$r["error_value"] = $e["test"]["value"];
-		}
-
-		if(!isset($r["value"]) && isset($options["default_value"])){
-			$r["value"] = $options["default_value"];
-		}
-
-		return $r && isset($r["value"]) && isset($options["return_value"])
-			? $r["value"]
-			: $r;
 	}
 
 	/**
@@ -1495,7 +1417,7 @@ class Amslib_Validator
 	 */
 	public function setError($name, $value, $error)
 	{
-		$this->__error[$name] = array("value"=>$value,"code"=>"VALIDATOR_{$error}");
+		$this->error[$name] = array("value"=>$value,"code"=>"VALIDATOR_{$error}");
 	}
 
 	/**
@@ -1508,9 +1430,9 @@ class Amslib_Validator
 	 */
 	public function getErrors($field=NULL)
 	{
-		return ($field && isset($this->__error[$field]))
-					? $this->__error[$field]
-					: $this->__error;
+		return ($field && isset($this->error[$field]))
+					? $this->error[$field]
+					: $this->error;
 	}
 
 	/**
@@ -1526,7 +1448,7 @@ class Amslib_Validator
 	 */
 	public function getSuccess($field)
 	{
-		return isset($this->__error[$field]) ? false : true;
+		return isset($this->error[$field]) ? false : true;
 	}
 
 	/**
@@ -1544,7 +1466,7 @@ class Amslib_Validator
 	 */
 	public function getValid($mergeSource=NULL)
 	{
-		$validData = is_array($this->__validData) ? $this->__validData : array();
+		$validData = is_array($this->validData) ? $this->validData : array();
 		return ($mergeSource) ? array_merge($mergeSource, $validData) : $validData;
 	}
 
@@ -1558,7 +1480,7 @@ class Amslib_Validator
 	 */
 	public function getStatus()
 	{
-		return (count($this->__error)) ? false : true;
+		return (count($this->error)) ? false : true;
 	}
 
 	/**
@@ -1572,7 +1494,7 @@ class Amslib_Validator
 	 */
 	public function itemCount()
 	{
-		return count($this->__rules);
+		return count($this->rules);
 	}
 
 	/**
@@ -1586,8 +1508,38 @@ class Amslib_Validator
 	 */
 	public function hasExecuted()
 	{
-		return $this->__hasExecuted;
+		return $this->hasExecuted;
 	}
+
+	/**
+	 * 	method:	test
+	 *
+	 * 	todo: write documentation
+	 */static public function test($value,$type,$required=false,$options=array())
+	 {
+	 	$v = new self(array("test"=>$value));
+	 	$v->add("test",$type,$required,$options);
+
+	 	$r = array();
+	 	$r["status"] = $v->execute();
+
+	 	if($r["status"]){
+	 		$d = $v->getValidData();
+	 		$r["value"] = $d["test"];
+	 	}else{
+	 		$e = $v->getErrors();
+	 		$r["error"] = $e["test"]["code"];
+	 		$r["error_value"] = $e["test"]["value"];
+	 	}
+
+	 	if(!isset($r["value"]) && isset($options["default_value"])){
+	 		$r["value"] = $options["default_value"];
+	 	}
+
+	 	return $r && isset($r["value"]) && isset($options["return_value"])
+	 		? $r["value"]
+	 		: $r;
+	 }
 
 	/**
 	 * 	method:	runTests
@@ -1629,22 +1581,25 @@ class Amslib_Validator
 		return $tests;
 	}
 
-	/** DEPRECATED METHOD: use getErrors instead */
+	private function _________DEPRECATED_METHODS_BELOW(){}
+
+	protected function validate_require_one($name,$value,$required,$options)
+	{
+		return $this->validate_logical_one($name,$value,$required,$options);
+	}
+
 	public function getErrorsByFieldName()
 	{
 		return $this->getErrors();
 	}
 
-	/**	DEPRECATED METHOD: use getValid instead */
 	public function getValidData($mergeSource=NULL)
 	{
 		return $this->getValid($mergeSource);
 	}
 
-	/** DEPRECATED METHOD: use __logical_one instead */
-	protected function __require_one($name,$value,$required,$options)
+	public function addRules($rules)
 	{
-		return $this->__logical_one($name,$value,$required,$options);
+		$this->add($rules);
 	}
 }
-?>
