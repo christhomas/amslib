@@ -39,6 +39,32 @@
 class Amslib_Array
 {
 	/**
+	 * 	method:	testKeys
+	 *
+	 * 	Test whether keys exist in an array or not
+	 *
+	 * 	NOTE: I think I could replace some of this code with a cheaper array_intersect or something instead
+	 */
+	static protected function testKeys($array,$keys,$ignoreFailure=false,$test=false)
+	{
+		if(!is_array($array)) return NULL;
+		if(is_string($keys) && strlen($keys)) $keys = array($keys);
+		if(!count($keys)) return NULL;
+
+		$found = array();
+
+		foreach(self::valid($keys) as $k=>$v){
+			if(array_key_exists($k,$array) === $test){
+				if($ignoreFailure == false) return false;
+			}else{
+				$found[$k] = $v;
+			}
+		}
+
+		return $found;
+	}
+
+	/**
 	 * 	method:	valid
 	 *
 	 * 	todo: write documentation
@@ -66,39 +92,90 @@ class Amslib_Array
 	}
 
 	/**
-	 * 	method:	min
+	 * 	method:	isMulti
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function min($array,$key,$returnKey=NULL)
+	static public function isMulti($array)
 	{
-		$min = NULL;
+		$result = array_unique(array_map("gettype",$array));
 
-		foreach(self::valid($array) as $item){
-			if($min === NULL) $min = $item;
-
-			if($item[$key] < $min[$key]) $min = $item;
-		}
-
-		return $returnKey !== NULL && isset($min[$returnKey]) ? $min[$returnKey] : $min;
+		return count($result) == 1 && array_shift($result) == "array";
 	}
 
 	/**
-	 * 	method:	max
+	 * 	method:	reindexByKey
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function max($array,$key,$returnKey=NULL)
+	static public function reindexByKey($array,$key,$optimise=false)
 	{
-		$max = NULL;
+		$array = self::valid($array);
 
-		foreach(self::valid($array) as $item){
-			if($max === NULL) $max = $item;
+		if(!is_string($key)) return $array;
 
-			if($item[$key] > $max[$key]) $max = $item;
+		$copy = array();
+
+		foreach($array as $item) if(isset($item[$key])){
+			$copy[$item[$key]] = $item;
 		}
 
-		return $returnKey !== NULL && isset($max[$returnKey]) ? $max[$returnKey] : $max;
+		return $copy;
+	}
+
+	/**
+	 * 	method:	fillMissing
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	notes:
+	 * 		-	This method allows me to batch fix missing keys in arrays in broken code quickly and easily.
+	 */
+	static public function fillMissing($array,$key,$value=NULL)
+	{
+		if(is_string($key)) $key = array($key);
+
+		return array_merge(array_fill_keys($key,$value),$array);
+	}
+
+	/**
+	 * 	method:	hasKeys
+	 *
+	 *	Searches an array for a set of keys and returns either an
+	 *	array of the matching key/values, boolean false, or null depending on what the array contained
+	 *
+	 *	parameters:
+	 *		$array			-	The array to search
+	 *		$keys			-	The keys used to search in the array
+	 *		$ignoreFailure	-	Whether or not to ignore failed tests and return what did match
+	 *
+	 * 	returns:
+	 * 		-	NULL if the array if not valid, boolean false for failure, or an array of matching key/values
+	 * 			depending on the value of $ignoreFailure
+	 */
+	static public function hasKeys($array,$keys,$ignoreFailure=true)
+	{
+		return self::testKeys($array,$keys,$ignoreFailure,false);
+	}
+
+	/**
+	 * 	method:	notKeys
+	 *
+	 *	Searches an array for a set of keys and returns either an
+	 *	array of the non matching key/values, boolean false, or null depending on what the array contained
+	 *
+	 *	parameters:
+	 *		$array			-	The array to search
+	 *		$keys			-	The keys used to search in the array
+	 *		$ignoreFailure	-	Whether or not to ignore failed tests and return what did match
+	 *
+	 * 	returns:
+	 * 		-	NULL if the array if not valid, boolean false for failure, or an array of non-matching key/values
+	 * 			depending on the value of $ignoreFailure
+	 */
+	static public function notKeys($array,$keys,$ignoreFailure=false)
+	{
+		return self::testKeys($array,$keys,$ignoreMissing,true);
 	}
 
 	/**
@@ -136,64 +213,72 @@ class Amslib_Array
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function pluck($array,$key)
+	static public function pluck($array,$key,$forceSingle=false)
 	{
-		if(!is_array($array))	return array();
-		if(!is_array($key))		$key = array($key);
+		if(!is_array($array)){
+			return array();
+		}
 
-		$values = array();
+		if (!is_array($key)) {
+			$key = func_get_args();
+			array_shift($key);
+		}
 
-		if(self::isMulti($array)){
-			foreach(self::valid($array) as $item){
-				$v = array();
+		//	Force single means treat this array like a single dimensional array, EVEN IF, it passes the isMulti test
+		//	This is used when executing/recursing into this function and/or we want to prevent unwanted recursion
+		if($forceSingle && self::isMulti($array)){
+			foreach($array as &$item){
+				$item = self::pluck($item,$key,true);
+			}
 
-				foreach($key as $k){
-					if(isset($item[$k])) $v[$k] = $item[$k];
+			if(count($key) == 1){
+				foreach($array as &$r){
+					$r = $r[$key[0]];
 				}
-
-				$values[] = count($v) == 1 ? array_shift($v) : $v;
-			}
-		}else{
-			$v = array();
-
-			foreach($key as $k){
-				if(isset($array[$k])) $v[$k] = $array[$k];
 			}
 
-			$values[] = count($v) == 1 ? array_shift($v) : $v;
+			return $array;
 		}
 
-		return $values;
+		return array_intersect_key($array,array_flip($key));
 	}
 
-	static public function pluck2($array,$keys)
+	static private function ______UPGRADE_METHODS_BELOW(){}
+
+	/**
+	 * 	method:	min
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function min($array,$key,$returnKey=NULL)
 	{
-		if (!is_array($keys)) {
-			$keys = func_get_args();
-			array_shift($keys);
+		$min = NULL;
+
+		foreach(self::valid($array) as $item){
+			if($min === NULL) $min = $item;
+
+			if($item[$key] < $min[$key]) $min = $item;
 		}
 
-		return array_intersect_key($array,array_flip($keys));
+		return $returnKey !== NULL && isset($min[$returnKey]) ? $min[$returnKey] : $min;
 	}
 
-	static public function pluckMulti2($array,$keys)
+	/**
+	 * 	method:	max
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function max($array,$key,$returnKey=NULL)
 	{
-		if (!is_array($keys)) {
-			$keys = func_get_args();
-			array_shift($keys);
+		$max = NULL;
+
+		foreach(self::valid($array) as $item){
+			if($max === NULL) $max = $item;
+
+			if($item[$key] > $max[$key]) $max = $item;
 		}
 
-		foreach($array as &$item){
-			$item = self::pluck2($item,$keys);
-		}
-
-		if(count($keys) == 1){
-			foreach($array as &$r){
-				$r = $r[$keys[0]];
-			}
-		}
-
-		return $array;
+		return $returnKey !== NULL && isset($max[$returnKey]) ? $max[$returnKey] : $max;
 	}
 
 	/**
@@ -275,95 +360,6 @@ class Amslib_Array
 	}
 
 	/**
-	 * 	method:	reindexByKey
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function reindexByKey($array,$key,$optimise=false)
-	{
-		$array = self::valid($array);
-
-		if(!is_string($key)) return $array;
-
-		$copy = array();
-
-		foreach($array as $item) if(isset($item[$key])){
-			$copy[$item[$key]] = $item;
-		}
-
-		return $copy;
-	}
-
-	/**
-	 * 	method:	missingKeys
-	 *
-	 * 	todo: write documentation
-	 *
-	 * 	notes:
-	 * 		-	This method allows me to batch fix missing keys in arrays in broken code quickly and easily.
-	 */
-	static public function missingKeys($array,$key,$value=NULL)
-	{
-		if(is_string($key)) $key = array($key);
-
-		foreach($key as $k) if(!isset($array[$k])) $array[$k] = $value;
-
-		return $array;
-	}
-
-	/**
-	 * 	method:	hasKeys
-	 *
-	 *	A function to search an array for keys which exist, or keys which are missing and return true or false depending
-	 *
-	 * 	parameters:
-	 * 		$array		-	The array to search for the present or missing keys
-	 * 		$present	-	A string, or array of strings to search for in the array
-	 * 		$missing	-	A string, or array of strings to search that are missing from the array
-	 *
-	 * 	returns:
-	 * 		NULL, Boolean true or false, depending on the result of various actions
-	 * 		-	If the array is not an array, will return NULL, this is a different error than false,
-	 * 			used to know whether the array was invalid without further effort
-	 * 		-	If you find a key from the $present variable is missing, will return false
-	 * 		-	If you find a key from the $missing various actually exists, will return false
-	 * 		-	If all the $present keys exist and none of the $missing keys exist and the
-	 * 			array was a valid array, will return true
-	 *
-	 * 	notes:
-	 * 		-	$missing is not required, if you do not pass it, it will resolve to NULL and nothing will be searched
-	 * 		-	$present and $missing can be a single string, or an array of strings, the function will internally deal with both
-	 * 		-	perhaps I can investigate the use of array intersections instead of manually looping through and detecting
-	 */
-	static public function hasKeys($array,$present,$missing=NULL)
-	{
-		if(!is_array($array)) return NULL;
-
-		if(is_string($present) && strlen($present))	$present = array($present);
-		if(is_string($missing) && strlen($missing))	$missing = array($missing);
-
-		foreach(self::valid($present) as $k){
-			if(!array_key_exists($k,$array)) return false;
-		}
-
-		foreach(self::valid($missing) as $k){
-			if(array_key_exists($k,$array)) return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * 	method:	isMulti
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function isMulti($array)
-	{
-		return count($array)!==count($array, COUNT_RECURSIVE);
-	}
-
-	/**
 	 * 	method:	diff
 	 *
 	 * 	todo: write documentation
@@ -418,6 +414,152 @@ class Amslib_Array
 				"dst"	=>	$b=self::diff($array2,$array1,$strict),
 				"equal"	=>	count($a) == 0 && count($b) == 0
 		);
+	}
+
+	/**
+	 * 	method:	countValues
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	TODO:	this method is a little open to abuse and in some situations wouldn't do the right thing
+	 * 	TODO:	explain in words what this does and how it should work
+	 * 	NOTE:	I am not sure what the above comment actually means, I should have been more explicit in my explanation
+	 */
+	static public function countValues($array)
+	{
+		$counts = array();
+
+		foreach(self::valid($array) as $v){
+			if(!isset($counts[$v])) $counts[$v] = 0;
+
+			$counts[$v]++;
+		}
+
+		return $counts;
+	}
+
+	/**
+	 * 	method:	find
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function find($array,$key,$value)
+	{
+		$result = NULL;
+
+		foreach(self::valid($array) as $a){
+			if($a[$key] == $value) return $a;
+		}
+
+		return false;
+	}
+
+	/*	I don't know how to integrate this into the api yet, but it's a cool function!!!
+	 //	author: d3x from freenode's #php channel
+	//	usage: find($array,$k1,$k2,$k3,$k4)
+	//	description: you have a multi-dimensional array, the keys will represent a path to the final kv pair
+	function find($array) {
+	$args = func_get_args();
+	array_shift($args);
+	if ($args) {
+	$key = array_shift($args);
+	array_unshift($args, $array[$key]);
+	return call_user_func_array(__FUNCTION__, $args);
+	}
+	return $array;
+	}*/
+
+	/**
+	 * 	method:	searchKeys
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function searchKeys($array,$filter)
+	{
+		$matches = array();
+
+		foreach(self::valid($array) as $k=>$v){
+			if(strpos($k,$filter) !== false) $matches[$k] = $v;
+		}
+
+		return $matches;
+	}
+
+	/**
+	 * 	method:	stripSlashesMulti
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function stripSlashesMulti($array,$key=NULL)
+	{
+		if(is_string($key)) $key = array($key);
+
+		$array = self::valid($array);
+
+		foreach($array as &$element){
+			if(!$key){
+				$element = array_map("stripslashes",$element);
+			}else{
+				foreach($key as $index) $element[$index] = stripslashes($element[$index]);
+			}
+		}
+
+		return $array;
+	}
+
+	/**
+	 * 	method:	stripSlashesSingle
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function stripSlashesSingle($array,$key="")
+	{
+		if($key == "") $key = array_keys($array);
+
+		if(!is_array($key)){
+			$array[$key] = stripslashes($array[$key]);
+		}else{
+			foreach($key as $index){
+				$array[$index] = stripslashes($array[$index]);
+			}
+		}
+		return $array;
+	}
+
+	/**
+	 * 	method:	stripSlashes
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function stripSlashes($array,$key="")
+	{
+		if(!is_array($array) || empty($array)) return $array;
+
+		if($key == "") $key = array_keys($array);
+
+		return (self::isMulti($array)) ?
+		self::stripSlashesMulti($array,$key) :
+		self::stripSlashesSingle($array,$key);
+	}
+
+	//	deprecated: this is not supposed to be here
+	//	FIXME: glob() on an array object? when it refers to the filesystem or array? I think it's a mistake to put this method here
+	/**
+	 * 	method:	glob
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function glob($location,$relative=false)
+	{
+		$items = glob(Amslib_Website::abs($location));
+
+		if($relative){
+			foreach($items as &$i){
+				$i = Amslib_Website::rel($i);
+			}
+		}
+
+		return $items;
 	}
 
 	/**
@@ -558,151 +700,6 @@ class Amslib_Array
 		return $returnFiltered ? $matched : $array;
 	}
 
-	//	TODO: this method is a little open to abuse and in some situations wouldn't do the right thing
-	//	TODO: explain in words what this does and how it should work
-	//	NOTE: I am not sure what the above comment actually means, I should have been more explicit in my explanation
-	/**
-	 * 	method:	countValues
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function countValues($array)
-	{
-		$counts = array();
-
-		foreach(self::valid($array) as $v){
-			if(!isset($counts[$v])) $counts[$v] = 0;
-
-			$counts[$v]++;
-		}
-
-		return $counts;
-	}
-
-	/**
-	 * 	method:	find
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function find($array,$key,$value)
-	{
-		$result = NULL;
-
-		foreach(self::valid($array) as $a){
-			if($a[$key] == $value) return $a;
-		}
-
-		return false;
-	}
-
-	/*	I don't know how to integrate this into the api yet, but it's a cool function!!!
-	//	author: d3x from freenode's #php channel
-	//	usage: find($array,$k1,$k2,$k3,$k4)
-	//	description: you have a multi-dimensional array, the keys will represent a path to the final kv pair
-	function find($array) {
-		$args = func_get_args();
-		array_shift($args);
-		if ($args) {
-			$key = array_shift($args);
-			array_unshift($args, $array[$key]);
-			return call_user_func_array(__FUNCTION__, $args);
-		}
-		return $array;
-	}*/
-
-	/**
-	 * 	method:	searchKeys
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function searchKeys($array,$filter)
-	{
-		$matches = array();
-
-		foreach(self::valid($array) as $k=>$v){
-			if(strpos($k,$filter) !== false) $matches[$k] = $v;
-		}
-
-		return $matches;
-	}
-
-	/**
-	 * 	method:	stripSlashesMulti
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function stripSlashesMulti($array,$key=NULL)
-	{
-		if(is_string($key)) $key = array($key);
-
-		$array = self::valid($array);
-
-		foreach($array as &$element){
-			if(!$key){
-				$element = array_map("stripslashes",$element);
-			}else{
-				foreach($key as $index) $element[$index] = stripslashes($element[$index]);
-			}
-		}
-
-		return $array;
-	}
-
-	/**
-	 * 	method:	stripSlashesSingle
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function stripSlashesSingle($array,$key="")
-	{
-		if($key == "") $key = array_keys($array);
-
-		if(!is_array($key)){
-			$array[$key] = stripslashes($array[$key]);
-		}else{
-			foreach($key as $index){
-				$array[$index] = stripslashes($array[$index]);
-			}
-		}
-		return $array;
-	}
-
-	/**
-	 * 	method:	stripSlashes
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function stripSlashes($array,$key="")
-	{
-		if(!is_array($array) || empty($array)) return $array;
-
-		if($key == "") $key = array_keys($array);
-
-		return (self::isMulti($array)) ?
-					self::stripSlashesMulti($array,$key) :
-					self::stripSlashesSingle($array,$key);
-	}
-
-	//	deprecated: this is not supposed to be here
-	//	FIXME: glob() on an array object? when it refers to the filesystem or array? I think it's a mistake to put this method here
-	/**
-	 * 	method:	glob
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function glob($location,$relative=false)
-	{
-		$items = glob(Amslib_Website::abs($location));
-
-		if($relative){
-			foreach($items as &$i){
-				$i = Amslib_Website::rel($i);
-			}
-		}
-
-		return $items;
-	}
-
 	/**
 	 * 	method:	wrap
 	 *
@@ -754,5 +751,22 @@ class Amslib_Array
 	static public function implodeQuoteDouble($array,$join=",")
 	{
 		return self::implode($array,$join,"\"");
+	}
+
+	static private function ______DEPRECATED_METHODS_BELOW(){}
+
+	static public function missingKeys($array,$key,$value=NULL)
+	{
+		return self::fillMissing($array,$key,$value);
+	}
+
+	static public function pluck2($array,$keys)
+	{
+		return self::pluck($array,$keys);
+	}
+
+	static public function pluckMulti2($array,$keys)
+	{
+		return self::pluck($array,$keys);
 	}
 }

@@ -1162,7 +1162,9 @@ class Amslib_Validator
 	 */
 	protected function hasRequiredRules()
 	{
-		return in_array(Amslib_Array::pluck($this->rules,"required"),true);
+		return is_array($this->rules)
+			? in_array(true,Amslib_Array::pluck($this->rules,"required"))
+			: false;
 	}
 
 	/**
