@@ -1288,7 +1288,7 @@ class Amslib_Validator
 	 * 		by merely looking for it and seeing it's not present is actually useful too.
 	 * 		The problem here seems to be a lack of direction, we haven't decided yet which is the best course of action
 	 */
-	public function add($name,$type,$required=false,$options=array())
+	public function add($name,$type=false,$required=false,$options=array())
 	{
 		if(is_array($name) && $rules=Amslib_Array::valid($name)){
 			foreach($rules as $name=>$r){
@@ -1296,14 +1296,13 @@ class Amslib_Validator
 				$required	= count($r) ? array_shift($r) : false;
 				$options	= count($r) ? array_shift($r) : array();
 
-				if($type) $this->add($name,$type,$required,$options);
+				$this->add($name,$type,$required,$options);
 			}
 
 			return;
 		}
 
-		if(!strlen($type) || !strlen($name)){
-			Amslib_Debug::log(__METHOD__.", name or type parameters were not non-zero-length strings",$name);
+		if(!strlen($name) || !strlen($type)){
 			return;
 		}
 
@@ -1402,7 +1401,7 @@ class Amslib_Validator
 					$this->setError($name,$value,$status);
 				}
 			}else{
-				Amslib_Debug::log("stack_trace","validator method missing or not callable",$rule["type"]);
+				Amslib_Debug::log("stack_trace","validator method missing or not callable",$rule["type"],$callback[1]);
 			}
 		}
 

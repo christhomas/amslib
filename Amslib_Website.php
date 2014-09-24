@@ -53,6 +53,11 @@ class Amslib_Website
 		return self::reduceSlashes($path);
 	}
 
+	//	NOTE:	why does an object called Amslib_Website have a function
+	//			called move? Is moving files a website functionality?
+	//	NOTE:	this function basically hides the details of where the
+	//			real filename is, but I think it's the wrong place to
+	//			put this functionality
 	static public function move($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		$s = $src_filename;
@@ -71,6 +76,8 @@ class Amslib_Website
 		return false;
 	}
 
+	//	NOTE:	same problem as "move", why is this function here
+	//	NOTE:	but why is this called deleteFile and that method is called move? not very consistent
 	static public function deleteFile($src_filename)
 	{
 		$s = $src_filename;

@@ -283,6 +283,8 @@ class Amslib_File
 	 * 	method:	removeTrailingSlash
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	note: WTF?? why didnt I just rtrim($path,"/") ??? there is any good reason for this??
 	 */
 	static public function removeTrailingSlash($path)
 	{
@@ -450,29 +452,23 @@ class Amslib_File
 		return $status;
 	}
 
-	//	DEPRECATED: use moveFile($src_filename,$directory,&$dst_filename,&$fullpath) instead
+	static private function ____DEPRECATED_METHODS_BELOW(){}
+
 	static public function saveUploadedFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		return self::moveFile($src_filename,$directory,$dst_filename,$fullpath);
 	}
 
-	//	DEPRECATED: use copyFile($src_filename,$directory,$dst_filename,$fullpath) instead
-	//	NOTE:	was made to unify the method names, deleteFile, copyFile, moveFile
-	//			(because delete is a reserved word, I didnt want to use it)
 	static public function copy($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		return self::copyFile($src_filename,$directory,$dst_filename,$fullpath);
 	}
 
-	//	DEPRECATED: use moveFile($src_filename,$directory,$dst_filename,$fullpath) instead
-	//	NOTE:	was made to unify the method names, deleteFile, copyFile, moveFile
-	//			(because delete is a reserved word, I didnt want to use it)
 	static public function move($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		return self::moveFile($src_filename,$directory,$dst_filename,$fullpath);
 	}
 
-	//	DEPRECATED: use Amslib_String::reduceSlashes($string) instead
 	static public function reduceSlashes($string)
 	{
 		return Amslib_String::reduceSlashes($string);

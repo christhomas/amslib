@@ -158,12 +158,20 @@ class Amslib_Router_URL
 	 * 	method:	externalURL
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	notes:
+	 * 		-	inside here we do a cheap detection for the "://" string meaning most likely
+	 * 			the url has a protocol/http host so then it's already an external url, this
+	 * 			might not be safe in all circumstances but without more information, I'm
+	 * 			going to leave it like this and hope it's ok
 	 */
 	static public function externalURL($url="")
 	{
-		//	I had another version of this code, I'm not sure which is better without looking in more detail
-		//	EXAMPLE: (isset($_SERVER["HTTPS"]) || (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"]) ? "s" : "")
-		return (isset($_SERVER['HTTPS'])?'https':'http').'://'.$_SERVER['HTTP_HOST'].$url;
+		if(strpos($url,"://") !== false) return $url;
+
+		$protocol = isset($_SERVER['HTTPS']) ? "https" : "http";
+
+		return "{$protocol}://{$_SERVER['HTTP_HOST']}{$url}";
 	}
 
 	//	DEPRECATED METHODS, DO NOT USE THEM

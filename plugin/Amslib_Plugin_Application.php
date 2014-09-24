@@ -109,7 +109,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			if($p){
 				$p->autoloadResources();
 			}else{
-				Amslib_Debug::errorlog("plugin not found?",$p);
+				Amslib_Debug::log("plugin not found?",$p);
 			}
 		}
 
@@ -466,14 +466,14 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$route = Amslib_Router::getRoute();
 
 		if(!$route || !isset($route["group"])){
-			Amslib_Debug::errorlog("ROUTE OR ROUTE/GROUP DOES NOT EXIST",$route);
+			Amslib_Debug::log("ROUTE OR ROUTE/GROUP DOES NOT EXIST",$route);
 			return;
 		}
 
 		$api = $this->getAPI($route["group"]);
 
 		if(!$api || !method_exists($api,"render")){
-			Amslib_Debug::errorlog("API OR ITS RENDER METHOD DOES NOT EXIST",get_class($api),$route);
+			Amslib_Debug::log("API OR ITS RENDER METHOD DOES NOT EXIST",get_class($api),$route);
 			return;
 		}
 

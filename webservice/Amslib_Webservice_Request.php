@@ -97,6 +97,13 @@ class Amslib_Webservice_Request
 			curl_setopt($curl,CURLOPT_POSTFIELDS,		$params);
 
 			$reply = curl_exec($curl);
+			if(!$reply || !strlen($reply)){
+				Amslib_Debug::log("CURL ERROR",curl_error($curl),Amslib_Debug::dump($reply));
+				curl_close($curl);
+
+				return false;
+			}
+
 			curl_close($curl);
 
 			$response = new Amslib_Webservice_Response();

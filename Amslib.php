@@ -70,7 +70,7 @@ class Amslib
 		if(!is_array($__p)) $__p = array();
 
 		if(is_array($__f)){
-			Amslib_Debug::errorLog("array was passed, string is required",$__f);
+			Amslib_Debug::log("array was passed, string is required",$__f);
 			return false;
 		}
 
@@ -252,6 +252,11 @@ class Amslib
 		}
 
 		return false;
+	}
+
+	static public function autoloaderStatus($name)
+	{
+		return isset(self::$autoload_silent[$name]) ? self::$autoload_silent[$name] : false;
 	}
 
 	static public function autoloaderStandard($state=true,$silent=NULL)

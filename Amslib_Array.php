@@ -53,11 +53,15 @@ class Amslib_Array
 
 		$found = array();
 
-		foreach(self::valid($keys) as $k=>$v){
+		foreach(self::valid($keys) as $k){
 			if(array_key_exists($k,$array) === $test){
-				if($ignoreFailure == false) return false;
+				if($test){
+					$found[$k] = $array[$k];
+				}
 			}else{
-				$found[$k] = $v;
+				if($ignoreFailure == false){
+					return false;
+				}
 			}
 		}
 
@@ -153,9 +157,9 @@ class Amslib_Array
 	 * 		-	NULL if the array if not valid, boolean false for failure, or an array of matching key/values
 	 * 			depending on the value of $ignoreFailure
 	 */
-	static public function hasKeys($array,$keys,$ignoreFailure=true)
+	static public function hasKeys($array,$keys,$ignoreFailure=false)
 	{
-		return self::testKeys($array,$keys,$ignoreFailure,false);
+		return self::testKeys($array,$keys,$ignoreFailure,true);
 	}
 
 	/**
@@ -171,11 +175,13 @@ class Amslib_Array
 	 *
 	 * 	returns:
 	 * 		-	NULL if the array if not valid, boolean false for failure, or an array of non-matching key/values
-	 * 			depending on the value of $ignoreFailure
+
 	 */
-	static public function notKeys($array,$keys,$ignoreFailure=false)
+	static public function notKeys($array,$keys)
 	{
-		return self::testKeys($array,$keys,$ignoreMissing,true);
+		$return = self::testKeys($array,$keys,false,false);
+
+		return is_array($return) ? true : $return;
 	}
 
 	/**
