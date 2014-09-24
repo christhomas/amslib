@@ -176,7 +176,7 @@ class Amslib_Plugin
 
 					case "object":{
 						if(!isset($v["file"])){
-							Amslib_Debug::errorlog("WARNING: object being configured and has no file array index");
+							Amslib_Debug::log("WARNING: object being configured and has no file array index");
 
 							continue;
 						}
@@ -204,7 +204,7 @@ class Amslib_Plugin
 						$translator	=	$this->createTranslator($v);
 
 						if(!$translator){
-							Amslib_Debug::errorlog("WARNING: a translator was requested, but could not be created",$v);
+							Amslib_Debug::log("WARNING: a translator was requested, but could not be created",$v);
 							continue;
 						}
 
@@ -255,7 +255,7 @@ class Amslib_Plugin
 					}break;
 
 					default:{
-						Amslib_Debug::errorlog("WARNING: unrecognised key '$key' being processed, ignoring");
+						Amslib_Debug::log("WARNING: unrecognised key '$key' being processed, ignoring");
 						continue;
 					}break;
 				}
@@ -263,7 +263,7 @@ class Amslib_Plugin
 				if(!empty($params)){
 					call_user_func_array($callback,$params);
 				}else{
-					Amslib_Debug::errorlog("WARNING: {$callback[1]} called with empty parameters",$k,$v);
+					Amslib_Debug::log("WARNING: {$callback[1]} called with empty parameters",$k,$v);
 				}
 			}
 		}
@@ -336,7 +336,7 @@ class Amslib_Plugin
 			//			which respects the methods that return false, will keep functioning but failing to operating,
 			//			although they will not crash
 			$error = str_replace("__ERROR__","find class using configuration ".Amslib_Debug::var_dump($object)."'",$error);
-			Amslib_Debug::errorlog("stack_trace",$error,$object);
+			Amslib_Debug::log("stack_trace",$error,$object);
 			die($error);
 		}
 
@@ -424,7 +424,7 @@ class Amslib_Plugin
 
 			foreach(Amslib_Array::valid($translators) as $name=>$object){
 				if(!$object){
-					Amslib_Debug::errorlog(__METHOD__,"we found a translator which was not valid",$name,$object);
+					Amslib_Debug::log(__METHOD__,"we found a translator which was not valid",$name,$object);
 					continue;
 				}
 
@@ -435,7 +435,7 @@ class Amslib_Plugin
 
 			$api->finalise();
 		}else{
-			Amslib_Debug::errorlog("plugin not found?",$api);
+			Amslib_Debug::log("plugin not found?",$api);
 		}
 	}
 
@@ -526,7 +526,7 @@ class Amslib_Plugin
 		if(file_exists($file)){
 			$a["file"] = $file;
 		}else{
-			Amslib_Debug::errorlog("Controller object not found, serious error: ",$array,$a,$file);
+			Amslib_Debug::log("Controller object not found, serious error: ",$array,$a,$file);
 		}
 
 		//	NOTE:	we are overriding this because we want to change the xml and code separately
@@ -573,7 +573,7 @@ class Amslib_Plugin
 			//			with previous versions of the amslib plugin system
 			$this->data["model"] = $a;
 		}else{
-			Amslib_Debug::errorlog("Model Connection object not found, serious error: ", $array,$a,$file);
+			Amslib_Debug::log("Model Connection object not found, serious error: ", $array,$a,$file);
 		}
 	}
 
@@ -609,7 +609,7 @@ class Amslib_Plugin
 
 			$this->data["object"][$array["value"]] = $a;
 		}else{
-			Amslib_Debug::errorlog("Model object not found, serious error: ",$array,$a,$file);
+			Amslib_Debug::log("Model object not found, serious error: ",$array,$a,$file);
 		}
 	}
 
@@ -822,10 +822,10 @@ class Amslib_Plugin
 			if($plugin){
 				$this->data["requires"][$array["value"]] = $plugin;
 			}else{
-				Amslib_Debug::errorlog("PLUGIN LOAD FAILURE: ".$array["value"],$location);
+				Amslib_Debug::log("PLUGIN LOAD FAILURE: ".$array["value"],$location);
 			}
 		}else{
-			Amslib_Debug::errorlog("CONFIGURING ITSELF: {$this->getName()} / {$array["value"]}");
+			Amslib_Debug::log("CONFIGURING ITSELF: {$this->getName()} / {$array["value"]}");
 		}
 	}
 
@@ -853,7 +853,7 @@ class Amslib_Plugin
 
 		//	We don't have the correct tags, so this extension was invalid
 		if(!isset($data["selector"]) || !isset($data["callback"])){
-			Amslib_Debug::errorlog("INVALID CALLBACK",$data);
+			Amslib_Debug::log("INVALID CALLBACK",$data);
 			return false;
 		}
 
@@ -861,7 +861,7 @@ class Amslib_Plugin
 
 		//	We don't have one or two parts to the callback, so this extension is invalid
 		if(!in_array(count($data["callback"]),array(1,2))){
-			Amslib_Debug::errorlog("INVALID CALLBACK",$data);
+			Amslib_Debug::log("INVALID CALLBACK",$data);
 			return false;
 		}
 

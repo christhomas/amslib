@@ -50,7 +50,7 @@ class Amslib_Log extends Amslib_Mixin
 		if(file_exists($filename)) return true;
 
 		if(!is_dir(dirname($filename)) && !@mkdir(dirname($filename),0777,true)){
-			Amslib_Debug::errorlog(error_get_last(),$dirname,$basename,$filename);
+			Amslib_Debug::log(error_get_last(),$dirname,$basename,$filename);
 			return false;
 		}
 
@@ -60,7 +60,7 @@ class Amslib_Log extends Amslib_Mixin
 			return true;
 		}
 
-		Amslib_Debug::errorlog(__METHOD__,"file failed to create, or modify it's permissions",error_get_last(),"touch=".intval($t),"chmod=".intval($c));
+		Amslib_Debug::log(__METHOD__,"file failed to create, or modify it's permissions",error_get_last(),"touch=".intval($t),"chmod=".intval($c));
 
 		return false;
 	}
@@ -255,7 +255,7 @@ class Amslib_Log extends Amslib_Mixin
 					//	We do this to make sure the appender cannot be activated or used
 					unset($this->appender[$index]);
 					//	Ironically, the logging class fails, so we use the error log :)
-					Amslib_Debug::errorlog(__METHOD__.", Failed to find or create the log file that we needed");
+					Amslib_Debug::log(__METHOD__.", Failed to find or create the log file that we needed");
 				}
 			}break;
 		}

@@ -65,7 +65,7 @@ class Amslib_Website
 		if($s && Amslib_File::move($s,$d,$dst_filename,$fullpath)) return true;
 
 		if(!$s){
-			Amslib_Debug::errorlog(self::ERROR_FILE_NOT_FOUND." (s,src_filename) = ",$s,$src_filename);
+			Amslib_Debug::log(self::ERROR_FILE_NOT_FOUND." (s,src_filename) = ",$s,$src_filename);
 		}
 
 		return false;
@@ -80,15 +80,15 @@ class Amslib_Website
 		}
 
 		if($s && Amslib_File::deleteFile($s)){
-			Amslib_Debug::errorlog(__METHOD__,"success, file was deleted from the disk",$s);
+			Amslib_Debug::log(__METHOD__,"success, file was deleted from the disk",$s);
 			return true;
 		}
 
 		if(!$s){
-			Amslib_Debug::errorlog("stack_trace",self::ERROR_FILE_NOT_FOUND." (s,src_filename) = ",$s,$src_filename);
+			Amslib_Debug::log("stack_trace",self::ERROR_FILE_NOT_FOUND." (s,src_filename) = ",$s,$src_filename);
 		}
 
-		Amslib_Debug::errorlog(__METHOD__,"failed to delete file");
+		Amslib_Debug::log(__METHOD__,"failed to delete file");
 
 		return false;
 	}
@@ -248,7 +248,7 @@ class Amslib_Website
 			header("Location: $location");
 		}else{
 			$message = __METHOD__."-> The \$location parameter was an invalid string: '$location'";
-			Amslib_Debug::errorlog($message);
+			Amslib_Debug::log($message);
 		}
 
 		if($block) die($message);
@@ -286,7 +286,7 @@ class Amslib_Website
 
 	//	DEPRECATED METHOD, use move() instead
 	static public function saveUploadedFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL){
-		Amslib_Debug::errorlog("DEPRECATED METHOD","stack_trace");
+		Amslib_Debug::log("DEPRECATED METHOD","stack_trace");
 
 		self::move($src_filename,$directory,$dst_filename,$fullpath);
 	}

@@ -310,7 +310,7 @@ class Amslib_Validator
 
 		//	replace this key with a better named version, but have this code here to patch over code which uses it
 		if(array_key_exists("permit-empty",$options)){
-			Amslib_Debug::errorlog("**** DEPRECATED CODE: permit-empty flag detected","stack-trace");
+			Amslib_Debug::log("**** DEPRECATED CODE: permit-empty flag detected","stack-trace");
 			$options["allow-empty"] = $options["permit-empty"];
 		}
 
@@ -1235,7 +1235,7 @@ class Amslib_Validator
 	{
 		//	NOTE: not sure whether I want to put this code her or not, but it seems a reasonably good idea
 		if(!is_array($source)){
-			Amslib_Debug::errorlog(
+			Amslib_Debug::log(
 				"stack_trace",
 				"WARNING: the source attempting to be validating was not an array, setting empty array",
 				$source

@@ -278,7 +278,7 @@ class Amslib_String
 	static public function stripComments($string)
 	{
 		if(!is_string($string)){
-			Amslib_Debug::errorlog(__METHOD__,"Attempting to strip comments from something that is not a string");
+			Amslib_Debug::log(__METHOD__,"Attempting to strip comments from something that is not a string");
 			return false;
 		}
 

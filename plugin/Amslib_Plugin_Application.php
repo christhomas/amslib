@@ -88,8 +88,8 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 					$object->load();
 				}
 			}else{
-				Amslib_Debug::errorlog("plugin list",Amslib_Plugin_Manager::listPlugins());
-				Amslib_Debug::errorlog("plugin for translator not found?",$plugin);
+				Amslib_Debug::log("plugin list",Amslib_Plugin_Manager::listPlugins());
+				Amslib_Debug::log("plugin for translator not found?",$plugin);
 			}
 		}
 

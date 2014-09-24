@@ -62,7 +62,7 @@ class Amslib_Router_Source_XML
 			}
 
 			if(!$filename){
-				Amslib_Debug::errorlog("The filename was not valid, we could not getRoutes from this XML Source");
+				Amslib_Debug::log("The filename was not valid, we could not getRoutes from this XML Source");
 			}else{
 				Amslib_QueryPath::qp($filename);
 				Amslib_QueryPath::execCallback("router > path[name]",		array($this,"configPath"),		$this);
@@ -72,8 +72,8 @@ class Amslib_Router_Source_XML
 				Amslib_QueryPath::execCallback("router > export",			array($this,"configExport"),	$this);
 			}
 		}catch(Exception $e){
-			Amslib_Debug::errorlog("Exception: ",$e->getMessage(),"file=",$filename,"source=",$source);
-			Amslib_Debug::errorlog("stack_trace");
+			Amslib_Debug::log("Exception: ",$e->getMessage(),"file=",$filename,"source=",$source);
+			Amslib_Debug::log("stack_trace");
 		}
 	}
 

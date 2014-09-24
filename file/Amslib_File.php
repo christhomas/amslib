@@ -206,7 +206,7 @@ class Amslib_File
 		ob_start();
 		$exists = is_dir($directory);
 		if(!$exists && !mkdir($directory,$mode,$recursive)){
-			Amslib_Debug::errorlog("Failed to create directory requested",$directory);
+			Amslib_Debug::log("Failed to create directory requested",$directory);
 			$status = false;
 		}
 		$error_text = ob_get_clean();
@@ -383,13 +383,13 @@ class Amslib_File
 		//	NOTE: Perhaps all this checking and copying or directories etc, should be formalised into the api??
 		//	If the destination directory doesnt exist, attempt to create it
 		if($error == false && !is_dir($directory) && !mkdir($directory,0777,true)){
-			Amslib_Debug::errorlog("There was an error with the directory, either permissions, or creating it was not possible",$directory,error_get_last());
+			Amslib_Debug::log("There was an error with the directory, either permissions, or creating it was not possible",$directory,error_get_last());
 			$error = true;
 		}
 
 		//	It REALLY REALLY should exist now, but lets check just in case
 		if($error == false && !is_dir($directory)){
-			Amslib_Debug::errorlog("The directory does not exist, so cannot write to the location",$directory,error_get_last());
+			Amslib_Debug::log("The directory does not exist, so cannot write to the location",$directory,error_get_last());
 			$error = true;
 		}
 
@@ -401,13 +401,13 @@ class Amslib_File
 
 		//	Try to move the file into the correct destination
 		if($error == false && !rename($src_filename,$destination)){
-			Amslib_Debug::errorlog("It was not possible to save to the requested filename",error_get_last());
+			Amslib_Debug::log("It was not possible to save to the requested filename",error_get_last());
 			$error = true;
 		}
 
 		//	If there are no errors, you have uploaded the file ok, however, you could still fail here
 		if($error == false && !chmod($destination,0777)){
-			Amslib_Debug::errorlog("file uploaded ok (apparently), but chmod failed",$destination,error_get_last());
+			Amslib_Debug::log("file uploaded ok (apparently), but chmod failed",$destination,error_get_last());
 		}
 
 		//	if the output was not empty, something bad happened, like a warning or error
@@ -416,7 +416,7 @@ class Amslib_File
 		//	then once I have it, I can do something with it, like output it only to the error log, etc, etc.
 		$output = ob_get_clean();
 		if(strlen($output)){
-			Amslib_Debug::errorlog("Error or warning executing file operations",$output);
+			Amslib_Debug::log("Error or warning executing file operations",$output);
 		}
 
 		//	Set the full path of the file, it's final destination in the filesystem
@@ -444,7 +444,7 @@ class Amslib_File
 		//	then once I have it, I can do something with it, like output it only to the error log, etc, etc.
 		if(strlen($output)){
 			$status = false;
-			Amslib_Debug::errorlog("Error or warning executing file operations",$output);
+			Amslib_Debug::log("Error or warning executing file operations",$output);
 		}
 
 		return $status;

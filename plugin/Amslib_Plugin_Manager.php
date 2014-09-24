@@ -108,7 +108,7 @@ class Amslib_Plugin_Manager
 	static public function config($name,$location)
 	{
 		if(!is_string($name) || is_bool($name)){
-			Amslib_Debug::errorlog("stack_trace","Error attempting to configure plugin, invalid name",$name);
+			Amslib_Debug::log("stack_trace","Error attempting to configure plugin, invalid name",$name);
 
 			return false;
 		}
@@ -353,7 +353,7 @@ class Amslib_Plugin_Manager
 				$sname = is_object($src) ? $src->getName() : "searched: {$value["src"]}";
 				$dname = is_object($dst) ? $dst->getName() : "searched: {$value["dst"]}";
 
-				Amslib_Debug::errorlog("plugin invalid",intval(is_object($src)).", ".intval(is_object($dst)),$sname,$dname);
+				Amslib_Debug::log("plugin invalid",intval(is_object($src)).", ".intval(is_object($dst)),$sname,$dname);
 				continue;
 			}
 
@@ -424,8 +424,8 @@ class Amslib_Plugin_Manager
 				$sname = is_object($src) ? $src->getName() : "searched: {$value["src"]}";
 				$dname = is_object($dst) ? $dst->getName() : "searched: {$value["dst"]}";
 
-				Amslib_Debug::errorlog("plugin list",Amslib_Plugin_Manager::listPlugins());
-				Amslib_Debug::errorlog("plugin invalid",intval(is_object($src)).", ".intval(is_object($dst)),$sname,$dname,Amslib_Router::getPath());
+				Amslib_Debug::log("plugin list",Amslib_Plugin_Manager::listPlugins());
+				Amslib_Debug::log("plugin invalid",intval(is_object($src)).", ".intval(is_object($dst)),$sname,$dname,Amslib_Router::getPath());
 				continue;
 			}
 

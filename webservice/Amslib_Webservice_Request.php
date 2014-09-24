@@ -115,7 +115,7 @@ class Amslib_Webservice_Request
 			$exception = $e->getMessage();
 		}
 
-		Amslib_Debug::errorlog(
+		Amslib_Debug::log(
 			"EXCEPTION: ",		$exception,
 			"WEBSERVICE URL: ",	$this->url,
 			"PARAMS: ",			$params,

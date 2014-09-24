@@ -409,7 +409,7 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		$args = func_get_args();
 		if(count($args) != 2){
-			Amslib_Debug::errorlog("stack_trace",$args);
+			Amslib_Debug::log("stack_trace",$args);
 		}
 		if(!$id || strlen($id) == 0) $id = $name;
 
@@ -536,7 +536,7 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		if(!is_string($view) || !isset($this->view[$view]))
 		{
-			Amslib_Debug::errorlog("stack_trace","Unable to find view in structure",$this->getName(),$view,$this->view);
+			Amslib_Debug::log("stack_trace","Unable to find view in structure",$this->getName(),$view,$this->view);
 
 			return "";
 		}
@@ -552,7 +552,7 @@ class Amslib_MVC extends Amslib_Mixin
 		if(!empty($params)) $this->setViewParam($params);
 
 		if(Amslib_Array::hasKeys($params,array("api","wt","ct"))){
-			Amslib_Debug::errorlog(
+			Amslib_Debug::log(
 					"ERROR: A reserved key was detected in this array,
 					this might result in subtle errors, please remove 'api', 'wt' or 'ct',
 					they are used by the framework to provide access to the api object, and the translators"
@@ -637,7 +637,7 @@ class Amslib_MVC extends Amslib_Mixin
 
 			Amslib_Resource::addStylesheet($id,$s["file"],$s["conditional"],$s["media"],$s["position"]);
 		}else{
-			Amslib_Debug::errorlog(__METHOD__,"stylesheet not found",$id);
+			Amslib_Debug::log(__METHOD__,"stylesheet not found",$id);
 		}
 	}
 
@@ -702,7 +702,7 @@ class Amslib_MVC extends Amslib_Mixin
 
 			Amslib_Resource::addJavascript($id,$j["file"],$j["conditional"],$j["position"]);
 		}else{
-			Amslib_Debug::errorlog(__METHOD__,"javascript not found",$id);
+			Amslib_Debug::log(__METHOD__,"javascript not found",$id);
 		}
 	}
 
@@ -895,7 +895,7 @@ class Amslib_MVC extends Amslib_Mixin
 			return $relative ? Amslib_Website::rel($path) : $path;
 		}
 
-		Amslib_Debug::errorlog("stack_trace","failed to find image",$id,$relative,$path,$this->location);
+		Amslib_Debug::log("stack_trace","failed to find image",$id,$relative,$path,$this->location);
 
 		//	Step 4: return false, image was not found
 		return false;

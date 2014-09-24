@@ -364,9 +364,9 @@ class Amslib
 				if(isset($t[1]) && isset($t[1]["file"])){
 					$result = Amslib::requireFile(dirname($t[1]["file"])."/$c.php");
 
-					if($result && !self::$autoload_silent["exception"]){
-						Amslib_Debug::errorLog("EXCEPTION AUTOLOADER: we loaded the class '$c' this is not efficient");
-						Amslib_Debug::errorLog("EXCEPTION AUTOLOADER: call Amslib::autoloader_exception(true,true) to remove this warning");
+					if($result && !Amslib::autoloaderStatus("exception")){
+						Amslib_Debug::log("EXCEPTION AUTOLOADER: we loaded the class '$c' this is not efficient");
+						Amslib_Debug::log("EXCEPTION AUTOLOADER: call Amslib::autoloader_exception(true,true) to remove this warning");
 					}
 				}
 			}

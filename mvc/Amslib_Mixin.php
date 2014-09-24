@@ -60,9 +60,9 @@ class Amslib_Mixin
 				$map[$o][] = $method;
 			}
 			//	Log the failure to find a method to call to the error log
-			Amslib_Debug::errorlog("MIXIN FAILURE","stack_trace",get_class($this),$name);
+			Amslib_Debug::log("MIXIN FAILURE","stack_trace",get_class($this),$name);
 			foreach($map as $o=>$l){
-				Amslib_Debug::errorlog("MIXIN FAILURE DATA",$o,$name,implode(",",$l));
+				Amslib_Debug::log("MIXIN FAILURE DATA",$o,$name,implode(",",$l));
 			}
 		}
 
@@ -110,7 +110,7 @@ class Amslib_Mixin
 			if(is_string($object)) $name = is_string($object);
 			if(is_object($object)) $name = get_class($object);
 
-			Amslib_Debug::errorlog("MIXIN FAILURE","stack_trace",$name);
+			Amslib_Debug::log("MIXIN FAILURE","stack_trace",$name);
 		}
 
 		return $object;

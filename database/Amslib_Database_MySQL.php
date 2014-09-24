@@ -85,7 +85,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			$output = ob_get_clean();
 
 			$details["password"] = "** CENSORED **";
-			if(strlen($output)) Amslib_Debug::errorlog("Database failed to connect, this is most likely a fatal error",$details);
+			if(strlen($output)) Amslib_Debug::log("Database failed to connect, this is most likely a fatal error",$details);
 		}else{
 			// Replace these errors with Amslib_Translator codes instead (language translation)
 			$this->setDBErrors("Failed to find the database connection details, check this information<br/>");
@@ -164,13 +164,13 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 		//	from this point on, the value must be a string
 		if(!is_string($value)){
-			Amslib_Debug::errorlog("stack_trace,2,*","value is not a string",$value);
+			Amslib_Debug::log("stack_trace,2,*","value is not a string",$value);
 		}
 
 		if(!$this->getConnectionStatus()){
 			print(__METHOD__.", unsafe string escape: database not connected<br/>\n");
 			print("it is not safe to continue, corruption might occur<br/>\n");
-			Amslib_Debug::errorlog("stack_trace,2","not connected to database");
+			Amslib_Debug::log("stack_trace,2","not connected to database");
 			die("DYING");
 		}
 

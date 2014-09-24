@@ -148,7 +148,7 @@ class Amslib_Webservice_Response
 
 		if(!strlen($response)){
 			if($response !== NULL){
-				Amslib_Debug::errorlog(__METHOD__,"response was empty string");
+				Amslib_Debug::log(__METHOD__,"response was empty string",$response);
 			}
 
 			return false;
@@ -167,7 +167,7 @@ class Amslib_Webservice_Response
 				try{
 					$this->response["json"] = json_decode($response,true);
 				}catch(Exception $e){
-					Amslib_Debug::errorlog(__METHOD__,"response was not a valid json string or had a problem to decode");
+					Amslib_Debug::log(__METHOD__,"response was not a valid json string or had a problem to decode");
 
 					return false;
 				}
