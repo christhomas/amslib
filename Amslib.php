@@ -38,15 +38,6 @@
  *		Using Amslib::requireFile() will search intelligently your path in a better way
  *		than basic the PHP functionality, because it will allow relative file name
  *		searches as PHP does not
- *
- *		There are functions for debugging, see var_dump, getStackTrace, errorLog which do
- *		various useful things, var_dump is exactly what you expect, but can format the data
- *		to be more visually understandable and return you a string so you can manipulate it further
- *		errorLog can output multiple pieces of data to the error log, obtain stack traces, etc
- *
- *		lchop, rchop, truncateString are some basic string manipulation functions which are useful
- *		for cutting up urls or blocks of html if required, which is useful when cutting html strings and
- *		fixing up the html so it still works, or doesnt break
  */
 class Amslib
 {
@@ -164,7 +155,7 @@ class Amslib
 					"895vbpq34985ox4r".
 					"gwefijoiwy4cbo9t";
 
-		$input = $input !== NULL ? Amslib_Debug::var_dump($args,true) : "";
+		$input = $input !== NULL ? Amslib_Debug::pdump(true,$args) : "";
 
 		return sha1(implode("__",array($salt,$input,microtime(true),mt_rand(0,21387132987),$salt)));
 	}

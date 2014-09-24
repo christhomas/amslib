@@ -221,8 +221,8 @@ class Amslib_Plugin
 						//	NOTE (25/08/2014):	I'm not sure why I wrote this protection code,
 						//						maybe it's old logic not needed anymore?
 						if(is_object($v)){
-							print("key[$key] = ".Amslib_Debug::var_dump($v,true));
-							print("callback = ".Amslib_Debug::var_dump(array($callback[0]->getName(),$callback[1]),true));
+							print("key[$key] = ".Amslib_Debug::pdump(true,$v));
+							print("callback = ".Amslib_Debug::pdump(true,array($callback[0]->getName(),$callback[1])));
 							print("value was object, cannot continue");
 							continue;
 						}
@@ -240,8 +240,8 @@ class Amslib_Plugin
 						//	NOTE (25/08/2014):	I'm not sure why I wrote this protection code,
 						//						maybe it's old logic not needed anymore?
 						if(is_object($v)){
-							print("key[$key] = ".Amslib_Debug::var_dump($v,true));
-							print("callback = ".Amslib_Debug::var_dump(array($callback[0]->getName(),$callback[1]),true));
+							print("key[$key] = ".Amslib_Debug::pdump(true,$v));
+							print("callback = ".Amslib_Debug::pdump(true,array($callback[0]->getName(),$callback[1])));
 							print("value was object, cannot continue");
 							continue;
 						}
@@ -335,7 +335,7 @@ class Amslib_Plugin
 			//			but not killing the process, but handling all the failures which happen and properly written code
 			//			which respects the methods that return false, will keep functioning but failing to operating,
 			//			although they will not crash
-			$error = str_replace("__ERROR__","find class using configuration ".Amslib_Debug::var_dump($object)."'",$error);
+			$error = str_replace("__ERROR__","find class using configuration ".Amslib_Debug::dump($object)."'",$error);
 			Amslib_Debug::log("stack_trace",$error,$object);
 			die($error);
 		}
@@ -1023,7 +1023,7 @@ class Amslib_Plugin
 			}break;
 
 			default:{
-				die(__METHOD__.": UNCONVERTED CODE: ".Amslib_Debug::var_dump(array($key,$value),true));
+				die(__METHOD__.": UNCONVERTED CODE: ".Amslib_Debug::pdump(true,$key,$value));
 				//	THIS IS THE OLD UNCONVERTED CODE
 
 				//	This is important, because otherwise values imported/exported through transfer() will not execute in process()

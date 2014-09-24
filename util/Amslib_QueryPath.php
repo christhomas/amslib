@@ -101,7 +101,7 @@ class Amslib_QueryPath
 	static public function execCallback($key,$callback,$object=NULL)
 	{
 		if(!self::$qp || !is_callable($callback)){
-			print("FAILED CALLBACK = ".Amslib_Debug::var_dump($callback,true));
+			print("FAILED CALLBACK = ".Amslib_Debug::pdump(true,$callback));
 			return;
 		}
 

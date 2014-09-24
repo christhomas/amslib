@@ -157,7 +157,7 @@ class Amslib_Paypal
 		if($response == false) return false;
 
 		if(is_string($response)){
-			if($this->debug) print("DEBUGGING: ".var_dump($response));
+			if($this->debug) print("DEBUGGING: ".Amslib_Debug::dump($response));
 
 			$parameters = explode("&",$response);
 

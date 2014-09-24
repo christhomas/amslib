@@ -77,7 +77,7 @@ class Amslib_Plugin_Service
 
 		if(!self::$handler){
 			//	TODO: move into the logging system intead of here
-			error_log("** ".__METHOD__." ** ".Amslib_Debug::var_dump(self::$handler,true)." was invalid");
+			error_log("** ".__METHOD__." ** ".Amslib_Debug::pdump(true,self::$handler)." was invalid");
 			return NULL;
 		}
 
@@ -504,7 +504,7 @@ class Amslib_Plugin_Service
 		}
 
 		if(!is_object($object)){
-			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib_Debug::var_dump($object));
+			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib_Debug::pdump(true,$object));
 			$object = "__INVALID_OBJECT__";
 		}else{
 			$object = get_class($object);

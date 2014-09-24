@@ -34,7 +34,7 @@ class Amslib_Plugin_Service_Response
 
 		if(!$this->handler){
 			//	TODO: move into the logging system intead of here
-			error_log("** ".__METHOD__." ** ".Amslib_Debug::var_dump($this->handler,true)." was invalid");
+			error_log("** ".__METHOD__." ** ".Amslib_Debug::pdump(true,$this->handler)." was invalid");
 			return NULL;
 		}
 

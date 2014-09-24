@@ -99,11 +99,11 @@ class Amslib_Log extends Amslib_Mixin
 		}
 
 		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
-			$function	=	"(ERROR, function invalid: ".Amslib_Debug::var_dump($function).")";
-			$data		=	array(Amslib_Debug::var_dump($stack));
+			$function	=	"(ERROR, function invalid: ".Amslib_Debug::dump($function).")";
+			$data		=	array(Amslib_Debug::dump($stack));
 		}else{
 			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
-			//$data[] = Amslib_Debug::var_dump($stack);
+			//$data[] = Amslib_Debug::dump($stack);
 		}
 	}
 
@@ -151,7 +151,7 @@ class Amslib_Log extends Amslib_Mixin
 
 				$trace = array("\n");
 				foreach($stack as $row){
-					$trace[] = "[STACK TRACE] ".str_replace("\n","",Amslib_Debug::var_dump($row));
+					$trace[] = "[STACK TRACE] ".str_replace("\n","",Amslib_Debug::dump($row));
 				}
 				$data[] = implode("\n",$trace);
 			}else if(is_string($a) && strpos($a,"func_offset") === 0){
@@ -159,8 +159,8 @@ class Amslib_Log extends Amslib_Mixin
 
 				if(count($command) == 1) $function = $command[0];
 			}else{
-				if(is_object($a))	$a = array(get_class($a),Amslib_Debug::var_dump($a));
-				if(is_array($a)) 	$a = Amslib_Debug::var_dump($a);
+				if(is_object($a))	$a = array(get_class($a),Amslib_Debug::dump($a));
+				if(is_array($a)) 	$a = Amslib_Debug::dump($a);
 				if(is_bool($a))		$a = $a ? "true" : "false";
 				if(is_null($a))		$a = "null";
 

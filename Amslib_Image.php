@@ -289,7 +289,7 @@ class Amslib_Image
 	public function getError()
 	{
 		return is_array($this->error)
-			? Amslib_Debug::var_dump($this->error)
+			? Amslib_Debug::dump($this->error)
 			: $this->error;
 	}
 

@@ -945,7 +945,7 @@ class Amslib_Router
 	 */
 	static public function serviceExportRouterDEBUG($service,$source)
 	{
-		die(Amslib_Debug::var_dump(self::exportRouterShared(),true));
+		die(Amslib_Debug::pdump(true,self::exportRouterShared()));
 	}
 
 	/**

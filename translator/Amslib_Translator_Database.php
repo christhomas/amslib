@@ -119,7 +119,7 @@ class Amslib_Translator_Database extends Amslib_Translator_Keystore
 				$v = $n;
 			}
 		}else{
-			die("FAIL 1: ".Amslib_Debug::var_dump(array($n,$i,$l,$v),true));
+			die("FAIL 1: ".Amslib_Debug::pdump(true,$n,$i,$l,$v));
 		}
 
 		return $v;

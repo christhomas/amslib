@@ -44,7 +44,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 	protected function setDebugOutput($query)
 	{
 		if($this->debug && $this->errorState){
-			Amslib_Keystore::set("db_query[{$this->seq}][".microtime(true)."]",Amslib_Debug::var_dump($query,true));
+			Amslib_Keystore::set("db_query[{$this->seq}][".microtime(true)."]",Amslib_Debug::pdump(true,$query));
 		}
 	}
 

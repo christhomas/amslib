@@ -364,12 +364,12 @@ class Amslib_Plugin_Manager
 				case "stylesheet":
 				case "javascript":
 				case "font":{
-					die("[DIE]IMPORT[$key] => ".Amslib_Debug::var_dump(array(
+					die("[DIE]IMPORT[$key] => ".Amslib_Debug::pdump(true,array(
 							$src->getName(),
 							$dst->getName(),
 							$value["key"],
 							$value["val"]
-					),true));
+					)));
 				}break;
 
 				case "translator":{
@@ -433,7 +433,12 @@ class Amslib_Plugin_Manager
 				case "stylesheet":
 				case "javascript":
 				case "font":{
-					die("[DIE]EXPORT[$key] => ".Amslib_Debug::var_dump(array($src->getName(),$dst->getName(),$value["key"],$value["val"]),true));
+					die("[DIE]EXPORT[$key] => ".Amslib_Debug::pdump(true,array(
+							$src->getName(),
+							$dst->getName(),
+							$value["key"],
+							$value["val"]
+					)));
 				}break;
 
 				case "view":
