@@ -219,7 +219,7 @@ class Amslib_Array
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function pluck($array,$key,$forceSingle=false)
+	static public function pluck($array,$key)
 	{
 		if(!is_array($array)){
 			return array();
@@ -230,11 +230,9 @@ class Amslib_Array
 			array_shift($key);
 		}
 
-		//	Force single means treat this array like a single dimensional array, EVEN IF, it passes the isMulti test
-		//	This is used when executing/recursing into this function and/or we want to prevent unwanted recursion
-		if($forceSingle && self::isMulti($array)){
+		if(self::isMulti($array)){
 			foreach($array as &$item){
-				$item = self::pluck($item,$key,true);
+				$item = self::pluck($item,$key);
 			}
 
 			if(count($key) == 1){
