@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<object directory="__website/objects">
+		
+	</object>
+	
+	<view directory="/__website/views/">
+		<name>Home</name>
+		<name>Skeleton</name>
+	</view>
+	
+	<stylesheet>
+		<file id="bootstrap" autoload="true">__AMSLIB__/util/bootstrap/3.1.1/css/bootstrap.min.css</file>
+		<file id="bootstrap.xl" autoload="true">__AMSLIB__/util/bootstrap/3.1.1/css/bootstrap-xl.min.css</file>
+		<file id="framework" autoload="true">__AMSLIB__/__website/resources/framework.css</file>
+	</stylesheet>
+	
+	<javascript>
+		<file id="jquery" autoload="true">__AMSLIB__/util/jquery-2.0.3.min.js</file>
+		<file id="bootstrap" autoload="true">__AMSLIB__/util/bootstrap/3.1.1/js/bootstrap.min.js</file>
+		
+		<!-- example of defining resources groups with dependencies -->
+		<group name="core" autoload="true" depend="jquery/2.x">
+			<file id="my.common">/util/my.common.min.js</file>
+			<file id="my.class">/util/my.class.min.js</file>		
+			<file id="amslib">/js/Amslib.js</file>
+		</group>
+	</javascript>
+	
+	<router>
+		<path name="home">
+			<src>/</src>
+			<resource>Skeleton</resource>
+			<parameter id="plugin">application</parameter>
+		</path>
+	</router>
+</package>
