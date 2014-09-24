@@ -12,43 +12,49 @@
 #			adding new things instead of automatically
 #
 # ----------------------------------------------------------------------
+#	Enable URL rewriting
+# ---------------------------------------------------------------------- 
+RewriteEngine On
+#
+# ----------------------------------------------------------------------
+#	Some basic variables that you can change here to affect the rest
+#	of the htaccess file without digging around for the properties
+# ----------------------------------------------------------------------
+RewriteRule ^(.*) - [E=__SCRIPT__:__website/amslib_website.php]
+RewriteRule ^(.*) - [E=ENABLE_DEBUG:0]
+
+# ----------------------------------------------------------------------
 #	without -MultiViews, Apache will give a 404 for a rewrite if a 
 #	folder of the same name does not exist 
 #	e.g. /blog/hello : webmasterworld.com/apache/3808792.htm
 # ---------------------------------------------------------------------- 
 Options +FollowSymlinks -MultiViews
 
-# ----------------------------------------------------------------------
-#	Enable URL rewriting
-# ---------------------------------------------------------------------- 
-RewriteEngine On
-
 # -----------------------------------------------------------------------
 #	Don't attempt to manipulate images, javascripts or stylesheets
 # -----------------------------------------------------------------------
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteCond %{REQUEST_URI} (gif|png|jpg|jpeg|ico|css|js|xml|pdf)$ [NC]
+RewriteCond %{REQUEST_FILENAME} (gif|png|jpg|jpeg|ico|css|js|xml|pdf)$ [NC]
 RewriteRule ^(.*)$ - [L]
 
 # -----------------------------------------------------------------------
-#	Set the __WEBSITE__ variable depending on the installation location
+#	Set the __WEBSITE_ROOT__ variable depending on the installation location
 # -----------------------------------------------------------------------
 #	First default this environment variable to the root
-RewriteRule ^(.*)$ - [E=__WEBSITE_ROOT__:/]
+RewriteRule ^(.*) - [E=__WEBSITE_ROOT__:/]
 #	Then, if a path is found, reset the variable to that path
 RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
-RewriteRule ^(.*)$ - [E=__WEBSITE_ROOT__:%1/]
+RewriteRule ^(.*) - [E=__WEBSITE_ROOT__:%1/]
 
 # enable debugging when you're on testing
 #RewriteCond %{HTTP_HOST} testing.mydomain.com$
-#RewriteRule ^(.*)$ - [E=ENABLE_DEBUG:1]
+#RewriteRule ^(.*) - [E=ENABLE_DEBUG:1]
 
 # -----------------------------------------------------------------------
 #	Make sure the URL ends with a slash
 # -----------------------------------------------------------------------
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} !webservice [NC]
-RewriteRule ^(.*)([^/])$ %{ENV:__AMSLIB_ROUTER_ACTIVE__}$1$2/ [L,R=301]
+RewriteRule ^(.*)([^/])$ %{ENV:__WEBSITE_ROOT__}$1$2/ [L,R=301]
 
 # ------------------------------------------------------------------------------
 # |	Suppressing / Forcing the "www." at the beginning of URLs (OPTIONAL)       |
@@ -234,7 +240,6 @@ php_value session.gc.maxlifetime 3600
     AddType text/vtt                                    vtt
     AddType text/x-component                            htc
     AddType text/x-vcard                                vcf
-
 </IfModule>
 
 # ------------------------------------------------------------------------------
@@ -295,8 +300,7 @@ RewriteRule sample.admin_panel.xml	-	[F]
 #</Files>
 
 #	Perhaps you need to comment out -d from here or not, depends on your website
-#	NOTE (16/04/2014):	I added the get parameter to this because some websites 
-#						were not setting the environment var properly so it's a backup
 RewriteCond %{REQUEST_FILENAME} !-f
 #RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ %{ENV:__AMSLIB_ROUTER_ACTIVE__}amslib_router.php?routed=true&__AMSLIB_ROUTER_ACTIVE__=%{ENV:__AMSLIB_ROUTER_ACTIVE__} [L,QSA]
+RewriteCond %{REQUEST_FILENAME} !__website.php$ [NC]
+RewriteRule ^(.*)$ %{ENV:__WEBSITE_ROOT__}%{ENV:__SCRIPT__}?__WEBSITE_ROOT__=%{ENV:__WEBSITE_ROOT__} [L,QSA]

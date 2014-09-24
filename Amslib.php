@@ -409,7 +409,7 @@ class Amslib
 					"file"	=>	isset($e['file']) ? $e['file'] : '',
 					"line"	=>	isset($e['line']) ? $e['line'] : '',
 					"uri"	=>	$_SERVER["REQUEST_URI"],
-					"root"	=>	isset($_SERVER["__AMSLIB_ROUTER_ACTIVE__"]) ? $_SERVER["__AMSLIB_ROUTER_ACTIVE__"] : "/"
+					"root"	=>	isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/"
 				)));
 
 				header("Location: $url?data=$error");

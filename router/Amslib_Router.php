@@ -164,17 +164,11 @@ class Amslib_Router
 	 */
 	static public function initialise()
 	{
-		//	Find all the AMSLIB_ROUTER type variables and insert them into the pathList
-		//	NOTE: I probably don't need to scan through $_SERVER and can just optimise this to use $_GET in the future when I'm sure
-		foreach(array_merge($_SERVER,$_GET) as $k=>$v){
-			if(strpos($k,"AMSLIB_ROUTER") !== false) self::$pathList[$k] = $v;
-		}
-
-		//	TODO:	I should use an easier expression than __AMSLIB_ROUTER_ACTIVE__,
-		//			perhaps __WEBSITE__ is more normal, or even __AMSLIB_WEBSITE__
+		$search = array_merge($_SERVER,$_GET);
+		self::$pathList["__WEBSITE_ROOT__"] = $search["__WEBSITE_ROOT__"];
 
 		self::$path	=	NULL;
-		self::$base	=	self::getPath("__AMSLIB_ROUTER_ACTIVE__");
+		self::$base	=	self::getPath("__WEBSITE_ROOT__");
 
 		if(self::$base){
 			//	Obtain the path within the website, without the website base
@@ -198,7 +192,7 @@ class Amslib_Router
 	static public function finalise()
 	{
 		if(!self::$path){
-			trigger_error("There was no __AMSLIB_ROUTER_ACTIVE__ definition found, check your .htaccess file",E_USER_ERROR);
+			trigger_error("There was no __WEBSITE_ROOT__ definition found, check your .htaccess file",E_USER_ERROR);
 			return false;
 		}
 

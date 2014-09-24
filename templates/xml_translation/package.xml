@@ -10,7 +10,7 @@
 	</view>
 
 	<path>
-		<website>__AMSLIB_ROUTER_ACTIVE__</website>
+		<website>__WEBSITE_ROOT__</website>
 		<admin>__WEBSITE__</admin>
 		<amslib>__WEBSITE__/amslib/</amslib>
 		<plugin>__WEBSITE__/plugins/</plugin>
