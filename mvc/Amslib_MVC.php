@@ -524,7 +524,11 @@ class Amslib_MVC extends Amslib_Mixin
 	 */
 	public function render($view="default",$params=array())
 	{
-		return $this->renderView($view,$params);
+		$resource = Amslib_Router::getResource();
+
+		if(!$resource) $resource = $view;
+
+		return $this->renderView($resource,$params);
 	}
 
 	/**
