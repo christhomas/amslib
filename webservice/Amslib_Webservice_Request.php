@@ -106,9 +106,8 @@ class Amslib_Webservice_Request
 
 			curl_close($curl);
 
-			$response = new Amslib_Webservice_Response();
+			$response = new Amslib_Webservice_Response($reply);
 			$response->setMode("raw",$raw);
-			$response->setData($reply);
 
 			if($this->sharedSession && !$id_session){
 				$data = $response->getData("amslib");
