@@ -51,6 +51,11 @@ class Amslib_Plugin_Config_XML
 		self::addScanSelector("package requires extension",	"configExtension");
 		self::addScanSelector("package requires plugin",	"configPlugin");
 
+		self::addLoadSelector("package object",				"setComponentConfig");
+		self::addLoadSelector("package controller",			"setComponentConfig");
+		self::addLoadSelector("package model",				"setComponentConfig");
+		self::addLoadSelector("package view",				"setComponentConfig");
+
 		//	Now add all the load selectors, now that the tree scanning has completed
 		self::addLoadSelector("package object name",		"configObject");
 		self::addLoadSelector("package controller name",	"configController");

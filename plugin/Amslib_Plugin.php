@@ -72,7 +72,7 @@ class Amslib_Plugin
 	 */
 	protected function setComponent($component,$directory,$prefix)
 	{
-		$this->prefix[$component] = "/$directory/$prefix";
+		$this->prefix[$component] = array($directory,$prefix);
 	}
 
 	/**
@@ -80,9 +80,13 @@ class Amslib_Plugin
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function getComponent($component,$name)
+	protected function getComponent($component,$name=NULL)
 	{
-		return $this->getLocation().$this->prefix[$component]."$name.php";
+		if(!isset($this->prefix[$component])) return NULL;
+
+		return $name
+			? Amslib_String::reduceSlashes($this->getLocation().implode("/",$this->prefix[$component])."$name.php")
+			: $this->prefix[$component];
 	}
 
 	/**
@@ -469,6 +473,21 @@ class Amslib_Plugin
 		if($instance === NULL) $instance = new self();
 
 		return $instance;
+	}
+
+	public function setComponentConfig($name,$array,$object)
+	{
+		$component = $this->getComponent($name);
+
+		if(isset($array["attr"]["directory"])){
+			$component[0] = $array["attr"]["directory"];
+		}
+
+		if(isset($array["attr"]["prefix"])){
+			$component[1] = $array["attr"]["prefix"];
+		}
+
+		$this->setComponent($name,$component[0],$component[1]);
 	}
 
 	public function configAPI($name,$array,$object)
