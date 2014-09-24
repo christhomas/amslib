@@ -364,6 +364,12 @@ class Amslib_File
 		return $list;
 	}
 
+	static public function writeFile($data,$dst_filename)
+	{
+
+		return $dst_filename;
+	}
+
 	static public function copyFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		//	TODO: implement similar code to move() but copying not moving the file
@@ -431,7 +437,7 @@ class Amslib_File
 	static public function deleteFile($filename)
 	{
 		if(!$filename || !is_string($filename) || !file_exists($filename)){
-			die("filename invalid".Amslib_Debug::var_dump($filename));
+			die("filename invalid".Amslib_Debug::pdump(true,$filename));
 			return false;
 		}
 
