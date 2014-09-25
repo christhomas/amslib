@@ -254,8 +254,18 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		parent::setConfigSource($config);
 
-		//	Initialise all the selectors
-		call_user_func(array(get_class($this->source),"initialiseSelectors"));
+		$callback = array(get_class($this->source),"initialiseSelectors");
+
+		if(is_callable($callback)){
+			//	Initialise all the selectors
+			call_user_func($callback);
+
+			return true;
+		}
+
+		Amslib_Debug::log(__METHOD__,"initialiseSelectors not available",$callback);
+
+		return false;
 	}
 
 	/**

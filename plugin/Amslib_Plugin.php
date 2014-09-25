@@ -905,6 +905,12 @@ class Amslib_Plugin
 		$this->isLoaded		=	false;
 		$this->name			=	$name;
 
+		if(!$this->source){
+			Amslib_Debug::log(__METHOD__,"plugin source was not valid",$this->source);
+
+			return $this->isConfigured;
+		}
+
 		//	Prepare and process all the selectors that we do by default
 		$this->source->prepare();
 

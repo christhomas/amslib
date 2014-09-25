@@ -302,5 +302,5 @@ RewriteRule sample.admin_panel.xml	-	[F]
 #	Perhaps you need to comment out -d from here or not, depends on your website
 RewriteCond %{REQUEST_FILENAME} !-f
 #RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !__website.php$ [NC]
+RewriteCond %{REQUEST_FILENAME} !%{ENV:__SCRIPT__}$ [NC]
 RewriteRule ^(.*)$ %{ENV:__WEBSITE_ROOT__}%{ENV:__SCRIPT__}?__WEBSITE_ROOT__=%{ENV:__WEBSITE_ROOT__} [L,QSA]
