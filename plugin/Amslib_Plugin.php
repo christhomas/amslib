@@ -84,9 +84,11 @@ class Amslib_Plugin
 	{
 		if(!isset($this->prefix[$component])) return NULL;
 
-		return $name
-			? Amslib_String::reduceSlashes($this->getLocation().implode("/",$this->prefix[$component])."$name.php")
-			: $this->prefix[$component];
+		if(!$name) return $this->prefix[$component];
+
+		return Amslib_String::reduceSlashes(
+			$this->getLocation()."/".implode("/",$this->prefix[$component])."$name.php"
+		);
 	}
 
 	/**
