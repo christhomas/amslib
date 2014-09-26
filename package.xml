@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package>
-	<object directory="__website/objects">
-		
-	</object>
-	
-	<view directory="/__website/views/">
+	<view directory="__website/views/">
 		<name>Home</name>
 		<name>Skeleton</name>
 	</view>
