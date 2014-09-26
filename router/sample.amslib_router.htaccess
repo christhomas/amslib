@@ -12,43 +12,49 @@
 #			adding new things instead of automatically
 #
 # ----------------------------------------------------------------------
+#	Enable URL rewriting
+# ---------------------------------------------------------------------- 
+RewriteEngine On
+#
+# ----------------------------------------------------------------------
+#	Some basic variables that you can change here to affect the rest
+#	of the htaccess file without digging around for the properties
+# ----------------------------------------------------------------------
+RewriteRule ^(.*) - [E=__SCRIPT__:amslib_router.php]
+RewriteRule ^(.*) - [E=ENABLE_DEBUG:0]
+
+# ----------------------------------------------------------------------
 #	without -MultiViews, Apache will give a 404 for a rewrite if a 
 #	folder of the same name does not exist 
 #	e.g. /blog/hello : webmasterworld.com/apache/3808792.htm
 # ---------------------------------------------------------------------- 
 Options +FollowSymlinks -MultiViews
 
-# ----------------------------------------------------------------------
-#	Enable URL rewriting
-# ---------------------------------------------------------------------- 
-RewriteEngine On
-
 # -----------------------------------------------------------------------
 #	Don't attempt to manipulate images, javascripts or stylesheets
 # -----------------------------------------------------------------------
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteCond %{REQUEST_URI} (gif|png|jpg|jpeg|ico|css|js|xml|pdf)$ [NC]
+RewriteCond %{REQUEST_FILENAME} (gif|png|jpg|jpeg|ico|css|js|xml|pdf)$ [NC]
 RewriteRule ^(.*)$ - [L]
 
 # -----------------------------------------------------------------------
-#	Set the __WEBSITE__ variable depending on the installation location
+#	Set the __WEBSITE_ROOT__ variable depending on the installation location
 # -----------------------------------------------------------------------
 #	First default this environment variable to the root
-RewriteRule .? - [E=__AMSLIB_ROUTER_ACTIVE__:/]
+RewriteRule ^(.*) - [E=__WEBSITE_ROOT__:/]
 #	Then, if a path is found, reset the variable to that path
 RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
-RewriteRule .? - [E=__AMSLIB_ROUTER_ACTIVE__:%1/]
+RewriteRule ^(.*) - [E=__WEBSITE_ROOT__:%1/]
 
 # enable debugging when you're on testing
 #RewriteCond %{HTTP_HOST} testing.mydomain.com$
-#RewriteRule . - [E=ENABLE_DEBUG:1]
+#RewriteRule ^(.*) - [E=ENABLE_DEBUG:1]
 
 # -----------------------------------------------------------------------
 #	Make sure the URL ends with a slash
 # -----------------------------------------------------------------------
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} !webservice [NC]
-RewriteRule ^(.*)([^/])$ %{ENV:__AMSLIB_ROUTER_ACTIVE__}$1$2/ [L,R=301]
+RewriteRule ^(.*)([^/])$ %{ENV:__WEBSITE_ROOT__}$1$2/ [L,R=301]
 
 # ------------------------------------------------------------------------------
 # |	Suppressing / Forcing the "www." at the beginning of URLs (OPTIONAL)       |
@@ -72,9 +78,9 @@ RewriteRule ^(.*)([^/])$ %{ENV:__AMSLIB_ROUTER_ACTIVE__}$1$2/ [L,R=301]
 # Option 1: rewrite www.example.com ? example.com
 
 <IfModule mod_rewrite.c>
-	RewriteCond %{HTTPS} !=on
-	RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-	RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
 </IfModule>
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -84,11 +90,11 @@ RewriteRule ^(.*)([^/])$ %{ENV:__AMSLIB_ROUTER_ACTIVE__}$1$2/ [L,R=301]
 # Be aware that the following might not be a good idea if you use "real"
 # subdomains for certain parts of your website.
 
-#<IfModule mod_rewrite.c>
-#	RewriteCond %{HTTPS} !=on
-#	RewriteCond %{HTTP_HOST} !^www\..+$ [NC]
-#	RewriteRule ^ http://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
-#</IfModule>
+# <IfModule mod_rewrite.c>
+#    RewriteCond %{HTTPS} !=on
+#    RewriteCond %{HTTP_HOST} !^www\..+$ [NC]
+#    RewriteRule ^ http://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# </IfModule>
 
 # ##############################################################################
 # # PHP									                                       #
@@ -124,9 +130,9 @@ php_value session.gc.maxlifetime 3600
 # http://code.google.com/p/html5security/wiki/CrossOriginRequestSecurity
 # http://enable-cors.org/
 
-<IfModule mod_headers.c>
-	Header set Access-Control-Allow-Origin "*"
-</IfModule>
+# <IfModule mod_headers.c>
+#    Header set Access-Control-Allow-Origin "*"
+# </IfModule>
 
 # ------------------------------------------------------------------------------
 # | CORS-enabled images                                                        |
@@ -234,7 +240,6 @@ php_value session.gc.maxlifetime 3600
     AddType text/vtt                                    vtt
     AddType text/x-component                            htc
     AddType text/x-vcard                                vcf
-
 </IfModule>
 
 # ------------------------------------------------------------------------------
@@ -252,7 +257,7 @@ AddDefaultCharset utf-8
 # -----------------------------------------------------------------------
 #	A list of forbidden resources
 # -----------------------------------------------------------------------
-<FilesMatch "\.(htaccess|htpasswd|phps|settings|gitignore|project|package.xml)$">
+<FilesMatch "\.(htaccess|htpasswd|ini|phps|fla|psd|log|sh|sql|settings|gitignore|project|package.xml)$">
 	Order Allow,Deny
 	Deny from all
 </FilesMatch>
@@ -297,4 +302,5 @@ RewriteRule sample.admin_panel.xml	-	[F]
 #	Perhaps you need to comment out -d from here or not, depends on your website
 RewriteCond %{REQUEST_FILENAME} !-f
 #RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule .? %{ENV:__AMSLIB_ROUTER_ACTIVE__}amslib_router.php?routed=true&__AMSLIB_ROUTER_ACTIVE__=%{ENV:__AMSLIB_ROUTER_ACTIVE__} [L,QSA]
+RewriteCond %{REQUEST_FILENAME} !%{ENV:__SCRIPT__}$ [NC]
+RewriteRule ^(.*)$ %{ENV:__WEBSITE_ROOT__}%{ENV:__SCRIPT__}?__WEBSITE_ROOT__=%{ENV:__WEBSITE_ROOT__} [L,QSA]
