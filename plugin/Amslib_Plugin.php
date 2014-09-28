@@ -801,7 +801,7 @@ class Amslib_Plugin
 			if($c["tag"] == "include"){
 				Amslib::addIncludePath(Amslib_File::absolute($v));
 			}else{
-				Amslib_Plugin::setPath($c["tag"],$v);
+				Amslib_Website::setPath($c["tag"],$v);
 
 				switch($c["tag"]){
 					case "plugin":{
@@ -1139,8 +1139,8 @@ class Amslib_Plugin
 
 		//	NOTE:	(05/05/2014) why the duplicated name....or more or less
 		//			duplicated, obviously I have old code to fix
-		self::setPath("plugin",$location);
-		self::setPath("current_plugin",$this->location);
+		Amslib_Website::setPath("plugin",$location);
+		Amslib_Website::setPath("current_plugin",$this->location);
 	}
 
 	/**
@@ -1204,22 +1204,13 @@ class Amslib_Plugin
 	}
 
 	/**
-	 * 	method:	setPath
-	 *
-	 * 	todo: write documentation
-	 */
-	static protected function setPath($name,$path)
-	{
-		Amslib_Website::setPath($name,$path);
-	}
-
-	/**
 	 * 	method:	expandPath
 	 *
 	 * 	todo: write documentation
 	 */
 	static public function expandPath($path)
 	{
+		//	NOTE: this doesn't happen anymore, I think I got rid of this idea because it was never used
 		//	Loop through all the paths given in the htaccess file and attempt to replace them
 		foreach(Amslib_Router::listPaths() as $key){
 			$path = str_replace($key, Amslib_Router::getPath($key), $path);
@@ -1228,5 +1219,15 @@ class Amslib_Plugin
 		$path = Amslib_Website::expandPath($path);
 
 		return Amslib_File::reduceSlashes($path);
+	}
+
+	////////////////////////////////////////////////
+	//	DEPRECATED METHODS BELOW
+	////////////////////////////////////////////////
+	static private function ____DEPRECATED_METHODS_BELOW(){}
+
+	static protected function setPath($name,$path)
+	{
+		Amslib_Website::setPath($name,$path);
 	}
 }
