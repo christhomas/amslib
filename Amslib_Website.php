@@ -142,6 +142,12 @@ class Amslib_Website
 	 */
 	static public function rel($url="",$resolve=false)
 	{
+		if(!is_string($url)){
+			Amslib_Debug::log("stack_trace",$url);
+
+			return false;
+		}
+
 		if(strpos($url,"://") !== false){
 			$l = list($protocol,$domain,$url) = self::parseURL($url);
 
@@ -188,7 +194,7 @@ class Amslib_Website
 		$url = self::rel($url);
 		$url = str_replace(self::$location,"","/$url/");
 
-		return self::reduceSlashes("/$url/");
+		return self::reduceSlashes("/$url");
 	}
 
 	static public function parseURL($url)
