@@ -20,7 +20,7 @@ RewriteEngine On
 #	Some basic variables that you can change here to affect the rest
 #	of the htaccess file without digging around for the properties
 # ----------------------------------------------------------------------
-RewriteRule ^(.*) - [E=__SCRIPT__:amslib_router.php]
+RewriteRule ^(.*) - [E=__SCRIPT__:__website/amslib_router.php]
 
 # enable debugging when you're on any specific domain
 RewriteRule ^(.*) - [E=ENABLE_DEBUG:0]
