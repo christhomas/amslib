@@ -250,10 +250,15 @@ class Amslib_File
 	 */
 	static public function getFileExtension($filename)
 	{
-		$part	=	explode(".",$filename);
-		$last	=	end($part);
+		$part = explode(".",$filename);
 
-		return strtolower($last);
+		if(count($part) > 1){
+			$last = end($part)
+
+			return strtolower($last);
+		}
+
+		return false;
 	}
 
 	/**

@@ -440,6 +440,13 @@ class Amslib_Router
 	 */
 	static public function getRoute($name=NULL,$group=NULL,$domain=NULL)
 	{
+		//	NOTE:	If you request a route using the array syntax, such as
+		//			array("myroute",$param1,$param2) that would normally result
+		//			in /myroute/$param1/$param2, then this code won't work unless
+		//			we only search the route based on the first parameter, so lets
+		//			do that and discard the parameters whilst searching
+		if(is_array($name)) $name = current($name);
+
 		//	if there was no name, surely you mean return the current route
 		if($name == NULL) return self::$route;
 

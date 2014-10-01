@@ -1216,9 +1216,7 @@ class Amslib_Plugin
 			$path = str_replace($key, Amslib_Router::getPath($key), $path);
 		}
 
-		$path = Amslib_Website::expandPath($path);
-
-		return Amslib_File::reduceSlashes($path);
+		return Amslib_Website::expandPath($path);
 	}
 
 	////////////////////////////////////////////////

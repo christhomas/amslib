@@ -192,7 +192,12 @@ class Amslib_Website
 	static public function web($url="")
 	{
 		$url = self::rel($url);
-		$url = str_replace(self::$location,"","/$url/");
+
+		$extension = Amslib_File::getFileExtension(basename($url));
+
+		$url = "/$url".($extension ? "" : "/");
+
+		$url = str_replace(self::$location,"",$url);
 
 		return self::reduceSlashes("/$url");
 	}
