@@ -886,13 +886,16 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		if(!is_string($id)) return false;
 
-		//	Step 1: Is the image absolute, beginning with http?
+		//	Step 1: Expand any recognised tokens in the path
+		$path = Amslib_Website::expandPath($id);
+
+		//	Step 2: Is the image absolute, beginning with http?
 		if(strpos($id,"http") === 0) return $id;
 
-		//	Step 2: find the image inside the plugin
+		//	Step 3: find the image inside the plugin
 		if(isset($this->images[$id])) return $this->images[$id];
 
-		//	Step 3: find the image relative to the website base (perhaps it's a path)
+		//	Step 4: find the image relative to the website base (perhaps it's a path)
 		$path = Amslib_Website::abs($this->location."/".$id);
 
 		if(file_exists($path)){

@@ -8,7 +8,7 @@
 
 	<title>AMSLIB: <?=$api->getValue("title")?></title>
 
-	<link rel="shortcut icon" href="<?=$api->getImage("favicon.ico")?>" />
+	<link rel="shortcut icon" href="<?=$api->getImage("/__website/resources/favicon.ico")?>" />
 
 	<?=Amslib_Resource::getStylesheet()?>
 	<?=Amslib_Resource::getJavascript()?>

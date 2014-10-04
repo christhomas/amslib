@@ -99,7 +99,8 @@ class Amslib_Plugin
 	protected function findResource($resource,$absolute=false)
 	{
 		//	If the resource has an attribute "absolute" don't process it, return it directly
-		if($absolute) return $resource;
+		//	An absolute resource will also have a protocol token inside the string
+		if($absolute || strpos($resource,"://") !== false) return $resource;
 
 		$location	=	$this->getLocation();
 

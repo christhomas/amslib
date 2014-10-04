@@ -154,9 +154,9 @@ class Amslib_Debug
 			//$data[] = self::dump($stack);
 		}
 
-		error_log("[DEBUG] $function, ".implode(", ",$data));
+		error_log($log = "[DEBUG] $function, ".implode(", ",$data));
 
-		return array("function"=>$function,"data"=>$data);
+		return array("function"=>$function,"data"=>$data,"log"=>$log);
 	}
 
 	/**
