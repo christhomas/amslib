@@ -26,6 +26,8 @@ class Amslib_Webservice_Request
 	protected $params;
 	protected $sharedSession;
 	protected $debug;
+	protected $username;
+	protected $password;
 
 	public function __construct($url,$params=array(),$sharedSession=false)
 	{
@@ -33,6 +35,8 @@ class Amslib_Webservice_Request
 		$this->setParams($params);
 		$this->setSharedSessionState($sharedSession);
 		$this->setDebugState(false);
+		//	Reset the authorisation to turn it off
+		$this->setBasicAuthorisation();
 	}
 
 	public function setDebugState($state)
@@ -53,6 +57,17 @@ class Amslib_Webservice_Request
 	public function setSharedSessionState($state)
 	{
 		$this->sharedSession = $state;
+	}
+
+	public function setBasicAuthorisation($username=NULL,$password=NULL)
+	{
+		$this->username = NULL;
+		$this->password = NULL;
+
+		if(is_string($username) && strlen($username) && is_string($password) && strlen($password)){
+			$this->username = $username;
+			$this->password = $password;
+		}
 	}
 
 	public function execute($raw=false)
@@ -89,6 +104,10 @@ class Amslib_Webservice_Request
 
 			$params = http_build_query(Amslib_Array::valid($this->params));
 
+			if($this->username && $this->password){
+				curl_setopt($curl,CURLOPT_USERPWD,"$this->username:$this->password");
+			}
+
 			curl_setopt($curl,CURLOPT_URL,				$this->url);
 			curl_setopt($curl,CURLOPT_POST,				true);
 			curl_setopt($curl,CURLOPT_HTTP_VERSION,		1.0);
@@ -97,6 +116,7 @@ class Amslib_Webservice_Request
 			curl_setopt($curl,CURLOPT_POSTFIELDS,		$params);
 
 			$reply = curl_exec($curl);
+
 			if(!$reply || !strlen($reply)){
 				Amslib_Debug::log("CURL ERROR",curl_error($curl),Amslib_Debug::dump($reply));
 				curl_close($curl);
