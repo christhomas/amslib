@@ -28,6 +28,7 @@
 			<src>/</src>
 			<resource>Skeleton</resource>
 			<parameter id="plugin">application</parameter>
+			<parameter id="template">Home</parameter>
 		</path>
 	</router>
 </package>
