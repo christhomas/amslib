@@ -14,6 +14,66 @@ main{
 	justify-content: center;
 }
 
-main img{
-	margin-right: 2rem;
+section .img-area,
+section .txt-area{
+	float: left;
+}
+
+section .img-area{
+	width: 25%;
+	margin-left: 10%;
+	margin-right: 5%;
+	margin-top: 2rem;
+	text-align: right;
+}
+
+section .txt-area{
+	width: 50%;
+	margin-right: 10%;
+}
+
+section h2{
+	font-size: 1.8rem;
+	font-style: italic;
+}
+
+@media screen and (max-width:768px) and (orientation:portrait){
+	section{
+		text-align: center;
+	}
+	
+	section .img-area{
+		text-align: center;
+		width: 100%;
+		margin: 0;
+	}
+	
+	section .img-area img{
+		display: inline-block;
+		margin: 0;
+		max-height: 20rem;
+	}
+	
+	section .txt-area{
+		margin: 0;
+		width: 100%;
+		padding: 0 10%;<main class>​
+	}
+}
+
+@media screen and (max-width:768px) and (orientation:landscape){
+	section .img-area{
+		float: left;
+		width: 20%;
+		text-align: center;
+	}
+	
+	section .img-area img{
+		max-height: 10rem;
+	}
+	
+	section .txt-area{
+		float: left;
+		width: 55%;
+	}	
 }
