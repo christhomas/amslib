@@ -34,12 +34,111 @@
  *
  * 	todo: write documentation
  */
-class Amslib_Database_PDO extends Amslib_Database
-{
-	/**
+
+	/**		Jedi says:
 	 * -	We need to look at the mysql code and figure out how to reimplement the same api here
 	 * -	If we are creating a lot of shadow methods, we need to look at how to use the mixin object
 	 * -	But in order to do this, perhaps the mixin object needs to change how it is implemented to be more generic
 	 * -	Although I need to figure out whether I should inherit from PDO, or wrap it up, I'm favouring wrapping it
 	 */
+
+
+class Amslib_Database_PDO extends Amslib_Database
+{
+	var $db_type;
+	
+	public function __construct($connect=true)
+	{
+		parent::__construct();
+	
+		$this->errors = array();
+	
+		//	TODO: we should implement a try/catch block to easily catch disconnected databases
+		if($connect) $this->connect();
+	}
+	
+	public function getInstance()
+	{
+		static $instance = NULL;
+	
+		if($instance === NULL) $instance = new self();
+	
+		return $instance;
+	}
+	
+	public function connect($details=false)
+	{
+		$this->db_type = $DB_TYPE;
+		$details = $this->getConnectionDetails();
+		$server = $details['server'];
+		$username = $details['username'];
+		$password =  $details['password'];
+		$database = $details['database'];
+		$dns = "mysql:host=$server:$database";
+		
+		try {
+			$this->connection = new PDO( $dns, $username, $password );
+		} catch ( Exception $e ) {
+			echo "Impossible to connect to the Mysql Database : ", $e->getMessage();
+			die();
+		}		
+	}
+	
+	function lastInsertRowId() {
+		switch($this->db_type) {
+			case 'SQLITE':
+				return $this->connect()->lastInsertRowId();
+			case 'MYSQL':
+				return mysql_insert_id($this->db);
+		}
+	}
+
+	public function query($query){
+		$this->setLastQuery($query);
+		
+		$results = $this->connection->query($query);
+		$this->setDebugOutput($query);
+		return $results->fetchAll();
+	}
+	
+	/* this select and returns the typical MySQL array in Amslib_Database_MySQL */
+	public function select($query,$numResults=0,$optimise=false){
+		$query ="select $query";
+		$this->setLastQuery($query);
+		
+		if($numResults == 0) $numResults = PHP_INT_MAX;
+		$results = $this->connection->query($query);
+		$this->setDebugOutput($query);
+		return $results->fetchAll();
+	}
+	
+	/**
+	 * 	method:	beginTransaction
+	 *
+	 * 	todo: write documentation
+	 */
+	public function beginTransaction()
+	{
+		return $this->connection->beginTransaction();
+	}
+	
+	/**
+	 * 	method:	commitTransaction
+	 *
+	 * 	todo: write documentation
+	 */
+	public function commitTransaction()
+	{
+		return $this->connection->commit();
+	}
+	
+	/**
+	 * 	method:	rollbackTransaction
+	 *
+	 * 	todo: write documentation
+	 */
+	public function rollbackTransaction()
+	{
+		return $this->connection->rollBack();
+	}
 }
