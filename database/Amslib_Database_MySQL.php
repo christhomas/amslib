@@ -157,6 +157,8 @@ class Amslib_Database_MySQL extends Amslib_Database
 	public function escape($value)
 	{
 		if($value === NULL)		return $value;
+		//check if a string contains an integer representation and convert it into an integer
+		if((string)(int)$value == $value) return (int)$value;
 		//	Simple numeric checks to quickly escape them without using the mysql functionality
 		if(is_int($value))		return intval($value);
 		if(is_bool($value))		return intval($value);
