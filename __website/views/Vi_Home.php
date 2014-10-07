@@ -1,7 +1,11 @@
 <section>
-	<img class="pull-left" src="<?=$api->getImage("/__website/resources/logo.png")?>" alt="Antimatter Studios" />
+	<div class="img-area">
+		<img class="img-responsive" src="<?=$api->getImage("/__website/resources/logo.png")?>" alt="Antimatter Studios" />
+	</div>
 
-	<h1>We are running the amslib framework website</h1>
+	<div class="txt-area">
+		<h1>We are running the amslib framework website</h1>
 
-	<h2><i>Coming soon, in time we'll fill this with content</i></h2>
+		<h2>Coming soon, in time we'll fill this with content</h2>
+	</div>
 </section>
