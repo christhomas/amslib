@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contributors/Author:
- *    {Christopher Thomas} - Creator - chris.thomas@antimatter-studios.com
+ *    {Alfonso Fernandez-Ocampo} - Author = afernandezocampo@gmail.com
  *
  *******************************************************************************/
 
@@ -45,27 +45,27 @@
 
 class Amslib_Database_PDO extends Amslib_Database
 {
-	var $db_type;
-	
+	var $db_type; // <-= BAD ALFONSO!!! class members ALWAYS have an access type, protected, public or private
+
 	public function __construct($connect=true)
 	{
 		parent::__construct();
-	
+
 		$this->errors = array();
-	
+
 		//	TODO: we should implement a try/catch block to easily catch disconnected databases
 		if($connect) $this->connect();
 	}
-	
+
 	public function getInstance()
 	{
 		static $instance = NULL;
-	
+
 		if($instance === NULL) $instance = new self();
-	
+
 		return $instance;
 	}
-	
+
 	public function connect($details=false)
 	{
 		$this->db_type = $DB_TYPE;
@@ -75,15 +75,15 @@ class Amslib_Database_PDO extends Amslib_Database
 		$password =  $details['password'];
 		$database = $details['database'];
 		$dns = "mysql:host=$server:$database";
-		
+
 		try {
 			$this->connection = new PDO( $dns, $username, $password );
 		} catch ( Exception $e ) {
 			echo "Impossible to connect to the Mysql Database : ", $e->getMessage();
 			die();
-		}		
+		}
 	}
-	
+
 	function lastInsertRowId() {
 		switch($this->db_type) {
 			case 'SQLITE':
@@ -95,23 +95,23 @@ class Amslib_Database_PDO extends Amslib_Database
 
 	public function query($query){
 		$this->setLastQuery($query);
-		
+
 		$results = $this->connection->query($query);
 		$this->setDebugOutput($query);
 		return $results->fetchAll();
 	}
-	
+
 	/* this select and returns the typical MySQL array in Amslib_Database_MySQL */
 	public function select($query,$numResults=0,$optimise=false){
 		$query ="select $query";
 		$this->setLastQuery($query);
-		
+
 		if($numResults == 0) $numResults = PHP_INT_MAX;
 		$results = $this->connection->query($query);
 		$this->setDebugOutput($query);
 		return $results->fetchAll();
 	}
-	
+
 	/**
 	 * 	method:	beginTransaction
 	 *
@@ -121,7 +121,7 @@ class Amslib_Database_PDO extends Amslib_Database
 	{
 		return $this->connection->beginTransaction();
 	}
-	
+
 	/**
 	 * 	method:	commitTransaction
 	 *
@@ -131,7 +131,7 @@ class Amslib_Database_PDO extends Amslib_Database
 	{
 		return $this->connection->commit();
 	}
-	
+
 	/**
 	 * 	method:	rollbackTransaction
 	 *
