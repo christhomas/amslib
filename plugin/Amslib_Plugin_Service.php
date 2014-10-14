@@ -669,10 +669,16 @@ class Amslib_Plugin_Service
 	{
 		$plugin = self::pluginToName($plugin);
 
-		if($name == NULL && is_array($value)){
-			$this->data[$plugin][self::SD] = $value;
-		}else{
+		if($name == NULL){
+			if(is_array($value)){
+				$this->data[$plugin][self::SD] = $value;
+			}else{
+				Amslib_Debug::log(__METHOD__,"value was invalid array",$value);
+			}
+		}else if(is_numeric($name) || is_string($name)){
 			$this->data[$plugin][self::SD][$name] = $value;
+		}else{
+			Amslib_Debug::log(__METHOD__,"name was invalid",$name);
 		}
 	}
 
