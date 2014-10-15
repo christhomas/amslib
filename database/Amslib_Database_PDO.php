@@ -45,7 +45,7 @@
 
 class Amslib_Database_PDO extends Amslib_Database
 {
-	var $db_type; // <-= BAD ALFONSO!!! class members ALWAYS have an access type, protected, public or private
+	protected $db_type;
 
 	public function __construct($connect=true)
 	{
