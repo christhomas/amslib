@@ -288,7 +288,7 @@ class Amslib_Debug
 	{
 		if($state){
 			ini_set("display_errors",$state);
-			error_reporting(E_ALL);
+			error_reporting(-1);
 		}else{
 			ini_set("display_errors",$state);
 			error_reporting(intval($state));
