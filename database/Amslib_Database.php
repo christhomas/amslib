@@ -689,7 +689,9 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function connect($details=false)
 	{
+		Amslib_Debug::log("stack_trace");
 		//	What is $DB_TYPE ? it's not specified ANYWHERE.....probably this code will fail really badly...
+		//	chris: I just tested this code, omg, fails the first attempt, how did you ever use this code?
 		$this->db_type	=	$DB_TYPE;
 		//	chris: alfonso, so you ignore the $details parameter I pass in here completely and just use your own?
 		$details		=	$this->getConnectionDetails();

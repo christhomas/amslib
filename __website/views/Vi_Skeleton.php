@@ -6,7 +6,7 @@
     <meta name="description" content="A sample template using the amslib framework">
     <meta name="author" content="chris thomas, antimatter studios">
 
-	<title>AMSLIB: <?=$api->getValue("title")?></title>
+	<title>Amslib Framework</title>
 
 	<link rel="shortcut icon" href="<?=$api->getImage("/__website/favicon/favicon.ico")?>" type="image/x-icon" />
 	<link rel="apple-touch-icon" href="<?=$api->getImage("/__website/favicon/apple-touch-icon.png")?>" />
