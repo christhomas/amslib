@@ -324,7 +324,9 @@ class Amslib_Plugin
 					$cache = call_user_func(array($object["value"],"getInstance"));
 				}else{
 					//	your object was not a compatible singleton, we need to find the getInstance method
-					die(str_replace("__ERROR__","find the getInstance method in the API object '{$object["value"]}'",$error));
+					$message = str_replace("__ERROR__","find the getInstance method in the API object '{$object["value"]}'",$error);
+					Amslib_Debug::log(__METHOD__,$message);
+					die($message);
 				}
 			}else{
 				//	yay! we have a proper object
