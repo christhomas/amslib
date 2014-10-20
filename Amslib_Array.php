@@ -98,7 +98,8 @@ class Amslib_Array
 	/**
 	 * 	method:	isMulti
 	 *
-	 * 	todo: write documentation
+	 * 	Check the array is a multidimensional array or not
+	 *  returns true if multi, false if not
 	 */
 	static public function isMulti($array)
 	{
