@@ -34,17 +34,10 @@
  *
  * 	todo: write documentation
  */
-class Amslib_Database_MySQL extends Amslib_Database_MySQL_DEPRECATED
+class Amslib_Database_MySQL extends Amslib_Database
 {
-	protected $selectHandle	=	false;
-	protected $selectStack	=	array();
-
 	const FETCH_ASSOC		=	"mysql_fetch_assoc";
 	const FETCH_ARRAY		=	"mysql_fetch_array";
-
-	/******************************************************************************
-	 *	PUBLIC MEMBERS
-	 *****************************************************************************/
 
 	/**
 	 * 	method:	__construct
@@ -89,52 +82,6 @@ class Amslib_Database_MySQL extends Amslib_Database_MySQL_DEPRECATED
 	public function isHandle($handle)
 	{
 		return $handle && is_resource($handle) && stristr($handle, "mysql");
-	}
-
-	public function setHandle($handle)
-	{
-		return $this->isHandle($handle)
-			? ($this->selectHandle = $handle)
-			: false;
-	}
-
-	public function getHandle()
-	{
-		return $this->selectHandle;
-	}
-
-	public function pushHandle($handle=NULL,$returnHandle=true)
-	{
-		if($handle === NULL) $handle = $this->getHandle();
-
-		if(!$this->isHandle($handle)) return false;
-
-		$this->selectStack[] = $handle;
-
-		//	Return the handle, or the index where it was added
-		return $returnHandle ? $handle : count($this->selectStack)-1;
-	}
-
-	public function popHandle($index=NULL)
-	{
-		if($index !== NULL && !is_numeric($index) && !isset($this->selectStack[$index])){
-			return false;
-		}
-
-		if($index === NULL){
-			return array_pop($this->selectStack);
-		}
-
-		$handle = $this->selectStack[$index];
-		unset($this->selectStack[$index]);
-		return $handle;
-	}
-
-	public function restoreHandle($index=NULL)
-	{
-		$handle = $this->popHandle($index);
-
-		return $this->setHandle($handle);
 	}
 
 	/**
@@ -230,39 +177,13 @@ class Amslib_Database_MySQL extends Amslib_Database_MySQL_DEPRECATED
 		$value = mysql_real_escape_string($value);
 		$error = ob_get_clean();
 
-		if(!strlen($error)){
+		if(strlen($error)){
 			//	I'm not sure what I should do here, so I'll just log whatever
 			//	it outputs and improve the error control when I find out what I am dealing with
 			$this->debug(__METHOD__,$error);
 		}
 
 		return $value;
-	}
-
-	/**
-	 * 	method:	unescape
-	 *
-	 * 	todo: write documentation
-	 *
-	 * 	note: this is generic functionality, it's not mysql specific
-	 */
-	public function unescape($results,$keys="")
-	{
-		if(!$results || !is_array($results)) return $results;
-
-		if(Amslib_Array::isMulti($results)){
-			if($keys == "") $keys = array_keys(current($results));
-
-			foreach($results as &$r){
-				$r = Amslib_Array::stripSlashesSingle($r,$keys);
-			}
-		}else{
-			if($keys == "") $keys = array_keys($results);
-
-			$results = Amslib_Array::stripSlashesSingle($results,$keys);
-		}
-
-		return $results;
 	}
 
 	/**
@@ -303,46 +224,6 @@ class Amslib_Database_MySQL extends Amslib_Database_MySQL_DEPRECATED
 	}
 
 	/**
-	 * 	method:	fixColumnEncoding
-	 *
-	 * 	todo: write documentation
-	 *
-	 * 	note: this method isn't really mysql specific, apart from calling select, escape and update, these could be API specific but they are abstracted anyway
-	 */
-	public function fixColumnEncoding($src,$dst,$table,$primaryKey,$column)
-	{
-		$encoding_map = array(
-			"latin1"	=>	"latin1",
-			"utf8"		=>	"utf-8"
-		);
-
-		if(!isset($encoding_map[$src])) return false;
-		if(!isset($encoding_map[$dst])) return false;
-
-		$this->setEncoding($src);
-		$data = $this->select("$primaryKey,$column from $table");
-
-		if(!empty($data)){
-			$this->setEncoding($dst);
-
-			$ic_src = $encoding_map[$src];
-			$ic_dst = $encoding_map[$dst];
-
-			foreach($data as $c){
-				$string = iconv($ic_src,$ic_dst,$c[$column]);
-
-				if($string && is_string($string) && strlen($string)){
-					$string = $this->escape($string);
-
-					$this->update("$table set $column='$string' where $primaryKey='{$c[$primaryKey]}'");
-				}
-			}
-
-			return true;
-		}
-	}
-
-	/**
 	 * method:	getRealResultCount
 	 *
 	 * Obtain a real row count from the previous query, if you use limit and want to know how many
@@ -368,46 +249,6 @@ class Amslib_Database_MySQL extends Amslib_Database_MySQL_DEPRECATED
 		$this->popHandle();
 
 		return $count;
-	}
-
-	/**
-	 * method: hasTable
-	 *
-	 * Find out whether the connected mysql database has a table on the database given
-	 * this is useful for determining whether a database can support certain functionality
-	 * or not
-	 *
-	 * parameters:
-	 * 	$database	-	The database to check for the table
-	 * 	$table		-	The table to check for
-	 *
-	 * returns:
-	 * 	A boolean true or false result, depending on the existence of the table
-	 *
-	 * note:	perhaps I should split all of these "db structure" methods into a separate object
-	 * 			but to do that, then you'd need to use this object to acquire the structure object
-	 * 			since it would require a database connection, so it'd have to clone the connection
-	 */
-	public function hasTable($database,$table)
-	{
-		$database	=	$this->escape($database);
-		$table		=	$this->escape($table);
-
-$query=<<<HAS_TABLE
-			COUNT(*)
-		from
-			information_schema.tables
-		where
-			table_schema = '$database' and table_name='$table'
-HAS_TABLE;
-
-		$result = $this->select($query,1);
-
-		if(isset($result["COUNT(*)"])){
-			return $result["COUNT(*)"] ? true : false;
-		}
-
-		return false;
 	}
 
 	/**
@@ -531,29 +372,6 @@ HAS_TABLE;
 	}
 
 	/**
-	 * method: selectColumn
-	 *
-	 * Obtain a single column from the result of an SQL query, optionally optimised
-	 * to a single value if there is only one result.
-	 *
-	 * operations:
-	 * 	-	do the sql query
-	 * 	-	if the column parameter is a string, pluck that column from each result
-	 * 	-	if there is only one result and optimisation was requested, make the first array value as the return value
-	 * 	-	return the final value, either an array of values for that column, or a single variable containing the first value
-	 */
-	public function selectColumn($query,$column=false,$numResults=0,$optimise=false)
-	{
-		$result = $this->select($query,$numResults,$optimise);
-
-		if(is_string($column)) $result = Amslib_Array::pluck($result,$column);
-
-		if(count($result) == 1 && $optimise) $result = current($result);
-
-		return $result;
-	}
-
-	/**
 	 * 	method:	selectField
 	 *
 	 * 	todo: write documentation
@@ -597,45 +415,6 @@ $query=<<<QUERY
 QUERY;
 
 		return $this->select($query);
-	}
-
-	/**
-	 * 	method:	selectValue
-	 *
-	 * 	todo: write documentation
-	 *
-	 * 	notes:
-	 * 		Anxo has explained that perhaps it's unnecessary that in the query to put the field if you are going to put
-	 * 		the field you want in the first parameter, so in the query you can just put a "$field $query" and it'll
-	 * 		select only what you want, without duplication.  He's clever sometimes.
-	 */
-	public function selectValue($field,$query,$numResults=0,$optimise=false)
-	{
-		$field	=	trim($field);
-		$values	=	$this->select($query,$numResults,$optimise);
-
-		if($numResults == 1 && $optimise){
-			return isset($values[$field]) ? $values[$field] : NULL;
-		}
-
-		//	TODO: This hasn't been tested yet, it might not return exactly what I want
-		if($numResults != 1 && !$optimise){
-			//	FIXME? Why am I optimising the array, when optimise is being tested for false?
-			//	NOTE: I think the reason I never found this issue before was I always using 1,true for numResults/optimise
-			return Amslib_Array::pluck($values,$field);
-		}
-
-		return $values;
-	}
-
-	/**
-	 * 	method:	selectRow
-	 *
-	 * 	todo: write documentation
-	 */
-	public function selectRow($query)
-	{
-		return $this->select($query,1,true);
 	}
 
 	/**

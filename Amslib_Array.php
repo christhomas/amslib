@@ -100,6 +100,15 @@ class Amslib_Array
 	 *
 	 * 	Check the array is a multidimensional array or not
 	 *  returns true if multi, false if not
+	 *
+	 *  notes:
+	 *  	-	It's quite hard to know whether an array is an array containing results which are
+	 *  		interesting, say an array of SQL rows, all containing various fields, or whether
+	 *  		an array is just a normal array which may contain an array, but is not multi-dimensional
+	 *  	-	This method simplifies this a lot, but may present issues in itself, because it
+	 *  		basically considers an array to be multidimensional, IF and ONLY IF, the array
+	 *  		being tested, contains a single type of data "array", but this is ignoring quite
+	 *  		a few types of array I can think of which are still multidimensional
 	 */
 	static public function isMulti($array)
 	{

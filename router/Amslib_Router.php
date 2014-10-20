@@ -841,7 +841,7 @@ class Amslib_Router
 			$data	= Amslib_File::getContents($import["url_full"],$error);
 
 			if(strlen($error)){
-				Amslib_Debug::log("FAILED TO IMPORT ROUTER IN JSON FORMAT, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
+				Amslib_Debug::log("FAILED TO IMPORT ROUTER IN JSON FORMAT, OR OTHER PROBLEM DETECTED",$error,error_get_last());
 			}
 
 			$data	= json_decode($data,true);
@@ -862,7 +862,7 @@ class Amslib_Router
 			$data	= Amslib_File::getContents($import["url_full"],$error);
 
 			if(strlen($error)){
-				Amslib_Debug::log("FAILED TO IMPORT ROUTER IN XML FORMAT, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
+				Amslib_Debug::log("FAILED TO IMPORT ROUTER IN XML FORMAT, OR OTHER PROBLEM DETECTED",$error,error_get_last());
 			}
 
 			//	TODO: implement the logic to import from XML
