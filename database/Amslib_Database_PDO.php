@@ -42,6 +42,9 @@
 	 * -	Although I need to figure out whether I should inherit from PDO, or wrap it up, I'm favouring wrapping it
 	 */
 
+/**
+ * chris: alfonso, I'm not going to fix this object, I'll let you do it and I'll tell you what you need to fix
+ */
 
 class Amslib_Database_PDO extends Amslib_Database
 {
@@ -49,15 +52,12 @@ class Amslib_Database_PDO extends Amslib_Database
 
 	public function __construct($connect=true)
 	{
-		parent::__construct();
+		parent::__construct($connect);
 
 		$this->errors = array();
-
-		//	TODO: we should implement a try/catch block to easily catch disconnected databases
-		if($connect) $this->connect();
 	}
 
-	public function getInstance()
+	static public function getInstance()
 	{
 		static $instance = NULL;
 
@@ -68,6 +68,7 @@ class Amslib_Database_PDO extends Amslib_Database
 
 	public function connect($details=false)
 	{
+		//	What is $DB_TYPE ? it's not specified ANYWHERE.....
 		$this->db_type = $DB_TYPE;
 		$details = $this->getConnectionDetails();
 		$server = $details['server'];
@@ -75,8 +76,12 @@ class Amslib_Database_PDO extends Amslib_Database
 		$password =  $details['password'];
 		$database = $details['database'];
 		$dns = "mysql:host=$server:$database";
+		//	chris: perhaps better to do this no? less useless variables that are only used once and then thrown away
+		//$dns = "mysql:host={$details["server"]}:{$details["database"]}";
 
 		try {
+			//	chris: and also
+			//	$this->connection = new PDO($dns,$details["username"],$details["password"]);
 			$this->connection = new PDO( $dns, $username, $password );
 		} catch ( Exception $e ) {
 			echo "Impossible to connect to the Mysql Database : ", $e->getMessage();

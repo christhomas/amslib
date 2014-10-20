@@ -37,45 +37,24 @@
  * 		write documentation
  *
  */
-class Amslib_Database
+class Amslib_Database extends Amslib_Database_DEPRECATED
 {
-/******************************************************************************
- *	PRIVATE MEMBERS
- *
- *	These members are for private use only, if you have to use
- *	them yourself in the higher layers, maybe it's because you're DOING_IT_WRONG
- *
- *	NOTE: they are not converted to private yet because they are being
- *	explored for possible problems
- *****************************************************************************/
-	private static $sharedConnection	=	false;
+	protected $lastQuery		=	array();
+	protected $lastResult		=	array();
+	protected $lastInsertId		=	0;
 
-	protected $lastResult				=	array();
+	protected $debugState		=	false;
+	protected $errors			=	array();
+	protected $errorState		=	true;
+	protected $errorCount		=	100;
 
-	protected $lastInsertId			=	0;
-
-	protected $lastQuery				=	array();
-
-	protected $debug					=	false;
-	protected $errorState				=	true;
-
-	protected $selectResult			=	false;
-	protected $storeSearchResult		=	false;
-
-	protected $seq						=	0;
-
-	protected $errors					=	array();
-	protected $maxErrorCount			=	100;
-
-	//	NOTE: do I use this for anything?
-	protected $databaseName			=	false;
+	/**
+	 * 	variable:	$table
+	 * 	type:		array
+	 *
+	 * 	An array of table names, each key returns the actual name in the database
+	 */
 	protected $table					=	array();
-
-	protected $connection_details	=	false;
-
-/******************************************************************************
- *	PROTECTED MEMBERS
- *****************************************************************************/
 
 	/**
 	 * 	boolean: connection
@@ -88,7 +67,25 @@ class Amslib_Database
 	 *
 	 * 	FIXME: The description of this member is incorrect
 	 */
-	protected $connection = false;
+	protected $connection				=	false;
+	protected $connection_details		=	false;
+
+	/**
+	 * 	method: debug
+	 *
+	 * 	todo: write documentation
+	 */
+	protected function debug($va_args)
+	{
+		$va_args = func_get_args();
+
+		if(empty($va_args)) return;
+
+		//	Logging debug or query information is only allowed when debug is enabled
+		if(in_array($va_args[0],array("DEBUG","QUERY")) && !$this->debugState) return;
+
+		return call_user_func_array("Amslib_Debug::log",$va_args);
+	}
 
 	/**
 	 * 	method:	setLastQuery
@@ -102,16 +99,6 @@ class Amslib_Database
 	}
 
 	/**
-	 * 	method:	getLastTransactionId
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function getLastTransactionId()
-	{
-		return $this->lastInsertId;
-	}
-
-	/**
 	 * 	method:	getLastResult
 	 *
 	 * 	todo: write documentation
@@ -122,75 +109,58 @@ class Amslib_Database
 	}
 
 	/**
+	 * 	method:	getLastInsertId
+	 *
+	 * 	todo: write documentation
+	 */
+	protected function getLastInsertId()
+	{
+		return $this->lastInsertId;
+	}
+
+	/**
 	 * 	method:	__construct
 	 *
 	 * 	todo: write documentation
 	 */
-	public function __construct()
+	public function __construct($connect=true)
 	{
-		$this->seq		=	0;
 		$this->table	=	array();
+		$this->errors	=	array();
+
+		//	TODO: we should implement a try/catch block to easily catch disconnected databases
+		if($connect) $this->connect();
 	}
 
 	/**
-	 * 	method:	setFetchMethod
+	 * method:	setTable
 	 *
-	 * 	todo: write documentation
-	 */
-	public function setFetchMethod($method)
-	{
-		if(function_exists($method)){
-			$this->fetchMethod = $method;
-		}
-	}
-
-	public function setConnectionDetails($details)
-	{
-		$s = $d = false;
-
-		if($details){
-			$v = new Amslib_Validator($details);
-			$v->add("username","text",true);
-			$v->add("password","text",true);
-			$v->add("database","text",true);
-			$v->add("server","text",true);
-			$v->add("encoding","text");
-
-			$s = $v->execute();
-			$d = $v->getValidData();
-		}
-
-		$this->connection_details = $s ? $d : false;
-	}
-
-	/**
-	 * 	method:	getConnectionDetails
+	 * Set the table name for this database object, or if there are two parameters, a key=>value arrangement allowing
+	 * you to abstract table names from the names referenced in the code
 	 *
-	 * 	todo: write documentation
+	 * parameters:
+	 * 	arg1	-	the name of the table, or the name of the key to use for this table
+	 * 	arg2	-	[optional] or the actual name of the table inside the database references by arg1 as the "key"
 	 */
-	public function getConnectionDetails()
+	public function setTable()
 	{
-		if($this->connection_details){
-			return $this->connection_details;
+		$args = func_get_args();
+		$args = call_user_func_array(array($this,"escape"),$args);
+
+		$c = count($args);
+
+		if($c == 1){
+			$this->table = $args[0];
+		}else if($c > 1){
+			$this->table[$args[0]] = $args[1];
 		}
-
-		die("(".basename(__FILE__)." / FATAL ERROR): getConnectionDetails was not defined in your database object, so connection attempt will fail");
-	}
-
-	/**
-	 * 	method:	setDebug
-	 *
-	 * 	todo: write documentation
-	 */
-	public function setDebug($state)
-	{
-		$this->debug = $state;
 	}
 
 	/**
 	 * 	method:	setErrorState
 	 *
 	 * 	todo: write documentation
+	 * 	NOTE: does anything use this now??
 	 */
 	public function setErrorState($state)
 	{
@@ -202,24 +172,43 @@ class Amslib_Database
 	}
 
 	/**
-	 * 	method:	setDBErrors
+	 * 	method:	setDebug
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setDBErrors($data,$error=NULL,$errno=NULL,$insert_id=NULL)
+	public function setDebugState($state)
 	{
-		$this->errors[] = array(
-				"db_failure"		=>	true,
-				"db_query"			=>	preg_replace('/\s+/',' ',$data),
-				"db_error"			=>	$error,
-				"db_error_num"		=>	$errno,
-				"db_last_insert"	=>	$this->lastInsertId,
-				"db_insert_id"		=>	$insert_id,
-				"db_location"		=>	Amslib_Debug::getStackTrace(0,true)
+		$this->debugState = !!$state;
+	}
+
+	/**
+	 * 	method:	setError
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setError($data)
+	{
+		//	Overload some default values just inc ase something failed
+		$args = func_get_args() + array(
+			"database not connected",
+			"database not connected",
+			-1
 		);
 
-		if(count($this->errors) > $this->maxErrorCount){
-			$this->errors = array_slice($this->errors,-($this->maxErrorCount));
+		$this->errors[] = array(
+			"db_failure"		=>	true,
+			"db_query"			=>	preg_replace('/\s+/',' ',$args[0]),
+			"db_error"			=>	$args[1],
+			"db_error_num"		=>	$args[2],
+			"db_last_insert"	=>	$this->lastInsertId,
+			"db_insert_id"		=>	$args[3],
+			//	HMM, not sure about this, i think better to just record a single line of
+			//	the trace, which will be in the method which generated the failure
+			"db_location"		=>	Amslib_Debug::getStackTrace(0,true)
+		);
+
+		if(count($this->errors) > $this->errorCount){
+			array_shift($this->errors);
 		}
 	}
 
@@ -234,7 +223,7 @@ class Amslib_Database
 	 * 	returns
 	 * 		An array, empty or otherwise, of all the errors that have occured in the system
 	 */
-	public function getDBErrors($clear=false)
+	public function getError($clear=true)
 	{
 		$errors = $this->errors;
 
@@ -254,69 +243,6 @@ class Amslib_Database
 	}
 
 	/**
-	 * 	method:	getSearchResultHandle
-	 *
-	 * 	todo: write documentation
-	 */
-	public function getSearchResultHandle()
-	{
-		return $this->selectResult;
-	}
-
-	/**
-	 * 	method:	storeSearchHandle
-	 *
-	 * 	todo: write documentation
-	 */
-	public function storeSearchHandle()
-	{
-		$this->storeSearchResult = $this->selectResult;
-
-		return $this->storeSearchResult;
-	}
-
-	/**
-	 * 	method:	restoreSearchHandle
-	 *
-	 * 	todo: write documentation
-	 */
-	public function restoreSearchHandle($searchResult=NULL)
-	{
-		if($searchResult && is_resource($searchResult) && stristr($searchResult, "mysql")){
-			$this->storeSearchResults = $searchResults;
-		}
-
-		if($this->storeSearchResult){
-			$this->selectResult = $this->storeSearchResult;
-		}
-
-		$this->storeSearchResult = false;
-	}
-
-	/**
-	 * method:	setTable
-	 *
-	 * Set the table name for this database object, or if there are two parameters, a key=>value arrangement allowing
-	 * you to abstract table names from the names referenced in the code
-	 *
-	 * parameters:
-	 * 	arg1	-	the name of the table, or the name of the key to use for this table
-	 * 	arg2	-	[optional] or the actual name of the table inside the database references by arg1 as the "key"
-	 */
-	public function setTable()
-	{
-		$args = func_get_args();
-
-		$c = count($args);
-
-		if($c == 1){
-			$this->table = $this->escape($args[0]);
-		}else if($c > 1){
-			$this->table[$this->escape($args[0])] = $this->escape($args[1]);
-		}
-	}
-
-	/**
 	 * 	method:	getConnectionStatus
 	 *
 	 * 	Return the status of the database connection
@@ -324,13 +250,11 @@ class Amslib_Database
 	 * 	returns:
 	 * 		-	Boolean true or false depending on whether the database logged in correctly or not
 	 */
-	public function getConnectionStatus()
+	public function isConnected()
 	{
 		if($this->connection) return true;
 
-		//	This is almost always a good idea!!
-		ini_set("display_errors",false);
-		error_log(__METHOD__.": DATABASE IS NOT CONNECTED");
+		$this->debug(__METHOD__.": DATABASE IS NOT CONNECTED");
 
 		return false;
 	}
@@ -355,7 +279,7 @@ class Amslib_Database
 	 */
 	public function setConnection($connection)
 	{
-		$this->connection = $connection;
+		return $this->connection = $connection;
 	}
 
 	/**
@@ -363,37 +287,64 @@ class Amslib_Database
 	 *
 	 * 	todo: write documentation
 	 */
-	public function copyConnection($database)
+	public function copyConnection($object)
 	{
-		if($database && method_exists($database,"getConnection")){
-			$this->setConnection($database->getConnection());
+		if($object && is_object($object) && method_exists($object,"getConnection")){
+			$this->setConnection($object->getConnection());
 		}
 
 		return $this->connection ? true : false;
 	}
 
-	/**
-	 * method: setSharedConnection
-	 *
-	 * A simple way to share a database connection without
-	 * having to pass the object around
-	 */
-	public static function setSharedConnection($databaseObject)
+	public function setConnectionDetails($details=NULL)
 	{
-		if(method_exists($databaseObject,"getConnection")){
-			self::$sharedConnection = $databaseObject;
+		$s = $d = false;
+
+		if($details){
+			$v = new Amslib_Validator($details);
+			$v->add("username","text",true);
+			$v->add("password","text",true);
+			$v->add("database","text",true);
+			$v->add("server","text",true);
+			$v->add("encoding","text",true,array("default"=>"utf8"));
+
+			$s = $v->execute();
+			$d = $v->getValidData();
 		}
+
+		$this->connection_details = $s ? $d : false;
+
+		return $this->getConnectionDetails();
 	}
 
 	/**
-	 * method: getSharedConnection
+	 * 	method:	getConnectionDetails
 	 *
-	 * Retrieve the shared database connection, this is useful
-	 * in scenarios where you need to simply share the object
-	 * but don't want to pass the object around
+	 * 	todo: write documentation
 	 */
-	public static function getSharedConnection()
+	public function getConnectionDetails()
 	{
-		return self::$sharedConnection;
+		if($this->connection_details){
+			$c = $this->connection_details;
+			$p = $c["password"];
+			unset($c["password"]);
+
+			return array($c,$p);
+		}
+
+		die("(".basename(__FILE__)." / FATAL ERROR): ".
+			"getConnectionDetails was not defined in your database object, ".
+			"so connection attempt will fail");
+	}
+
+	public static function sharedConnection($object=NULL)
+	{
+		static $shared = NULL;
+
+		if($object && is_object($object) && method_exists($object,"getConnection")){
+			$shared = $object;
+		}
+
+		return $shared;
 	}
 }

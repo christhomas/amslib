@@ -34,63 +34,13 @@
  *
  * 	todo: write documentation
  */
-class Amslib_Database_MySQL extends Amslib_Database
+class Amslib_Database_MySQL extends Amslib_Database_MySQL_DEPRECATED
 {
-	/**
-	 * 	method:	setDebugOutput
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function setDebugOutput($query)
-	{
-		if($this->debug && $this->errorState){
-			Amslib_Keystore::set("db_query[{$this->seq}][".microtime(true)."]",Amslib_Debug::pdump(true,$query));
-		}
-	}
+	protected $selectHandle	=	false;
+	protected $selectStack	=	array();
 
-	/**
-	 * 	method:	connect
-	 *
-	 * 	Connect to the MYSQL database using various details
-	 *
-	 * 	todo:
-	 * 		-	Need to move the database details to somewhere more secure (like inside the database!! ROFL!! joke, don't do that!!!!)
-	 */
-	public function connect($details=false)
-	{
-		$this->setConnectionDetails($details);
-
-		$this->disconnect();
-		$details = $this->getConnectionDetails();
-
-		if($details){
-			$this->databaseName = $details["database"];
-
-			ob_start();
-				if($c = mysql_connect($details["server"],$details["username"],$details["password"],true))
-				{
-					if(!mysql_select_db($details["database"],$c)){
-						$this->disconnect();
-						$this->setDBErrors("Failed to open database requested '{$details["database"]}'");
-					}else{
-						$this->connection = $c;
-
-						$this->setFetchMethod("mysql_fetch_assoc");
-						$this->setEncoding(isset($details["encoding"]) ? $details["encoding"] : "utf8");
-					}
-				}else{
-					// Replace these errors with Amslib_Translator codes instead (language translation)
-					$this->setDBErrors("Failed to connect to database: {$details["database"]}<br/>");
-				}
-			$output = ob_get_clean();
-
-			$details["password"] = "** CENSORED **";
-			if(strlen($output)) Amslib_Debug::log("Database failed to connect, this is most likely a fatal error",$details);
-		}else{
-			// Replace these errors with Amslib_Translator codes instead (language translation)
-			$this->setDBErrors("Failed to find the database connection details, check this information<br/>");
-		}
-	}
+	const FETCH_ASSOC		=	"mysql_fetch_assoc";
+	const FETCH_ARRAY		=	"mysql_fetch_array";
 
 	/******************************************************************************
 	 *	PUBLIC MEMBERS
@@ -103,22 +53,28 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 */
 	public function __construct($connect=true)
 	{
-		parent::__construct();
+		parent::__construct(false);
 
-		$this->errors = array();
+		$this->setFetchMethod(self::FETCH_ASSOC);
 
 		//	TODO: we should implement a try/catch block to easily catch disconnected databases
-		if($connect) $this->connect();
+		if($connect){
+			$this->connect();
+		}
 	}
 
 	/**
 	 *  method:	getInstance
 	 *
-	 *  note: When launching the translator object with the option database, when launching the load function
-	 *  an instance of this object is needed. I do not know if you are aware of the problem and you have
-	 *  a way to cope with it.  I assume you are not aware of the problem since you have to do several
-	 *  installation to see it(in my case) so I am adding this function.  If you don't want getInstance
-	 *  in here I will create a wrapper "capsule" object for my projects.
+	 *  note: When launching the translator object with the option database,
+	 *  when launching the load function an instance of this object is needed.
+	 *  I do not know if you are aware of the problem and you have a way to
+	 *  cope with it.  I assume you are not aware of the problem since you
+	 *  have to do several installation to see it(in my case) so I am adding
+	 *  this function.  If you don't want getInstance in here I will create
+	 *  a wrapper "capsule" object for my projects.
+	 *
+	 *  Chris: alfonso, I don't have any idea what you mean, sorry
 	 */
 	static public function getInstance()
 	{
@@ -127,6 +83,96 @@ class Amslib_Database_MySQL extends Amslib_Database
 		if($instance === NULL) $instance = new self();
 
 		return $instance;
+	}
+
+
+	public function isHandle($handle)
+	{
+		return $handle && is_resource($handle) && stristr($handle, "mysql");
+	}
+
+	public function setHandle($handle)
+	{
+		return $this->isHandle($handle)
+			? ($this->selectHandle = $handle)
+			: false;
+	}
+
+	public function getHandle()
+	{
+		return $this->selectHandle;
+	}
+
+	public function pushHandle($handle=NULL,$returnHandle=true)
+	{
+		if($handle === NULL) $handle = $this->getHandle();
+
+		if(!$this->isHandle($handle)) return false;
+
+		$this->selectStack[] = $handle;
+
+		//	Return the handle, or the index where it was added
+		return $returnHandle ? $handle : count($this->selectStack)-1;
+	}
+
+	public function popHandle($index=NULL)
+	{
+		if($index !== NULL && !is_numeric($index) && !isset($this->selectStack[$index])){
+			return false;
+		}
+
+		if($index === NULL){
+			return array_pop($this->selectStack);
+		}
+
+		$handle = $this->selectStack[$index];
+		unset($this->selectStack[$index]);
+		return $handle;
+	}
+
+	public function restoreHandle($index=NULL)
+	{
+		$handle = $this->popHandle($index);
+
+		return $this->setHandle($handle);
+	}
+
+	/**
+	 * 	method:	freeHandle
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	If we supply a result handle, free that, or obtain the handle created when you last selected something
+	 */
+	public function freeHandle($handle=NULL)
+	{
+		if(!$this->isHandle($handle)){
+			$handle = $this->getHandle();
+		}
+
+		if(!$this->isHandle($handle)){
+			$this->debug("DEBUG",__METHOD__,": trying to free an invalid handle");
+
+			return false;
+		}
+
+		return mysql_free_result($handle);
+	}
+
+	/**
+	 * 	method:	setFetchMethod
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setFetchMethod($method)
+	{
+		if(function_exists($method)){
+			$this->fetchMethod = $method;
+		}else{
+			$message = "Your fetch method is not valid, ALL database queries will fail, this is not acceptable";
+			$this->debug(__METHOD__,$message);
+			die($message);
+		}
 	}
 
 	/**
@@ -140,13 +186,17 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 		$allowedEncodings = array("utf8","latin1");
 
-		if(in_array($encoding,$allowedEncodings)){
-			mysql_set_charset($encoding,$this->connection);
-		}else{
-			die(	"(".basename(__FILE__)." / FATAL ERROR): Your encoding ($encoding) is wrong, this can cause database corruption. ".
-					"I'm sorry dave, but I can't allow you to do that<br/>".
-					"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>");
+		if(!in_array($encoding,$allowedEncodings)){
+			$message =
+				"(".basename(__FILE__)." / FATAL ERROR): Your encoding ($encoding) is wrong, ".
+				"this can cause database corruption.".
+				"I'm sorry dave, but I can't allow you to do that<br/>".
+				"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>";
+			$this->debug("ERROR",$message);
+			die($message);
 		}
+
+		mysql_set_charset($encoding,$this->connection);
 	}
 
 	/**
@@ -166,17 +216,27 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 		//	from this point on, the value must be a string
 		if(!is_string($value)){
-			Amslib_Debug::log("stack_trace,2,*","value is not a string",$value);
+			$this->debug("stack_trace,2,*","value is not a string",$value);
 		}
 
 		if(!$this->getConnectionStatus()){
 			print(__METHOD__.", unsafe string escape: database not connected<br/>\n");
 			print("it is not safe to continue, corruption might occur<br/>\n");
-			Amslib_Debug::log("stack_trace,2","not connected to database");
+			$this->debug("stack_trace,2","not connected to database");
 			die("DYING");
 		}
 
-		return @mysql_real_escape_string($value);
+		ob_start();
+		$value = mysql_real_escape_string($value);
+		$error = ob_get_clean();
+
+		if(!strlen($error)){
+			//	I'm not sure what I should do here, so I'll just log whatever
+			//	it outputs and improve the error control when I find out what I am dealing with
+			$this->debug(__METHOD__,$error);
+		}
+
+		return $value;
 	}
 
 	/**
@@ -287,7 +347,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 *
 	 * Obtain a real row count from the previous query, if you use limit and want to know how many
 	 * a query WOULD return without the limit, you can use this method, but in the query, you need
-	 * to put SQL_CALC_FOUND_ROWS as one of the selected fields
+	 * to put SQL_CALC_FOUND_ROWS at the beginning of the query
 	 *
 	 * returns:
 	 * 	The number of results the previous query would have returned without the limit statement,
@@ -301,11 +361,11 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 */
 	public function getRealResultCount()
 	{
-		$this->storeSearchHandle();
+		$this->pushHandle();
 
 		$count = $this->selectValue("c","FOUND_ROWS() as c",1,true);
 
-		$this->restoreSearchHandle();
+		$this->popHandle();
 
 		return $count;
 	}
@@ -351,130 +411,67 @@ HAS_TABLE;
 	}
 
 	/**
-	 * 	method:	getDBList
+	 * 	method:	setError
 	 *
 	 * 	todo: write documentation
-	 *
-	 * note:	perhaps I should split all of these "db structure" methods into a separate object
-	 * 			but to do that, then you'd need to use this object to acquire the structure object
-	 * 			since it would require a database connection, so it'd have to clone the connection
 	 */
-	public function getDBList()
+	public function setErrors($data)
 	{
-		return $this->select("distinct table_schema as database_name from information_schema.tables");
-	}
+		$args = array($data);
 
-	/**
-	 * 	method:	getDBTables
-	 *
-	 * 	todo: write documentation
-	 *
-	 * note:	perhaps I should split all of these "db structure" methods into a separate object
-	 * 			but to do that, then you'd need to use this object to acquire the structure object
-	 * 			since it would require a database connection, so it'd have to clone the connection
-	 */
-	public function getDBTables($database_name=NULL)
-	{
-		$filter = "";
-		if($database_name && is_string($database_name)){
-			$database_name = $this->escape($database_name);
-
-			$filter = "where table_schema='$database_name'";
+		if($this->isConnected()){
+			$args[] = mysql_error($this->connection);
+			$args[] = mysql_errno($this->connection);
+			$args[] = mysql_insert_id($this->connection);
 		}
 
-		return $this->select("distinct table_name,table_schema as database_name from information_schema.tables $filter");
+		call_user_func_array("parent::setError",$args);
 	}
 
 	/**
-	 * 	method:	getDBColumns
+	 * 	method:	connect
 	 *
-	 * 	todo: write documentation
+	 * 	Connect to the MYSQL database using various details
 	 *
-	 * note:	perhaps I should split all of these "db structure" methods into a separate object
-	 * 			but to do that, then you'd need to use this object to acquire the structure object
-	 * 			since it would require a database connection, so it'd have to clone the connection
+	 * 	todo:
+	 * 		-	Need to move the database details to somewhere more secure (like inside the database!! ROFL!! joke, don't do that!!!!)
 	 */
-	public function getDBColumns($database_name=NULL,$table_name=NULL)
+	public function connect($details=false)
 	{
-		$filter = array();
+		list($details,$password) = $this->setConnectionDetails($details) + array(NULL,NULL);
 
-		if($database_name && is_string($database_name)){
-			$database_name = $this->escape($database_name);
+		$this->disconnect();
 
-			$filter[] = "table_schema='$database_name'";
-		}
+		$valid = Amslib_Array::hasKeys($details,"server","username","database","encoding") && strlen($password);
 
-		if($table_name && is_string($table_name)){
-			$table_name = $this->escape($table_name);
+		if($valid){
+			ob_start();
+			if($c = mysql_connect($details["server"],$details["username"],$password,true))
+			{
+				if(!mysql_select_db($details["database"],$c)){
+					$this->disconnect();
+					$this->debug("DATABASE","could not open requested database",$details);
+				}else{
+					$this->connection = $c;
 
-			$filter[] = "table_name='$table_name'";
-		}
+					$this->setEncoding($details["encoding"]);
 
-		$filter = count($filter) ? "where ".implode(" AND ",$filter) : "";
+					return true;
+				}
+			}else{
+				$this->debug("DATABASE","failed to connect",$details);
+			}
+			$output = ob_get_clean();
 
-$query=<<<QUERY
-		distinct column_name, table_name, table_schema as database_name
-		from information_schema.columns
-		$filter
-		order by database_name,table_name,ordinal_position
-QUERY;
-
-		return $this->select($query);
-	}
-
-	/**
-	 * 	method:	getDBTableFields
-	 *
-	 * 	todo: write documentation
-	 *
-	 * note:	perhaps I should split all of these "db structure" methods into a separate object
-	 * 			but to do that, then you'd need to use this object to acquire the structure object
-	 * 			since it would require a database connection, so it'd have to clone the connection
-	 */
-	public function getDBTableFields($table)
-	{
-		$table = $this->escape($table);
-
-		return $this->select("column_name from Information_Schema.Columns where table_name='$table'");
-	}
-
-	/**
-	 * 	method:	getDBTableRowCount
-	 *
-	 * 	todo: write documentation
-	 *
-	 * note:	perhaps I should split all of these "db structure" methods into a separate object
-	 * 			but to do that, then you'd need to use this object to acquire the structure object
-	 * 			since it would require a database connection, so it'd have to clone the connection
-	 */
-	public function getDBTableRowCount($database,$table)
-	{
-		$database	=	$this->escape($database);
-		$table		=	$this->escape($table);
-
-		$this->select("SQL_CALC_FOUND_ROWS * from $database.$table limit 1");
-
-		return $this->getRealResultCount();
-	}
-
-	/**
-	 * 	method:	setDBErrors
-	 *
-	 * 	todo: write documentation
-	 */
-	public function setDBErrors($data,$error=NULL,$errno=NULL,$id_insert=NULL)
-	{
-		if($this->connection){
-			$error		= $error ? $error : mysql_error($this->connection);
-			$errno		= $errno ? $errno : mysql_errno($this->connection);
-			$id_insert	= $id_insert ? $id_insert : mysql_insert_id($this->connection);
+			//	Cause obviously, I don't want to log the password
+			if(strlen($output)){
+				$this->debug("DATABASE","connection attempt was not clean, output = ",$output,$details);
+			}
 		}else{
-			$error		= $error ? $error : "database not connected";
-			$errno		= $errno ? $errno : "database not connected";
-			$id_insert	= $id_insert ? $id_insert : -1;
+			$this->debug("DATABASE","connection details were not valid",$details);
 		}
 
-		parent::setDBErrors($data,$error,$errno,$id_insert);
+		return false;
 	}
 
 	/**
@@ -484,81 +481,11 @@ QUERY;
 	 */
 	public function disconnect()
 	{
-		if($this->connection) mysql_close($this->connection);
-		$this->connection = false;
-	}
-
-	/**
-	 * 	method:	getResults
-	 *
-	 * 	todo: write documentation
-	 */
-	public function getResults($numResults,$resultHandle=NULL,$optimise=false)
-	{
-		$this->lastResult = array();
-
-		if(!$resultHandle) $resultHandle = $this->getSearchResultHandle();
-		if(!$resultHandle) return false;
-
-		for($a=0;$a<$numResults;$a++){
-			//	BUG: surely this should use $this->fetchMethod ?? wasn't that the whole point?
-			$r = mysql_fetch_assoc($resultHandle);
-			if(!$r) break;
-			$this->lastResult[] = $r;
-
-			//	Stop when you've got the number of results you need
-			if(count($this->lastResult) >= $numResults) break;
+		if($this->connection){
+			mysql_close($this->connection);
 		}
 
-		if($optimise && $numResults == 1) $this->lastResult = current($this->lastResult);
-		if(count($this->lastResult) == 0) $this->lastResult = false;
-
-		return $this->lastResult;
-	}
-
-	/**
-	 * 	method:	releaseMemory
-	 *
-	 * 	todo: write documentation
-	 *
-	 * 	If we supply a result handle, free that, or obtain the handle created when you last selected something
-	 */
-	public function releaseMemory($resultHandle=NULL)
-	{
-		if(!$resultHandle) $resultHandle = $this->getSearchResultHandle();
-
-		if(!$resultHandle) error_log(__METHOD__.": trying to free an invalid handle");
-		return $resultHandle ? mysql_free_result($resultHandle) : false;
-	}
-
-	/**
-	 * 	method:	beginTransaction
-	 *
-	 * 	todo: write documentation
-	 */
-	public function beginTransaction()
-	{
-		return mysql_query("begin");
-	}
-
-	/**
-	 * 	method:	commitTransaction
-	 *
-	 * 	todo: write documentation
-	 */
-	public function commitTransaction()
-	{
-		return mysql_query("commit");
-	}
-
-	/**
-	 * 	method:	rollbackTransaction
-	 *
-	 * 	todo: write documentation
-	 */
-	public function rollbackTransaction()
-	{
-		return mysql_query("rollback");
+		$this->connection = false;
 	}
 
 	/**
@@ -566,23 +493,21 @@ QUERY;
 	 *
 	 * 	todo: write documentation
 	 */
-	public function query($query)
+	public function query($query,$returnBoolean=false)
 	{
-		$this->seq++;
+		$result = false;
 
-		if($this->getConnectionStatus() == false) return false;
+		if($this->getConnectionStatus()){
+			$this->setLastQuery($query);
+			$result = mysql_query($query,$this->connection);
+			$this->debug("QUERY",$query);
 
-		$this->setLastQuery($query);
-		$result = mysql_query($query,$this->connection);
-
-		$this->setDebugOutput($query);
-
-		if(!$result){
-			$this->setDBErrors($query);
-			return false;
+			if(!$result){
+				$this->setDBErrors($query);
+			}
 		}
 
-		return true;
+		return $returnBoolean ? !!$result : $result;
 	}
 
 	/**
@@ -592,69 +517,17 @@ QUERY;
 	 */
 	public function select($query,$numResults=0,$optimise=false)
 	{
-		$this->seq++;
+		$handle = $this->query("select $query");
 
-		if($this->getConnectionStatus() == false) return false;
+		if(!$handle) return false;
 
-		$query = "select $query";
+		$handle = $this->setSelectHandle($handle);
 
-		$this->setLastQuery($query);
-		$this->selectResult = mysql_query($query,$this->connection);
-		$this->setDebugOutput($query);
+		//	If you don't request a number of results, use the maximum number we could possible accept
+		//	NOTE: you'll run out of memory a long time before you reach this count
+		if($numResults == 0) $numResults = PHP_INT_MAX;
 
-		if($this->selectResult){
-			//	If you don't request a number of results, use the maximum number we could possible accept
-			//	NOTE: you'll run out of memory a long time before you reach this count
-			if($numResults == 0) $numResults = PHP_INT_MAX;
-
-			return $this->getResults($numResults,$this->selectResult,$optimise);
-		}
-
-		$this->setDBErrors($query);
-
-		return false;
-	}
-
-	/**
-	 * 	method:	select2
-	 *
-	 * 	todo: write documentation
-	 */
-	public function select2($query,$numResults=0,$optimise=false)
-	{
-		$this->seq++;
-
-		if($this->getConnectionStatus() == false) return false;
-
-		$query = str_replace("SQL_CALC_FOUND_ROWS","",$query);
-
-		$numResults = intval($numResults);
-
-		//	These two rows are "dangerous" cause i'm not sure if the final query will be broken or not :(
-		//	NOTE: if you try hard to avoid problems, it should be ok and a lot faster
-		$query = "select SQL_CALC_FOUND_ROWS $query";
-		//	IMPORTANT NOTE:
-		//	****	there is a side effect of using select2 with a $numResults, is that the total result set is now
-		//	****	not "streamable" as in, you can't select 100,000 results, numResults=1000 and get more results afterwards
-		//	****	cause the limit clause will effectively return only 1000 results and the other 99,000 results will
-		//	****	not be accessible
-		if($numResults > 0 && strpos(strtolower($query)," limit ") === false) $query = "$query limit $numResults";
-
-		$this->setLastQuery($query);
-		$this->selectResult = mysql_query($query,$this->connection);
-		$this->setDebugOutput($query);
-
-		if($this->selectResult){
-			//	If you don't request a number of results, use the maximum number we could possible accept
-			//	NOTE: you'll run out of memory a long time before you reach this count
-			if($numResults == 0) $numResults = PHP_INT_MAX;
-
-			return $this->getResults($numResults,$this->selectResult,$optimise);
-		}
-
-		$this->setDBErrors($query);
-
-		return false;
+		return $this->getResults($numResults,$handle,$optimise);
 	}
 
 	/**
@@ -772,30 +645,13 @@ QUERY;
 	 */
 	public function insert($query)
 	{
-		$this->seq++;
+		$this->lastInsertId = false;
 
-		if($this->getConnectionStatus() == false) return false;
-
-		$query = "insert into $query";
-
-		//	FIXME: there is a memory leak in either setLastQuery,setDebugOutput,setDBErrors
-		//	NOTE: this leak leads to a LOT of memory being leaked on large scripts processing tens of thousands of rows
-		//	NOTE: when the methods are commented out, the leak disappears and it uses 32MB (Approx)
-		//	NOTE: so something bad is happening here
-		//$this->setLastQuery($query);
-		$result = mysql_query($query,$this->connection);
-
-		//$this->setDebugOutput($query);
-
-		if(!$result){
-			$this->lastInsertId = false;
-			$this->setDBErrors($query);
+		if($this->query("insert into $query")){
 			return false;
 		}
 
-		$this->lastInsertId = mysql_insert_id($this->connection);
-
-		return $this->lastInsertId;
+		return $this->lastInsertId = mysql_insert_id($this->connection);
 	}
 
 	/**
@@ -805,18 +661,7 @@ QUERY;
 	 */
 	public function update($query,$allow_zero=true)
 	{
-		$this->seq++;
-
-		if($this->getConnectionStatus() == false) return false;
-
-		$query = "update $query";
-
-		//$this->setLastQuery($query);
-		$result = mysql_query($query,$this->connection);
-		//$this->setDebugOutput($query);
-
-		if(!$result){
-			$this->setDBErrors($query);
+		if(!$this->query("update $query",true)){
 			return false;
 		}
 
@@ -832,22 +677,78 @@ QUERY;
 	 */
 	public function delete($query)
 	{
-		$this->seq++;
+		return $this->query("delete from $query")
+			? mysql_affected_rows($this->connection) >= 0
+			: false;
+	}
 
-		if($this->getConnectionStatus() == false) return false;
+	/**
+	 * 	method:	getResults
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getResults($count,$handle=NULL,$optimise=false)
+	{
+		$this->lastResult = array();
 
-		$query = "delete from $query";
+		//	Make sure the result handle is valid
+		if(!$this->isHandle($handle)) $handle = $this->getHandle();
+		if(!$this->isHandle($handle)) return false;
 
-		$this->setLastQuery($query);
-		$result = mysql_query($query,$this->connection);
-		$this->setDebugOutput($query);
-
-		if(!$result){
-			$this->setDBErrors($query);
-			return false;
+		for($a=0;$a<$count;$a++){
+			$row = call_user_func($this->fetchMethod,$handle);
+			//	We have no results left to obtain
+			if(!$row) break;
+			//	Otherwise record the result
+			$this->lastResult[] = $row;
 		}
 
-		return mysql_affected_rows($this->connection) >= 0;
+		//	optimise means remove the silly outer layer, this method normally returns an array
+		//	of results, but when there is one result, it's kind of silly, it's an array
+		//	containing a single array.  So optimise returns the single result as the returned variable
+		//	Example: array(array("id_row"=>1,"field_1"=>"hello")) will become array("id_row"=>1,"field_1"=>"hello")
+		//	So you can see it's removed the outer array
+		if($optimise && $numResults == 1){
+			$this->lastResult = current($this->lastResult);
+		}
+
+		//	No results? return false! I'm not sure whether returning false is a good idea, since it has some "meaning"
+		//	Perhaps return NULL = no results and return false = failure (failure has meaning, it means something went wrong)
+		if(empty($this->lastResult)){
+			$this->lastResult = false;
+		}
+
+		return $this->lastResult;
+	}
+
+	/**
+	 * 	method:	begin
+	 *
+	 * 	todo: write documentation
+	 */
+	public function begin()
+	{
+		return $this->query("begin");
+	}
+
+	/**
+	 * 	method:	commit
+	 *
+	 * 	todo: write documentation
+	 */
+	public function commit()
+	{
+		return $this->query("commit");
+	}
+
+	/**
+	 * 	method:	rollback
+	 *
+	 * 	todo: write documentation
+	 */
+	public function rollback()
+	{
+		return $this->query("rollback");
 	}
 
 	/**
@@ -873,13 +774,5 @@ QUERY;
 		if(!$table || !strlen($table) || is_numeric($table)) return -2;
 
 		return $this->selectValue("c","count($field) as c from $table",1,true);
-	}
-
-	/**
-	 * DEPRECATED: use buildLimit instead
-	 */
-	public function getSQLLimit($length=NULL,$offset=NULL)
-	{
-		return $this->buildLimit($length,$offset);
 	}
 }
