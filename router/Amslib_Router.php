@@ -838,11 +838,9 @@ class Amslib_Router
 		if($import["output"] == "json"){
 			//	We are going to install a router using json as a data transfer medium
 			//	Acquire the json, decode it and obtain the domain
-			ob_start();
-			$data	= file_get_contents($import["url_full"]);
-			$caught = ob_get_clean();
+			$data	= Amslib_File::getContents($import["url_full"],$error);
 
-			if(strlen($caught)){
+			if(strlen($error)){
 				Amslib_Debug::log("FAILED TO IMPORT ROUTER IN JSON FORMAT, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
 			}
 
@@ -861,11 +859,9 @@ class Amslib_Router
 			self::setImportData($import["name"],$import);
 
 		}else if($import["output"] == "xml"){
-			ob_start();
-				$data = file_get_contents($import["url"]);
-			$caught = ob_get_clean();
+			$data	= Amslib_File::getContents($import["url_full"],$error);
 
-			if(strlen($caught)){
+			if(strlen($error)){
 				Amslib_Debug::log("FAILED TO IMPORT ROUTER IN XML FORMAT, OR OTHER PROBLEM DETECTED",$caught,error_get_last());
 			}
 

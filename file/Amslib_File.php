@@ -253,7 +253,7 @@ class Amslib_File
 		$part = explode(".",$filename);
 
 		if(count($part) > 1){
-			$last = end($part)
+			$last = end($part);
 
 			return strtolower($last);
 		}
@@ -371,7 +371,6 @@ class Amslib_File
 
 	static public function writeFile($data,$dst_filename)
 	{
-
 		return $dst_filename;
 	}
 
@@ -461,6 +460,18 @@ class Amslib_File
 		}
 
 		return $status;
+	}
+
+	static public function getContents($filename,&$error=NULL)
+	{
+		ob_start();
+		$data = file_get_contents($filename);
+		$error = ob_get_clean();
+
+		//	TODO: make this logging optional
+		Amslib_Debug::log(__METHOD__,$filename);
+
+		return $data;
 	}
 
 	static private function ____DEPRECATED_METHODS_BELOW(){}
