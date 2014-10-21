@@ -362,7 +362,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 		if(!$handle) return false;
 
-		$handle = $this->setSelectHandle($handle);
+		$handle = $this->setHandle($handle);
 
 		//	If you don't request a number of results, use the maximum number we could possible accept
 		//	NOTE: you'll run out of memory a long time before you reach this count
