@@ -281,7 +281,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	public function setAlias()
 	{
 		$args = func_get_args();
-		$args = call_user_func_array(array($this,"escape"),$args);
+		$args = array_map(array($this,"escape"),$args);
 
 		$c = count($args);
 
@@ -385,7 +385,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	}
 
 	/**
-	 * 	method:	getConnectionStatus
+	 * 	method:	isConnected
 	 *
 	 * 	Return the status of the database connection
 	 *
@@ -517,7 +517,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	public function setEncoding($encoding)
 	{
 		/* The original MySQL Code, please convert to PDO
-		if($this->getConnectionStatus() == false) return;
+		if($this->isConnected() == false) return;
 
 		$allowedEncodings = array("utf8","latin1");
 
@@ -557,7 +557,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			$this->debug("stack_trace,2,*","value is not a string",$value);
 		}
 
-		if(!$this->getConnectionStatus()){
+		if(!$this->isConnected()){
 			print(__METHOD__.", unsafe string escape: database not connected<br/>\n");
 			print("it is not safe to continue, corruption might occur<br/>\n");
 			$this->debug("stack_trace,2","not connected to database");
