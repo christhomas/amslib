@@ -81,7 +81,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 	public function isHandle($handle)
 	{
-		return $handle && is_resource($handle) && stristr($handle, "mysql");
+		return $handle && is_resource($handle) && stristr(get_resource_type($handle), "mysql");
 	}
 
 	/**
