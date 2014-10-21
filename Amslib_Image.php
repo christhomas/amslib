@@ -332,7 +332,13 @@ class Amslib_Image
 			if(strpos($i,"..")) continue;
 
 			//	Just in case someone managed to write a file with .. in it (back directory)
-			@unlink($f);
+			ob_start();
+			unlink($f);
+			$error = ob_get_clean();
+
+			if(strlen($error)){
+				return $this->setError($error);
+			}
 		}
 
 		return true;
