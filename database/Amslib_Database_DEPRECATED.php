@@ -26,16 +26,19 @@ class Amslib_Database_DEPRECATED
 
 	public static function setSharedConnection($object)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return self::sharedConnection($object);
 	}
 
 	public static function getSharedConnection()
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return self::sharedConnection();
 	}
 
 	public function setDBErrors($data)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		$args = func_get_args();
 
 		call_user_func_array(array($this,"setError"),$args);
@@ -43,26 +46,31 @@ class Amslib_Database_DEPRECATED
 
 	public function getDBErrors($clear=true)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return $this->getError($clear);
 	}
 
 	public function getConnectionStatus()
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return $this->isConnected();
 	}
 
 	public function setDebug($state)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		$this->setDebugState($state);
 	}
 
 	protected function getLastTransactionId()
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return $this->getLastInsertId();
 	}
 
 	public function getDBList()
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		$this->schema = new Amslib_Database_Schema($this);
 
 		return $this->schema->getDatabases();
@@ -70,6 +78,7 @@ class Amslib_Database_DEPRECATED
 
 	public function getDBTables($database_name=NULL)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		$this->schema = new Amslib_Database_Schema($this);
 
 		return $this->schema->getTables($database_name);
@@ -77,6 +86,7 @@ class Amslib_Database_DEPRECATED
 
 	public function getDBColumns($database_name=NULL,$table_name=NULL)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		$this->schema = new Amslib_Database_Schema($this);
 
 		return $this->schema->getTables($database_name,$table_name);
@@ -84,6 +94,7 @@ class Amslib_Database_DEPRECATED
 
 	public function getDBTableFields($table)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		$this->schema = new Amslib_Database_Schema($this);
 
 		return $this->schema->getFields($table);
@@ -91,6 +102,7 @@ class Amslib_Database_DEPRECATED
 
 	public function getDBTableRowCount($database,$table)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		$this->schema = new Amslib_Database_Schema($this);
 
 		return $this->schema->getRowCount($database,$table);
@@ -98,6 +110,7 @@ class Amslib_Database_DEPRECATED
 
 	public function hasTable($database,$table)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		$this->schema = new Amslib_Database_Schema($this);
 
 		$this->schema->hasTable($database,$table);
@@ -105,29 +118,32 @@ class Amslib_Database_DEPRECATED
 
 	public function getSQLLimit($length=NULL,$offset=NULL)
 	{
-		$this->debug(__METHOD__,"DEPRECATED METHOD",$length,$offset);
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__,$length,$offset);
 		return $this->buildLimit($length,$offset);
 	}
 
 	//	this method was a horribly, ugly mistake
 	public function select2($query,$numResults=0,$optimise=false)
 	{
-		$this->debug(__METHOD__,"DEPRECATED METHOD",$query,$numResults,$optimise);
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__,$query,$numResults,$optimise);
 		return $this->select($query,$numResults,$optimise);
 	}
 
 	public function getSearchResultHandle()
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return $this->getHandle();
 	}
 
 	public function storeSearchHandle()
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return $this->pushHandle();
 	}
 
 	public function restoreSearchHandle($handle=NULL)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		if(!$this->isHandle($handle)) $handle = $this->popHandle();
 
 		return $this->setHandle($handle);
@@ -135,16 +151,19 @@ class Amslib_Database_DEPRECATED
 
 	public function beginTransaction()
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return $this->begin();
 	}
 
 	public function commitTransaction()
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return $this->commit();
 	}
 
 	public function rollbackTransaction()
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return $this->rollback();
 	}
 
@@ -157,22 +176,26 @@ class Amslib_Database_DEPRECATED
 	 */
 	public function releaseMemory($handle=NULL)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return $this->freeHandle($handle);
 	}
 
 	//	a quick fix for the PDO object which doesn't support this method yet
 	public function freeHandle($handle)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return false;
 	}
 
 	function lastInsertRowId()
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		return $this->getLastInsertId();
 	}
 
 	public function setTable()
 	{
+		Amslib_Debug::log("DEPRECATED METHOD",__METHOD__);
 		$args = func_get_args();
 
 		return call_user_func_array(array($this,"setAlias"),$args);

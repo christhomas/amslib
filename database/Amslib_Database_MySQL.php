@@ -129,7 +129,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 */
 	public function setEncoding($encoding)
 	{
-		if($this->getConnectionStatus() == false) return;
+		if($this->isConnected() == false) return;
 
 		$allowedEncodings = array("utf8","latin1");
 
@@ -166,7 +166,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			$this->debug("stack_trace,2,*","value is not a string",$value);
 		}
 
-		if(!$this->getConnectionStatus()){
+		if(!$this->isConnected()){
 			print(__METHOD__.", unsafe string escape: database not connected<br/>\n");
 			print("it is not safe to continue, corruption might occur<br/>\n");
 			$this->debug("stack_trace,2","not connected to database");
@@ -338,7 +338,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 	{
 		$result = false;
 
-		if($this->getConnectionStatus()){
+		if($this->isConnected()){
 			$this->setLastQuery($query);
 			$result = mysql_query($query,$this->connection);
 			$this->debug("QUERY",$query);
@@ -487,7 +487,7 @@ QUERY;
 		//	containing a single array.  So optimise returns the single result as the returned variable
 		//	Example: array(array("id_row"=>1,"field_1"=>"hello")) will become array("id_row"=>1,"field_1"=>"hello")
 		//	So you can see it's removed the outer array
-		if($optimise && $numResults == 1){
+		if($optimise && $count == 1){
 			$this->lastResult = current($this->lastResult);
 		}
 
