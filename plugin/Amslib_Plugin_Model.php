@@ -42,6 +42,9 @@
  * 			SINCE ITS ALMOST 100% NOT A PLUGIN SPECIFIC OBJECT, ITS
  * 			A DATABASE OBJECT, PERHAPS I CAN CALL IT SOMETHING LIKE
  * 			Amslib_Database_Model INSTEAD?
+ * 		-	(23/10/2014): I still think this object is stupid and
+ * 			the debugging code is probably not very nice, I should
+ * 			do something nicer, build into the base layer
  *
  */
 class Amslib_Plugin_Model extends Amslib_Database_MySQL
