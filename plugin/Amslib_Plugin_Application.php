@@ -76,7 +76,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->setLanguageKey();
 
 		//	Setup all the translators in other plugins with the correct languages
-		foreach(Amslib_Plugin_Manager::listPlugins() as $plugin){
+		foreach(Amslib_Plugin_Manager::listPlugin() as $plugin){
 			$api = Amslib_Plugin_Manager::getAPI($plugin);
 
 			if($api){
@@ -88,7 +88,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 					$object->load();
 				}
 			}else{
-				Amslib_Debug::log("plugin list",Amslib_Plugin_Manager::listPlugins());
+				Amslib_Debug::log("plugin list",Amslib_Plugin_Manager::listPlugin());
 				Amslib_Debug::log("plugin for translator not found?",$plugin);
 			}
 		}
@@ -104,7 +104,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	protected function autoloadResources()
 	{
 		//	STEP 1: Autoload all resources from each plugin as they are requested
-		foreach(Amslib_Plugin_Manager::listPlugins() as $name){
+		foreach(Amslib_Plugin_Manager::listPlugin() as $name){
 			$p = Amslib_Plugin_Manager::getAPI($name);
 			if($p){
 				$p->autoloadResources();
