@@ -65,6 +65,11 @@ class Amslib_Plugin
 	//	The path prefixes of each component type
 	protected $prefix = array();
 
+	const ERROR_API_INVALID				=	"api invalid, cannot continue";
+	const ERROR_IMAGE_ID_INVALID		=	"image invalid, no id attribute";
+	const ERROR_FONT_ID_INVALID			=	"font invalid, no id attribute";
+	const ERROR_PLUGIN_SOURCE_INVALID	=	"plugin source was not valid";
+
 	/**
 	 * 	method:	setComponent
 	 *
@@ -155,7 +160,10 @@ class Amslib_Plugin
 		$this->api->setModel($this->createObject($this->data["model"],true,true));
 
 		//	If the API object is not valid, don't continue to process
-		if(!$this->api) return false;
+		if(!$this->api){
+			Amslib_Debug::log(__METHOD__,self::ERROR_API_INVALID,$this->api,$this->getName());
+			return false;
+		}
 
 		foreach(Amslib_Array::valid($this->data) as $key=>$value)
 		{
@@ -694,7 +702,10 @@ class Amslib_Plugin
 		$a = $array["attr"];
 
 		//	If there is no valid "id" element, skip this item
-		if(!isset($a["id"])) continue;
+		if(!isset($a["id"])){
+			Amslib_Debug::log(__METHOD__,ERROR_IMAGE_ID_INVALID,$array);
+			return;
+		}
 
 		if(isset($a["import"])){
 			$this->addImport($a["import"],$this,"image",$a);
@@ -721,7 +732,10 @@ class Amslib_Plugin
 			if(!isset($a["autoload"])) $a["autoload"] = NULL;
 
 			//	If there is no valid "id" element, skip this item
-			if(!isset($a["id"])) continue;
+			if(!isset($a["id"])){
+				Amslib_Debug::log(__METHOD__,self::ERROR_FONT_ID_INVALID,$font);
+				continue;
+			}
 
 			if(isset($a["import"])){
 				$this->addImport($a["import"],$this,"font",$a);
@@ -911,7 +925,7 @@ class Amslib_Plugin
 		$this->name			=	$name;
 
 		if(!$this->source){
-			Amslib_Debug::log(__METHOD__,"plugin source was not valid",$this->source);
+			Amslib_Debug::log(__METHOD__,self::ERROR_PLUGIN_SOURCE_INVALID,$this->source);
 
 			return $this->isConfigured;
 		}
@@ -1206,6 +1220,15 @@ class Amslib_Plugin
 		$this->api->setModel($model);
 	}
 
+	/*******************************************************************
+		HELPER FUNCTIONS
+
+		Below are methods that allow you to plugin functionality
+		by just knowing the name of the plugin and the manager
+		will find out which appropriate plugin to call to execute
+		the functionality
+	********************************************************************/
+
 	/**
 	 * 	method:	expandPath
 	 *
@@ -1220,6 +1243,91 @@ class Amslib_Plugin
 		}
 
 		return Amslib_Website::expandPath($path);
+	}
+
+	/**
+	 * 	method:	render
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function render($plugin,$view="default",$parameters=array())
+	{
+		$api = Amslib_Plugin_Manager::getAPI($plugin);
+
+		return $api ? $api->render($view,$parameters) : false;
+	}
+
+	/**
+	 * 	method:	renderView
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function renderView($plugin,$view="default",$parameters=array())
+	{
+		$api = Amslib_Plugin_Manager::getAPI($plugin);
+
+		return $api ? $api->renderView($view,$parameters) : false;
+	}
+
+	/**
+	 * 	method:	getObject
+	 *
+	 * 	todo: write documentation
+	 * 	todo: why is singleton=false here and in Amslib_MVC::getObject, singleton=true?
+	 */
+	static public function getObject($plugin,$id,$singleton=false)
+	{
+		$api = Amslib_Plugin_Manager::getAPI($plugin);
+
+		return $api ? $api->getObject($id,$singleton) : false;
+	}
+
+	/**
+	 * 	method:	setStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function setStylesheet($plugin,$id,$file,$conditional=NULL)
+	{
+		$api = Amslib_Plugin_Manager::getAPI($plugin);
+
+		return $api ? $api->setStylesheet($id,$file,$conditional) : false;
+	}
+
+	/**
+	 * 	method:	addStylesheet
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function addStylesheet($plugin,$stylesheet)
+	{
+		$api = Amslib_Plugin_Manager::getAPI($plugin);
+
+		return $api ? $api->addStylesheet($stylesheet) : false;
+	}
+
+	/**
+	 * 	method:	setJavascript
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function setJavascript($plugin,$id,$file,$conditional=NULL)
+	{
+		$api = Amslib_Plugin_Manager::getAPI($plugin);
+
+		return $api ? $api->setJavascript($id,$file,$conditional) : false;
+	}
+
+	/**
+	 * 	method:	addJavascript
+	 *
+	 * 	todo: write documentation
+	 */
+	static public function addJavascript($plugin,$javascript)
+	{
+		$api = Amslib_Plugin_Manager::getAPI($plugin);
+
+		return $api ? $api->addJavascript($javascript) : false;
 	}
 
 	////////////////////////////////////////////////

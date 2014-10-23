@@ -45,6 +45,8 @@ class Amslib_Plugin_Manager
 	static protected $import	=	array();
 	static protected $export	=	array();
 
+	const ERROR_PLUGIN_INVALID = "plugin was invalid";
+
 	/**
 	 * 	method:	findPlugin
 	 *
@@ -258,7 +260,7 @@ class Amslib_Plugin_Manager
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function listPlugins()
+	static public function listPlugin()
 	{
 		return array_keys(self::$plugins);
 	}
@@ -350,10 +352,10 @@ class Amslib_Plugin_Manager
 			$data	= false;
 
 			if(!$src || !$dst){
-				$sname = is_object($src) ? $src->getName() : "searched: {$value["src"]}";
-				$dname = is_object($dst) ? $dst->getName() : "searched: {$value["dst"]}";
+				$sname = ($ts=is_object($src)) ? $src->getName() : "searched: {$value["src"]}";
+				$dname = ($td=is_object($dst)) ? $dst->getName() : "searched: {$value["dst"]}";
 
-				Amslib_Debug::log("plugin invalid",intval(is_object($src)).", ".intval(is_object($dst)),$sname,$dname);
+				Amslib_Debug::log(__METHOD__,self::PLUGIN_INVALID,intval($ts),intval($ts),$sname,$dname);
 				continue;
 			}
 
@@ -379,24 +381,14 @@ class Amslib_Plugin_Manager
 					$dst->setValue($value["key"],$data);
 				}break;
 
-				//	We do nothing special with these entries, we simply pass them
-				case "value":
-				case "image":
-				case "model":
-				default:{
-					//	NOTE: why do I not use $value["val"]["name"] here? like I do with translators?
-					$data = $src->getValue($value["key"]);
-					$dst->setValue($value["key"],$data);
-				}break;
-
 				case "service":{
 					/*
-					//	TODO	we are processing an xml block named "service" but allowing the service to be a route????
+					 //	TODO	we are processing an xml block named "service" but allowing the service to be a route????
 					//	FIXME:	this is obviously fucking stupid....perhaps the block should be called "router" or done
 					//			a different way, because this is obviously not the right way
 					$r = $item["service"] == "true"
-						? Amslib_Router::getService($item["name"],$item["plugin"])
-						: Amslib_Router::getRoute($item["name"],$item["plugin"]);
+					? Amslib_Router::getService($item["name"],$item["plugin"])
+					: Amslib_Router::getRoute($item["name"],$item["plugin"]);
 
 					Amslib_Router::setRoute($item["rename"],$this->getName(),NULL,$r,false);
 
@@ -407,7 +399,23 @@ class Amslib_Plugin_Manager
 					//		name => the service to obtain
 					//		service => whether it's a service or path route
 					//		rename => the local name to store the copy in
-					 */
+					*/
+				}break;
+
+				//	We do nothing special with these entries, we simply pass them
+				case "value":
+				case "image":
+				//case "model":
+				default:{
+					//	NOTE: why do I not use $value["val"]["name"] here? like I do with translators?
+					$data = $src->getValue($value["key"]);
+					$dst->setValue($value["key"],$data);
+				}break;
+
+				case "model":{
+					//	NOTE: why do I not use $value["val"]["name"] here? like I do with translators?
+					$data = $src->getValue($value["key"]);
+					$dst->setValue($value["key"],$data);
 				}break;
 			}
 		}
@@ -489,106 +497,60 @@ class Amslib_Plugin_Manager
 		self::$export = NULL;
 	}
 
-	/*******************************************************************
-	 	HELPER FUNCTIONS
+	/*************** DEPRECATED METHODS BELOW *******************/
+	private function _____DEPRECATED_METHODS_BELOW(){}
 
-	 	Below are methods that allow you to plugin functionality
-	 	by just knowing the name of the plugin and the manager
-	 	will find out which appropriate plugin to call to execute
-	 	the functionality
-	********************************************************************/
-	/**
-	 * 	method:	render
-	 *
-	 * 	todo: write documentation
-	 */
 	static public function render($plugin,$view="default",$parameters=array())
 	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->render($view,$parameters) : false;
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		return Amslib_Plugin::render($plugin,$view,$parameters);
 	}
 
-	/**
-	 * 	method:	renderView
-	 *
-	 * 	todo: write documentation
-	 */
 	static public function renderView($plugin,$view="default",$parameters=array())
 	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->renderView($view,$parameters) : false;
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		return Amslib_Plugin::renderView($plugin,$view,$parameters);
 	}
 
-	/**
-	 * 	method:	getObject
-	 *
-	 * 	todo: write documentation
-	 * 	todo: why is singleton=false here and in Amslib_MVC::getObject, singleton=true?
-	 */
 	static public function getObject($plugin,$id,$singleton=false)
 	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->getObject($id,$singleton) : false;
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		return Amslib_Plugin::getObject($plugin,$id,$singleton);
 	}
 
-	/**
-	 * 	method:	setStylesheet
-	 *
-	 * 	todo: write documentation
-	 */
 	static public function setStylesheet($plugin,$id,$file,$conditional=NULL)
 	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->setStylesheet($id,$file,$conditional) : false;
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		return Amslib_Plugin::setStylesheet($plugin,$id,$file,$conditional);
 	}
 
-	/**
-	 * 	method:	addStylesheet
-	 *
-	 * 	todo: write documentation
-	 */
 	static public function addStylesheet($plugin,$stylesheet)
 	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->addStylesheet($stylesheet) : false;
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		return Amslib_Plugin::addStylesheet($plugin,$stylesheet);
 	}
 
-	/**
-	 * 	method:	setJavascript
-	 *
-	 * 	todo: write documentation
-	 */
 	static public function setJavascript($plugin,$id,$file,$conditional=NULL)
 	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->setJavascript($id,$file,$conditional) : false;
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		return Amslib_Plugin::setJavascript($plugin,$id,$file,$conditional);
 	}
 
-	/**
-	 * 	method:	addJavascript
-	 *
-	 * 	todo: write documentation
-	 */
 	static public function addJavascript($plugin,$javascript)
 	{
-		$api = self::getAPI($plugin);
-
-		return $api ? $api->addJavascript($javascript) : false;
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		return Amslib_Plugin::addJavascript($plugin,$javascript);
 	}
 
-	/**
-	 *	DEPRECATED METHOD: preload
-	 *
-	 * 	todo: write documentation
-	 */
 	static public function preload($name,$plugin)
 	{
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
 		return self::insert($name,$plugin);
+	}
+
+	static public function listPlugins()
+	{
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		return self::listPlugin();
 	}
 }
