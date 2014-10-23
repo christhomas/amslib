@@ -10,9 +10,9 @@
 	</view>
 	
 	<value>
-		<meta_description>A sample template using the amslib framework</meta_description>
-    	<meta_author>chris thomas, antimatter studios</meta_author>
     	<site_title>Amslib Framework: Welcome</site_title>
+    	<meta_description>The amslib framework website, documentation, examples and more</meta_description>
+    	<meta_author>chris thomas, antimatter studios</meta_author>
 	</value>
 	
 	<stylesheet>
