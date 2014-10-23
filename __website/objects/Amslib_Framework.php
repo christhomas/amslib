@@ -15,6 +15,15 @@ class Amslib_Framework extends Amslib_MVC
 		return $instance;
 	}
 
+	public function getImage($id,$relative=true)
+	{
+		if(is_string($id)){
+			$id = "/__website/$id";
+		}
+
+		return parent::getImage($id,$relative);
+	}
+
 	/**
 	 * method:	render
 	 *
@@ -30,16 +39,21 @@ class Amslib_Framework extends Amslib_MVC
 		$resource	=	Amslib_Router::getResource();
 		$route		=	Amslib_Router::getName();
 
-		print(__METHOD__.", DEAD".Amslib_Debug::pdump(true,$resource,$route));
-
-		switch($route){
-			case "hello_world":{
-				//	Do you want to do something cusomised?
-				$params["jabba_the_hut"]	= "gimme a kiss beautiful";
-				$params["luke_skywalker"]	= "kissed his sister";
-				$params["han_solo"]			= "he shot first";
-			}
+		$params["site_title"] = false;
+		if(!$params["site_title"]){
+			$params["site_title"] = $this->getRouteParam("site_title",false);
 		}
+		if(!$params["site_title"]){
+			$params["site_title"] = $this->getValue("site_title",false);
+		}
+		if(!$params["site_title"]){
+			$params["site_title"] = "Welcome to the website";
+		}
+
+		$params["url_home"] = $this->getURL("home");
+
+		$params["meta_description"]	=	$this->getValue("meta_description");
+		$params["meta_author"]		=	$this->getValue("meta_author");
 
 		$params["content"] = $this->renderView($resource,$params);
 

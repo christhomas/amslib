@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package>
+	<object directory="__website/objects/">
+		<api>Amslib_Framework</api>
+	</object>
+	
 	<view directory="__website/views/">
 		<name>Home</name>
 		<name>Skeleton</name>
 	</view>
+	
+	<value>
+		<meta_description>A sample template using the amslib framework</meta_description>
+    	<meta_author>chris thomas, antimatter studios</meta_author>
+    	<site_title>Amslib Framework: Welcome</site_title>
+	</value>
 	
 	<stylesheet>
 		<file id="bootstrap" autoload="true">__AMSLIB__/util/bootstrap/3.1.1/css/bootstrap.min.css</file>
@@ -26,9 +36,8 @@
 	<router>
 		<path name="home">
 			<src>/</src>
-			<resource>Skeleton</resource>
+			<resource>Home</resource>
 			<parameter id="plugin">application</parameter>
-			<parameter id="template">Home</parameter>
 		</path>
 	</router>
 </package>

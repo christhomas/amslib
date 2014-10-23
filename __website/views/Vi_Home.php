@@ -1,6 +1,6 @@
 <section>
 	<div class="img-area">
-		<img class="img-responsive" src="<?=$api->getImage("/__website/resources/logo.png")?>" alt="Antimatter Studios" />
+		<img class="img-responsive" src="<?=$api->getImage("/resources/logo.png")?>" alt="Antimatter Studios" />
 	</div>
 
 	<div class="txt-area">
