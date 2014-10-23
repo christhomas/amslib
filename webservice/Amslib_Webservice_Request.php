@@ -22,10 +22,10 @@
 
 class Amslib_Webservice_Request
 {
+	protected $debug;
 	protected $url;
 	protected $params;
 	protected $sharedSession;
-	protected $debug;
 	protected $username;
 	protected $password;
 
@@ -127,12 +127,11 @@ class Amslib_Webservice_Request
 			curl_close($curl);
 
 			$response = new Amslib_Webservice_Response($reply);
-			$response->setMode("raw",$raw);
 
 			if($this->sharedSession && !$id_session){
 				$data = $response->getData("amslib");
-				if(isset($data[$key_remote])){
-					Amslib_SESSION::set($key_remote,$data[$key_remote]);
+				if($value = $data->getKey($key_remote)){
+					Amslib_SESSION::set($key_remote,$value);
 				}
 			}
 
