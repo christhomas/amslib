@@ -421,6 +421,44 @@ class Amslib_Debug
 		return $result;
 	}
 
+	//	OLD METHOD
+	//	static public function getStackTrace($index=NULL,$string=false,$var_dump=NULL)
+	static public function getStackTrace2($va_args=NULL)
+	{
+		$a = func_get_args();
+		$a = Amslib_Array::toKeyValue($a);
+
+		$e = new Exception();
+
+		if(isset($a["type"]) && in_array($a["type"],array("string","html"))){
+			$t = $e->getTraceAsString();
+			$t = explode("\n",$t);
+			$i = $a["type"] == "string" ? "\n" : "<br/>";
+		}else{
+			$t = $e->getTrace();
+		}
+
+		if(isset($a["limit"])){
+			$l = $a["limit"];
+
+			if(is_numeric($l)){
+				$l = array($l);
+			}
+
+			if(is_array($l) && count($l)){
+				$p = array($t,$s=intval(array_shift($l)));
+
+				if(count($l) && $e=intval(array_shift($l)) > $s){
+					$p[] = $e;
+				}
+
+				$t = call_user_func_array("array_slice",$p);
+			}
+		}
+
+		return isset($i) ? implode($i,$t) : $t;
+	}
+
 	static private function _______DEPRECATED_METHODS_BELOW_THIS_LINE(){}
 
 	//	DEPRECATED, BUT STILL USED EVERYWHERE

@@ -257,6 +257,32 @@ class Amslib_Array
 		return array_intersect_key($array,array_flip($key));
 	}
 
+	static public function toKeyValue($list)
+	{
+		$list	=	self::valid($list);
+		$array	=	array();
+
+		$k = NULL;
+		foreach($list as $index=>$item){
+			if($k == NULL){
+				if(is_numeric($item)){
+					$k = intval($item);
+				}else if(is_string($item)){
+					$k = $item;
+				}else{
+					Amslib_Debug::log(__METHOD__,"list was invalid, key not string or number",$index,$item,$k,$v,$array);
+					return $array;
+				}
+			}else{
+				$array[$k] = $item;
+
+				$k = NULL;
+			}
+		}
+
+		return $array;
+	}
+
 	static private function ______UPGRADE_METHODS_BELOW(){}
 
 	/**

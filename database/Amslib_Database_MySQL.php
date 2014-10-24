@@ -426,11 +426,9 @@ QUERY;
 	{
 		$this->lastInsertId = false;
 
-		if($this->query("insert into $query")){
-			return false;
-		}
-
-		return $this->lastInsertId = mysql_insert_id($this->connection);
+		return $this->query("insert into $query",true)
+			? $this->getLastInsertId()
+			: false;
 	}
 
 	/**
@@ -440,13 +438,9 @@ QUERY;
 	 */
 	public function update($query,$allow_zero=true)
 	{
-		if(!$this->query("update $query",true)){
-			return false;
-		}
-
-		$affected = mysql_affected_rows($this->connection);
-
-		return $allow_zero ? $affected >= 0 : $affected > 0;
+		return $this->query("update $query",true)
+			? $this->getLastAffectedCount(true,$allow_zero)
+			: false;
 	}
 
 	/**
@@ -457,8 +451,30 @@ QUERY;
 	public function delete($query)
 	{
 		return $this->query("delete from $query")
-			? mysql_affected_rows($this->connection) >= 0
+			? $this->getLastAffectedCount()
 			: false;
+	}
+
+	/**
+	 * 	method:	getLastInsertId
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getLastInsertId()
+	{
+		return $this->lastInsertId = mysql_insert_id($this->connection);
+	}
+
+	/**
+	 * 	method:	getLastAffectedCount
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getLastAffectedCount($boolean=true,$allow_zero=true)
+	{
+		$count = mysql_affected_rows($this->connection);
+
+		return $boolean ? ($allow_zero ? $count >= 0 : $count > 0) : $count;
 	}
 
 	/**

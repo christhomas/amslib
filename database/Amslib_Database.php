@@ -115,37 +115,6 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	}
 
 	/**
-	 * 	method:	getLastInsertId
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function getLastInsertId()
-	{
-		switch($this->db_type) {
-			case 'SQLITE': // <-- no { it's a bad form, you should always put one
-				//	chris:	alfonso? is a method to obtain the last inserted row,
-				//			the correct place to call a method that connects to a
-				//			databases? surely at this point, it should already be connected?
-				return $this->connect()->lastInsertRowId();
-				//	chris:	<---- here is a bug, there is no break, therefore this code will
-				//			execute the SQLITE code and immediately after the MYSQL code, the
-				//			correct form for a switch case statement to avoid stupid bugs like
-				//			this is as follows
-			case "DEMO_ALFONSO_SWITCH_CASE":{
-				//	chris: please do all future switch/case statements in this format
-			}break; // <-- this was missing from your above code
-			case 'MYSQL': // <-- no { to open the statement
-				//	chris:	I didnt research the PDO object, but is this the correct way to
-				//			ask the PDO object for it's last inserted row primary key ?
-				return mysql_insert_id($this->db);
-				//	<-- no break statement, also, no } to close this a few lines up
-		}
-
-		//	The original default code
-		return $this->lastInsertId;
-	}
-
-	/**
 	 * 	method:	__construct
 	 *
 	 * 	This method is called when the database object is created, it connects to the database by default
@@ -336,7 +305,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 				-1
 		);
 
-		$this->errors[] = array(
+		$this->errors[] = $error = array(
 				"db_failure"		=>	true,
 				"db_query"			=>	preg_replace('/\s+/',' ',$args[0]),
 				"db_error"			=>	$args[1],
@@ -351,6 +320,8 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		if(count($this->errors) > $this->errorCount){
 			array_shift($this->errors);
 		}
+
+		$this->debug("ERROR",$error);
 	}
 
 	/**
@@ -948,6 +919,51 @@ QUERY;
 	}
 
 	/**
+	 * 	method:	getLastInsertId
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getLastInsertId()
+	{
+		switch($this->db_type) {
+			case 'SQLITE': // <-- no { it's a bad form, you should always put one
+				//	chris:	alfonso? is a method to obtain the last inserted row,
+				//			the correct place to call a method that connects to a
+				//			databases? surely at this point, it should already be connected?
+				return $this->connect()->lastInsertRowId();
+				//	chris:	<---- here is a bug, there is no break, therefore this code will
+				//			execute the SQLITE code and immediately after the MYSQL code, the
+				//			correct form for a switch case statement to avoid stupid bugs like
+				//			this is as follows
+			case "DEMO_ALFONSO_SWITCH_CASE":{
+				//	chris: please do all future switch/case statements in this format
+			}break; // <-- this was missing from your above code
+			case 'MYSQL': // <-- no { to open the statement
+				//	chris:	I didnt research the PDO object, but is this the correct way to
+				//			ask the PDO object for it's last inserted row primary key ?
+				return mysql_insert_id($this->db);
+				//	<-- no break statement, also, no } to close this a few lines up
+		}
+
+		//	The original default code
+		return $this->lastInsertId;
+	}
+
+	/**
+	 * 	method:	getLastAffectedCount
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getLastAffectedCount($boolean=true,$allow_zero=true)
+	{
+		return 0;
+	}
+
+	/**	/**
+	 * 	method:	getLastAffectedCount
+	 *
+	 * 	todo: write documentation
+	 *
 	 * 	method:	getResults
 	 *
 	 * 	todo: write documentation
