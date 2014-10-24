@@ -344,7 +344,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			$this->debug("QUERY",$query);
 
 			if(!$result){
-				$this->setDBErrors($query);
+				$this->setError($query);
 			}
 		}
 
