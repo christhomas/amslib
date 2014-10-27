@@ -22,14 +22,15 @@
 
 class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 {
-	const VD = "validation/data";
-	const VE = "validation/errors";
-	const SD = "service/data";
-	const SE = "service/errors";
-	const DB = "database/errors";
+	//	response indicies
 	const HD = "handlers";
-	const FB = "feedback";
 	const SC = "success";
+	//	handler indicies
+	const VD = "validation.data";
+	const VE = "validation.errors";
+	const SD = "service.data";
+	const SE = "service.errors";
+	const DB = "database.errors";
 
 	protected $handler;
 
@@ -46,33 +47,7 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 		return $plugin;
 	}
 
-	/**
-	 * 	method:	getHandlerData
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function getHandlerData($plugin,$default,$key)
-	{
-		if(!$this->handler && $this->countHandler()){
-			$this->processHandler();
-		}
-
-		if(!$this->handler){
-			//	TODO: move into the logging system instead of here
-			Amslib_Debug::log(__METHOD__,"INVALID HANDLER",Amslib_Debug::pdump(true,$this->handler));
-			return NULL;
-		}
-
-		if($plugin === NULL) return $this->handler;
-
-		$plugin = self::pluginToName($plugin);
-
-		return isset($this->handler[$plugin]) && isset($this->handler[$plugin][$key])
-			? Amslib_Array::valid($this->handler[$plugin][$key])
-			: $default;
-	}
-
-	public function __construct($data)
+	public function __construct($data=array())
 	{
 		parent::__construct($data);
 
@@ -83,74 +58,37 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 	 * 	method:	hasData
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	note: do not use getKey here, will result in an infinite loop
 	 */
-	public function hasData()
+	public function hasResponse()
 	{
-		return parent::hasData() && isset($this->response["success"]) && isset($this->response["handlers"]);
-	}
-
-	public function deleteData($plugin,$name=NULL)
-	{
-		/*$plugin	=	self::pluginToName($plugin);
-			$copy	=	NULL;
-
-		if(isset($this->data[$plugin])){
-		if($name && isset($this->data[$plugin][self::SD][$name])){
-		$copy = $this->data[$plugin][self::SD][$name];
-
-		unset($this->data[$plugin][self::SD][$name]);
-		}else if(!$name){
-		$copy = $this->data[$plugin][self::SD];
-
-		unset($this->data[$plugin][self::SD]);
-		}
-
-		//	clean up empty arrays in the return structure
-		if(empty($this->data[$plugin])) unset($this->data[$plugin]);
-		}
-
-		return $copy;
-		*/
+		return
+			parent::hasResponse() &&
+			array_key_exists(self::SC,$this->response) &&
+			array_key_exists(self::HD,$this->response);
 	}
 
 	/**
-	 * 	method:	countHandler
+	 * 	method:	setStatus
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	note: do not use setKey in here, if your response is invalid, it'll fail to set the key because hasResponse will fail
 	 */
-	public function countHandler()
+	public function resetResponse()
 	{
-		if(!isset($this->response[self::HD])) return false;
-
-		return count($this->response[self::HD]);
-	}
-
-	public function setHandler($id,$data)
-	{
-		if(!is_array($data)) return false;
-
-		$this->setKey(self::HD,array());
-
-		$this->response[self::HD][intval($id)] = $data;
-	}
-
-	public function addHandler($data)
-	{
-		$this->setHandler($this->countHandler(),$data);
+		$this->response = array(
+			self::HD	=>	array(),
+			self::SC	=>	false
+		);
 	}
 
 	/**
-	 * 	method:	processHandler
+	 * 	method:	setStatus
 	 *
 	 * 	todo: write documentation
 	 */
-	public function processHandler($id=0)
-	{
-		$this->handler = Amslib_Array::valid($this->getKey(array(self::HD,$id),array()));
-
-		return array_keys($this->handler);
-	}
-
 	public function setStatus($status)
 	{
 		$this->setKey(self::SC,!!$status);
@@ -164,6 +102,146 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 	public function getStatus()
 	{
 		return $this->getKey(self::SC,false);
+	}
+
+	public function isHandler($id)
+	{
+		return is_numeric($id) && $this->getKey(array(self::HD,$id));
+	}
+
+	/**
+	 * 	method:	countHandler
+	 *
+	 * 	todo: write documentation
+	 */
+	public function countHandler()
+	{
+		return ($data = $this->getKey(self::HD,NULL))
+			? count($data)
+			: false;
+	}
+
+	public function createHandler()
+	{
+		$this->handler = intval($this->countHandler());
+
+		if(!$this->handler){
+			$this->setKey(self::HD,array());
+		}
+
+		$this->setKey(array(self::HD,$this->handler),array());
+
+		return $this->handler;
+	}
+
+	public function setHandler($id,$data)
+	{
+		if(!$this->isHandler($id)){
+			return false;
+		}
+
+		$this->setKey(array(self::HD,intval($id)),$data);
+	}
+
+	/**
+	 * 	method:	processHandler
+	 *
+	 * 	todo: write documentation
+	 */
+	public function processHandler($id=0)
+	{
+		$keys = array();
+
+		if($data = $this->getKey(array(self::HD,$id))){
+			$this->handler = $id;
+
+			$keys = array_keys($data);
+		}
+
+		return $keys;
+	}
+
+	public function setHandlerData($plugin,$name,$value)
+	{
+		if($this->handler === false && $this->countHandler()){
+			$this->processHandler();
+		}
+
+		if($this->handler === false){
+			//	TODO: move into the logging system instead of here
+			Amslib_Debug::log(__METHOD__,"INVALID HANDLER",Amslib_Debug::pdump(true,$this->handler));
+			return NULL;
+		}
+
+		$plugin = self::pluginToName($plugin);
+
+		$keys = array(self::HD,$this->handler,$plugin,self::SD);
+
+		if($name == NULL){
+			if(is_array($value)){
+				$this->setKey($keys,$value);
+			}else{
+				Amslib_Debug::log(__METHOD__,"value was invalid array",$value);
+			}
+		}else if(is_numeric($name) || is_string($name)){
+			$keys[] = $name;
+
+			$this->setKey($keys,$value);
+		}else{
+			Amslib_Debug::log(__METHOD__,"name was invalid",$name);
+		}
+	}
+
+	/**
+	 * 	method:	getHandlerData
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getHandlerData($plugin,$default,$name=NULL)
+	{
+		if(!$this->handler && $this->countHandler()){
+			$this->processHandler();
+		}
+
+		if(!$this->handler){
+			//	TODO: move into the logging system instead of here
+			Amslib_Debug::log(__METHOD__,"INVALID HANDLER",Amslib_Debug::pdump(true,$this->handler));
+			return NULL;
+		}
+
+		$keys = array(self::HD,$this->handler);
+
+		if($plugin !== NULL)	$keys[] = self::pluginToName($plugin);
+		if($name !== NULL)		$keys[] = $name;
+
+		return $this->getKey($keys,$default);
+	}
+
+	/**
+	 * 	method:	setValidationData
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setValidationData($plugin,$data)
+	{
+		/*$this->data[self::pluginToName($plugin)][self::VD] = $data;
+		 */
+	}
+
+	/**
+	 * 	method:	setValidationErrors
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setValidationErrors($plugin,$errors)
+	{
+		if(empty($errors)){
+			$errors["no_errors"] = true;
+			$errors["debug_help"] = "No Errors set and array was empty, perhaps validation failed because source was empty?";
+		}
+		/*
+		$this->data[self::pluginToName($plugin)][self::VE] = $errors;
+		*/
 	}
 
 	/**
@@ -196,6 +274,11 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 		return $this->getHandlerData($plugin,$default,self::SE);
 	}
 
+	public function setServiceData($plugin,$name,$value)
+	{
+		return $this->setHandlerData($plugin,$name,$value);
+	}
+
 	/**
 	 * 	method:	getServiceData
 	 *
@@ -206,6 +289,42 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 		$data = $this->getHandlerData($plugin,$default,self::SD);
 
 		return $key && $data && isset($data[$key]) ? $data[$key] : $data;
+	}
+
+	public function deleteServiceData($plugin,$name=NULL)
+	{
+		$keys = array(self::HD,$this->handler,$this->pluginToName($plugin),self::SD);
+
+		if(is_string($name) && strlen($name)) $keys[] = $name;
+
+		return $this->deleteKey($keys);
+	}
+
+	/**
+	 * 	method:	moveData
+	 *
+	 * 	todo: write documentation
+	 */
+	public function renameServiceData($dst,$src,$name=NULL)
+	{
+		$this->setServiceData(
+			$dst,
+			$name,
+			$this->deleteServiceData($src,$name)
+		);
+	}
+
+	/**
+	 * 	method:	setDatabaseErrors
+	 *
+	 * 	todo: write documentation
+	 *
+	 *	NOTE: Be careful with this method, you could be pushing secret data
+	 */
+	public function setDatabaseErrors($plugin,$errors)
+	{
+		/*if(!empty($errors)) $this->data[self::pluginToName($plugin)][self::DB] = $errors;
+		 */
 	}
 
 	/**
@@ -231,5 +350,16 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 			$this->getDatabaseErrors($plugin,$default),
 			array("db_error","db_location")
 		);
+	}
+
+	private function ____DEPRECATED_METHODS_BELOW(){}
+
+	public function addHandler($data)
+	{
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+
+		$index = $this->createHandler();
+
+		$this->setHandler($index,$data);
 	}
 }

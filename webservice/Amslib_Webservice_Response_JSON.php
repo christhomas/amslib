@@ -22,12 +22,12 @@
 
 class Amslib_Webservice_Response_JSON extends Amslib_Webservice_Response_Raw
 {
-	public function __construct($data)
+	public function __construct($data=array())
 	{
 		parent::__construct($data);
 	}
 
-	public function setData($data)
+	public function setResponse($data)
 	{
 		$exception = "";
 

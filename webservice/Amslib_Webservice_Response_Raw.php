@@ -24,18 +24,28 @@ class Amslib_Webservice_Response_Raw
 {
 	protected $response;
 
-	public function __construct($data)
+	public function __construct($data=array())
 	{
-		$this->setData($data);
+		$this->setResponse($data);
 
-		if(!$this->hasData()){
-			$this->response = array();
+		if(!$this->hasResponse()){
+			$this->resetResponse();
 		}
 	}
 
-	public function setData($data)
+	public function setResponse($data)
 	{
 		$this->response = $data;
+	}
+
+	public function resetResponse()
+	{
+		$this->response = array();
+	}
+
+	public function getResponse()
+	{
+		return $this->response;
 	}
 
 	/**
@@ -43,32 +53,94 @@ class Amslib_Webservice_Response_Raw
 	 *
 	 * 	todo: write documentation
 	 */
-	public function hasData()
+	public function hasResponse()
 	{
 		return $this->response && is_array($this->response);
 	}
 
-	public function setKey($type,$value=NULL)
+	public function setKey($key,$value=NULL)
 	{
-		if($this->hasData() && strlen($type)){
-			$this->response[$type] = $value;
+		if(!$this->hasResponse()){
+			return false;
 		}
+
+		$a = &$this->response;
+
+		if(is_string($key)){
+			$key = array($key);
+		}
+
+		while($count = count($key)){
+			$index = array_shift($key);
+
+			if($count > 1){
+				if(!isset($a[$index])){
+					$a[$index] = array();
+				}
+
+				$a = &$a[$index];
+			}else{
+				$a[$index] = $value;
+			}
+		}
+
+		unset($a);
+
+		return $value;
 	}
 
 	public function getKey($key=NULL,$default=NULL)
 	{
-		if(!$this->hasData()){
+		if(!$this->hasResponse()){
 			return $default;
 		}
 
 		$a = $this->response;
-		if(is_string($key)) $key = array($key);
+
+		if(is_string($key)){
+			$key = array($key);
+		}
+
 		foreach($key as $index){
-			if(!isset($a[$index])) return $default;
+			if(!isset($a[$index])){
+				return $default;
+			}
 
 			$a = $a[$index];
 		}
 
 		return $a;
+	}
+
+	public function deleteKey($key)
+	{
+		if(!$this->hasResponse()){
+			return NULL;
+		}
+
+		$a = &$this->response;
+
+		if(is_string($key)){
+			$key = array($key);
+		}
+
+		while($count = count($key)){
+			$index = array_shift($key);
+
+			if($count > 1){
+				if(!isset($a[$index])){
+					return NULL;
+				}
+
+				$a = &$a[$index];
+			}else{
+				$value = $a[$index];
+				unset($a[$index],$a);
+
+				return $value;
+			}
+		}
+
+		return NULL;
 	}
 }
