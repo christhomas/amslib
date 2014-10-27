@@ -1197,7 +1197,6 @@ class Amslib_Validator
 	protected function getValue($name)
 	{
 		$value = array_key_exists($name,$this->source) ? $this->source[$name] : "";
-		print(__METHOD__.", name[$name] = value[$value]<br/>");
 
 		if(!is_string($value)) return $value;
 
@@ -1339,6 +1338,11 @@ class Amslib_Validator
 	{
 		if(is_string($fields)){
 			$fields = array($fields);
+		}
+
+		//	note: this is just an idea I made to simplify how to do this, I could expand with more recognised token/replacements
+		if($format === "date"){
+			$format = "%s-%s-%s";
 		}
 
 		try{
