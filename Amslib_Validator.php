@@ -967,7 +967,7 @@ class Amslib_Validator
 			return true;
 		}
 
-		return false;
+		return "DATE_INVALID";
 	}
 
 	/**
@@ -1197,6 +1197,7 @@ class Amslib_Validator
 	protected function getValue($name)
 	{
 		$value = array_key_exists($name,$this->source) ? $this->source[$name] : "";
+		print(__METHOD__.", name[$name] = value[$value]<br/>");
 
 		if(!is_string($value)) return $value;
 
@@ -1332,6 +1333,31 @@ class Amslib_Validator
 		unset($this->rules[$name],$this->validData[$name]);
 
 		$this->checkRequiredRules();
+	}
+
+	public function build($name,$fields,$format)
+	{
+		if(is_string($fields)){
+			$fields = array($fields);
+		}
+
+		foreach($fields as &$value){
+			$value = $this->source[$value];
+		}
+
+		array_unshift($fields,$format);
+
+		try{
+			ob_start();
+			$this->source[$name] = call_user_func_array("sprintf",$fields);
+			$error = ob_get_clean();
+		}catch(Exception $e){
+			$error = $e->getMessage();
+		}
+
+		if(strlen($error)){
+			$this->setError("BUILDER[$name]",$error,"BUILDER_FAILURE");
+		}
 	}
 
 	/**
