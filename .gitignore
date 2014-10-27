@@ -2,3 +2,4 @@
 .project
 .buildpath
 .DS_Store
+/nbproject/*
