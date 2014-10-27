@@ -1341,13 +1341,17 @@ class Amslib_Validator
 			$fields = array($fields);
 		}
 
-		foreach($fields as &$value){
-			$value = $this->source[$value];
-		}
-
-		array_unshift($fields,$format);
-
 		try{
+			foreach($fields as &$value){
+				if(!isset($this->source[$value])){
+					throw new Exception("array index requested ($value) was not present in source array");
+				}else{
+					$value = $this->source[$value];
+				}
+			}
+
+			array_unshift($fields,$format);
+
 			ob_start();
 			$this->source[$name] = call_user_func_array("sprintf",$fields);
 			$error = ob_get_clean();
