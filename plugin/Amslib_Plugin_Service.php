@@ -36,12 +36,12 @@
  */
 class Amslib_Plugin_Service
 {
-	const SR = "/amslib/service";
-	const VD = "validation/data";
-	const VE = "validation/errors";
-	const SD = "service/data";
-	const SE = "service/errors";
-	const DB = "database/errors";
+	const SR = "amslib.service";
+	const VD = "validation.data";
+	const VE = "validation.errors";
+	const SD = "service.data";
+	const SE = "service.errors";
+	const DB = "database.errors";
 	const HD = "handlers";
 	const FB = "feedback";
 	const SC = "success";
@@ -52,6 +52,10 @@ class Amslib_Plugin_Service
 	protected $failureCB;
 	protected $format;
 	protected $data;
+
+	//	NOTE:	technically "session" is the wrong word, since we could be building a JSON
+	//			structure to send back, it's an old word associated with the old system
+	//			which only worked through PHP sessions
 	protected $session;
 	protected $handlerList;
 	protected $terminatorList;
@@ -101,6 +105,9 @@ class Amslib_Plugin_Service
 			}
 		}
 
+		//	this is why record=global overwrites previous session data, because it
+		//	effectively overwrites the last one with the new one, there is no
+		//	"handler" concept here like there is with recording the data into the session
 		if($this->activeHandler["global"]){
 			$this->setVar(NULL,$this->data);
 		}
@@ -649,18 +656,19 @@ class Amslib_Plugin_Service
 		$this->data[self::pluginToName($plugin)][self::VE] = $errors;
 	}
 
-	//	NOTE: Be careful with this method, you could be pushing secret data
 	/**
 	 * 	method:	setDatabaseErrors
 	 *
 	 * 	todo: write documentation
+	 *
+	 *	NOTE: Be careful with this method, you could be pushing secret data
 	 */
 	public function setDatabaseErrors($plugin,$errors)
 	{
 		if(!empty($errors)) $this->data[self::pluginToName($plugin)][self::DB] = $errors;
 	}
 
-/**
+	/**
 	 * 	method:	setData
 	 *
 	 * 	todo: write documentation
@@ -674,12 +682,18 @@ class Amslib_Plugin_Service
 				$this->data[$plugin][self::SD] = $value;
 			}else{
 				Amslib_Debug::log(__METHOD__,"value was invalid array",$value);
+
+				return NULL;
 			}
 		}else if(is_numeric($name) || is_string($name)){
 			$this->data[$plugin][self::SD][$name] = $value;
 		}else{
 			Amslib_Debug::log(__METHOD__,"name was invalid",$name);
+
+			return NULL;
 		}
+
+		return $value;
 	}
 
 	/**
