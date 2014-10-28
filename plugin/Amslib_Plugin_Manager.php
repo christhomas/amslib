@@ -256,7 +256,7 @@ class Amslib_Plugin_Manager
 	}
 
 	/**
-	 * 	method:	listPlugins
+	 * 	method:	listPlugin
 	 *
 	 * 	todo: write documentation
 	 */
@@ -502,7 +502,7 @@ class Amslib_Plugin_Manager
 
 	static public function render($plugin,$view="default",$parameters=array())
 	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD","stack_trace");
 		return Amslib_Plugin::render($plugin,$view,$parameters);
 	}
 
@@ -550,7 +550,7 @@ class Amslib_Plugin_Manager
 
 	static public function listPlugins()
 	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD","stack_trace");
 		return self::listPlugin();
 	}
 }

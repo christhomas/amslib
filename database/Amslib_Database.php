@@ -312,9 +312,8 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 				"db_error_num"		=>	$args[2],
 				"db_last_insert"	=>	$this->lastInsertId,
 				"db_insert_id"		=>	$args[3],
-				//	HMM, not sure about this, i think better to just record a single line of
-				//	the trace, which will be in the method which generated the failure
-				"db_location"		=>	Amslib_Debug::getStackTrace(0,true)
+				//	note: I don't think I need the entire trace, maybe just the first couple of methods
+				"db_location"		=>	Amslib_Debug::getStackTrace("type","text")
 		);
 
 		if(count($this->errors) > $this->errorCount){

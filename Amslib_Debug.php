@@ -33,7 +33,7 @@ class Amslib_Debug
 	{
 		//	NOTE: uncomment these lines to run the dirty nasty dump debugger :(
 		//static $run = 0;
-		//if(++$run == self::$dumpLimit) die(self::getStackTrace(NULL,true));
+		//if(++$run == self::$dumpLimit) die(self::getStackTrace("type","text"));
 
 		//	Obtain the variables to dump
 		$args = func_get_args();
@@ -47,10 +47,12 @@ class Amslib_Debug
 	/**
 	 *	method:	pdump
 	 *
+	 *	(pdump means <pre>dump</pre>)
 	 *	Print the dumping of various variables with optional hidden visibility for the browser
 	 *
 	 *	params:
 	 *		$visible	-	Boolean true or false, to print the data out in a browser visible or invisible form (<pre display:none>)
+	 *		$vargs		-	A variable list of arguments, minimum 1, of everything you want to dump
 	 *
 	 *	returns:
 	 *		A string containing the data, html or not ready to be output somewhere
@@ -69,6 +71,44 @@ class Amslib_Debug
 	}
 
 	/**
+	 *	method:	vdump
+	 *
+	 *	A wrapper around pdump which means visible pre-dump
+	 *
+	 *	params:
+	 *		$vargs		-	A variable list of arguments, minimum 1, of everything you want to dump
+	 *
+	 *	returns:
+	 *		A string containing the data, html or not ready to be output somewhere
+	 */
+	static public function vdump($args)
+	{
+		$args = func_get_args();
+		array_unshift($args,true);
+
+		return call_user_func_array("Amslib_Debug::pdump",$args);
+	}
+
+	/**
+	 *	method:	hdump
+	 *
+	 *	A wrapper around pdump which means hidden pre-dump
+	 *
+	 *	params:
+	 *		$vargs		-	A variable list of arguments, minimum 1, of everything you want to dump
+	 *
+	 *	returns:
+	 *		A string containing the data, html or not ready to be output somewhere
+	 */
+	static public function hdump($args)
+	{
+		$args = func_get_args();
+		array_unshift($args,false);
+
+		return call_user_func_array("Amslib_Debug::pdump",$args);
+	}
+
+	/**
 	 * 	method:	log
 	 *
 	 * 	todo: write documentation
@@ -82,18 +122,15 @@ class Amslib_Debug
 
 		foreach($args as $k=>$a){
 			if(is_string($a) && strpos($a,"stack_trace") === 0){
-				$command = explode(",",$a);
+				$parts = explode(",",$a);
+				array_shift($parts); // discard the "stack_trace" part
 
-				$stack = self::getStackTrace(NULL,true);
+				$args = count($parts)
+					? array("type","text","limit",$parts)
+					: array("type","text");
+
+				$stack = call_user_func_array("Amslib_Debug::getStackTrace",$args);
 				$stack = explode("\n",$stack);
-
-				$c = count($command);
-
-				if($c == 2){
-					$stack = array_slice($stack,$command[1]);
-				}else if($c == 3 && $command[2] > 0){
-					$stack = array_slice($stack,$command[1],$command[2]);
-				}
 
 				foreach($stack as $k=>$row){
 					error_log("[TRACE:$k] $row");
@@ -206,48 +243,47 @@ class Amslib_Debug
 	}
 
 	/**
-	 * 	method:	getStackTrace
+	 * 	method: getStackTrace
 	 *
-	 * 	Obtains a PHP exceptions stack trace, with optional starting index and string output facilities
-	 *
-	 *	parameters:
-	 *		$index		-	default NULL, the index to start the stack trace from, can be used to
-	 *						drop a certain number of leading function calls to focus on the section
-	 *						of the stack required.  Only will accept integer numbers.
-	 *		$string		-	default false, return the stack trace as a string or an array, useful
-	 *						when debugging and dumping the data to the browser, error log
-	 *		$var_dump - 	Whether or not to var_dump each section of the stack trace, only used
-	 *						when $string parameter is not set to true
-	 *
-	 *	notes:
-	 *		- the $var_dump parameter is not very useful, it should be considered a candidate for deletion
+	 * 	todo: write documentation
 	 */
-	static public function getStackTrace($index=NULL,$string=false,$var_dump=NULL)
+	static public function getStackTrace($va_args=NULL)
 	{
+		$a = func_get_args();
+		$a = Amslib_Array::toKeyValue($a);
+
 		$e = new Exception();
-		$t = false;
 
-		$t = $string ? $e->getTraceAsString() : $e->getTrace();
+		if(isset($a["type"]) && in_array($a["type"],array("text","string","html"))){
+			//	A common mistake is putting "text" instead of "string" so i'll cover this up here
+			if($a["type"] == "text") $a["type"] = "string";
 
-		if($index && is_numeric($index)){
-			$t = $string
-			//	NOTE: why in array_slice do we request a length of 1? we only want one return value??
-			? current(array_slice(explode("\n",$t),$index,1))
-			: ($var_dump ? self::dump($t[$index]) : $t[$index]);
+			$t = $e->getTraceAsString();
+			$t = explode("\n",$t);
+			$i = $a["type"] == "string" ? "\n" : "<br/>";
+		}else{
+			$t = $e->getTrace();
+		}
 
-			if($string || $var_dump){
-				$t = htmlspecialchars($t,ENT_QUOTES,"UTF-8");
+		if(isset($a["limit"])){
+			$l = $a["limit"];
+
+			if(is_numeric($l)){
+				$l = array($l);
+			}
+
+			if(is_array($l) && count($l)){
+				$p = array($t,$s=intval(array_shift($l)));
+
+				if(count($l) && ($e=intval(array_shift($l))) > $s){
+					$p[] = $e;
+				}
+
+				$t = call_user_func_array("array_slice",$p);
 			}
 		}
 
-		//	NOTE: remove the first entry, it will always be this function, we never want that.
-		if(is_string($t)){
-			$t = implode("\n",array_slice(explode("\n",$t),1));
-		}else{
-			array_shift($t);
-		}
-
-		return $t;
+		return isset($i) ? implode($i,$t) : $t;
 	}
 
 	/**
@@ -421,44 +457,6 @@ class Amslib_Debug
 		return $result;
 	}
 
-	//	OLD METHOD
-	//	static public function getStackTrace($index=NULL,$string=false,$var_dump=NULL)
-	static public function getStackTrace2($va_args=NULL)
-	{
-		$a = func_get_args();
-		$a = Amslib_Array::toKeyValue($a);
-
-		$e = new Exception();
-
-		if(isset($a["type"]) && in_array($a["type"],array("string","html"))){
-			$t = $e->getTraceAsString();
-			$t = explode("\n",$t);
-			$i = $a["type"] == "string" ? "\n" : "<br/>";
-		}else{
-			$t = $e->getTrace();
-		}
-
-		if(isset($a["limit"])){
-			$l = $a["limit"];
-
-			if(is_numeric($l)){
-				$l = array($l);
-			}
-
-			if(is_array($l) && count($l)){
-				$p = array($t,$s=intval(array_shift($l)));
-
-				if(count($l) && $e=intval(array_shift($l)) > $s){
-					$p[] = $e;
-				}
-
-				$t = call_user_func_array("array_slice",$p);
-			}
-		}
-
-		return isset($i) ? implode($i,$t) : $t;
-	}
-
 	static private function _______DEPRECATED_METHODS_BELOW_THIS_LINE(){}
 
 	//	DEPRECATED, BUT STILL USED EVERYWHERE
@@ -500,7 +498,7 @@ class Amslib_Debug
 	static public function backtrace()
 	{
 		//	Find out who is using this method so I can upgrade it's code and delete this
-		self::log("stack_trace");
+		Amslib_Debug::log(__METHOD__,"stack_trace");
 
 		$args	=	func_get_args();
 		$bt		=	debug_backtrace();
@@ -516,6 +514,7 @@ class Amslib_Debug
 
 	static public function showErrors($state=true)
 	{
+		Amslib_Debug::log(__METHOD__,"stack_trace");
 		self::enable($state);
 	}
 }

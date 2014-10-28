@@ -138,7 +138,7 @@ class Amslib_Log extends Amslib_Mixin
 			if(is_string($a) && strpos($a,"stack_trace") === 0){
 				$command = explode(",",$a);
 
-				$stack = Amslib_Debug::getStackTrace(NULL,true);
+				$stack = Amslib_Debug::getStackTrace("type","text");
 				$stack = explode("\n",$stack);
 
 				$c = count($command);

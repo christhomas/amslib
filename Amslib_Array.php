@@ -262,6 +262,8 @@ class Amslib_Array
 		$list	=	self::valid($list);
 		$array	=	array();
 
+		if(empty($list) || count($list) == 1) return $array;
+
 		$k = NULL;
 		foreach($list as $index=>$item){
 			if($k == NULL){
@@ -270,7 +272,7 @@ class Amslib_Array
 				}else if(is_string($item)){
 					$k = $item;
 				}else{
-					Amslib_Debug::log(__METHOD__,"list was invalid, key not string or number",$index,$item,$k,$v,$array);
+					Amslib_Debug::log(__METHOD__,"list was invalid, key not string or number",$index,$item,$k,$array);
 					return $array;
 				}
 			}else{
