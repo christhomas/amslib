@@ -198,9 +198,9 @@ class Amslib_Router_Source_XML
 					//	A reason for wanting to ignore failures is that you want to accumulate all the results
 					//	and post-process them into a final result, however this requires you setup the webservices with care
 					//	and attention that failures will not cause unpredictable errors, however, that this, it is useful
-					$c["failure"] = isset($c["failure"]) && strpos($c["failure"],"ignore") !== false
-						? false
-						: true;
+					if(!isset($c["failure"]) || !in_array($c["failure"],array("break","stop","ignore"))){
+						$c["failure"] = "break";
+					}
 
 					$a["handler"][] = $c;
 				}break;

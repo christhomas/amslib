@@ -592,7 +592,7 @@ class Amslib_Plugin_Service
 			$this->setOutputFormat($h["format"]);
 
 			//	Run the handler, either in managed or unmanaged mode
-			$state = isset($h["managed"])
+			$response = isset($h["managed"])
 				? $this->runManagedHandler($h["managed"],$h["object"],$h["method"],$source)
 				: $this->runHandler($h["object"],$h["method"],$source);
 
@@ -603,10 +603,20 @@ class Amslib_Plugin_Service
 			}
 
 			//	Store the result of the service and make ready to start a new service
-			$this->storeData($state);
+			$this->storeData($response);
 
-			//	OH NOES! we got brokens, have to stop here, cause something failed :(
-			if($h["failure"] && !$state) break;
+			if(!$response){
+				if($h["failure"] === "break"){
+					$state = false;
+					break;
+				}else if($h["failure"] === "stop"){
+					break;
+				}else if($h["failure"] === "ignore"){
+					//	do nothing
+				}
+			}else{
+				$state = $response;
+			}
 		}
 
 		$this->finalise($state);
