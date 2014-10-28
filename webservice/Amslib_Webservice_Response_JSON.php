@@ -33,7 +33,11 @@ class Amslib_Webservice_Response_JSON extends Amslib_Webservice_Response_Raw
 
 		ob_start();
 		try{
-			$this->response = json_decode($data,true);
+			if(is_string($data)){
+				$this->response = json_decode($data,true);
+			}else if(is_array($data)){
+				$this->response = $data;
+			}
 		}catch(Exception $e){
 			$exception = $e->getMessage();
 		}

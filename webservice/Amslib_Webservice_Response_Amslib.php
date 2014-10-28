@@ -199,11 +199,11 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 	 */
 	public function getHandlerData($plugin,$default,$name=NULL)
 	{
-		if(!$this->handler && $this->countHandler()){
+		if($this->handler === false && $this->countHandler()){
 			$this->processHandler();
 		}
 
-		if(!$this->handler){
+		if($this->handler === false){
 			//	TODO: move into the logging system instead of here
 			Amslib_Debug::log(__METHOD__,"INVALID HANDLER",Amslib_Debug::pdump(true,$this->handler));
 			return NULL;
