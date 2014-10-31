@@ -15,22 +15,57 @@
     	<meta_author>chris thomas, antimatter studios</meta_author>
 	</value>
 	
+	<!-- 
+	NOTE:	amslib should not be defining resources to autoload like you see in the 
+			following stylesheet or javascript blocks however because right now amslib 
+			is serving up a website, it uses the same package.xml to run the website
+			as I plan to use for the amslib plugin, so I should separate this to make 
+			the __website a plugin of it's own and separate it from amslib (the plugin)
+			
+			so when I separate amslib (the plugin) from amslib (the __website) I can remove
+			all of these autoload attributes and let the application do all the autoloading it requires	
+	-->
+	
 	<stylesheet>
-		<file id="bootstrap" autoload="true">__AMSLIB__/util/bootstrap/3.1.1/css/bootstrap.min.css</file>
-		<file id="bootstrap.xl" autoload="true">__AMSLIB__/util/bootstrap/3.1.1/css/bootstrap-xl.min.css</file>
+		<!--	Normally you'd only need to apply autoload="true" to the group, 
+				but because I'm straddling two systems the new syntax and old, 
+				I'll put the autoload on the individual files for now until it's upgraded 
+		-->
+		<group id="bootstrap-3.1.1" autoload="true">
+			<file id="bootstrap" autoload="true">__AMSLIB__/util/bootstrap/3.1.1/css/bootstrap.min.css</file>
+			<file id="bootstrap.xl" autoload="true">__AMSLIB__/util/bootstrap/3.1.1/css/bootstrap-xl.min.css</file>
+		</group>
+
 		<file id="framework" autoload="true">__AMSLIB__/__website/resources/framework.css</file>
 	</stylesheet>
 	
 	<javascript>
-		<file id="jquery" autoload="true">__AMSLIB__/util/jquery-2.0.3.min.js</file>
-		<file id="bootstrap" autoload="true">__AMSLIB__/util/bootstrap/3.1.1/js/bootstrap.min.js</file>
-		
+		<file id="jquery/1.x" autoload="true">/jquery/jquery-1.10.2.min.js</file>
+		<file id="jquery/2.x">/jquery/jquery-2.0.3.min.js</file>
+	
+		<!-- NOTE:	amslib should not include bootstrap like this, it's ok for 
+					jquery because Amslib.js depends on it but these files are 
+					not part of amslib since it's not a bootstrap library, so 
+					I have to remove these eventually and probably they will 
+					move into the __website where they are actually required
+		-->
+		<file id="bootstrap-3.0.2" require="jquery/1.x">__AMSLIB__/util/bootstrap-3.0.2/js/bootstrap.min.js</file>
+		<!-- NOTE:	I am not sure about putting such an exact version number
+					into the id like this, perhaps I should just put "bootstrap3"
+					or even, just "bootstrap" or even "bootstrap/3.x", to follow
+					the jquery way of naming the versions
+		-->
+		<file id="bootstrap-3.1.1" require="jquery/1.x" autoload="true"">__AMSLIB__/util/bootstrap/3.1.1/js/bootstrap.min.js</file>
+				
 		<!-- example of defining resources groups with dependencies -->
-		<group name="core" autoload="true" depend="jquery/2.x">
+		<group id="amslib/core" require="jquery/1.x">
 			<file id="my.common">__AMSLIB__/util/my.common.min.js</file>
 			<file id="my.class">__AMSLIB__/util/my.class.min.js</file>		
 			<file id="amslib">__AMSLIB__/js/Amslib.js</file>
 		</group>
+		
+		<file id="amslib.webservice">__AMSLIB__/js/Amslib_Webservice.js</file>
+		<file id="amslib.form">__AMSLIB__/js/Amslib_Form.js</file>		
 	</javascript>
 	
 	<router>

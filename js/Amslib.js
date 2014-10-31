@@ -24,6 +24,60 @@ if(typeof(my) == "undefined" || typeof(my.Class) == "undefined"){
 	 throw("Amslib.js: requires my.[class/common] to be loaded first");
 }
 
+;(function(window,jQuery){
+	var waiting 	=	{};
+	var completed	=	{};
+	
+	window.wait = {
+		until: function()
+		{
+			var def = [], done = false, fail = false;
+			
+			for(i in [].slice.call(arguments)){
+				var arg = arguments[i];
+				
+				switch(typeof(arg)){
+					case "string":{
+						if(typeof(waiting[arg]) == "undefined"){
+							waiting[arg] = jQuery.Deferred();
+						}
+						
+						if(typeof(completed[arg]) != "undefined"){
+							waiting[arg].resolve.apply(waiting[arg],completed[arg]);
+						}
+						
+						def.push(waiting[arg]);
+					}break;
+					
+					case "function":{
+						if(!done) done = arg;
+						if(!fail) fail = arg;
+					}
+				}
+			}
+
+			var w = jQuery.when.apply(jQuery,def);
+
+			if(done) w.done(done);
+			if(fail) w.fail(fail);
+			
+			return w;
+		},
+		
+		resolve: function(name)
+		{
+			var a = [].slice.call(arguments,1), 
+				w = waiting[name];
+
+			if(typeof(w) != "undefined"){
+				w.resolve.apply(w,a);
+			}
+			
+			completed[name] = a;
+		}
+	};
+})(window,jQuery);
+
 var Amslib = my.Amslib = my.Class({
 	parent:					false,
 	__controller:			false,
@@ -52,11 +106,15 @@ var Amslib = my.Amslib = my.Class({
 			
 			// make it safe to use console.log always
 			(function(b){function c(){}for(var d="assert,count,debug,dir,dirxml,error,exception,group,groupCollapsed,groupEnd,info,log,timeStamp,profile,profileEnd,time,timeEnd,trace,warn".split(","),a;a=d.pop();){b[a]=b[a]||c}})((function(){try
-			{console.log();return window.console;}catch(err){return window.console={};}})());			 	
+			{console.log();return window.console;}catch(err){return window.console={};}})());
+			
+			$(document).ready(function(){
+				wait.resolve("Amslib",Amslib);
+			});
 		},
 		
 		options: {
-			controller: "Amslib_Default_Controller"
+			controller: "Default_Controller"
 		},
 		
 		getController: function(amslib_object)
@@ -71,6 +129,7 @@ var Amslib = my.Amslib = my.Class({
 		
 		firebug: function()
 		{
+			console.log("DEPRECATED, STOP USING THIS METHOD (Amslib.firebug)");
 			//	NOTE: This is suspiciously similar to paulirishes window.log method shown above in the autoload method
 			//	NOTE: apparently some people found this function would cause an error in google chrome, dunno why.
 			if(console && console.log) console.log.apply(console,arguments);
@@ -79,6 +138,7 @@ var Amslib = my.Amslib = my.Class({
 		//	DEPRECATED getPath, use Amslib.locate() instead, it does exactly what I was supposed to do here
 		getPath: function(file)
 		{
+			console.log("DEPRECATED, STOP USING THIS METHOD (Amslib.getPath)");
 			//	Copied from how scriptaculous does it's "query string" thing
 			var re 		=	new RegExp("^(.*?)"+file.replace(/[-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&")+"$","g");
 			var path	=	false;
@@ -106,6 +166,7 @@ var Amslib = my.Amslib = my.Class({
 
 		getQuery: function()
 		{
+			console.log("DEPRECATED, STOP USING THIS METHOD (Amslib.getQuery)");
 			var p = function(s){
 				var e,
 		        a = /\+/g,  // Regex for replacing addition symbol with a space
@@ -215,21 +276,25 @@ var Amslib = my.Amslib = my.Class({
 	
 	bind: function(event,callback,live)
 	{
+		console.log("DEPRECATED, STOP USING THIS METHOD (Amslib.bind)");
 		this.__events.bind(event,callback);
 	},
 	
 	on: function(event,callback)
 	{
+		console.log("DEPRECATED, STOP USING THIS METHOD (Amslib.on)");
 		this.__events.on(event,callback);
 	},
 	
 	live: function(event,callback)
 	{
+		console.log("DEPRECATED, STOP USING THIS METHOD (Amslib.live)");
 		this.on(event,callback);
 	},
 	
 	trigger: function(event,data)
 	{
+		console.log("DEPRECATED, STOP USING THIS METHOD (Amslib.trigger)");
 		this.__events.trigger(event,Array.prototype.slice.call(arguments,1));
 	},
 	
@@ -255,9 +320,11 @@ Amslib.controller = {
 	{
 		node = $(node);
 		
-		return node && node.length
-			? node.data(name,controller)
-			: controller;
+		if(name != false){
+			name = "Amslib.controller."+name;
+		}
+		
+		return node && node.length ? node.data(name,controller) : controller;
 	},
 	
 	get: function(node,name)
@@ -265,7 +332,7 @@ Amslib.controller = {
 		node = $(node);
 		
 		if(node && node.length){
-			return node.data(name);
+			return node.data("Amslib.controller."+name);
 		}
 		
 		console.log("the requested controller was not found",name);
@@ -281,130 +348,55 @@ Amslib.controller = {
 	}
 };
 
-////////////////////////////////////////////////////////////////////
-//	The wait object API
-//
-//	This object will allow you to set a bunch of string keys and 
-//	it will create deferred object for each key, when you resolve 
-//	each key, depending on the combinations requested, it'll trigger
-//	the done or fail callbacks, allowing you to easily synchronise 
-//	asychronous actions between objects which are loaded and 
-//	created dynamically at different times
-////////////////////////////////////////////////////////////////////
-
 Amslib.wait = {
-	__handles: false,
-
-	__init: function()
-	{
-		if(Amslib.wait.__handles == false){
-			Amslib.wait.__handles = {};
-		}
-	},
-
-	until: function()
-	{
-		Amslib.wait.__init();
-		
-		var deferred = [];
-		var done = false; 
-		var fail = false;
-		
-		for(var a=0,len=arguments.length;a<len;a++){
-			var arg = arguments[a];
-			var type = typeof(arg);
-			
-			if(type == "string"){
-				if(typeof(Amslib.wait.__handles[arg]) == "object"){
-					var d = Amslib.wait.__handles[arg];
-				}else{
-					var d = $.Deferred();
-					
-					if(typeof(Amslib.wait.__handles[arg]) == "string" && arg == Amslib.wait.__handles[arg]){
-						d.resolve();
-					}
-					
-					Amslib.wait.__handles[arg] = d;
-				}
-				
-				deferred.push(d);
-			}else if(type == "function"){
-				if(!done) done = arg;
-				if(!fail) fail = arg;
-			}
-		}
-		
-		var w = $.when.apply($,deferred);
-	
-		if(done) w.done(done);
-		if(fail) w.fail(fail);
-		
-		if(!done && !fail){
-			console.log("ERROR[Amslib.wait.until]: both done and fail callbacks were not set, so what do we execute when this trigger executes?",arguments);
-		}
-	
-		return w;
-	},
-	
-	resolve: function(name)
-	{
-		Amslib.wait.__init();
-		
-		if(typeof(Amslib.wait.__handles[name]) == "object"){
-			Amslib.wait.__handles[name].resolve();
-		}else{
-			Amslib.wait.__handles[name] = name;
-		}
-	}
+	until:		window.wait.until,
+	resolve:	window.wait.resolve
 };
 
 ////////////////////////////////////////////////////////////////////
-//	The JS API
+//The JS API
 //
-//	This API will allow you to quickly and simply load a javascript
-//	and apply a function that will wait until it's loaded to execute
+//This API will allow you to quickly and simply load a javascript
+//and apply a function that will wait until it's loaded to execute
 //
-//	NOTE: refactor this against the wait API, it's cleaner
-//	NOTE: if I can refactor it, I'm having second thoughts
+//NOTE: refactor this against the wait API, it's cleaner
+//NOTE: if I can refactor it, I'm having second thoughts
 ////////////////////////////////////////////////////////////////////
+
 Amslib.js = {
-	__loadHandles: false,
+	handles: {},
 	
-	__init: function(){
-		if(Amslib.js.__loadHandles == false){
-			Amslib.js.__loadHandles = {};
-		}
-	},
-	
-	load: function(name,filename,callback){
-		var self = Amslib.js;
-			
-		self.__init();
-		
-		if(typeof(require) != 'function'){
-			console.log("ERROR[Amslib.js.load]: We cannot proceed because the 'require' function is not available, did you load my.common into your website?");
+	load: function(name,filename,callback)
+	{	
+		if(typeof(require) != "function" || typeof(scope) != "function"){
+			console.log("ERROR[Amslib.js.load]: Functions 'require' or 'scope' are not available");
+			console.log("ERROR[Amslib.js.load]: Did you load my.common into your website?");
 			return;
 		}
 		
-		if(typeof(self.__loadHandles[name]) == "undefined"){
-			self.__loadHandles[name] = require(filename);
+		var self = Amslib.js
+		
+		if(typeof(self.handles[name]) == "undefined"){
+			self.handles[name] = require(filename);
 		}
 		
 		scope(function(){
-			Amslib.wait.resolve(name);
+			wait.resolve(name);
 			
-			if(typeof(callback) == "function") callback();
-		},self.__loadHandles[name]);
+			if(typeof(callback) == "function"){
+				callback();
+			}
+		},self.handles[name]);
 	},
 	
 	loadSeq: function()
 	{
-		var args = Array.prototype.slice.call(arguments);
+		var args = [].slice.call(arguments);
 		
 		if(args.length < 2) return;
 		
 		var trigger = args.shift();
-		
+		//	NOTE: what does "prev" mean? previous?
 		var prev = args.shift();
 		
 		//	If you don't have this, lets be harsh and cancel the whole thing
@@ -412,7 +404,7 @@ Amslib.js = {
 		
 		Amslib.js.load.apply(null,prev);
 		
-		var wait = [prev[0]];
+		var list = [prev[0]];
 		
 		for(a in args){
 			var item = args[a];
@@ -428,14 +420,14 @@ Amslib.js = {
 			
 			prev = item;
 			
-			wait.push(prev[0]);
+			list.push(prev[0]);
 		}
 		
-		wait.push(function(){
-			Amslib.wait.resolve(trigger);
+		list.push(function(){
+			wait.resolve.resolve(trigger);
 		});
 		
-		Amslib.wait.until.apply(null,wait);
+		wait.until.apply(null,list);
 	},
 	
 	//	a variable number of names and possible two callbacks for success and failure
@@ -443,7 +435,7 @@ Amslib.js = {
 	//	together and run the function as a success callback
 	has: function(name,callback)
 	{
-		return Amslib.wait.until.apply(null,arguments);
+		return wait.until.apply(null,arguments);
 	},
 	
 	find: function(search,path)
@@ -459,13 +451,6 @@ Amslib.css = {
 	{
 		$("head").append($("<link/>").attr({rel:"stylesheet",type:"text/css",href: file}));
 	}		
-};
-
-////////////////////////////////////////////////////////////////////
-//	FUTURE: an mvc api, but this needs to extend Amslib, not be static
-////////////////////////////////////////////////////////////////////
-Amslib.mvc = {
-
 };
 
 Amslib.autoload();

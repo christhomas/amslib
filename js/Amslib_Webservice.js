@@ -207,7 +207,7 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 	 */
 	getServiceData: function(plugin,name,handlerindex)
 	{	
-		return this.readData(plugin,"service/data",name,handlerindex);		
+		return this.readData(plugin,"service.data",name,handlerindex);		
 	},
 	
 	/**
@@ -217,7 +217,7 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 	 */
 	getServiceErrors: function(plugin,name,handlerindex)
 	{	
-		return this.readData(plugin,"service/errors",name,handlerindex);		
+		return this.readData(plugin,"service.errors",name,handlerindex);		
 	},
 	
 	/**
@@ -227,7 +227,7 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 	 */
 	getValidationData: function(plugin,name,handlerindex)
 	{	
-		return this.readData(plugin,"validation/errors",name,handlerindex);	
+		return this.readData(plugin,"validation.errors",name,handlerindex);	
 	},
 	
 	/**
@@ -237,7 +237,7 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 	 */
 	getValidationErrors: function(plugin,name,handlerindex)
 	{	
-		return this.readData(plugin,"validation/data",name,handlerindex);	
+		return this.readData(plugin,"validation.data",name,handlerindex);	
 	},
 	
 	//	TODO: getDatabaseErrors
@@ -254,3 +254,5 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 		return this.data[name] || defaultValue;
 	}
 });
+
+wait.resolve("Amslib_Webservice",Amslib_Webservice);
