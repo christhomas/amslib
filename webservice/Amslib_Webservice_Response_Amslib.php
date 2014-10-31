@@ -136,11 +136,16 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 
 	public function setHandler($id,$data)
 	{
-		if(!$this->isHandler($id)){
-			return false;
-		}
+		return $this->isHandler($id)
+			? $this->setKey(array(self::HD,intval($id)),$data)
+			: false;
+	}
 
-		$this->setKey(array(self::HD,intval($id)),$data);
+	public function addHandler($data)
+	{
+		$index = $this->createHandler();
+
+		return $this->setHandler($index,$data);
 	}
 
 	/**
@@ -350,16 +355,5 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 			$this->getDatabaseErrors($plugin,$default),
 			array("db_error","db_location")
 		);
-	}
-
-	private function ____DEPRECATED_METHODS_BELOW(){}
-
-	public function addHandler($data)
-	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
-
-		$index = $this->createHandler();
-
-		$this->setHandler($index,$data);
 	}
 }

@@ -365,6 +365,16 @@ class Amslib_Router
 
 		$route = self::getRoute($name,$group,$domain);
 
+		//	NOTE:	If you request a webservice and cannot find it, make this a serious error
+		//			You cannot return a "closest" url in this case, cause it causes a LOT of problems
+		//	NOTE:	If you call a webservice which results in the home page opening, which is what called
+		//			the webservice in the first place, it'll cause an infinite loop of repeatedly trying to
+		//			open the home page, which generates a new webservice request and this cycle never ends
+		//	NOTE:	This solves the problem, for now, but ultimately, shows a critical problem that needs addressing
+		if(strpos($name,"service:") === 0 && $route["name"] === false){
+			return false;
+		}
+
 		//	NOTE: I think it's safe to assume sending NULL means you want the default language
 		//	NOTE: otherwise it would never ever match a language and the system would fail worse
 		//	NOTE: although this is silly, cause it means that passing "default" and NULL are the same, why not just use one?
@@ -403,6 +413,7 @@ class Amslib_Router
 
 		//	NOTE:	this is pretty dumb, I should try to work out a generic way to deal with all of these
 		//			http-like prefixes so I don't have to keep writing this shitty code everywhere.....
+		//	NOTE:	I think I have solved this in the new Amslib_Website::reduceSlashes method
 		$prefix = "";
 		if(strpos($url,"http://") !== false) $prefix = "http://";
 		if(strpos($url,"https://") !== false) $prefix = "https://";
@@ -486,8 +497,11 @@ class Amslib_Router
 	 */
 	static public function getServiceURL($name,$group=NULL,$lang="default",$domain=NULL)
 	{
-		if(is_array($name) && count($name)) $name[0] = "service:{$name[0]}";
-		else $name = "service:$name";
+		if(is_array($name) && count($name)){
+			$name[0] = "service:{$name[0]}";
+		}else{
+			$name = "service:$name";
+		}
 
 		return self::getURL($name,$group,$lang,$domain);
 	}
