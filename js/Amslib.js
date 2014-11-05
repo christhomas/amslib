@@ -25,24 +25,36 @@ if(typeof(my) == "undefined" || typeof(my.Class) == "undefined"){
 }
 
 ;(function(window,jQuery){
-	var waiting 	=	{};
-	var completed	=	{};
+	var waiting 	=	{},
+		completed	=	{},
+		undef		=	"undefined";
+	
+	//	Protect against jQuery not being installed before the wait api, but allow the code to run, not causing fatal errors
+	if(typeof(jQuery) == undef){
+		var error = function(){
+			throw("Amslib.js: jQuery.Deferred is required for the wait API");
+		};
+		
+		window.wait = {until:error,resolve:error};
+		
+		return error();
+	}
 	
 	window.wait = {
 		until: function()
 		{
-			var def = [], done = false, fail = false;
+			var def = [], done = false, fail = false, list = [].slice.call(arguments); 
 			
-			for(i in [].slice.call(arguments)){
-				var arg = arguments[i];
+			for(i=0,l=list.length;i<l;i++){
+				var arg = list[i];
 				
 				switch(typeof(arg)){
 					case "string":{
-						if(typeof(waiting[arg]) == "undefined"){
+						if(typeof(waiting[arg]) == undef){
 							waiting[arg] = jQuery.Deferred();
 						}
 						
-						if(typeof(completed[arg]) != "undefined"){
+						if(typeof(completed[arg]) != undef){
 							waiting[arg].resolve.apply(waiting[arg],completed[arg]);
 						}
 						
@@ -69,7 +81,7 @@ if(typeof(my) == "undefined" || typeof(my.Class) == "undefined"){
 			var a = [].slice.call(arguments,1), 
 				w = waiting[name];
 
-			if(typeof(w) != "undefined"){
+			if(typeof(w) != undef){
 				w.resolve.apply(w,a);
 			}
 			
@@ -77,6 +89,10 @@ if(typeof(my) == "undefined" || typeof(my.Class) == "undefined"){
 		}
 	};
 })(window,jQuery);
+
+// make it safe to use console.log always
+(function(b){function c(){}for(var d="assert,count,debug,dir,dirxml,error,exception,group,groupCollapsed,groupEnd,info,log,timeStamp,profile,profileEnd,time,timeEnd,trace,warn".split(","),a;a=d.pop();){b[a]=b[a]||c}})((function(){try
+{console.log();return window.console;}catch(err){return window.console={};}})());
 
 var Amslib = my.Amslib = my.Class({
 	parent:					false,
@@ -91,26 +107,8 @@ var Amslib = my.Amslib = my.Class({
 	
 	STATIC: {
 		autoload: function()
-		{
-			// usage: log('inside coolFunc', this, arguments);
-			// paulirish.com/2009/log-a-lightweight-wrapper-for-consolelog/
-			window.log = function(){
-				log.history = log.history || [];   // store logs to an array for reference
-				log.history.push(arguments);
-				if(this.console){
-					arguments.callee = arguments.callee.caller;
-					var newarr = [].slice.call(arguments);
-					(typeof console.log === 'object' ? log.apply.call(console.log, console, newarr) : console.log.apply(console, newarr));
-				}
-			};
-			
-			// make it safe to use console.log always
-			(function(b){function c(){}for(var d="assert,count,debug,dir,dirxml,error,exception,group,groupCollapsed,groupEnd,info,log,timeStamp,profile,profileEnd,time,timeEnd,trace,warn".split(","),a;a=d.pop();){b[a]=b[a]||c}})((function(){try
-			{console.log();return window.console;}catch(err){return window.console={};}})());
-			
-			$(document).ready(function(){
-				wait.resolve("Amslib",Amslib);
-			});
+		{		
+			wait.resolve("Amslib",Amslib);
 		},
 		
 		options: {
@@ -374,10 +372,8 @@ Amslib.js = {
 			return;
 		}
 		
-		var self = Amslib.js
-		
-		if(typeof(self.handles[name]) == "undefined"){
-			self.handles[name] = require(filename);
+		if(typeof(Amslib.js.handles[name]) == "undefined"){
+			Amslib.js.handles[name] = require(filename);
 		}
 		
 		scope(function(){
@@ -386,7 +382,7 @@ Amslib.js = {
 			if(typeof(callback) == "function"){
 				callback();
 			}
-		},self.handles[name]);
+		},Amslib.js.handles[name]);
 	},
 	
 	loadSeq: function()
@@ -453,4 +449,4 @@ Amslib.css = {
 	}		
 };
 
-Amslib.autoload();
+$(document).ready(Amslib.autoload);
