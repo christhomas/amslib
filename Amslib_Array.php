@@ -490,7 +490,9 @@ class Amslib_Array
 		$result = NULL;
 
 		foreach(self::valid($array) as $a){
-			if($a[$key] == $value) return $a;
+			if(array_key_exists($key,$a) && $a[$key] == $value){
+				return $a;
+			}
 		}
 
 		return false;
