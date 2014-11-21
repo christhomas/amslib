@@ -438,6 +438,10 @@ class Amslib_Plugin_Service
 				$method	=	isset($h["method"]) ? $h["method"] : "missingServiceMethod";
 			}
 
+			if(!$plugin || !$object || $method == "missingServiceMethod"){
+				Amslib_Debug::log(__METHOD__,"handler maybe invalid, handler = ",$h);
+			}
+
 			$params = array($plugin,$object,$method,$h["input"],$h["record"],$h["global"],$h["failure"]);
 
 			if($h["type"] == "service"){
@@ -511,7 +515,7 @@ class Amslib_Plugin_Service
 		}
 
 		if(!is_object($object)){
-			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib_Debug::pdump(true,$object));
+			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib_Debug::dump($object));
 			$object = "__INVALID_OBJECT__";
 		}else{
 			$object = get_class($object);
@@ -569,6 +573,13 @@ class Amslib_Plugin_Service
 		return false;
 	}
 
+	public function setSourceData($key,$value)
+	{
+		if(is_string($key) && is_array($this->source)){
+			$this->source[$key] = $value;
+		}
+	}
+
 	/**
 	 * 	method:	execute
 	 *
@@ -584,21 +595,21 @@ class Amslib_Plugin_Service
 
 			//	Set the source to what was requested, or default in any other case to the $_POST array
 			if(isset($h["source"]) && $h["source"] == "get"){
-				$source = &$_GET;
+				$this->source = &$_GET;
 			}else{
-				$source = &$_POST;
+				$this->source = &$_POST;
 			}
 
 			$this->setOutputFormat($h["format"]);
 
 			//	Run the handler, either in managed or unmanaged mode
 			$response = isset($h["managed"])
-				? $this->runManagedHandler($h["managed"],$h["object"],$h["method"],$source)
-				: $this->runHandler($h["object"],$h["method"],$source);
+				? $this->runManagedHandler($h["managed"],$h["object"],$h["method"],$this->source)
+				: $this->runHandler($h["object"],$h["method"],$this->source);
 
 			//	Need to somehow merge against Amslib_Webservice_* classes
 			//	because now some of this code is overlapping a lot
-			if(isset($source["/amslib/webservice/session/request/"])){
+			if(isset($this->source["/amslib/webservice/session/request/"])){
 				$this->session["/amslib/webservice/session/remote/"] = session_id();
 			}
 

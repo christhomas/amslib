@@ -432,18 +432,24 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		//	NOTE:	However, check all the route data is valid before using it
 
-		if(!$route) die(__FILE__.": route is invalid");
+		if(!$route){
+			Amslib_Debug::log($m=__METHOD__.": route is invalid, check error log",$route);
+			die($m);
+		}
 
 		if(!isset($route["group"]) || !strlen($route["group"])){
-			die(__FILE__.": route/group is invalid");
+			Amslib_Debug::log($m=__METHOD__.": route/group is invalid, check error log",$route);
+			die($m);
 		}
 
 		if(!isset($route["name"]) || !strlen($route["name"])){
-			die(__FILE__.": route/name is invalid");
+			Amslib_Debug::log($m=__METHOD__.": route/name is invalid, check error log",$route);
+			die($m);
 		}
 
 		if(!isset($route["handler"]) || !is_array($route["handler"]) || empty($route["handler"])){
-			die(__FILE__.": route/handler is invalid or empty");
+			Amslib_Debug::log($m=__METHOD__.": route/handler is invalid or empty, check error log",$route);
+			die($m);
 		}
 
 		$this->api->setupService($route["group"],$route["name"]);

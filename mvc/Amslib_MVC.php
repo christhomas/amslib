@@ -93,7 +93,7 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
-	 * 	method:	getInstance
+	 * 	method:	__construct
 	 *
 	 * 	todo: write documentation
 	 */
@@ -115,7 +115,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function &getInstance()
+	static public function getInstance()
 	{
 		static $instance = NULL;
 

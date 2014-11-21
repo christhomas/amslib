@@ -143,4 +143,29 @@ class Amslib_Webservice_Response_Raw
 
 		return NULL;
 	}
+
+	public function hasKey($vargs)
+	{
+		if(!$this->hasResponse()) return false;
+
+		$args = func_get_args();
+
+		$count = count($args);
+
+		if(!$count) return false;
+
+		$response = $this->response;
+
+		do{
+			$a = array_shift($args);
+
+			if((is_string($a) || is_numeric($a)) && array_key_exists($a,$response)){
+				$response = $response[$a];
+			}else{
+				return false;
+			}
+		}while(count($args));
+
+		return true;
+	}
 }

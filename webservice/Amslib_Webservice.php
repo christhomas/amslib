@@ -17,6 +17,19 @@ class Amslib_Webservice
 		return $instance;
 	}
 
+	static public function createResponse($type,$data=NULL)
+	{
+		$map = array("amslib"=>"Amslib","json"=>"JSON","raw"=>"Raw");
+
+		if(!in_array(strtolower($type),array("amslib","json","raw"))){
+			$type = "Raw";
+		}
+
+		$type = "Amslib_Webservice_Response_{$map[$type]}";
+
+		return new $type($data);
+	}
+
 	public function initialiseObject($urlSource)
 	{
 		$this->setURLSource($urlSource);

@@ -631,6 +631,8 @@ class Amslib_Array
 
 		$array = self::valid($array);
 
+		if(is_string($filter)) $filter = array($filter);
+
 		if(self::isMulti($array) && $multi){
 			//	NOTE: perhaps I should recurse here?
 			//	EXAMPLE: foreach($array as &$a) $a = self::FilterKey($a,$filter,$similar);
@@ -646,7 +648,11 @@ class Amslib_Array
 				}
 			}
 		}else{
-			$array = array_intersect_key($array, array_flip($filter));
+			if(!is_array($filter)){
+				Amslib_Debug::log("stack_trace","filter is not an array",$filter);
+			}else{
+				$array = array_intersect_key($array, array_flip($filter));
+			}
 		}
 
 		return $array;

@@ -106,7 +106,7 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 
 	public function isHandler($id)
 	{
-		return is_numeric($id) && $this->getKey(array(self::HD,$id));
+		return is_numeric($id) && $this->hasKey(self::HD,$id);
 	}
 
 	/**
