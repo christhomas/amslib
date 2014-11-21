@@ -39,6 +39,43 @@ class Amslib_Router_Source_XML
 	protected $route;
 	protected $import;
 
+	protected function sanitise($type,$data)
+	{
+		if(count($data) != 2) return $data;
+
+		if(in_array($type,array("input","output","record"))){
+			$data = array_key_exists($data[1],$data[0]) ? $data[0][$data[1]] : false;
+		}
+
+		switch($type){
+			case "input":{
+				if(!in_array($data,array("get","post"))){
+					$data = "post";
+				}
+			}break;
+
+			case "output":{
+				if(!in_array($data,array("json","session"))){
+					$data = "session";
+				}
+			}break;
+
+			case "record":{
+				if(!in_array($data,array("true","false","global"))){
+					$data = "true";
+				}
+			}break;
+
+			case "type":{
+				$data = $data[0] == "terminator"
+				? (isset($data[1]["state"]) ? "terminator_{$data[1]["state"]}" : "terminator_common")
+				: "service";
+			}break;
+		}
+
+		return $data;
+	}
+
 	/**
 	 * 	method:	__construct
 	 *
@@ -135,27 +172,19 @@ class Amslib_Router_Source_XML
 		//	Ignore if there are no children
 		if(empty($array["child"])) return;
 
-		$a 					=	$array["attr"];
-		$a["type"]			=	$array["tag"];
-		$a["src"]			=	array();
-		$a["handler"]		=	array();
+		$d 				=	array("input"=>"post","output"=>"session","record"=>"true");
+		$a 				=	array_merge($d,array_map("strtolower",$array["attr"]));
+		$a["type"]		=	$array["tag"];
+		$a["src"]		=	array();
+		$a["handler"]	=	array();
 
 		//	Allowed handler types
-		$handler_types		=	array(
-			"service",
-			"terminator_common",
-			"terminator_success",
-			"terminator_failure"
-		);
+		$handler_types = array("service","terminator_common","terminator_success","terminator_failure");
 
 		//	Grab the default route input and output values, in order to potentially use them when setting up the handlers
-		$a["input"]		= isset($a["input"])	? strtolower($a["input"])	:	"post";
-		$a["output"]	= isset($a["output"])	? strtolower($a["output"])	:	"session";
-		$a["record"]	= isset($a["record"])	? strtolower($a["record"])	:	"true";
-
-		//	Make sure the input source and output targets are valid, otherwise default to sensible values
-		//	TODO: In the future, support "xml"
-		if(!in_array($a["output"],array("json","session"))) $a["output"] = "session";
+		$a["input"]		=	self::sanitise("input",array($a,"input"));
+		$a["output"]	=	self::sanitise("output",array($a,"output"));
+		$a["record"]	=	self::sanitise("record",array($a,"record"));
 
 		foreach($array["child"] as $child){
 			switch($child["tag"]){
@@ -168,31 +197,10 @@ class Amslib_Router_Source_XML
 					$c = $child["attr"];
 
 					//	Set the type of webservice this will be attached
-					$c["type"] = $child["tag"] == "terminator"
-						? (isset($c["state"]) ? "terminator_{$c["state"]}" : "terminator_common")
-						: "service";
+					$c["type"] = self::sanitise("type",array($child["tag"],$c));
 
 					//	Ignore the webservice type is not valid
 					if(!in_array($c["type"],$handler_types)) continue;
-
-					//	Default input source if not found to default route source
-					if(!isset($c["input"])) $c["input"] = $a["input"];
-					//	Validate it was set to a correct value
-					if(!in_array($c["input"],array("get","post"))) $c["input"] = "post";
-
-					//	By default, recording, global is disabled unless it's enabled by a valid value
-					$record = $global = false;
-
-					if(!isset($c["record"])) $c["record"] = $a["record"];
-
-					//	If the record value was global, per-webservice recording is disabled, but global recording is enabled
-					if(strpos($c["record"],"global")!== false)	$global = true;
-					//	If the record value was "true" or "record" then obviously turn on per-webservice recording
-					if(strpos($c["record"],"true")	!== false)	$record = true;
-					if(strpos($c["record"],"record")!== false)	$record = true;
-
-					$c["record"] = $record;
-					$c["global"] = $global;
 
 					//	Failure will block unless you tell the system to ignore failure
 					//	A reason for wanting to ignore failures is that you want to accumulate all the results

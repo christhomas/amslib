@@ -157,6 +157,89 @@ class Amslib_Router
 		return $select;
 	}
 
+	static protected function finaliseService($route)
+	{
+		$extend	=	isset($route["extend"]) ? $route["extend"] : false;
+		$list	=	array();
+
+		if($extend && is_string($extend)){
+			//	Split the extend parameter to find the name, but an optional group (the plugin name probably)
+			list($name,$group) = explode(",",$extend) + array(NULL,NULL);
+			$service = self::getService($name,$group);
+
+			//	If the service requested had no handlers (weird!) then just don't do anything
+			if(self::isEmptyRoute($service)){
+				Amslib_Debug::log(__METHOD__,"cannot extend service because it was not found",$extend,$service);
+				return $route;
+			}
+
+			//	Start with adding all the services from the extended service
+			$list = Amslib_Array::valid($service["handler"]);
+
+			//	We first need to process these services to make their data correct with the current route
+			foreach($list as &$h){
+				//	When extending services from another plugin/group, you need to copy the
+				//	group otherwise it's object will become invalid when you execute this service
+				if(!isset($h["plugin"])) $h["plugin"] = $service["group"];
+
+				//	When extending services, we need to use this routes service parameters
+				//	to override the ones in the service handlers themselves so you can customise them
+
+				//	Copy the input/record/global/failure parameter if they exist
+				if(isset($route["input"]))		$h["input"]		= $route["input"];
+				if(isset($route["record"]))		$h["record"]	= $route["record"];
+			}
+			//	unlink/break the reference which causes the next foreach loop to fail
+			unset($h);
+		}
+
+		//	Now go through the routes own webservices, adding them according to their
+		//	configuration to the final service handler list and doing this in the way
+		//	their parameters specify, whether to insert, replace or append each one to the finaly list
+		foreach($route["handler"] as $h){
+			//	Figure out where to insert/replace/append the handler from the service being extended
+			$c = count($list);
+			$i = isset($h["insert"]) && is_numeric($i=intval($h["insert"])) && $i >= 0 && $i < $c ? $i : -1;
+			$r = isset($h["replace"]) && is_numeric($r=intval($h["replace"])) && $r >= 0 && $r < $c ? $r : -1;
+
+			//	Default input source if not found to default route source
+			if(!isset($h["input"]))		$h["input"]		=	$route["input"];
+			if(!isset($h["record"]))	$h["record"]	=	$route["record"];
+
+			if($i !== -1){
+				if($i == 0){
+					//	insert at the beginning
+					array_unshift($list,$h);
+				}else{
+					//	insert at particular location
+					$list = array_merge(array_slice($list,0,$i),array($h),array_slice($list,$i));
+				}
+			}else if($r !== -1){
+				//	replace a particular location
+				$list[$r] = $h;
+			}else{
+				//	default action: append to the end
+				$list[] = $h;
+			}
+		}
+
+		//	Set each of the global and record parameters according to the final configuration
+		foreach($list as &$h){
+			$h["global"] = in_array($h["record"],array("global",false));
+			$h["record"] = in_array($h["record"],array("true","record")) || $h["global"] == false;
+		}
+		unset($h);
+
+		//	Set the final handler list
+		$route["handler"] = $list;
+
+		if(isset($route["debug"])){
+			Amslib_Debug::log(__METHOD__,"debugging finalised service = ",$route);
+		}
+
+		return $route;
+	}
+
 	/**
 	 * 	method:	initialise
 	 *
@@ -521,7 +604,9 @@ class Amslib_Router
 	 */
 	static public function getService($name,$group=NULL,$domain=NULL)
 	{
-		$name = "service:".(is_array($name) && count($name) ? $name[0] : $name);
+		$name = is_array($name) && count($name) ? $name[0] : $name;
+
+		if(strpos($name,"service:") === false) $name = "service:$name";
 
 		return self::getRoute($name,$group,$domain);
 	}
@@ -542,10 +627,16 @@ class Amslib_Router
 		//	test if the src value is valid
 		if(!isset($route["src"]) || !is_array($route["src"]) || count($route["src"]) == 0) return false;
 
-		//	Automatically prepend service route names with "service:" so you can easily distinguish them
-		//	This also enabled the getServiceURL,getService methods on the Amslib_Router object
-		if($route["type"] == "service" && strpos($name,"service:") === false){
-			$name = "service:".$name;
+		//	Special case for the service routes
+		if($route["type"] == "service"){
+			//	Automatically prepend service route names with "service:" so you can easily distinguish them
+			//	This also enabled the getServiceURL,getService methods on the Amslib_Router object
+			if(strpos($name,"service:") === false){
+				$name = "service:".$name;
+			}
+
+			//	Finalise service route according to it's various rules
+			$route = self::finaliseService($route);
 		}
 
 		//	NOTE: we "reset" the values here because if you are
@@ -558,8 +649,8 @@ class Amslib_Router
 		$domain = rtrim($domain,"/");
 
 		//	store the route data underneath the name so you can explicitly search for it
-		self::$cache[$domain."/$group/$name"]	=	&$route;
-		self::$name[$domain."/$name"]			=	&$route;
+		self::$cache["$domain/$group/$name"]	=	&$route;
+		self::$name["$domain/$name"]			=	&$route;
 
 		//	store the route data referencing it by url, so you can build a request url cache
 		if($updateURLCache) foreach($route["src"] as $s){
@@ -611,7 +702,17 @@ class Amslib_Router
 	 */
 	static public function hasRoute()
 	{
-		return self::$emptyRoute != self::getRoute();
+		return !self::isEmptyRoute(self::getRoute());
+	}
+
+	/**
+	 * 	method: isEmptyRoute
+	 *
+	 * 	Say whether or not this route is empty
+	 */
+	static public function isEmptyRoute($route)
+	{
+		return self::$emptyRoute == $route;
 	}
 
 	/**
