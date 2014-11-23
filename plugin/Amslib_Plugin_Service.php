@@ -33,6 +33,16 @@
  * 	todo:
  * 		write documentation
  *
+ * 	notes:
+ * 		I think it's wrong now to assume that this object is in any way related to plugins
+ * 		it's actually an object executing a series of service handlers and recording the results
+ * 		to be passed back to the caller (through the session or through a json data structure)
+ *
+ * 		Over the next couple of revisions, I'm going to start to break parts of the code away
+ * 		from being so attached to the plugin system, so things can start to be used in isolation
+ * 		even if you're not using the plugin system, this means I can do router/webservices without
+ * 		almost requiring the plugin system to be used.
+ *
  */
 class Amslib_Plugin_Service
 {
