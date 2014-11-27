@@ -421,7 +421,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			$v->add("encoding","text",true,array("default"=>"utf8"));
 
 			$s = $v->execute();
-			$d = $v->getValidData();
+			$d = $v->getValid();
 		}
 
 		$this->connectionDetails = $s ? $d : false;

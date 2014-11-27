@@ -46,14 +46,9 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 */
 	public function __construct($connect=true)
 	{
-		parent::__construct(false);
+		parent::__construct($connect);
 
 		$this->setFetchMethod(self::FETCH_ASSOC);
-
-		//	TODO: we should implement a try/catch block to easily catch disconnected databases
-		if($connect){
-			$this->connect();
-		}
 	}
 
 	/**
@@ -277,9 +272,9 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 * 	todo:
 	 * 		-	Need to move the database details to somewhere more secure (like inside the database!! ROFL!! joke, don't do that!!!!)
 	 */
-	public function connect($details=false)
+	public function connect($details=NULL)
 	{
-		list($details,$password) = $this->setConnectionDetails($details) + array(NULL,NULL);
+		list($details,$password) = Amslib_Array::valid($this->setConnectionDetails($details)) + array(NULL,NULL);
 
 		$this->disconnect();
 
