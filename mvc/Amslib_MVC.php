@@ -38,7 +38,7 @@ class Amslib_MVC extends Amslib_Mixin
 {
 	protected $object;
 	protected $view;
-	protected $images;
+	protected $image;
 	protected $stylesheet;
 	protected $javascript;
 	protected $translator;
@@ -64,11 +64,6 @@ class Amslib_MVC extends Amslib_Mixin
 	protected $tempViewParams;
 
 	protected $routes;
-
-	//	To allow views/html segments to be slotted into an existing layout
-	//	extending their capabilities with customised functionality
-	//	PROBABLY DEPRECATED
-	protected $slots;
 
 	protected $name;
 	protected $location;
@@ -282,37 +277,11 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
-	 * 	method:	setFields
+	 * 	method:	listValue
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setFields($name,$value)
-	{
-		$name = "validate/$name";
-
-		$f = $this->getValue($name,array());
-
-		if(!is_array($value)) $value = array();
-
-		$this->setValue($name,array_merge($f,$value));
-	}
-
-	/**
-	 * 	method:	getFields
-	 *
-	 * 	todo: write documentation
-	 */
-	public function getFields($name)
-	{
-		return $this->getValue("validate/$name",array());
-	}
-
-	/**
-	 * 	method:	listValues
-	 *
-	 * 	todo: write documentation
-	 */
-	public function listValues()
+	public function listValue()
 	{
 		return array_keys($this->value);
 	}
@@ -453,11 +422,11 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
-	 * 	method:	listObjects
+	 * 	method:	listObject
 	 *
 	 * 	todo: write documentation
 	 */
-	public function listObjects()
+	public function listObject()
 	{
 		return array_keys($this->object);
 	}
@@ -499,22 +468,13 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
-	 * 	method:	getEmptyData
+	 * 	method:	listView
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getEmptyData($group)
+	public function listView($keys=true)
 	{
-		$rules	= Amslib_Array::valid($this->getValidatorRules($group));
-		$values	= array_fill_keys(array_keys($rules),"");
-
-		foreach($rules as $k=>$v){
-			if(isset($v[2]) && isset($v[2]["form_default"])){
-				$values[$k] = $v[2]["form_default"];
-			}
-		}
-
-		return $values;
+		return $keys ? array_keys($this->view) : $this->view;
 	}
 
 	/**
@@ -572,16 +532,6 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
-	 * 	method:	listViews
-	 *
-	 * 	todo: write documentation
-	 */
-	public function listViews($keys=true)
-	{
-		return $keys ? array_keys($this->view) : $this->view;
-	}
-
-	/**
 	 * 	method:	setTranslator
 	 *
 	 * 	todo: write documentation
@@ -602,13 +552,13 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
-	 * 	method:	listTranslators
+	 * 	method:	listTranslator
 	 *
 	 * 	todo: write documentation
 	 */
-	public function listTranslators($pluckNames=true)
+	public function listTranslator($keys=true)
 	{
-		return $pluckNames ? array_keys($this->translator) : $this->translator;
+		return $keys ? array_keys($this->translator) : $this->translator;
 	}
 
 	/**
@@ -865,13 +815,32 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
+	 * 	method:	getEmptyData
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getEmptyData($group)
+	{
+		$rules	= Amslib_Array::valid($this->getValidatorRules($group));
+		$values	= array_fill_keys(array_keys($rules),"");
+
+		foreach($rules as $k=>$v){
+			if(isset($v[2]) && isset($v[2]["form_default"])){
+				$values[$k] = $v[2]["form_default"];
+			}
+		}
+
+		return $values;
+	}
+
+	/**
 	 * 	method:	setImage
 	 *
 	 * 	todo: write documentation
 	 */
 	public function setImage($id,$file)
 	{
-		$this->images[$id] = $file;
+		$this->image[$id] = $file;
 
 		$this->setValue("image:$id", $file);
 	}
@@ -893,7 +862,7 @@ class Amslib_MVC extends Amslib_Mixin
 		if(strpos($id,"http") === 0) return $id;
 
 		//	Step 3: find the image inside the plugin
-		if(isset($this->images[$id])) return $this->images[$id];
+		if(isset($this->image[$id])) return $this->image[$id];
 
 		//	Step 4: find the image relative to the website base (perhaps it's a path)
 		$path = Amslib_Website::abs($this->location."/".$id);
@@ -915,7 +884,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 */
 	public function listImage($return_data=false)
 	{
-		return $return_data ? $this->images : array_keys($this->images);
+		return $return_data ? $this->image : array_keys($this->image);
 	}
 
 	/**
@@ -1061,6 +1030,37 @@ class Amslib_MVC extends Amslib_Mixin
 		Amslib_Website::redirect($url);
 	}
 
+	/**
+	 * method: setupService
+	 *
+	 * A customisation method which can do "something" based on what service is being called, at the very
+	 * last second before the actual service is run, this might be to setup some static and protected
+	 * data which is only available here and is not convenient to setup elsewhere.
+	 *
+	 * parameters:
+	 * 	$plugin		-	The plugin for the service
+	 * 	$service	-	The service being run inside the plugin
+	 *
+	 * notes:
+	 * 	-	The parameters are only really used to identify what service is being run
+	 */
+	public function setupService($plugin,$service)
+	{
+		//	NOTE: by default, we don't setup anything.
+	}
+
+	private function ___DEPRECATED_METHODS_BELOW(){}
+
+	public function listValues()
+	{
+		return $this->listValue();
+	}
+
+	//	To allow views/html segments to be slotted into an existing layout
+	//	extending their capabilities with customised functionality
+	//	PROBABLY DEPRECATED
+	protected $slots;
+
 	//	FIXME: we have to formalise what this slot code is supposed to do, opposed to what the view system already does.
 	//	NOTE: 10/03/2013, still have no idea what this code is really supposed to do
 	/**
@@ -1096,21 +1096,43 @@ class Amslib_MVC extends Amslib_Mixin
 	}
 
 	/**
-	 * method: setupService
+	 * 	method:	setFields
 	 *
-	 * A customisation method which can do "something" based on what service is being called, at the very
-	 * last second before the actual service is run, this might be to setup some static and protected
-	 * data which is only available here and is not convenient to setup elsewhere.
-	 *
-	 * parameters:
-	 * 	$plugin		-	The plugin for the service
-	 * 	$service	-	The service being run inside the plugin
-	 *
-	 * notes:
-	 * 	-	The parameters are only really used to identify what service is being run
+	 * 	todo: write documentation
 	 */
-	public function setupService($plugin,$service)
+	public function setFields($name,$value)
 	{
-		//	NOTE: by default, we don't setup anything.
+		$name = "validate/$name";
+
+		$f = $this->getValue($name,array());
+
+		if(!is_array($value)) $value = array();
+
+		$this->setValue($name,array_merge($f,$value));
+	}
+
+	/**
+	 * 	method:	getFields
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getFields($name)
+	{
+		return $this->getValue("validate/$name",array());
+	}
+
+	public function listObjects()
+	{
+		return $this->listObject();
+	}
+
+	public function listViews($keys=true)
+	{
+		return $this->listView($keys);
+	}
+
+	public function listTranslators($keys=true)
+	{
+		return $this->listTranslator($keys);
 	}
 }
