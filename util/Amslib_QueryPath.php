@@ -36,7 +36,9 @@ class Amslib_QueryPath
 		//	Something went wrong, create a dummy object (this hasn't been tested properly)
 		if(!self::$qp){
 			Amslib_Debug::log("QueryPath was invalid, creating a dummy object to prevent code break");
-			self::$qp = qp();
+			self::$qp = qp(
+			"<?xml version='1.0' encoding='UTF-8'?>
+			 <querypath><invalid/></querypath>");
 		}
 
 		return self::$qp;

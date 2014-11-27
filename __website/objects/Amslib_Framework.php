@@ -6,7 +6,7 @@ class Amslib_Framework extends Amslib_MVC
 		parent::__construct();
 	}
 
-	static public function &getInstance()
+	static public function getInstance()
 	{
 		static $instance = NULL;
 

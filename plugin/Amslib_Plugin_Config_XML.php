@@ -173,7 +173,7 @@ class Amslib_Plugin_Config_XML
 		try{
 			$results = $this->queryPath->branch()->find($key);
 		}catch(Exception $e){
-			Amslib_Debug::log("QueryPath Exception",$e->getMessage);
+			Amslib_Debug::log("QueryPath Exception",$e->getMessage());
 		}
 
 		foreach($results as $r){
@@ -190,7 +190,7 @@ class Amslib_Plugin_Config_XML
 		try{
 			$this->queryPath = Amslib_QueryPath::qp($filename);
 		}catch(Exception $e){
-			Amslib_Debug::log("QueryPath Exception",$e->getMessage);
+			Amslib_Debug::log("QueryPath Exception",$e->getMessage());
 		}
 	}
 }

@@ -7,6 +7,11 @@
 	<view directory="__website/views/">
 		<name>Home</name>
 		<name>Skeleton</name>
+		<name>Error_403</name>
+		<name>Error_404</name>
+		<name>Error_418</name>
+		<name>Error_500</name>
+		<name>Error_xxx</name>
 	</view>
 	
 	<value>
@@ -37,6 +42,7 @@
 		</group>
 
 		<file id="framework" autoload="true">__AMSLIB__/__website/resources/framework.css</file>
+		<file id="error">__AMSLIB__/__website/resources/error.css</file>
 	</stylesheet>
 	
 	<javascript>
@@ -55,7 +61,7 @@
 					or even, just "bootstrap" or even "bootstrap/3.x", to follow
 					the jquery way of naming the versions
 		-->
-		<file id="bootstrap-3.1.1" require="jquery/1.x" autoload="true"">__AMSLIB__/util/bootstrap/3.1.1/js/bootstrap.min.js</file>
+		<file id="bootstrap-3.1.1" require="jquery/1.x" autoload="true">__AMSLIB__/util/bootstrap/3.1.1/js/bootstrap.min.js</file>
 				
 		<!-- example of defining resources groups with dependencies -->
 		<group id="amslib/core" require="jquery/1.x">
@@ -73,6 +79,46 @@
 			<src>/</src>
 			<resource>Home</resource>
 			<parameter id="plugin">application</parameter>
+		</path>
+		
+		<path name="error:403">
+			<src>/error/403/</src>
+			<resource>Error_403</resource>
+			<parameter id="plugin">application</parameter>
+			<parameter id="site_title">There was a 403 error</parameter>
+			<stylesheet>error</stylesheet>
+		</path>
+		
+		<path name="error:404">
+			<src>/error/404/</src>
+			<resource>Error_404</resource>
+			<parameter id="plugin">application</parameter>
+			<parameter id="site_title">There was a 404 error</parameter>
+			<stylesheet>error</stylesheet>
+		</path>
+		
+		<path name="error:418">
+			<src>/error/418/</src>
+			<resource>Error_418</resource>
+			<parameter id="plugin">application</parameter>
+			<parameter id="site_title">There was a 418 error</parameter>
+			<stylesheet>error</stylesheet>
+		</path>
+		
+		<path name="error:500">
+			<src>/error/500/</src>
+			<resource>Error_500</resource>
+			<parameter id="plugin">application</parameter>
+			<parameter id="site_title">There was a 500 error</parameter>
+			<stylesheet>error</stylesheet>
+		</path>
+		
+		<path name="error:xxx">
+			<src>/error/xxx/</src>
+			<resource>Error_xxx</resource>
+			<parameter id="plugin">application</parameter>
+			<parameter id="site_title">There was an unknown error</parameter>
+			<stylesheet>error</stylesheet>
 		</path>
 	</router>
 </package>

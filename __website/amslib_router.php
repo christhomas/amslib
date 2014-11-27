@@ -4,14 +4,12 @@
 
 @session_start();
 
-$path = dirname(dirname(__FILE__));
+$path = dirname(__DIR__);
 
 require_once("$path/Amslib.php");
 
-//	This shutdown call has to be more or less static and touching as little code as possible
-//	NOTE: the reason for this is, touching more code means touching ore potential errors
-//	NOTE: if you touch an error whilst trying to setup the shutdown function, maybe you'll never get to see the error page
-#Amslib::shutdown(Amslib_File::relative(dirname(__FILE__)."/500/"));
+//	Unfortunately, the amslib internal website cannot execute itself for the error handling, circular loop
+//Amslib::shutdown(Amslib_File::relative(dirname(__FILE__)."/500/"));
 Amslib_Debug::showErrors(true);
 //	This is needed so non-routed-services will work without modification
 Amslib_Router::initialise();

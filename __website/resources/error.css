@@ -1,0 +1,13 @@
+@CHARSET "UTF-8";
+
+.center {
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: auto;
+	margin-top: auto;
+}
+
+.center p{
+	word-break: break-all;
+}
