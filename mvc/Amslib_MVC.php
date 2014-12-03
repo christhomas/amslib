@@ -845,11 +845,12 @@ class Amslib_MVC extends Amslib_Mixin
 		$this->setValue("image:$id", $file);
 	}
 
-	//	NOTE: this function is being abused to be a generic "make relative url for a file" method for pretty much everything
 	/**
 	 * 	method:	getImage
 	 *
 	 * 	todo: write documentation
+	 *
+	 *	NOTE: this function is being abused to be a generic "make relative url for a file" method for pretty much everything
 	 */
 	public function getImage($id,$relative=true)
 	{
@@ -885,6 +886,16 @@ class Amslib_MVC extends Amslib_Mixin
 	public function listImage($return_data=false)
 	{
 		return $return_data ? $this->image : array_keys($this->image);
+	}
+
+	/**
+	 * 	method:	getFile
+	 *
+	 * 	A method to obtain a file relative to the location of this MVC component
+	 */
+	public function getFile($filename)
+	{
+		return $this->getImage($filename,true);
 	}
 
 	/**
