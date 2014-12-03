@@ -273,7 +273,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 */
 	public function getValueIfEmpty($value,$name=NULL,$default=NULL)
 	{
-		return $value !== NULL || $value !== false || strlen($value) ? $value : $this->getValue($name,$value);
+		return $value !== NULL || $value !== false || strlen($value) ? $value : $this->getValue($name,$default);
 	}
 
 	/**
