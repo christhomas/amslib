@@ -4,12 +4,13 @@
 
 @session_start();
 
-$path = dirname(__DIR__);
+$path	=	dirname(__DIR__);
+$amslib	=	"$path/amslib/";
 
-require_once("$path/Amslib.php");
+require_once("$amslib/Amslib.php");
 
 //	Unfortunately, the amslib internal website cannot execute itself for the error handling, circular loop
-//Amslib::shutdown(Amslib_File::relative(dirname(__FILE__)."/500/"));
+//Amslib::shutdown(Amslib_File::relative("$amslib/error/500/"));
 Amslib_Debug::showErrors(true);
 //	This is needed so non-routed-services will work without modification
 Amslib_Router::initialise();
