@@ -5,7 +5,7 @@
 @session_start();
 
 $path	=	dirname(__DIR__);
-$amslib	=	"$path/amslib";
+$amslib	=	$path;
 
 require_once("$amslib/Amslib.php");
 
