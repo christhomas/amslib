@@ -85,8 +85,8 @@ class Amslib
 			if($__b) ob_start();
 
 			$__v = $__r
-			? (isset($require_once) ? require_once($__f) : require($__f))
-			: (isset($include_once) ? include_once($__f) : include($__f));
+				? (isset($require_once) ? require_once($__f) : require($__f))
+				: (isset($include_once) ? include_once($__f) : include($__f));
 
 			if($__b) $__v = ob_get_clean();
 
