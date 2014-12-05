@@ -11,7 +11,7 @@ require_once("$amslib/Amslib.php");
 
 //	Unfortunately, the amslib internal website cannot execute itself for the error handling, circular loop
 //Amslib::shutdown(Amslib_File::relative("$amslib/error/500/"));
-Amslib_Debug::showErrors(true);
+Amslib_Debug::enable(true);
 //	This is needed so non-routed-services will work without modification
 Amslib_Router::initialise();
 //	NOTE: I think that this method is redundant and the system should do it for me
