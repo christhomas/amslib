@@ -41,7 +41,14 @@ class Amslib_Plugin_Config_XML
 
 	static public function initialiseSelectors()
 	{
-		self::$selectors = array("scan"=>array(),"load"=>array());
+		//	NOTE:	I use ArrayObject here because it's iterators allow
+		//			me to dynamically add selectors whilst iterating and
+		//			obtain a new iterator at the start of the array when
+		//			processing nested plugin trees, which is very important!!
+		self::$selectors = array(
+			"scan"	=>	new ArrayObject(),
+			"load"	=>	new ArrayObject()
+		);
 
 		//	If you do not load the router first, the routes will come out in reverse order :(
 		//	So you need to do this first, before processing all the child plugins which can override them
@@ -102,16 +109,6 @@ class Amslib_Plugin_Config_XML
 	static public function addLoadSelector($selector,$callback)
 	{
 		return self::addSelector("load",$selector,$callback);
-	}
-
-	public function getScanSelectors()
-	{
-		return self::$selectors["scan"];
-	}
-
-	public function getLoadSelectors()
-	{
-		return self::$selectors["load"];
 	}
 
 	public function getStatus()
@@ -183,14 +180,44 @@ class Amslib_Plugin_Config_XML
 		}
 	}
 
-	public function prepare()
+	public function execute($plugin)
 	{
 		$filename = $this->getValue("filename");
 
 		try{
 			$this->queryPath = Amslib_QueryPath::qp($filename);
+
+			$this->executeScan($plugin);
+			$this->executeLoad($plugin);
+
+			return true;
 		}catch(Exception $e){
 			Amslib_Debug::log("QueryPath Exception",$e->getMessage());
+		}
+
+		return false;
+	}
+
+	public function executeScan($plugin)
+	{
+		$i = self::$selectors["scan"]->getIterator();
+
+		while($i->valid()){
+			$this->process($plugin,$i->key(),$i->current());
+
+			$i->next();
+		}
+
+	}
+
+	public function executeLoad($plugin)
+	{
+		$i = self::$selectors["load"]->getIterator();
+
+		while($i->valid()){
+			$this->process($plugin,$i->key(),$i->current());
+
+			$i->next();
 		}
 	}
 }

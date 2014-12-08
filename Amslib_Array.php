@@ -117,10 +117,31 @@ class Amslib_Array
 		return count($result) == 1 && array_shift($result) == "array";
 	}
 
+	static public function reindexByKeyValue($array,$key,$value)
+	{
+		$array = self::valid($array);
+
+		if(!is_string($key) || !is_string($value)){
+			return $array;
+		}
+
+		$copy = array();
+
+		foreach($array as $item){
+			if(isset($item[$key]) && isset($item[$value])){
+				$copy[$item[$key]] = $item[$value];
+			}
+		}
+
+		return $copy;
+	}
+
 	/**
 	 * 	method:	reindexByKey
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	FIXME: \$optimise value is never used
 	 */
 	static public function reindexByKey($array,$key,$optimise=false)
 	{
@@ -130,8 +151,10 @@ class Amslib_Array
 
 		$copy = array();
 
-		foreach($array as $item) if(isset($item[$key])){
-			$copy[$item[$key]] = $item;
+		foreach($array as $item){
+			if(isset($item[$key])){
+				$copy[$item[$key]] = $item;
+			}
 		}
 
 		return $copy;

@@ -835,55 +835,83 @@ class Amslib_Plugin
 
 	public function configPlugin($name,$array,$object)
 	{
-		if($this->getName() != $array["value"]){
-			$a = $array["attr"];
+		if($this->getName() == $array["value"]){
+			Amslib_Debug::log("CONFIGURING ITSELF: {$this->getName()} / {$array["value"]}","stack_trace");
+			return;
+		}
 
-			$replace = isset($a["replace"]) ? $a["replace"] : NULL;;
-			if($replace) Amslib_Plugin_Manager::replacePluginLoad($replace,$array["value"]);
+		$a = $array["attr"];
 
-			$prevent = isset($a["prevent"]) ? $a["prevent"] : NULL;
-			if($prevent) Amslib_Plugin_Manager::preventPluginLoad($prevent,$array["value"]);
+		$replace = isset($a["replace"]) ? $a["replace"] : NULL;
+		if($replace) Amslib_Plugin_Manager::replacePluginLoad($replace,$array["value"]);
 
-			//	Only process plugins which have no replace or prevent instructions,
-			//	these are instructions about loading, not instructions to ACTUALLY load
-			if($prevent || $replace) return;
+		$prevent = isset($a["prevent"]) ? $a["prevent"] : NULL;
+		if($prevent) Amslib_Plugin_Manager::preventPluginLoad($prevent,$array["value"]);
 
-			//	If the plugin is already created, don't attempt to configure or load it again
-			$plugin = Amslib_Plugin_Manager::getPlugin($array["value"]);
+		//	Only process plugins which have no replace or prevent instructions,
+		//	these are instructions about loading, not instructions to ACTUALLY load
+		if($prevent || $replace) return;
 
-			if($plugin) return;
+		//	If the plugin is already created, don't attempt to configure or load it again
+		$plugin = Amslib_Plugin_Manager::getPlugin($array["value"]);
 
+		if($plugin) return;
+
+		try{
 			//	Since this plugin is not replaced, nor prevented from loading, lets load it!!
 			$location	=	$this->getLocation();
 			$plugin		=	Amslib_Plugin_Manager::config($array["value"],$location);
+		}catch(Exception $e){
+			Amslib_Debug::log("Exception occured whilst configuring plugin, message = ".$e->getMessage());
+		}
 
-			if($plugin){
-				$this->data["requires"][$array["value"]] = $plugin;
-			}else{
-				Amslib_Debug::log("PLUGIN LOAD FAILURE: ".$array["value"],$location);
-			}
+		if($plugin){
+			$this->data["requires"][$array["value"]] = $plugin;
 		}else{
-			Amslib_Debug::log("CONFIGURING ITSELF: {$this->getName()} / {$array["value"]}");
+			Amslib_Debug::log("PLUGIN LOAD FAILURE: ".$array["value"],$location);
 		}
 	}
 
 	public function configRouter($name,$array,$object)
 	{
-		//	NOTE: is it possible in the future to ask the router to add a parameter by default to each route
-		//	NOTE: if it was, I wouldn't have to add all the time the plugin to the routes that belong to this configuration
-		//	NOTE: which would solve a silly problem which has happened for a long time, but only really happens
-		//			in situations like the power panel, where the route has to know which plugin was responsible
-		//	NOTE: however, this is not true JUST of the power panel, it would matter for ANY plugin based architecture
-		//			where the system would render a plugin, based on a route, you'd obviously need to know the relationship
-		//	NOTE: this obviously won't work if you try to use a database configuration object
-		Amslib_Router::load($this->source->getValue("filename"),"xml",$this->getName());
+		$data = $array["attr"];
+
+		if(!isset($data["type"]) || !in_array($data["type"],array("xml","database"))){
+			$data["type"] = "xml";
+		}
+
+		switch($data["type"]){
+			case "xml":{
+				//	NOTE: is it possible in the future to ask the router to add a parameter by default to each route
+				//	NOTE: if it was, I wouldn't have to add all the time the plugin to the routes that belong to this configuration
+				//	NOTE: which would solve a silly problem which has happened for a long time, but only really happens
+				//			in situations like the power panel, where the route has to know which plugin was responsible
+				//	NOTE: however, this is not true JUST of the power panel, it would matter for ANY plugin based architecture
+				//			where the system would render a plugin, based on a route, you'd obviously need to know the relationship
+				//	NOTE: this obviously won't work if you try to use a database configuration object
+				$config = $this->source->getValue("filename");
+			}break;
+
+			case "database":{
+				//	NOTE: actually the problem of knowing which route belongs to which plugin is a problem stopping me
+				//			from implementing this router in full, right now I have a half-way-point version which
+				//			is not possible to use in the same way as the XML router is now.
+				$config = Amslib_Array::reindexByKeyValue($array["child"],"tag","value");
+			}break;
+		}
+
+		Amslib_Router::load($config,$data["type"],$this->getName());
 	}
 
 	public function configExtension($name,$array,$object)
 	{
 		if(!array_key_exists("child",$array)) return;
 
-		$data = array();
+		$data = $array["attr"];
+
+		if(!isset($data["type"]) || !in_array($data["type"],array("scan","load"))){
+			$data["type"] = "load";
+		}
 
 		foreach(Amslib_Array::valid($array["child"]) as $c){
 			$data[$c["tag"]] = $c["value"];
@@ -903,7 +931,19 @@ class Amslib_Plugin
 			return false;
 		}
 
-		call_user_func(array(get_class($this->source),"addLoadSelector"),$data["selector"],$data["callback"]);
+		$callback = array(
+			"scan"	=>	"addScanSelector",
+			"load"	=>	"addLoadSelector"
+		);
+
+		$method = array(
+			get_class($this->source),
+			$callback[$data["type"]]
+		);
+
+		Amslib_Debug::log(__METHOD__,$method,$data);
+
+		call_user_func($method,$data["selector"],$data["callback"]);
 	}
 
 	public function configCustom($name,$array,$object)
@@ -924,33 +964,21 @@ class Amslib_Plugin
 		$this->isLoaded		=	false;
 		$this->name			=	$name;
 
-		if(!$this->source){
+		if($this->source){
+			//	Prepare, execute and process all the selectors loaded
+			$this->source->execute($this);
+
+			//	Save memory, be water my friend, delete unwanted things
+			//	NOTE: probably this is not the best way to do this...
+			$this->deleteConfigSource();
+
+			$this->isConfigured = true;
+
+			//	Now the configuration data is loaded, initialise the plugin with any custom requirements
+			$this->initialisePlugin();
+		}else{
 			Amslib_Debug::log(__METHOD__,self::ERROR_PLUGIN_SOURCE_INVALID,$this->source);
-
-			return $this->isConfigured;
 		}
-
-		//	Prepare and process all the selectors that we do by default
-		$this->source->prepare();
-
-		$selectors = $this->source->getScanSelectors();
-		foreach($selectors as $s=>$c){
-			$this->source->process($this,$s,$c);
-		}
-
-		$selectors = $this->source->getLoadSelectors();
-		foreach($selectors as $s=>$c){
-			$this->source->process($this,$s,$c);
-		}
-
-		//	Save memory, be water my friend, delete unwanted things
-		//	NOTE: probably this is not the best way to do this...
-		$this->deleteConfigSource();
-
-		$this->isConfigured = true;
-
-		//	Now the configuration data is loaded, initialise the plugin with any custom requirements
-		$this->initialisePlugin();
 
 		return $this->isConfigured;
 	}
