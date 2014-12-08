@@ -716,7 +716,7 @@ class Amslib_Plugin
 			if(isset($a["export"])){
 				$this->addExport($this,$a["export"],"image",$a);
 			}else{
-				$this->data["image"][$a["id"]] = $a;
+				$this->data["image"][$a["id"]] = $a["value"];
 			}
 		}
 	}
