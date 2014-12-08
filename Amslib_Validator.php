@@ -1152,6 +1152,27 @@ class Amslib_Validator
 	}
 
 	/**
+	 * 	method: validate_instanceof
+	 *
+	 * 	Validate that the parameter is an instanceof the class given in the option[type] value
+	 */
+	protected function validate_instanceof($name,$value,$required,$options)
+	{
+		if(	isset($options["type"]) &&
+			is_string($options["type"]) &&
+			strlen($options["type"]) &&
+			$value instanceof $options["type"])
+		{
+			$this->setValid($name,$value);
+			return true;
+		}
+
+		if($required == false) return true;
+
+		return "INSTANCEOF_FAILED";
+	}
+
+	/**
 	 * For description: read the member variables related to this method, they explain all
 	 */
 
