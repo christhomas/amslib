@@ -433,15 +433,23 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 * 	method:	getConnectionDetails
 	 *
 	 * 	todo: write documentation
+	 *
+	 * 	note:
+	 * 		-	we store the password like this because it hides it from var_dump and friends but
+	 * 			still allows the password to be returned within the duration of the script
+	 * 		-	I'm not 100% sure it stops people from grabbing the password, but 90%+ :D
 	 */
 	public function getConnectionDetails()
 	{
-		if($this->connectionDetails){
-			$c = $this->connectionDetails;
-			$p = $c["password"];
-			unset($c["password"]);
+		static $password = NULL;
 
-			return array($c,$p);
+		if($this->connectionDetails){
+			if(isset($this->connectionDetails["password"])){
+				$password = $this->connectionDetails["password"];
+				unset($this->connectionDetails["password"]);
+			}
+
+			return array($this->connectionDetails,$password);
 		}
 
 		die("(".basename(__FILE__)." / FATAL ERROR): ".
