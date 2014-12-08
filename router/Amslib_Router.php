@@ -362,12 +362,20 @@ class Amslib_Router
 	static public function load($source,$type,$group,$domain=NULL)
 	{
 		try{
-			switch($type){
-				case "xml":{		$s = new Amslib_Router_Source_XML($source);		}break;
-				case "database":{	$s = new Amslib_Router_Source_Database($source);}break;
+			$objects = array(
+				"xml"		=>	"Amslib_Router_Source_XML",
+				"database"	=>	"Amslib_Router_Source_DB"
+			);
+
+			if(!is_string($type) && !isset($objects[$type])){
+				throw new Exception("the type was not the correct value");
 			}
 
-			if($domain == NULL) $domain = self::$domain;
+			$s = new $objects[$type]($source);
+
+			if($domain == NULL){
+				$domain = self::$domain;
+			}
 
 			foreach($s->getRoutes() as $route){
 				self::setRoute($route["name"],$group,$domain,$route);
@@ -376,11 +384,13 @@ class Amslib_Router
 			foreach($s->getImports() as $import){
 				self::importRouter($import);
 			}
+
+			return true;
 		}catch(Exception $e){
-			return false;
+			Amslib_Debug::log("stack_trace","an exception occurred loading the router, message = ",$e->getMessage());
 		}
 
-		return true;
+		return false;
 	}
 
 	/**
