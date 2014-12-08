@@ -373,19 +373,23 @@ class Amslib_Router
 
 			$s = new $objects[$type]($source);
 
-			if($domain == NULL){
-				$domain = self::$domain;
-			}
+			if($s->isValid()){
+				if($domain == NULL){
+					$domain = self::$domain;
+				}
 
-			foreach($s->getRoutes() as $route){
-				self::setRoute($route["name"],$group,$domain,$route);
-			}
+				foreach($s->getRoutes() as $route){
+					self::setRoute($route["name"],$group,$domain,$route);
+				}
 
-			foreach($s->getImports() as $import){
-				self::importRouter($import);
-			}
+				foreach($s->getImports() as $import){
+					self::importRouter($import);
+				}
 
-			return true;
+				return true;
+			}else{
+				Amslib_Debug::log("the router source method isValid returned false, source = ",$source,$type);
+			}
 		}catch(Exception $e){
 			Amslib_Debug::log("stack_trace","an exception occurred loading the router, message = ",$e->getMessage());
 		}

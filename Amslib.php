@@ -146,6 +146,8 @@ class Amslib
 	 * 	todo: write documentation
 	 *	I wonder if this is true, or it's bullshit? could ask someone to verify whether they think it's safe or not
 	 *	TODO: I was told to replace this with a call to crypt()
+	 *	TODO: maybe this should move to the Amslib_String object, since it's a string function?
+	 *	NOTE: actually it's more a utility function, so I'm not sure where to put it, or just leave it here
 	 */
 	static public function getRandomCode($input=NULL)
 	{

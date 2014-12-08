@@ -38,6 +38,7 @@ class Amslib_Router_Source_XML
 {
 	protected $route;
 	protected $import;
+	protected $valid;
 
 	protected function sanitise($type,$data)
 	{
@@ -85,6 +86,7 @@ class Amslib_Router_Source_XML
 	{
 		$this->route	=	false;
 		$this->import	=	false;
+		$this->valid	=	false;
 
 		$filename = false;
 
@@ -107,11 +109,18 @@ class Amslib_Router_Source_XML
 				Amslib_QueryPath::execCallback("router > callback",			array($this,"configCallback"),	$this);
 				Amslib_QueryPath::execCallback("router > import",			array($this,"configImport"),	$this);
 				Amslib_QueryPath::execCallback("router > export",			array($this,"configExport"),	$this);
+
+				$this->valid = true;
 			}
 		}catch(Exception $e){
 			Amslib_Debug::log("Exception: ",$e->getMessage(),"file=",$filename,"source=",$source);
 			Amslib_Debug::log("stack_trace");
 		}
+	}
+
+	public function isValid()
+	{
+		return $this->valid;
 	}
 
 	public function configPath($name,$array,$object)
