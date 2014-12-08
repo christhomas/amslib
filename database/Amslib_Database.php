@@ -486,24 +486,25 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function setEncoding($encoding)
 	{
-		/* The original MySQL Code, please convert to PDO
-		if($this->isConnected() == false) return;
+		if($this->isConnected() == false) return false;
 
 		$allowedEncodings = array("utf8","latin1");
 
 		if(!in_array($encoding,$allowedEncodings)){
 			$message =
-			"(".basename(__FILE__)." / FATAL ERROR): Your encoding ($encoding) is wrong, ".
-			"this can cause database corruption.".
-			"I'm sorry dave, but I can't allow you to do that<br/>".
-			"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>";
+				"(".basename(__FILE__)." / FATAL ERROR): Your encoding ($encoding) is wrong, ".
+				"this can cause database corruption.".
+				"I'm sorry dave, but I can't allow you to do that<br/>".
+				"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>";
+
 			$this->debug("ERROR",$message);
 			die($message);
 		}
 
-		mysql_set_charset($encoding,$this->connection);
-		*/
-		return false;
+		$this->connection->exec("set names $encoding");
+		$this->connection->exec("set character set $encoding");
+
+		return true;
 	}
 
 	/**
@@ -660,27 +661,39 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	public function connect($details=false)
 	{
 		Amslib_Debug::log("stack_trace");
-		//	What is $DB_TYPE ? it's not specified ANYWHERE.....probably this code will fail really badly...
-		//	chris: I just tested this code, omg, fails the first attempt, how did you ever use this code?
-		$this->db_type	=	$DB_TYPE;
-		//	chris: alfonso, so you ignore the $details parameter I pass in here completely and just use your own?
-		$details		=	$this->getConnectionDetails();
-		$server			=	$details['server'];
-		$username		=	$details['username'];
-		$password		=	$details['password'];
-		$database		=	$details['database'];
-		$dns			=	"mysql:host=$server:$database";
-		//	chris: perhaps better to do this no? less useless variables that are only used once and then thrown away
-		//$dns = "mysql:host={$details["server"]}:{$details["database"]}";
 
-		try {
-			//	chris: and also
-			//	$this->connection = new PDO($dns,$details["username"],$details["password"]);
-			$this->connection = new PDO( $dns, $username, $password );
-		} catch ( Exception $e ) {
-			echo "Impossible to connect to the Mysql Database : ", $e->getMessage();
-			die();
+		list($details,$password) = Amslib_Array::valid($this->setConnectionDetails($details)) + array(NULL,NULL);
+
+		$this->disconnect();
+
+		$valid = Amslib_Array::hasKeys($details,"server","username","database","encoding") && strlen($password);
+
+		if($valid){
+			ob_start();
+				try {
+					$dsn = "mysql:host=$server:dbname=$database";
+
+					$this->connection = new PDO($dsn,$details["username"],$password);
+
+					$this->setEncoding($details["encoding"]);
+
+					return $this->isConnected();
+				} catch (PDOException $e){
+					$this->debug("DATABASE","failed to connect",$details,$e->getMessage());
+				}
+			$output = ob_get_clean();
+
+			//	Cause obviously, I don't want to log the password
+			if(strlen($output)){
+				$this->debug("DATABASE","connection attempt was not clean, output = ",$output,$details);
+			}
+		}else{
+			$this->debug("DATABASE","connection details were not valid",$details);
 		}
+
+		$this->disconnect();
+
+		return false;
 	}
 
 	/**
@@ -690,18 +703,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function disconnect()
 	{
-		if($this->connection){
-			/* The original MySQL Code, please convert to PDO
-			 * chris:	alfonso, you need to actually ask the connection to disconnect I suppose
-			 *
-			 * note:	I'm not sure about manually disconnecting a database object, it might prevent you from
-			 * 			connection sharing, or using persistent connections, so perhaps this method gets dropped
-			 * 			and deprecated
-			mysql_close($this->connection);
-			*/
-		}
-
-		$this->connection = false;
+		$this->connection = NULL;
 	}
 
 	/**
@@ -711,8 +713,8 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 * 	notes:
 	 * 		-	I added the returnBoolean parameter to keep the code compatible with the mysql version
 	 */
-	public function query($query,$returnBoolean=false){ // <-- always put the { opening a function, on a new line
-		//{ <-- here for example, it's better code readability, fuck java.....
+	public function query($query,$returnBoolean=false)
+	{
 		$this->setLastQuery($query);
 
 		$results = $this->connection->query($query);
