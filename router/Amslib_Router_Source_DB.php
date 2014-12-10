@@ -37,12 +37,226 @@
  */
 class Amslib_Router_Source_DB
 {
+	protected $database;
+	protected $table;
 	protected $route;
 	protected $import;
+	protected $valid;
+
+	protected function getURLByRouteId($id_route)
+	{
+		if(!$id_route || !is_numeric($id_route)) return false;
+
+		$id_route = intval($id_route);
+
+$query=<<<QUERY
+			url,
+			ifnull(l.code_4,"default") as lang
+		from
+			{$this->table["url"]} as u
+		left join
+			{$this->table["lang"]} as l on l.id_lang = u.id_lang
+		where
+			id_route = $id_route
+				and
+			u.active = 1
+QUERY;
+
+		$list = Amslib_Array::valid($this->database->select($query));
+
+		foreach($list as $key=>$item){
+			unset($list[$key]);
+			$list[$item["lang"]] = $item["url"];
+		}
+
+		return $list;
+	}
+
+	protected function getParam($id_route,$type="param")
+	{
+		if(!$id_route || !is_numeric($id_route)) return false;
+
+		$id_route = intval($id_route);
+		$type = $this->database->escape($type);
+
+$query=<<<QUERY
+			pm.name,
+			pm.data as value,
+			pt.name as type
+		from
+			{$this->table["param"]} as pm
+		inner join
+			{$this->table["param_type"]} as pt on pt.id_type = pm.id_type and pt.name='$type'
+		inner join
+			{$this->table["route"]} as ru on ru.id_route = pm.id_route and ru.id_route = $id_route
+QUERY;
+
+		$list = Amslib_Array::valid($this->database->select($query));
+
+		foreach($list as $key=>$item){
+			switch($item["type"]){
+				case "param":
+				case "resource":{
+					unset($list[$key]);
+					$list[$item["name"]] = $item["value"];
+				}break;
+
+				case "stylesheet":
+				case "javascript":{
+					//	FIXME:	I am hard coding __CURRENT_PLUGIN__ here and
+					//			I have no idea (yet) how to specify yet the plugin to attach it
+
+					$list[$key] = array(
+						"value"		=>	$item["value"],
+						"plugin"	=>	"__CURRENT_PLUGIN__"
+					);
+				}break;
+			};
+		}
+
+		return $list;
+	}
+
+	protected function getHandlerByRouteId($id_route)
+	{
+		if(!$id_route || !is_numeric($id_route)) return false;
+
+		$id_route = intval($id_route);
+
+$query=<<<QUERY
+			hd.id_handler,
+			hd.id_route,
+			hd.id_type,
+			ht.name as type,
+			hd.plugin,
+			hd.object,
+			hd.method,
+			ifnull(hi.name,ri.name) as input,
+			ifnull(hp.name,rp.name) as output,
+			ifnull(hr.name,rr.name) as record,
+			ifnull(hf.name,rf.name) as failure
+		from
+			{$this->table["handler"]} as hd
+		inner join
+			{$this->table["handler_type"]} as ht on ht.id_type = hd.id_type
+		inner join
+			{$this->table["route"]} as ru on ru.id_route = hd.id_route and ru.id_route=$id_route
+		left join
+			{$this->table["options"]} as ho on ho.id_options = hd.id_options
+		left join
+			{$this->table["options_input"]} as hi on hi.id_input = ho.id_input
+		left join
+			{$this->table["options_output"]} as hp on hp.id_output = ho.id_output
+		left join
+			{$this->table["options_record"]} as hr on hr.id_record = ho.id_record
+		left join
+			{$this->table["options_failure"]} as hf on hf.id_failure = ho.id_failure
+		left join
+			{$this->table["options"]} as ro on ro.id_options = ru.id_options
+		left join
+			{$this->table["options_input"]} as ri on ri.id_input = ro.id_input
+		left join
+			{$this->table["options_output"]} as rp on rp.id_output = ro.id_output
+		left join
+			{$this->table["options_record"]} as rr on rr.id_record = ro.id_record
+		left join
+			{$this->table["options_failure"]} as rf on rf.id_failure = ro.id_failure
+QUERY;
+
+		$list = Amslib_Array::valid($this->database->select($query));
+
+		//	Allowed handler types
+		$handler_types = array("service","terminator_common","terminator_success","terminator_failure");
+
+		foreach($list as &$item){
+			//	Grab the default route input and output values, in order to potentially use them when setting up the handlers
+			$item["input"]	=	self::sanitise("input",array($item,"input"));
+			$item["output"]	=	self::sanitise("output",array($item,"output"));
+			$item["record"]	=	self::sanitise("record",array($item,"record"));
+
+			//	Ignore the webservice type is not valid
+			if(!in_array($item["type"],$handler_types)){
+				$item = NULL;
+				continue;
+			}
+
+			//	Failure will block unless you tell the system to ignore failure
+			//	A reason for wanting to ignore failures is that you want to accumulate all the results
+			//	and post-process them into a final result, however this requires you setup the webservices with care
+			//	and attention that failures will not cause unpredictable errors, however, that this, it is useful
+			if(!isset($item["failure"]) || !in_array($item["failure"],array("break","stop","ignore"))){
+				$item["failure"] = "break";
+			}
+		}
+
+		return array_filter($list);
+	}
+
+	protected function processPath()
+	{
+$query=<<<QUERY
+			ru.id_route,
+			ru.name,
+			rt.name as type,
+			pm.data as resource
+		from
+			{$this->table["route"]} as ru
+		inner join
+			{$this->table["route_type"]} as rt on rt.id_type = ru.id_type and rt.name="path"
+		inner join
+			{$this->table["param"]} as pm on pm.id_route = ru.id_route
+		inner join
+			{$this->table["param_type"]} as pt on pt.id_type = pm.id_type and pt.name="resource"
+QUERY;
+
+		$list = Amslib_Array::valid($this->database->select($query));
+
+		foreach($list as &$route){
+			$route["src"] = $this->getURLByRouteId($route["id_route"]);
+			$route["route_param"] = $this->getParam($route["id_route"],"param");
+			$route["javascript"] = $this->getParam($route["id_route"],"javascript");
+			$route["stylesheet"] = $this->getParam($route["id_route"],"stylesheet");
+
+			$this->route[] = $route;
+		}
+	}
+
+	protected function processService()
+	{
+$query=<<<QUERY
+			ru.id_route,
+			ru.name,
+			rt.name as type,
+			ur.url as url
+		from
+			{$this->table["route"]} as ru
+		inner join
+			{$this->table["route_type"]} as rt on rt.id_type = ru.id_type and rt.name="service"
+		inner join
+			{$this->table["url"]} as ur on ur.id_route = ru.id_route
+QUERY;
+
+		$list = Amslib_Array::valid($this->database->select($query));
+
+		foreach($list as &$route){
+			$route["src"]		=	$this->getURLByRouteId($route["id_route"]);
+			$route["handler"]	=	$this->getHandlerByRouteId($route["id_route"]);
+
+			$this->route[] = $route;
+		}
+	}
+
+	protected function processConfig()
+	{
+		/*
+		Amslib_QueryPath::execCallback("router > callback",			array($this,"configCallback"),	$this);
+		Amslib_QueryPath::execCallback("router > import",			array($this,"configImport"),	$this);
+		Amslib_QueryPath::execCallback("router > export",			array($this,"configExport"),	$this);
+		*/
+	}
 
 	protected function sanitise($type,$data)
 	{
-		/*	The original XML code commented out for reference
 		if(count($data) != 2) return $data;
 
 		if(in_array($type,array("input","output","record"))){
@@ -74,7 +288,6 @@ class Amslib_Router_Source_DB
 					: "service";
 			}break;
 		}
-		*/
 
 		return $data;
 	}
@@ -88,153 +301,50 @@ class Amslib_Router_Source_DB
 	{
 		$this->route	=	false;
 		$this->import	=	false;
+		$this->valid	=	false;
 
-		Amslib_Debug::log(__METHOD__,"source = ",$source);
-		/**
-		 * NOTE:	The problem is that this object has no access to the database,
-		 * 			I somehow have to figure out a nice way that this object can
-		 * 			connect to the database and obtain all the route information
-		 * 			WITHOUT breaking the plugin/component model and doing various
-		 * 			dubious and custom tasks.  It has to be something beautiful and simple
-		 */
-		//print("database = ".Amslib_Debug::vdump(Amslib_Database::getInstance()));
-		//die("DEAD");
+		$v = new Amslib_Validator($source);
+		$v->add("lang","text",true);
+		$v->add("route","text",true);
+		$v->add("route_type","text",true);
+		$v->add("options","text",true);
+		$v->add("options_input","text",true);
+		$v->add("options_output","text",true);
+		$v->add("options_record","text",true);
+		$v->add("options_failure","text",true);
+		$v->add("url","text",true);
+		$v->add("param","text",true);
+		$v->add("param_type","text",true);
+		$v->add("handler","text",true);
+		$v->add("handler_type","text",true);
+		$v->add("database","instanceof",true,array("type"=>"Amslib_Database_MySQL"));
 
-		/*	The original XML code commented out for reference
-		$filename = false;
+		$s = $v->execute();
+		$d = $v->getValid();
+		$e = $v->getErrors();
 
-		try{
-			//	NOTE: This is ugly and I believe it's a failure of Amslib_File::find() to not do this automatically
-			if(file_exists($source)){
-				$filename = $source;
-			}else if(file_exists($f=Amslib_File::find(Amslib_Website::rel($source),true))){
-				$filename = $f;
-			}else if(file_exists($f=Amslib_File::find(Amslib_Website::abs($source),true))){
-				$filename = $f;
-			}
+		if($s){
+			try{
+				$this->database = $d["database"];
 
-			if(!$filename){
-				Amslib_Debug::log("The filename was not valid, we could not getRoutes from this XML Source");
-			}else{
-				Amslib_QueryPath::qp($filename);
-				Amslib_QueryPath::execCallback("router > path[name]",		array($this,"configPath"),		$this);
-				Amslib_QueryPath::execCallback("router > service[name]",	array($this,"configService"),	$this);
-				Amslib_QueryPath::execCallback("router > callback",			array($this,"configCallback"),	$this);
-				Amslib_QueryPath::execCallback("router > import",			array($this,"configImport"),	$this);
-				Amslib_QueryPath::execCallback("router > export",			array($this,"configExport"),	$this);
-			}
-		}catch(Exception $e){
-			Amslib_Debug::log("Exception: ",$e->getMessage(),"file=",$filename,"source=",$source);
-			Amslib_Debug::log("stack_trace");
-		}*/
-	}
+				$this->table = $d;
+				unset($this->table["database"]);
 
-	public function configPath($name,$array,$object)
-	{
-		/*	The original XML code commented out for reference
-		//	Ignore if there are no children
-		if(empty($array["child"])) return;
+				$this->processPath();
+				$this->processService();
+				$this->processConfig();
 
-		$array["name"]			=	$array["attr"]["name"];
-		$array["type"]			=	$array["tag"];
-		$array["src"]			=	array();
-		$array["javascript"]	=	array();
-		$array["stylesheet"]	=	array();
-
-		foreach($array["child"] as $child){
-			switch($child["tag"]){
-				case "src":{
-					//	Obtain the language attribute for this path url/source
-					$lang = isset($child["attr"]["lang"]) ? $child["attr"]["lang"] : "default";
-
-					$array[$child["tag"]][$lang] = $child["value"];
-
-					//	if there is no default, create one, all routers require a "default source"
-					if(!isset($array[$child["tag"]]["default"])){
-						$array[$child["tag"]]["default"] = $child["value"];
-					}
-				}break;
-
-				case "resource":{
-					$array[$child["tag"]] = $child["value"];
-				}break;
-
-				case "parameter":{
-					//	If this parameter has no attribute id, you cannot process it
-					if(!isset($child["attr"]["id"])) continue;
-
-					$array["route_param"][$child["attr"]["id"]] = $child["value"];
-				}break;
-
-				case "stylesheet":
-				case "javascript":{
-					//	NOTE: interesting!! could this be the solution to for how to automatically assign the "plugin"
-					//			attribute to routes so the system can identify which route belongs to which plugin?
-					if(!isset($child["attr"]["plugin"])) $child["attr"]["plugin"] = "__CURRENT_PLUGIN__";
-
-					$array[$child["tag"]][] = array("value"=>$child["value"],"plugin"=>$child["attr"]["plugin"]);
-				}break;
+				$this->valid = true;
+			}catch(Exception $e){
+				Amslib_Debug::log("Exception: ",$e->getMessage());
+				Amslib_Debug::log("stack_trace");
 			}
 		}
-
-		//	remove unwanted data that would just clog up the data array
-		unset($array["tag"],$array["attr"],$array["child"]);
-
-		$this->route[] = $array;
-		*/
 	}
 
-	public function configService($name,$array,$object)
+	public function isValid()
 	{
-		/*	The original XML code commented out for reference
-		//	Ignore if there are no children
-		if(empty($array["child"])) return;
-
-		$d 				=	array("input"=>"post","output"=>"session","record"=>"true");
-		$a 				=	array_merge($d,array_map("strtolower",$array["attr"]));
-		$a["type"]		=	$array["tag"];
-		$a["src"]		=	array();
-		$a["handler"]	=	array();
-
-		//	Allowed handler types
-		$handler_types = array("service","terminator_common","terminator_success","terminator_failure");
-
-		//	Grab the default route input and output values, in order to potentially use them when setting up the handlers
-		$a["input"]		=	self::sanitise("input",array($a,"input"));
-		$a["output"]	=	self::sanitise("output",array($a,"output"));
-		$a["record"]	=	self::sanitise("record",array($a,"record"));
-
-		foreach($array["child"] as $child){
-			switch($child["tag"]){
-				case "src":{
-					$a["src"]["default"] = $child["value"];
-				}break;
-
-				case "handler":
-				case "terminator":{
-					$c = $child["attr"];
-
-					//	Set the type of webservice this will be attached
-					$c["type"] = self::sanitise("type",array($child["tag"],$c));
-
-					//	Ignore the webservice type is not valid
-					if(!in_array($c["type"],$handler_types)) continue;
-
-					//	Failure will block unless you tell the system to ignore failure
-					//	A reason for wanting to ignore failures is that you want to accumulate all the results
-					//	and post-process them into a final result, however this requires you setup the webservices with care
-					//	and attention that failures will not cause unpredictable errors, however, that this, it is useful
-					if(!isset($c["failure"]) || !in_array($c["failure"],array("break","stop","ignore"))){
-						$c["failure"] = "break";
-					}
-
-					$a["handler"][] = $c;
-				}break;
-			}
-		}
-
-		$this->route[] = $a;
-		*/
+		return $this->valid;
 	}
 
 	public function configCallback($name,$array,$object)
