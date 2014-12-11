@@ -452,6 +452,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			die($m);
 		}
 
+		if(!isset($route["output"])){
+			Amslib_Debug::log($m=__METHOD__.": route/handler is invalid, there was no output specified",$route);
+			die($m);
+		}
+
 		$this->api->setupService($route["group"],$route["name"]);
 
 		$service = Amslib_Plugin_Service::getInstance();

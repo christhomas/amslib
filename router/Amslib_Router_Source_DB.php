@@ -227,13 +227,27 @@ $query=<<<QUERY
 			ru.id_route,
 			ru.name,
 			rt.name as type,
-			ur.url as url
+			ur.url as url,
+			ifnull(ip.name,"post") as input,
+			ifnull(ot.name,"session") as output,
+			ifnull(rd.name,"true") as record,
+			ifnull(fl.name,"break") as failure
 		from
 			{$this->table["route"]} as ru
 		inner join
 			{$this->table["route_type"]} as rt on rt.id_type = ru.id_type and rt.name="service"
 		inner join
 			{$this->table["url"]} as ur on ur.id_route = ru.id_route
+		left join
+			{$this->table["options"]} as op on op.id_options = ru.id_options
+		left join
+			{$this->table["options_input"]} as ip on ip.id_input = op.id_input
+		left join
+			{$this->table["options_output"]} as ot on ot.id_output = op.id_output
+		left join
+			{$this->table["options_record"]} as rd on rd.id_record = op.id_record
+		left join
+			{$this->table["options_failure"]} as fl on fl.id_failure = op.id_failure
 QUERY;
 
 		$list = Amslib_Array::valid($this->database->select($query));
