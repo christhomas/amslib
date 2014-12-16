@@ -10,8 +10,9 @@
 		<name>About_Framework</name>
 		<name>Getting_Started</name>
 		<name>Using_Examples</name>
-		<name>Plugins_Components</name>
-		<name>Webservices_API</name>
+		<name>Explain_Plugins</name>
+		<name>Explain_Webservices</name>
+		<name>Explain_API</name>
 		<name>Documentation</name>
 		<name>Test_Framework</name>
 		<name>Error_403</name>
@@ -107,14 +108,20 @@
 		</path>
 		
 		<path name="plugins">
-			<src>/plugins-components/</src>
-			<resource>Plugins_Components</resource>
+			<src>/what-is-a-plugins-or-components/</src>
+			<resource>Explain_Plugins</resource>
 			<parameter id="plugin">application</parameter>
 		</path>
 		
-		<path name="webservices-api">
-			<src>/webservices-api/</src>
-			<resource>Webservices_API</resource>
+		<path name="webservices">
+			<src>/what-is-a-webservice/</src>
+			<resource>Explain_Webservices</resource>
+			<parameter id="plugin">application</parameter>
+		</path>
+		
+		<path name="api">
+			<src>/what-is-an-api/</src>
+			<resource>Explain_API</resource>
 			<parameter id="plugin">application</parameter>
 		</path>
 		
