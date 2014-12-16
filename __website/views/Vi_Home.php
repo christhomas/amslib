@@ -8,7 +8,7 @@
 
 		<ul>
 			<li><a href="<?=$url_about?>">About Framework</a></li>
-			<li><a href="<?=$url_gettingstarted?>">Getting Started</a></li>
+			<li><a href="<?=$url_gettingstarted?>">Getting Started</a><a href="<?=$url_examples?>">Using Examples</a></li>
 			<li><a href="<?=$url_plugins?>">What are plugins?</a></li>
 			<li><a href="<?=$url_webservices?>">Explanation of Webservices and APIs</a></li>
 			<li><a href="<?=$url_documentation?>">Amslib Documentation</a></li>

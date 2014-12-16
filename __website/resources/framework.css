@@ -52,13 +52,29 @@ section h2{
 	font-style: italic;
 }
 
-section p{
+section p,
+section ul{
 	font-size: 1.5em;
 }
 
+section p b,
+section p i{
+	color: #FFFFFF;
+}
+
 section a{
-	display: block;
+	display: inline-block;
 	margin-top: 1rem;
+}
+
+section a+a{
+	margin-left: 1rem;
+}
+
+section a+a:before{
+	content: "-";
+	color: #FFFFFF;
+	margin-right: 1rem;
 }
 
 section ul{

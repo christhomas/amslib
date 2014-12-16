@@ -1,3 +1,3 @@
 <section>
-	<p>TODO: write documentation page</p>
+	<p>At the moment there is no automatically generated documentation</p>
 </section>

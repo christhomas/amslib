@@ -9,6 +9,7 @@
 		<name>Home</name>
 		<name>About_Framework</name>
 		<name>Getting_Started</name>
+		<name>Using_Examples</name>
 		<name>Plugins_Components</name>
 		<name>Webservices_API</name>
 		<name>Documentation</name>
@@ -96,6 +97,12 @@
 		<path name="getting-started">
 			<src>/getting-started/</src>
 			<resource>Getting_Started</resource>
+			<parameter id="plugin">application</parameter>
+		</path>
+		
+		<path name="examples">
+			<src>/using-examples/</src>
+			<resource>Using_Examples</resource>
 			<parameter id="plugin">application</parameter>
 		</path>
 		

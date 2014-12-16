@@ -60,6 +60,7 @@ class Amslib_Framework extends Amslib_MVC
 
 		$params["url_about"]			=	$this->getURL("about-framework");
 		$params["url_gettingstarted"]	=	$this->getURL("getting-started");
+		$params["url_examples"]			=	$this->getURL("examples");
 		$params["url_plugins"]			=	$this->getURL("plugins");
 		$params["url_webservices"]		=	$this->getURL("webservices-api");
 		$params["url_documentation"]	=	$this->getURL("documentation");

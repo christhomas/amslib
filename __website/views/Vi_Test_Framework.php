@@ -1,3 +1,3 @@
 <section>
-	<p>TODO: write test framework page</p>
+	<p>The testing framework is currently in development, sorry for the inconvenience</p>
 </section>

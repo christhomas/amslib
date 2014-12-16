@@ -104,4 +104,14 @@
 			upgrade automatically with no issue. You can even version API's and
 			import a specific version</li>
 	</ul>
+
+	<p> <b>Obviously, as just an overview</b> of the functionality present in Amslib
+		This document will not tell you everything.  The purpose is just to give a history
+		Of the how and the why of what went on behind the scenes and the thinking
+		that went into creating the library.  I know that some programmers will disagree
+		with somethings that I've done, maybe you agree, if so, thats great!<br/>
+		<br/>
+		I hope that Amslib can provide you with the tools that you need to write a
+		solid, easy custom website in the near future
+	</p>
 </section>
