@@ -36,8 +36,9 @@ class Amslib_Framework extends Amslib_MVC
 	 */
 	public function render($id="default",$params=array())
 	{
-		$resource	=	Amslib_Router::getResource();
-		$route		=	Amslib_Router::getName();
+		$params["resource"]	=	Amslib_Router::getResource();
+		$params["body"]		=	strtolower($params["resource"]);
+		$params["route"]	=	Amslib_Router::getName();
 
 		$params["site_title"] = false;
 		if(!$params["site_title"]){
@@ -55,7 +56,16 @@ class Amslib_Framework extends Amslib_MVC
 		$params["meta_description"]	=	$this->getValue("meta_description");
 		$params["meta_author"]		=	$this->getValue("meta_author");
 
-		$params["content"] = $this->renderView($resource,$params);
+		$params["logo"] = $this->getFile("/resources/logo.png");
+
+		$params["url_about"]			=	$this->getURL("about-framework");
+		$params["url_gettingstarted"]	=	$this->getURL("getting-started");
+		$params["url_plugins"]			=	$this->getURL("plugins");
+		$params["url_webservices"]		=	$this->getURL("webservices-api");
+		$params["url_documentation"]	=	$this->getURL("documentation");
+		$params["url_testframework"]	=	$this->getURL("test-framework");
+
+		$params["content"] = $this->renderView($params["resource"],$params);
 
 		return $this->renderView("Skeleton",$params);
 	}

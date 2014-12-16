@@ -14,12 +14,7 @@ main{
 	padding: 70px 0 50px 0;
 }
 
-section{
-	width: 90%;
-	font-size: 1rem;
-}
-
-.vcenter{
+body.home main{
 	display: -webkit-flex;
 	display: flex;
 	-webkit-flex-direction: row; /* works with row or column */
@@ -28,6 +23,12 @@ section{
 	align-items: center;
 	-webkit-justify-content: center;
 	justify-content: center;
+}
+
+section{
+	width: 90%;
+	font-size: 1rem;
+	margin: 0 auto;
 }
 
 section .img-area,
@@ -61,10 +62,27 @@ section a{
 }
 
 section ul{
+	margin: 1rem 0;
+}
+
+section ul li{
+	margin: 0.5rem 0;
+}
+
+section ul li:nth-child(odd){
+	color: #FFFFFF;
+}
+
+body.home ul{
 	list-style: none;
 	font-size: 1.5em;
 	margin: 0;
 	padding: 0;
+}
+
+body.home ul li{
+	color: inherit;
+	margin: 0;
 }
 
 @media (orientation:portrait){
@@ -104,6 +122,7 @@ section ul{
 		line-height: 20px;
 		height: 50px;
 		padding: 15px;
+		margin: 0;
 		top: 0;
 		right: 0;
 	}
@@ -139,8 +158,9 @@ section ul{
 		color: #A0A0A0;
 	}
 	
-	section p{
-		font-size: 2em;
+	section p,
+	section ul{
+		font-size: 1.5em;
 	}
 }
 
@@ -148,4 +168,8 @@ section ul{
 	section{
 		width: 90%;
 	}	
+	
+	body.home ul{
+		font-size: 1.5em;
+	}
 }

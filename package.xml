@@ -5,8 +5,14 @@
 	</object>
 	
 	<view directory="__website/views/">
-		<name>Home</name>
 		<name>Skeleton</name>
+		<name>Home</name>
+		<name>About_Framework</name>
+		<name>Getting_Started</name>
+		<name>Plugins_Components</name>
+		<name>Webservices_API</name>
+		<name>Documentation</name>
+		<name>Test_Framework</name>
 		<name>Error_403</name>
 		<name>Error_404</name>
 		<name>Error_418</name>
@@ -78,6 +84,42 @@
 		<path name="home">
 			<src>/</src>
 			<resource>Home</resource>
+			<parameter id="plugin">application</parameter>
+		</path>
+		
+		<path name="about-framework">
+			<src>/about-framework/</src>
+			<resource>About_Framework</resource>
+			<parameter id="plugin">application</parameter>
+		</path>
+		
+		<path name="getting-started">
+			<src>/getting-started/</src>
+			<resource>Getting_Started</resource>
+			<parameter id="plugin">application</parameter>
+		</path>
+		
+		<path name="plugins">
+			<src>/plugins-components/</src>
+			<resource>Plugins_Components</resource>
+			<parameter id="plugin">application</parameter>
+		</path>
+		
+		<path name="webservices-api">
+			<src>/webservices-api/</src>
+			<resource>Webservices_API</resource>
+			<parameter id="plugin">application</parameter>
+		</path>
+		
+		<path name="documentation">
+			<src>/documentation</src>
+			<resource>Documentation</resource>
+			<parameter id="plugin">application</parameter>
+		</path>
+		
+		<path name="test-framework">
+			<src>/test-framework/</src>
+			<resource>Test_Framework</resource>
 			<parameter id="plugin">application</parameter>
 		</path>
 		

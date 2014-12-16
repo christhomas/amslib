@@ -22,7 +22,7 @@
 	<?=Amslib_Resource::getJavascript()?>
 </head>
 
-<body>
+<body class="<?=$body?>">
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
             <div class="navbar-header">
@@ -31,7 +31,7 @@
         </div>
     </nav>
 
-    <main class="vcenter">
+    <main>
 		<?=$content?>
     </main>
 </body>
