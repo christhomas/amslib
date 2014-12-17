@@ -24,7 +24,7 @@
 
 <body class="<?=$body?>">
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-        <div class="container">
+        <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="<?=$url_home?>">Antimatter Studios</a>
             </div>
