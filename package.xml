@@ -23,10 +23,17 @@
 	</view>
 	
 	<value>
+		<site_shutdown>__AMSLIB__/error/500/</site_shutdown>
+		<site_debug>true</site_debug>
     	<site_title>Amslib Framework: Welcome</site_title>
     	<meta_description>The amslib framework website, documentation, examples and more</meta_description>
     	<meta_author>chris thomas, antimatter studios</meta_author>
 	</value>
+	
+	<path>
+		<include>/__website/</include>
+		<include>/__website/objects/</include>
+	</path>
 	
 	<!-- 
 	NOTE:	amslib should not be defining resources to autoload like you see in the 

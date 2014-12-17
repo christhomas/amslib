@@ -178,6 +178,13 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		parent::__construct();
 
+		//	This is needed so non-routed-services will work without modification
+		//	NOTE: probably I shouldn't need to do this, I need to find a way to make this redundant
+		Amslib_Router::initialise();
+		//	NOTE: I think that this method is redundant and the system should do it for me
+		//	NOTE: I'm not sure whether this method is actually useful anymore, I think it's out of date maybe
+		Amslib_Website::set();
+
 		Amslib_Website::setPath("amslib",		Amslib::locate());
 		Amslib_Website::setPath("website",		Amslib_Router::getBase());
 		Amslib_Website::setPath("website_ext",	Amslib_Router_URL::externalURL(Amslib_Router::getBase()));
