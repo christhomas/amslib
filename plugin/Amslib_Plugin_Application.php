@@ -199,9 +199,10 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		$this->completionCallback = array();
 
-		//	Set the name and location of the plugin that was found in the hard disk
+		//	Set the name, location and config of the plugin that was found in the hard disk
 		$this->setName($name);
 		$this->setLocation($location);
+		$this->setConfigSource($config);
 	}
 
 	public function initialise()
@@ -222,8 +223,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		Amslib_Plugin_Manager::addLocation($this->getLocation());
 		Amslib_Plugin_Manager::addLocation($this->getLocation()."/plugins");
 
-		//	Set the configuration source, so it can read the appropriate data
-		$this->setConfigSource($config);
 		//	We can't use Amslib_Plugin_Manager for this, because it's an application plugin
 		$this->config($this->getName());
 		//	Process all the imports and exports so all the plugins contain the correct data
