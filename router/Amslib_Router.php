@@ -193,6 +193,10 @@ class Amslib_Router
 			unset($h);
 		}
 
+		//	Make sure the handler list is available, either empty, or a valid array
+		if(!isset($route["handler"])) $route["handler"] = array();
+		$route["handler"] = Amslib_Array::valid($route["handler"]);
+
 		//	Now go through the routes own webservices, adding them according to their
 		//	configuration to the final service handler list and doing this in the way
 		//	their parameters specify, whether to insert, replace or append each one to the finaly list
