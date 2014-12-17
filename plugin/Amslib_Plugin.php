@@ -463,7 +463,7 @@ class Amslib_Plugin
 	 */
 	public function __construct()
 	{
-		$this->data = array("api"=>false,"model"=>false,"translator"=>false,"requires"=>false,"value"=>false);
+		$this->data = array_fill_keys(array("api","model","translator","requires","value"),false);
 
 		//	This stores where all the types components are stored as part of the application
 		//	WARNING: object is soon to be deprecated
@@ -816,7 +816,7 @@ class Amslib_Plugin
 			$v = Amslib_Plugin::expandPath($c["value"]);
 
 			if($c["tag"] == "include"){
-				Amslib::addIncludePath(Amslib_File::absolute($v));
+				Amslib::addIncludePath(Amslib_Website::abs($v));
 			}else{
 				Amslib_Website::setPath($c["tag"],$v);
 
