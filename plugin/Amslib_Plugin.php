@@ -474,20 +474,6 @@ class Amslib_Plugin
 		$this->setComponent("view",			"views",		"Vi_");
 	}
 
-	/**
-	 * 	method:	getInstance
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function &getInstance()
-	{
-		static $instance = NULL;
-
-		if($instance === NULL) $instance = new self();
-
-		return $instance;
-	}
-
 	public function setComponentConfig($name,$array,$object)
 	{
 		$component = $this->getComponent($name);
@@ -1196,6 +1182,18 @@ class Amslib_Plugin
 	public function getLocation()
 	{
 		return $this->location;
+	}
+
+	/**
+	 * 	method:	setName
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setName($name)
+	{
+		if(is_string($name) && strlen($name)){
+			$this->name = $name;
+		}
 	}
 
 	/**

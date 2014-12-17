@@ -44,6 +44,11 @@ class Amslib_Website
 		self::$path[$name] = $path;
 	}
 
+	static public function getPath($name)
+	{
+		return isset(self::$path[$name]) ? self::$path[$name] : NULL;
+	}
+
 	static public function expandPath($path)
 	{
 		foreach(array_keys(self::$path) as $key){

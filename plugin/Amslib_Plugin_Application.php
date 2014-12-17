@@ -38,7 +38,9 @@
  */
 class Amslib_Plugin_Application extends Amslib_Plugin
 {
+	//	NOTE: Not sure that this variable is useful anymore
 	static protected $version;
+	//	NOTE: I think these two variables are assuming that a website needs or has language support
 	static protected $langKey = "/amslib/lang/shared";
 	static protected $registeredLanguages = array();
 
@@ -178,6 +180,9 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		parent::__construct();
 
+		//	unless I think of a reason to not do this, always initialise sessions
+		@session_start();
+
 		//	This is needed so non-routed-services will work without modification
 		//	NOTE: probably I shouldn't need to do this, I need to find a way to make this redundant
 		Amslib_Router::initialise();
@@ -194,6 +199,13 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		$this->completionCallback = array();
 
+		//	Set the name and location of the plugin that was found in the hard disk
+		$this->setName($name);
+		$this->setLocation($location);
+	}
+
+	public function initialise()
+	{
 		//	Quickly insert this plugin object before we load anything else
 		//	We do this so other plugins that might call the application can access this plugins
 		//	configuration before the entire tree is loaded, because in a tree algorithm, all the
@@ -203,19 +215,17 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	"insert" a incomplete plugin here, so at least the plugin configurtion is available even
 		//	if the actual API is not, when configuring the plugin tree, we 100% of the time always deal
 		//	with the plugin object, not the API which is created after the plugin is fully loaded
-		Amslib_Plugin_Manager::insert($name,$this);
+		Amslib_Plugin_Manager::insert($this->getName(),$this);
 
 		//	Set the base locations to load plugins from
 		//	NOTE: this obviously means it's not configurable, since I'm hardcoding the path for this here
-		Amslib_Plugin_Manager::addLocation($location);
-		Amslib_Plugin_Manager::addLocation($location."/plugins");
+		Amslib_Plugin_Manager::addLocation($this->getLocation());
+		Amslib_Plugin_Manager::addLocation($this->getLocation()."/plugins");
 
-		//	Set the location of the plugin that was found in the hard disk
-		$this->setLocation($location);
 		//	Set the configuration source, so it can read the appropriate data
 		$this->setConfigSource($config);
 		//	We can't use Amslib_Plugin_Manager for this, because it's an application plugin
-		$this->config($name);
+		$this->config($this->getName());
 		//	Process all the imports and exports so all the plugins contain the correct data
 		Amslib_Plugin_Manager::processImport();
 		Amslib_Plugin_Manager::processExport();
@@ -232,18 +242,14 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->runCompletionCallbacks();
 	}
 
-	/**
-	 * 	method:	getInstance
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function &getInstance()
+	public function setDebug($state)
 	{
-		static $instance = NULL;
+		Amslib_Debug::enable($state);
+	}
 
-		if($instance === NULL) $instance = new self();
-
-		return $instance;
+	public function setShutdown($url)
+	{
+		Amslib::shutdown($url);
 	}
 
 	/**

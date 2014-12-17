@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package>
+	<!-- NOTE: an idea to set configuration parameters for plugins -->
+	<!-- NOTE: looks an awful lot like the value node doesn't it? -->
+	<config>
+		<debug>true</debug>
+		<shutdown>__AMSLIB__/error/500/</shutdown>
+	</config>
+	
 	<object directory="__website/objects/">
 		<api>Amslib_Framework</api>
 	</object>
@@ -23,8 +30,6 @@
 	</view>
 	
 	<value>
-		<site_shutdown>__AMSLIB__/error/500/</site_shutdown>
-		<site_debug>true</site_debug>
     	<site_title>Amslib Framework: Welcome</site_title>
     	<meta_description>The amslib framework website, documentation, examples and more</meta_description>
     	<meta_author>chris thomas, antimatter studios</meta_author>
@@ -33,6 +38,7 @@
 	<path>
 		<include>/__website/</include>
 		<include>/__website/objects/</include>
+		<file>/__website/amslib_customise.php</file>
 	</path>
 	
 	<!-- 

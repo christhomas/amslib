@@ -1,21 +1,9 @@
 <?php
-//	NOTE:	this version of this script is customised to allow the website to run
-//			out of a subdirectory and not the root folder where the framework is
+$path = dirname(__DIR__);
 
-@session_start();
-
-$path	=	dirname(__DIR__);
-$amslib	=	$path;
-
-require_once("$amslib/Amslib.php");
-
-//	Unfortunately, the amslib internal website cannot execute itself for the error handling, circular loop
-//Amslib::shutdown(Amslib_File::relative("$amslib/error/500/"));
-Amslib_Debug::enable(true);
-//	The minimal amount of information we need to manually provide to get the system working
-//Amslib::addIncludePath("$path/__website/objects");
-//	This will attempt to load any customisations we need to run PER PROJECT before we run this boilerplate code.
-Amslib::includeFile("$path/__website/amslib_customise.php");
+require_once("$path/Amslib.php");
 
 $application = new Amslib_Plugin_Application("application",$path);
+$application->setDebug(true);
+$application->initialise();
 $application->execute();
