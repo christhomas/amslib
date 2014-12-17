@@ -52,6 +52,7 @@ class Amslib_Plugin_Config_XML
 
 		//	If you do not load the router first, the routes will come out in reverse order :(
 		//	So you need to do this first, before processing all the child plugins which can override them
+		self::addScanSelector("package path",				"configPath");
 		self::addScanSelector("package router",				"configRouter");
 		//	Create the API object first, then load the selector extensions and then all the child plugins to build the tree
 		self::addScanSelector("package object api",			"configAPI");
@@ -77,7 +78,6 @@ class Amslib_Plugin_Config_XML
 		self::addLoadSelector("package font",				"configFont");
 		self::addLoadSelector("package translator",			"configTranslator");
 		self::addLoadSelector("package value",				"configValue");
-		self::addLoadSelector("package path",				"configPath");
 		self::addLoadSelector("package",					"configCustom");
 	}
 
