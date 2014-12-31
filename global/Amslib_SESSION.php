@@ -48,4 +48,25 @@ class Amslib_SESSION extends Amslib_GLOBAL
 	{
 		return self::deleteIndex($_SESSION,$key);
 	}
+
+	static public function start()
+	{
+		@session_start();
+	}
+
+	static public function stop()
+	{
+		@session_write_close();
+	}
+
+	static public function destroy()
+	{
+		@session_destroy();
+	}
+
+	static public function reset()
+	{
+		self::start();
+		self::destroy();
+	}
 }
