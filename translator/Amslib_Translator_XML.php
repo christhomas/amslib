@@ -102,7 +102,7 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 		$v = parent::translateExtended($n,$i,$l);
 
 		if($v == $n){
-			$text = trim($this->qp->find("database translation[key='$n']")->text());
+			$text = trim($this->qp->find("database translation[key='$n']")->innerHTML());
 
 			if(strlen($text)){
 				parent::learnExtended($n,$i,$text,$l);
