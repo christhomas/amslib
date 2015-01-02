@@ -150,9 +150,9 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function addFont($id,$font)
+	static public function addFont($id,$font,$conditional=NULL,$position=NULL)
 	{
-		self::addStylesheet($id,"http://fonts.googleapis.com/css?$font");
+		self::addStylesheet($id,"http://fonts.googleapis.com/css?$font",$conditional,NULL,$position);
 	}
 
 	/**

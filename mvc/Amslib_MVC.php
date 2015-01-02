@@ -713,12 +713,17 @@ class Amslib_MVC extends Amslib_Mixin
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setFont($type,$id,$file,$autoload)
+	public function setFont($type,$id,$file,$autoload,$conditional=NULL,$position=NULL)
 	{
 		//	FIXME: implement the $type field somehow, but atm we only support google webfont
 		if(!is_string($id) && $file) return;
 
-		$this->font[$id] = array("file"=>$file);
+		$this->font[$id] = array(
+			"file"			=>	$file,
+			"conditional"	=>	$conditional,
+			"autoload"		=>	$autoload,
+			"position"		=>	$position
+		);
 
 		if($autoload) $this->addFont($id);
 	}
@@ -732,7 +737,9 @@ class Amslib_MVC extends Amslib_Mixin
 	{
 		if(!isset($this->font[$id])) return;
 
-		Amslib_Resource::addFont($id,$this->font[$id]["file"]);
+		$f = $this->font[$id];
+
+		Amslib_Resource::addFont($id,$f["file"],$f["conditional"],$f["position"]);
 	}
 
 	/**

@@ -199,10 +199,6 @@ class Amslib_Plugin
 						$params = array($k,$v["file"]);
 					}break;
 
-					case "font":{
-						$params = array($v["type"],$k,$v["value"],$v["autoload"]);
-					}break;
-
 					case "value":{
 						$params = array($v["name"],$v["value"]);
 					}break;
@@ -230,6 +226,16 @@ class Amslib_Plugin
 
 					case "image":{
 						$params = array($k,$v);
+					}break;
+
+					case "font":{
+						$type		=	isset($v["type"])		? $v["type"]		: NULL;
+						$value		=	isset($v["value"])		? $v["value"]		: NULL;
+						$condition	=	isset($v["condition"])	? $v["condition"]	: NULL;
+						$autoload	=	isset($v["autoload"])	? $v["autoload"]	: NULL;
+						$position	=	isset($v["position"])	? $v["position"]	: NULL;
+
+						$params = array($type,$k,$value,$autoload,$condition,$position);
 					}break;
 
 					case "stylesheet":{
@@ -715,7 +721,6 @@ class Amslib_Plugin
 			$a			=	$font["attr"];
 			$a["value"]	=	trim($font["value"]);
 			$a["type"]	=	$font["tag"];
-			if(!isset($a["autoload"])) $a["autoload"] = NULL;
 
 			//	If there is no valid "id" element, skip this item
 			if(!isset($a["id"])){
