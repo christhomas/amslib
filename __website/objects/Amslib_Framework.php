@@ -1,6 +1,34 @@
 <?php
 class Amslib_Framework extends Amslib_MVC
 {
+	protected function getSiteTitle()
+	{
+		$title = false;
+
+		if(!$title)	$title = $this->getRouteParam("site_title",false);
+		if(!$title)	$title = $this->getValue("site_title",false);
+		if(!$title)	$title = "Welcome to the website";
+
+		return $title;
+	}
+
+	protected function getErrorData()
+	{
+		$base = isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "";
+
+		$data = "";
+		if(!strlen($data) && isset($_GET["data"])){
+			$data = $_GET["data"];
+		}
+
+		if(!strlen($data) && isset($_SERVER["QUERY_STRING"])){
+			$part = explode("data=",$_SERVER["QUERY_STRING"]);
+			$data = end($part);
+		}
+
+		return json_decode(base64_decode($data),true);
+	}
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -40,32 +68,27 @@ class Amslib_Framework extends Amslib_MVC
 		$params["body"]		=	strtolower($params["resource"]);
 		$params["route"]	=	Amslib_Router::getName();
 
-		$params["site_title"] = false;
-		if(!$params["site_title"]){
-			$params["site_title"] = $this->getRouteParam("site_title",false);
+		$params["site_title"] = $this->getSiteTitle();
+
+		if(strpos($params["route"],"error") !== false){
+			$params["data"] = $this->getErrorData();
+		}else{
+			$params["url_home"] = $this->getURL("home");
+
+			$params["meta_description"]	=	$this->getValue("meta_description");
+			$params["meta_author"]		=	$this->getValue("meta_author");
+
+			$params["logo"] = $this->getFile("/resources/logo.png");
+
+			$params["url_about"]			=	$this->getURL("about-framework");
+			$params["url_gettingstarted"]	=	$this->getURL("getting-started");
+			$params["url_examples"]			=	$this->getURL("examples");
+			$params["url_plugins"]			=	$this->getURL("plugins");
+			$params["url_webservices"]		=	$this->getURL("webservices");
+			$params["url_api"]				=	$this->getURL("api");
+			$params["url_documentation"]	=	$this->getURL("documentation");
+			$params["url_testframework"]	=	$this->getURL("test-framework");
 		}
-		if(!$params["site_title"]){
-			$params["site_title"] = $this->getValue("site_title",false);
-		}
-		if(!$params["site_title"]){
-			$params["site_title"] = "Welcome to the website";
-		}
-
-		$params["url_home"] = $this->getURL("home");
-
-		$params["meta_description"]	=	$this->getValue("meta_description");
-		$params["meta_author"]		=	$this->getValue("meta_author");
-
-		$params["logo"] = $this->getFile("/resources/logo.png");
-
-		$params["url_about"]			=	$this->getURL("about-framework");
-		$params["url_gettingstarted"]	=	$this->getURL("getting-started");
-		$params["url_examples"]			=	$this->getURL("examples");
-		$params["url_plugins"]			=	$this->getURL("plugins");
-		$params["url_webservices"]		=	$this->getURL("webservices");
-		$params["url_api"]				=	$this->getURL("api");
-		$params["url_documentation"]	=	$this->getURL("documentation");
-		$params["url_testframework"]	=	$this->getURL("test-framework");
 
 		$params["content"] = $this->renderView($params["resource"],$params);
 

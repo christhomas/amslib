@@ -1,5 +1,10 @@
 @CHARSET "UTF-8";
 
+body{
+	background-color: inherit;
+	color: inherit;
+}
+
 .center {
 	text-align: center;
 	margin-left: auto;
