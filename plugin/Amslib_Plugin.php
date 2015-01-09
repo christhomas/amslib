@@ -827,7 +827,6 @@ class Amslib_Plugin
 	public function configPlugin($name,$array,$object)
 	{
 		if($this->getName() == $array["value"]){
-			Amslib_Debug::log("CONFIGURING ITSELF: {$this->getName()} / {$array["value"]}","stack_trace");
 			return;
 		}
 
@@ -932,7 +931,7 @@ class Amslib_Plugin
 			$callback[$data["type"]]
 		);
 
-		Amslib_Debug::log(__METHOD__,$method,$data);
+		//Amslib_Debug::log(__METHOD__,$method,$data);
 
 		call_user_func($method,$data["selector"],$data["callback"]);
 	}
