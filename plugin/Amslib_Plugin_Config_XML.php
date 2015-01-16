@@ -23,6 +23,9 @@ class Amslib_Plugin_Config_XML
 		//	With XML, we want to anchor each selector to the package tag, sometimes you can nest
 		//	nodes and have nodes which look like they should be part of the amslib package xml
 		//	scheme, but are some custom nodes with the same names.  This replacement stops that problem.
+		//	NOTE:	what would happen if I already included > in my selector like "package > something"
+		//			this would break then? resulting in something like "package > >" ?
+		//	NOTE:	this doesn't look very robust, I think it might be easy to break
 		if(strpos($selector,"package") === 0){
 			$selector = str_replace("package ","package > ",$selector);
 		}
@@ -74,15 +77,16 @@ class Amslib_Plugin_Config_XML
 		//	So you need to do this first, before processing all the child plugins which can override them
 		self::addScanSelector("package path",				"configPath");
 		self::addScanSelector("package router",				"configRouter");
+
+		self::addScanSelector("package object",				"setComponentConfig");
+		self::addScanSelector("package controller",			"setComponentConfig");
+		self::addScanSelector("package model",				"setComponentConfig");
+		self::addScanSelector("package view",				"setComponentConfig");
+
 		//	Create the API object first, then load the selector extensions and then all the child plugins to build the tree
 		self::addScanSelector("package object api",			"configAPI");
 		self::addScanSelector("package requires extension",	"configExtension");
 		self::addScanSelector("package requires plugin",	"configPlugin");
-
-		self::addLoadSelector("package object",				"setComponentConfig");
-		self::addLoadSelector("package controller",			"setComponentConfig");
-		self::addLoadSelector("package model",				"setComponentConfig");
-		self::addLoadSelector("package view",				"setComponentConfig");
 
 		//	Now add all the load selectors, now that the tree scanning has completed
 		self::addLoadSelector("package object name",		"configObject");
