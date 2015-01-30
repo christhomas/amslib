@@ -1039,13 +1039,32 @@ class Amslib_MVC extends Amslib_Mixin
 		return Amslib_Router_URL::externalURL($url);
 	}
 
+	public function redirectToRoute($name,$group=NULL)
+	{
+		Amslib_Website::redirect($this->getURL($name,$group));
+	}
+
+	public function redirectToService($name,$group=NULL)
+	{
+		Amslib_Website::redirect($this->getServiceURL($name,$group));
+	}
+
+	public function redirectToURL($url)
+	{
+		Amslib_Website::redirect($url);
+	}
+
 	public function redirectTo($name,$group=NULL,$is_service=false,$url=NULL)
 	{
-		if(!$url){
-			$url = $is_service ? $this->getServiceURL($name,$group) : $this->getURL($name,$group);
+		if($is_service){
+			$this->redirectToService($name,$group);
 		}
 
-		Amslib_Website::redirect($url);
+		if(!$url){
+			$this->redirectToRoute($name,$group);
+		}
+
+		$this->redirectToURL($url);
 	}
 
 	/**
