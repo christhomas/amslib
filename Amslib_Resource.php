@@ -64,7 +64,7 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getStylesheet($position="common")
+	static public function getStylesheet($position="__common")
 	{
 		if(isset(self::$stylesheet[$position])){
 			return implode("\n",self::$stylesheet[$position]);
@@ -80,7 +80,7 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function removeStylesheet($id,$position="common")
+	static public function removeStylesheet($id,$position="__common")
 	{
 		if(!isset(self::$stylesheet[$position])){
 			Amslib_Debug::log(__METHOD__,"position requested to remove stylesheet from is not exist");
@@ -118,7 +118,7 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getJavascript($position="common")
+	static public function getJavascript($position="__common")
 	{
 		if(isset(self::$javascript[$position])){
 			return implode("\n",self::$javascript[$position]);
@@ -134,7 +134,7 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function removeJavascript($id,$position="common")
+	static public function removeJavascript($id,$position="__common")
 	{
 		if(!isset(self::$javascript[$position])){
 			Amslib_Debug::log(__METHOD__,"position requested to remove javascript from is not valid");
