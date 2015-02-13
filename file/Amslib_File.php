@@ -277,7 +277,7 @@ class Amslib_File
 		foreach($includePath as $path){
 			$test = (strpos($filename,"/") !== 0) ? "$path/$filename" : "{$path}{$filename}";
 			if(@file_exists($test)){
-				return ($includeFilename) ? $test : $path;
+				return realpath($includeFilename ? $test : $path);
 			}
 		}
 
