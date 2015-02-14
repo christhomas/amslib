@@ -41,9 +41,8 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function addStylesheet($id,$file,$conditional=NULL,$media=NULL,$position=NULL)
+	static public function addStylesheet($id,$file,$conditional=NULL,$media=NULL,$position="__common")
 	{
-		if(!$position) $position = "common";
 		if(!isset(self::$stylesheet[$position])) self::$stylesheet[$position] = array();
 		$p = &self::$stylesheet[$position];
 
@@ -96,9 +95,8 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function addJavascript($id,$file,$conditional=NULL,$position=NULL)
+	static public function addJavascript($id,$file,$conditional=NULL,$position="__common")
 	{
-		if(!$position) $position = "common";
 		if(!isset(self::$javascript[$position])) self::$javascript[$position] = array();
 		$p = &self::$javascript[$position];
 
@@ -150,7 +148,7 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function addFont($id,$font,$conditional=NULL,$position=NULL)
+	static public function addFont($id,$font,$conditional=NULL,$position="__common")
 	{
 		self::addStylesheet($id,"http://fonts.googleapis.com/css?$font",$conditional,NULL,$position);
 	}
