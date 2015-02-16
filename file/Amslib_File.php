@@ -164,8 +164,19 @@ class Amslib_File
 	static public function absolute($path)
 	{
 		if(strpos($path,"http://") === 0) return $path;
-
-		$root	=	self::documentRoot();
+                $rootOverride=NULL;
+                /****
+                 *  Alfonso: It may be ugly but it does the trick
+                 *  I added the $_SERVER['REMOTE_ADDR']=='127.0.0.1' condition because I don't know if running
+                 *  this on a windows remote server will work since I never used a windows remote server and thus
+                 *  I don't know the structure.
+                 *  You should know better than me. Now at least windows users get the correct path and can 
+                 *  locally work on projects using the framework.
+                 ****/
+                if(strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && $_SERVER['REMOTE_ADDR']=='127.0.0.1'){
+                    $rootOverride = "C:";
+                }
+		$root	=	self::documentRoot($rootOverride);
 		$path	=	self::removeWindowsDrive($path);
 		$rel	=	Amslib_String::lchop($path,$root);
 
