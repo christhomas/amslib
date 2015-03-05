@@ -35,7 +35,15 @@ class Amslib_Resource
 {
 	static protected $stylesheet = array();
 	static protected $javascript = array();
+	static protected $default_position = "__common";
 
+	static protected function validatePosition($position=NULL)
+	{
+		return is_string($position) && strlen($position) 
+			? $position 
+			: self::$default_position;
+	}
+	
 	/**
 	 * 	method:	addStylesheet
 	 *
@@ -43,7 +51,8 @@ class Amslib_Resource
 	 */
 	static public function addStylesheet($id,$file,$conditional=NULL,$media=NULL,$position=NULL)
 	{
-		if(!$position) $position = "common";
+		$position = self::validatePosition($position);
+
 		if(!isset(self::$stylesheet[$position])) self::$stylesheet[$position] = array();
 		$p = &self::$stylesheet[$position];
 
@@ -64,13 +73,15 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getStylesheet($position="__common")
+	static public function getStylesheet($position=NULL)
 	{
+		$position = self::validatePosition($position);
+
 		if(isset(self::$stylesheet[$position])){
 			return implode("\n",self::$stylesheet[$position]);
 		}
 
-		Amslib_Debug::log(__METHOD__,"the requested position to obtain the stylesheets from was not valid");
+		Amslib_Debug::log(__METHOD__,"the requested position to obtain the stylesheets from was not valid",$position,array_keys(self::$stylesheet));
 
 		return "";
 	}
@@ -80,8 +91,10 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function removeStylesheet($id,$position="__common")
+	static public function removeStylesheet($id,$position=NULL)
 	{
+		$position = self::validatePosition($position);
+
 		if(!isset(self::$stylesheet[$position])){
 			Amslib_Debug::log(__METHOD__,"position requested to remove stylesheet from is not exist");
 		}else if(!isset(self::$stylesheet[$position][$id])){
@@ -98,7 +111,8 @@ class Amslib_Resource
 	 */
 	static public function addJavascript($id,$file,$conditional=NULL,$position=NULL)
 	{
-		if(!$position) $position = "common";
+		$position = self::validatePosition($position);
+
 		if(!isset(self::$javascript[$position])) self::$javascript[$position] = array();
 		$p = &self::$javascript[$position];
 
@@ -118,8 +132,10 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getJavascript($position="__common")
+	static public function getJavascript($position=NULL)
 	{
+		$position = self::validatePosition($position);
+
 		if(isset(self::$javascript[$position])){
 			return implode("\n",self::$javascript[$position]);
 		}
@@ -134,8 +150,10 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function removeJavascript($id,$position="__common")
+	static public function removeJavascript($id,$position=NULL)
 	{
+		$position = self::validatePosition($position);
+
 		if(!isset(self::$javascript[$position])){
 			Amslib_Debug::log(__METHOD__,"position requested to remove javascript from is not valid");
 		}else if(!isset(self::$javascript[$position][$id])){
@@ -150,8 +168,10 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function addFont($id,$font,$conditional=NULL,$position=NULL)
+	static public function addFont($id,$font,$conditional=NULL,$position)
 	{
+		$position = self::validatePosition($position);
+
 		self::addStylesheet($id,"http://fonts.googleapis.com/css?$font",$conditional,NULL,$position);
 	}
 
@@ -160,9 +180,9 @@ class Amslib_Resource
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function removeFont($id)
+	static public function removeFont($id,$position=NULL)
 	{
-		self::removeStylesheet($id);
+		self::removeStylesheet($id,$position);
 	}
 
 	//	DEPRECATED GOOGLE FONT METHODS

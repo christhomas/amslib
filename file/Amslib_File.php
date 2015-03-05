@@ -165,7 +165,9 @@ class Amslib_File
 	{
 		if(strpos($path,"http://") === 0) return $path;
 
-		$root	=	self::documentRoot();
+		$rootOverride=NULL;
+
+		$root	=	self::documentRoot($rootOverride);
 		$path	=	self::removeWindowsDrive($path);
 		$rel	=	Amslib_String::lchop($path,$root);
 
