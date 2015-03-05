@@ -26,7 +26,7 @@
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="<?=$url_home?>">Antimatter Studios</a>
+                <a class="navbar-brand" href="<?=$url_home?>">Antimatter Studios / Amslib Framework</a>
             </div>
         </div>
     </nav>
