@@ -164,7 +164,8 @@ class Amslib_File
 	static public function absolute($path)
 	{
 		if(strpos($path,"http://") === 0) return $path;
-                $rootOverride=NULL;
+
+		$rootOverride=NULL;
 
 		$root	=	self::documentRoot($rootOverride);
 		$path	=	self::removeWindowsDrive($path);

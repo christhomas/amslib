@@ -124,8 +124,14 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		$this->table	=	array();
 		$this->errors	=	array();
 
+		//	This test is to detect whether you are accidentally going
+		//	to try to auto-connect a database object which has no database
+		//	settings, causing the database system to kill the code because
+		//	it will not continue without database credentials
+		$is_derived_class = strpos(get_class($this),__CLASS__) === false;
+
 		//	TODO: we should implement a try/catch block to easily catch disconnected databases
-		if($connect){
+		if($connect && $is_derived_class){
 			$this->connect();
 		}
 	}
@@ -422,6 +428,14 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 			$s = $v->execute();
 			$d = $v->getValid();
+			$e = $v->getErrors();
+
+			if(!$s){
+				if(isset($e["password"])){
+					$e["password"]["value"] = "*CENSORED*";
+				}
+				Amslib_Debug::log(__METHOD__,"database details were invalid",$e);
+			}
 		}
 
 		$this->connectionDetails = $s ? $d : false;
@@ -452,9 +466,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			return array($this->connectionDetails,$password);
 		}
 
-		die("(".basename(__FILE__)." / FATAL ERROR): ".
-				"getConnectionDetails was not defined in your database object, ".
-				"so connection attempt will fail");
+		die(__METHOD__.", FATAL ERROR: there were no connection details".Amslib_Debug::vdump($this->connectionDetails));
 	}
 
 	public static function sharedConnection($object=NULL)
@@ -668,8 +680,6 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function connect($details=false)
 	{
-		Amslib_Debug::log("stack_trace");
-
 		list($details,$password) = Amslib_Array::valid($this->setConnectionDetails($details)) + array(NULL,NULL);
 
 		$this->disconnect();
