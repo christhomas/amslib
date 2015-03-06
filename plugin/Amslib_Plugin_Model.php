@@ -80,8 +80,6 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 			);
 
 			return false;
-		}else{
-			Amslib_Debug::log(__METHOD__,$s1,$s2);
 		}
 
 		return true;
