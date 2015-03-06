@@ -73,10 +73,15 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 		$s2 = $this->isInitialised();
 
 		if(!$s1 && !$s2){
-			Amslib_Debug::log(__METHOD__,"NOTE: Database was not connected, model was not initialised properly");
-			Amslib_Debug::log(__METHOD__,"NOTE: have you called the parent::initialiseObject(\$api) method?");
+			Amslib_Debug::log(
+				__METHOD__,
+				"NOTE: Database was not connected, model was not initialised properly, ".
+				"have you called the parent::initialiseObject(\$api) method?"
+			);
 
 			return false;
+		}else{
+			Amslib_Debug::log(__METHOD__,$s1,$s2);
 		}
 
 		return true;
