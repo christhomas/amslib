@@ -1042,7 +1042,7 @@ class Amslib_Plugin
 				//	This could be that the actual data source is missing?
 				//	TODO: This needs to be better than "OMG WE ARE ALL GONNA DIE!!!"
 				$filename = $config->getValue("filename");
-				print("[".get_class($this)."/".$this->getName()."]::load(): PACKAGES FAILED TO OPEN: file[$filename]<br/>");
+				print("[".get_class($this)."/".$this->getName()."]::load(): PACKAGE FAILED TO OPEN: file[$filename]<br/>");
 			}
 		}else{
 			//	There is no valid configuration object created or requested
