@@ -148,17 +148,10 @@ class Amslib_Plugin_Config_XML
 			//	But of course this stops us from using those keys as XML Nodes in the code
 			//	This isn't really a problem, since I can't see them overlapping right now
 
-			case "filename":{
-				if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-				    return Amslib_File::reduceSlashes(
-						Amslib_File::absolute("{$this->location}/{$this->packageName}")
-					);
-				} else {
-				    return Amslib_File::reduceSlashes(
-						"{$this->location}".Amslib_File::absolute("{$this->location}/{$this->packageName}")
-					);
-				}				
-											
+			case "filename":{				
+				return Amslib_File::reduceSlashes(
+					Amslib_File::absolute("{$this->location}/{$this->packageName}")
+				);
 			}break;
 		}
 
