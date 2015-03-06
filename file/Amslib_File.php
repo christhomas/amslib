@@ -171,9 +171,7 @@ class Amslib_File
 		$path	=	self::removeWindowsDrive($path);
 		$rel	=	Amslib_String::lchop($path,$root);
 
-		//return self::reduceSlashes("$root/$rel");
-		//	TRYING OUT A FIX FROM j.c.h.b
-		return self::reduceSlashes("$rel");
+		return self::reduceSlashes("$root/$rel");
 	}
 
 	/**
