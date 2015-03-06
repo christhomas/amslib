@@ -92,7 +92,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 				//	Now inform all the plugins the application has loaded
 				$callback = array($api,"finaliseApplication");
-				if(method_exists($callback)){
+				if(method_exists($callback[0],$callback[1])){
 					call_user_func($callback);
 				}
 			}else{
