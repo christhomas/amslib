@@ -92,8 +92,8 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 				//	Now inform all the plugins the application has loaded
 				$callback = array($api,"finaliseApplication");
-				if(is_callable($callable)){
-					call_user_func($callable);
+				if(is_callable($callback)){
+					call_user_func($callback);
 				}
 			}else{
 				Amslib_Debug::log("plugin list",Amslib_Plugin_Manager::listPlugin());
@@ -209,8 +209,6 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		$this->setName($name);
 		$this->setLocation($location);
 		$this->setConfigSource($config);
-
-		$this->
 	}
 
 	public function initialise()
