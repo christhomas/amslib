@@ -89,6 +89,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 					$object->setLanguage(Amslib_Plugin_Application::getLanguage($name));
 					$object->load();
 				}
+
+				//	Now inform all the plugins the application has loaded
+				$callback = array($api,"finaliseApplication");
+				if(is_callable($callback)){
+					call_user_func($callback);
+				}
 			}else{
 				Amslib_Debug::log("plugin list",Amslib_Plugin_Manager::listPlugin());
 				Amslib_Debug::log("plugin for translator not found?",$plugin);
