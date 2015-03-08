@@ -149,9 +149,7 @@ class Amslib_Plugin_Config_XML
 			//	This isn't really a problem, since I can't see them overlapping right now
 
 			case "filename":{
-			    return Amslib_File::reduceSlashes(
-					Amslib_File::absolute("{$this->location}/{$this->packageName}")
-				);
+			    return Amslib_File::absolute($this->location."/".$this->packageName);
 			}break;
 		}
 

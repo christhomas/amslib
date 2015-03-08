@@ -196,9 +196,11 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		//	NOTE: I'm not sure whether this method is actually useful anymore, I think it's out of date maybe
 		Amslib_Website::set();
 
+		$base = Amslib_Router::getBase();
+
 		Amslib_Website::setPath("amslib",		Amslib::locate());
-		Amslib_Website::setPath("website",		Amslib_Router::getBase());
-		Amslib_Website::setPath("website_ext",	Amslib_Router_URL::externalURL(Amslib_Router::getBase()));
+		Amslib_Website::setPath("website",		$base);
+		Amslib_Website::setPath("website_ext",	Amslib_Router_URL::externalURL($base));
 		Amslib_Website::setPath("admin",		"__ADMIN__");
 		Amslib_Website::setPath("plugin",		"__PLUGIN__");
 		Amslib_Website::setPath("docroot",		Amslib_File::documentRoot());

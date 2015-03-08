@@ -67,8 +67,8 @@
 	</stylesheet>
 	
 	<javascript>
-		<file id="jquery/1.x" autoload="true">/jquery/jquery-1.10.2.min.js</file>
-		<file id="jquery/2.x">/jquery/jquery-2.0.3.min.js</file>
+		<file id="jquery/1.x" autoload="true">__AMSLIB__/util/jquery-1.10.2.min.js</file>
+		<file id="jquery/2.x">__AMSLIB__/util/jquery-2.0.3.min.js</file>
 	
 		<!-- NOTE:	amslib should not include bootstrap like this, it's ok for 
 					jquery because Amslib.js depends on it but these files are 
@@ -76,7 +76,7 @@
 					I have to remove these eventually and probably they will 
 					move into the __website where they are actually required
 		-->
-		<file id="bootstrap-3.0.2" require="jquery/1.x">__AMSLIB__/util/bootstrap-3.0.2/js/bootstrap.min.js</file>
+		<file id="bootstrap-3.0.2" require="jquery/1.x">__AMSLIB__/util/bootstrap/3.0.2/js/bootstrap.min.js</file>
 		<!-- NOTE:	I am not sure about putting such an exact version number
 					into the id like this, perhaps I should just put "bootstrap3"
 					or even, just "bootstrap" or even "bootstrap/3.x", to follow

@@ -1027,22 +1027,11 @@ class Amslib_Plugin
 			if($config->getStatus()){
 				$this->source = $config;
 			}else{
-				/**
-				 *	Alfonso:	In a windows environment and Wamp:
-				 *
-				 * 				Amslib_Plugin_Application/]::load(): PACKAGE FAILED TO OPEN:
-				 * 				file[C:\wamp\www/wamp/www/amslib_directory/package.xml]
-				 *
-				 * 				instead of the correct root C:/wamp/www/amslib_directory/package.xml
-				 * 				I suppose you expect that taking into account your warning message.
-				 *	====================
-				 *	Chris:		nope, I wasn't, hmm, what do you think is the correct solution? propose it
-				 */
 				//	The configuration source was setup, however it failed to return that it was ok
 				//	This could be that the actual data source is missing?
 				//	TODO: This needs to be better than "OMG WE ARE ALL GONNA DIE!!!"
 				$filename = $config->getValue("filename");
-				print("[".get_class($this)."/".$this->getName()."]::load(): PACKAGE FAILED TO OPEN: file[$filename]<br/>");
+				print(__METHOD__.": PACKAGE FAILED TO OPEN: plugin[".$this->getName()."], file[$filename]<br/>");
 			}
 		}else{
 			//	There is no valid configuration object created or requested
@@ -1170,11 +1159,17 @@ class Amslib_Plugin
 	 */
 	public function setLocation($location)
 	{
-		$this->location = $location;
+		$this->location = Amslib_File::absolute($location);
+
+		//	NOTE:	(08/03/2015) I don't think the below setPaths will work the way expected
+		//			as each plugin will keep resetting them with whatever location they are
+		//			given, hence there is no "plugin" location, it could diff and current plugin
+		//			will obviously change depending on the plugin being loaded, so this is 
+		//			way off for a start.
 
 		//	NOTE:	(05/05/2014) why the duplicated name....or more or less
 		//			duplicated, obviously I have old code to fix
-		Amslib_Website::setPath("plugin",$location);
+		Amslib_Website::setPath("plugin",$this->location);
 		Amslib_Website::setPath("current_plugin",$this->location);
 	}
 

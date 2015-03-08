@@ -63,7 +63,7 @@ class Amslib_Website
 	//	NOTE:	this function basically hides the details of where the
 	//			real filename is, but I think it's the wrong place to
 	//			put this functionality
-	static public function move($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
+	static public function moveFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		$s = $src_filename;
 		$d = self::abs($directory);
@@ -141,11 +141,11 @@ class Amslib_Website
 
 	//	Return a relative url for the file to the document root
 	/**
-	 * 	method:	rel
+	 * 	method:	relative
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function rel($url="",$resolve=false)
+	static public function relative($url="",$resolve=false)
 	{
 		if(!is_string($url)){
 			Amslib_Debug::log("stack_trace",$url);
@@ -153,18 +153,16 @@ class Amslib_Website
 			return false;
 		}
 
+		//	When the string has this protocol marker, the url part is already relative to the document root
 		if(strpos($url,"://") !== false){
-			$l = list($protocol,$domain,$url) = self::parseURL($url);
+			list($protocol,$domain,$url) = self::parseURL($url);
 
-			//	Because we have a url with a protocol, it must mean the url parsed is already relative
 			return $url;
 		}
 
 		$url = Amslib_File::relative(self::$location.$url);
 
-		if($resolve) $url = Amslib_File::resolvePath($url);
-
-		return $url;
+		return $resolve ? Amslib_File::resolvePath($url) : $url;
 	}
 
 	/**
@@ -173,9 +171,22 @@ class Amslib_Website
 	 *	Return an absolute url for the file to the root directory
 	 *	FIXME: if you pass an absolute filename into this method, it won't return the correct filename back
 	 */
-	static public function abs($url="")
+	static public function absolute($url="",$resolve=false)
 	{
-		return Amslib_File::absolute(self::$location.$url);
+		if(!is_string($url)){
+			Amslib_Debug::log("stack_trace",$url);
+
+			return false;
+		}
+
+		//	When we have a string with this protocol token, it's already an absolute url
+		if(strpos($url,"://") !== false){
+			return $url;
+		}
+
+		$url = Amslib_File::absolute(self::$location.$url);
+
+		return $resolve ? Amslib_File::resolvePath($url) : $url;
 	}
 
 	/**
@@ -244,7 +255,7 @@ class Amslib_Website
 
 		if($postfix) $string = $postfix;
 
-		return ($postfix ? "{$prefix}{$token}" : "").Amslib_File::reduceSlashes($string);
+		return ($postfix ? $prefix.$token : "").Amslib_File::reduceSlashes($string);
 	}
 
 	/**
@@ -307,10 +318,29 @@ class Amslib_Website
 		return $json;
 	}
 
-	//	DEPRECATED METHOD, use move() instead
+	protected function __DEPRECATED_METHODS_BELOW(){}
+
 	static public function saveUploadedFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL){
 		Amslib_Debug::log("DEPRECATED METHOD","stack_trace");
 
-		self::move($src_filename,$directory,$dst_filename,$fullpath);
+		return self::moveFile($src_filename,$directory,$dst_filename,$fullpath);
+	}
+
+	static public function move($src_filename,$directory,&$dst_filename,&$fullpath=NULL){
+		Amslib_Debug::log("DEPRECATED METHOD","stack_trace");
+
+		return self::moveFile($src_filename,$directory,$dst_filename,$fullpath);
+	}
+
+	static public function rel($url="",$resolve=false){
+		Amslib_Debug::log("DEPRECATED METHOD","stack_trace");
+
+		return self::relative($url,$resolve);
+	}
+
+	static public function abs($url="",$resolve=false){
+		Amslib_Debug::log("DEPRECATED METHOD","stack_trace");
+
+		return self::absolute($url,$resolve);
 	}
 }

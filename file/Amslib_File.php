@@ -40,6 +40,11 @@ class Amslib_File
 {
 	static protected $docroot = false;
 
+	static public function swapSeparator($string,$from="\\",$to="/")
+	{
+		return str_replace($from,$to,$string);
+	}
+
 	/**
 	 * 	method:	documentRoot
 	 *
@@ -48,39 +53,33 @@ class Amslib_File
 	 * 					linux hosts and falls to pieces on anything "weird"
 	 */
 	static public function documentRoot($docroot=NULL)
-	{
-		//	Manually override the document root
-		if($docroot && is_dir($docroot)) self::$docroot = $docroot;
-		//	If the document root was already calculated, return it's cached value
-		if(self::$docroot) return self::$docroot;
-
-		$dr = self::removeWindowsDrive($_SERVER["DOCUMENT_ROOT"]);
-
-		//	If the document root index exists, ues it to calculate the docroot
-		if(isset($dr))
-		{
-			//	FIXME: If the docroot and dirname(__FILE__) have a different base path, this code will break
-			/*	NOTE:	this situation happened with dinahosting, although without an example of
-						how to get around it, I dont think I can do it now, but this code is causing
-						problems, so I am going to delete it, it will always be in the GIT repo if I
-						want to look at it again and I will just return to doing everything the normal
-						way until the point in time where I need to do this again */
-
-			$docroot	=	self::reduceSlashes($dr);
+	{//die(__METHOD__.Amslib_Debug::vdump($_SERVER));
+		if(!$docroot && isset($_SERVER["CONTEXT_DOCUMENT_ROOT"])){
+			$docroot = $_SERVER["CONTEXT_DOCUMENT_ROOT"];
+			
+			if(isset($_SERVER["CONTEXT_PREFIX"])){
+				$docroot = Amslib_String::rchop($docroot,$_SERVER["CONTEXT_PREFIX"]);
+			}
+		}else if(is_string($docroot) && strlen($docroot)){
+			$docroot = Amslib_String::reduceSlashes($docroot);	
 		}else{
-			//	on IIS, there is no parameter DOCUMENT_ROOT, have to construct it yourself.
-
-			//	Switch the document separators to match windows dumbass separators
-			$phpself	=	str_replace("/","\\",$_SERVER["PHP_SELF"]);
-			//	delete from script filename, the php self, which should reveal the base directory
-			$root		=	str_replace($phpself,"",$_SERVER["SCRIPT_FILENAME"]);
-
-			$docroot	=	self::removeWindowsDrive($root);
+			Amslib_Debug::log(__METHOD__,"Not sure how to obtain the docroot on this platform");
+			// NOTE: ADD DEBUGGING CODE HERE AND UPDATE WHEN YOU FIND A SCENARIO WHICH WORKS
+			return false;
 		}
+ 
+ 		self::$docroot = $docroot;
+ 		self::$docroot = realpath(self::$docroot);
+ 		self::$docroot = self::win2unix(self::$docroot);
 
-		self::$docroot = realpath($docroot);
+		return self::$docroot;	
+	}
 
-		return self::$docroot;
+	static public function win2unix($path)
+	{
+		return self::removeWindowsDrive(
+			self::swapSeparator($path)
+		);
 	}
 
 	/**
@@ -90,13 +89,13 @@ class Amslib_File
 	 */
 	static public function removeWindowsDrive($location)
 	{
-		if(strpos($location,":") !== false && isset($_SERVER["WINDIR"])){
-			$location = array_slice(explode(":",str_replace("\\","/",$location)),1);
+		//	If we detect this token, it's a protocol marker which is not safe to modify
+		if(strpos($location,"://") !== false) return $location;
 
-			return implode("/",$location);
-		}
+		$location = explode(":",$location);
 
-		return $location;
+		//	if there are two parts, return the last, otherwise return the first
+		return count($location) > 1 ? end($location) : current($location);
 	}
 
 	/**
@@ -163,15 +162,19 @@ class Amslib_File
 	 */
 	static public function absolute($path)
 	{
-		if(strpos($path,"http://") === 0) return $path;
+		if(strpos($path,"://") !== false) return $path;
 
-		$rootOverride=NULL;
-
-		$root	=	self::documentRoot($rootOverride);
-		$path	=	self::removeWindowsDrive($path);
+		$root	=	self::documentRoot();
+		$path 	=	self::win2unix($path);
 		$rel	=	Amslib_String::lchop($path,$root);
 
-		return self::reduceSlashes("$root/$rel");
+		$final = self::reduceSlashes("$root/$rel");
+
+		if(!is_dir($final) && !file_exists($final)){
+			//ssprint(__METHOD__.Amslib_Debug::vdump($path,$root,$rel,$final));
+		}
+
+		return $final;
 	}
 
 	/**
@@ -184,6 +187,7 @@ class Amslib_File
 		if(strpos($path,"http://") === 0) return $path;
 
 		$root	=	self::documentRoot();
+		$path 	=	self::win2unix($path);
 		$rel	=	Amslib_String::lchop($path,$root);
 
 		return self::reduceSlashes("/$rel");
