@@ -71,6 +71,8 @@ class Amslib_File
 			return false;
 		}
 
+		die(__METHOD__.Amslib_Debug::vdump(array("docroot"=>$docroot,"server"=>$_SERVER)));
+
  		self::$docroot = $docroot;
  		self::$docroot = realpath(self::$docroot);
  		self::$docroot = self::win2unix(self::$docroot);
