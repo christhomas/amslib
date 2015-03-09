@@ -53,26 +53,27 @@ class Amslib_File
 	 * 					linux hosts and falls to pieces on anything "weird"
 	 */
 	static public function documentRoot($docroot=NULL)
-	{//die(__METHOD__.Amslib_Debug::vdump($_SERVER));
+	{
 		if(!$docroot && isset($_SERVER["CONTEXT_DOCUMENT_ROOT"])){
 			$docroot = $_SERVER["CONTEXT_DOCUMENT_ROOT"];
-			
+
 			if(isset($_SERVER["CONTEXT_PREFIX"])){
 				$docroot = Amslib_String::rchop($docroot,$_SERVER["CONTEXT_PREFIX"]);
 			}
 		}else if(is_string($docroot) && strlen($docroot)){
-			$docroot = Amslib_String::reduceSlashes($docroot);	
+			$docroot = Amslib_String::reduceSlashes($docroot);
 		}else{
-			Amslib_Debug::log(__METHOD__,"Not sure how to obtain the docroot on this platform");
+			Amslib_Debug::log(__METHOD__,"Not sure how to obtain the docroot on this platform",$docroot,$_SERVER);
 			// NOTE: ADD DEBUGGING CODE HERE AND UPDATE WHEN YOU FIND A SCENARIO WHICH WORKS
+			//die(__METHOD__.Amslib_Debug::vdump(array("docroot"=>$docroot,"server"=>$_SERVER)));
 			return false;
 		}
- 
+
  		self::$docroot = $docroot;
  		self::$docroot = realpath(self::$docroot);
  		self::$docroot = self::win2unix(self::$docroot);
 
-		return self::$docroot;	
+		return self::$docroot;
 	}
 
 	static public function win2unix($path)
