@@ -54,14 +54,16 @@ class Amslib_File
 	 */
 	static public function documentRoot($docroot=NULL)
 	{
-		if(!$docroot && isset($_SERVER["CONTEXT_DOCUMENT_ROOT"])){
+		if($docroot && is_string($docroot) && strlen($docroot)){
+			$docroot = Amslib_String::reduceSlashes($docroot);
+		}else if(isset($_SERVER["CONTEXT_DOCUMENT_ROOT"])){
 			$docroot = $_SERVER["CONTEXT_DOCUMENT_ROOT"];
 
 			if(isset($_SERVER["CONTEXT_PREFIX"])){
 				$docroot = Amslib_String::rchop($docroot,$_SERVER["CONTEXT_PREFIX"]);
 			}
-		}else if(is_string($docroot) && strlen($docroot)){
-			$docroot = Amslib_String::reduceSlashes($docroot);
+		}else if(isset($_SERVER["DOCUMENT_ROOT"])){
+			$docroot = $_SERVER["DOCUMENT_ROOT"];
 		}else{
 			Amslib_Debug::log(__METHOD__,"Not sure how to obtain the docroot on this platform",$docroot,$_SERVER);
 			// NOTE: ADD DEBUGGING CODE HERE AND UPDATE WHEN YOU FIND A SCENARIO WHICH WORKS
