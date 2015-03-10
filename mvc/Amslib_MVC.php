@@ -873,7 +873,7 @@ class Amslib_MVC extends Amslib_Mixin
 		if(isset($this->image[$id])) return $this->image[$id];
 
 		//	Step 4: find the image relative to the website base (perhaps it's a path)
-		$path = Amslib_Website::abs($this->location."/".$id);
+		$path = Amslib_Website::absolute($this->location."/".$id);
 
 		if(file_exists($path)){
 			return $relative ? Amslib_Website::relative($path) : $path;
