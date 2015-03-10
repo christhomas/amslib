@@ -43,7 +43,7 @@ class Amslib_Router_URL
 	 */
 	static public function getFullURL()
 	{
-		return Amslib_Website::rel(Amslib_Router::getPath());
+		return Amslib_Website::relative(Amslib_Router::getPath());
 	}
 
 	/**

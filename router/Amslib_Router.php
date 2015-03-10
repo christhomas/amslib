@@ -485,10 +485,11 @@ class Amslib_Router
 
 		//	If the url contains a http, don't attempt to make it relative, it's an absolute url
 		//	NOTE: perhaps a better way to solve this is to mark routes as absolute, then I don't have to "best guess"
-		$url = strpos($url,"http") !== false ? $url : Amslib_Website::rel($url);
+		$url = strpos($url,"http") !== false ? $url : Amslib_Website::relative($url);
 
 		//	NOTE: perhaps I should move this highly specific code into it's own method so I can keep things small and tidy
 		//	Now we can replace all the wildcard targets in the url with parameters passed into the function
+		//	NOTE: I like codeigniters version of this better, they use like (:any) or (:num) and replace specifically
 		$target	=	array('(\w+)','(.*?)','(.*)');
 		$append	=	array();
 
