@@ -322,12 +322,23 @@ class Amslib_Debug
 	 */
 	static public function enable($state=true)
 	{
-		if($state){
-			ini_set("display_errors",$state);
-			error_reporting(-1);
-		}else{
-			ini_set("display_errors",$state);
-			error_reporting(intval($state));
+		$state = intval($state);
+
+		switch($state){
+			case 0:{
+				ini_set("display_errors",false);
+				error_reporting($state);
+			}break;
+
+			case 1:{
+				ini_set("display_errors",true);
+				error_reporting(-1);
+			}break;
+
+			case 2:{
+				ini_set("display_errors",false);
+				error_reporting(-1);
+			}break;
 		}
 	}
 
