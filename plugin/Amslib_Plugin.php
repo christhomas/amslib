@@ -807,7 +807,7 @@ class Amslib_Plugin
 			$v = Amslib_Plugin::expandPath($c["value"]);
 
 			if($c["tag"] == "include"){
-				Amslib::addIncludePath(Amslib_Website::abs($v));
+				Amslib::addIncludePath(Amslib_Website::absolute($v));
 			}else{
 				Amslib_Website::setPath($c["tag"],$v);
 
@@ -1164,7 +1164,7 @@ class Amslib_Plugin
 		//	NOTE:	(08/03/2015) I don't think the below setPaths will work the way expected
 		//			as each plugin will keep resetting them with whatever location they are
 		//			given, hence there is no "plugin" location, it could diff and current plugin
-		//			will obviously change depending on the plugin being loaded, so this is 
+		//			will obviously change depending on the plugin being loaded, so this is
 		//			way off for a start.
 
 		//	NOTE:	(05/05/2014) why the duplicated name....or more or less
