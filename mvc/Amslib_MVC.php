@@ -876,7 +876,7 @@ class Amslib_MVC extends Amslib_Mixin
 		$path = Amslib_Website::abs($this->location."/".$id);
 
 		if(file_exists($path)){
-			return $relative ? Amslib_Website::rel($path) : $path;
+			return $relative ? Amslib_Website::relative($path) : $path;
 		}
 
 		Amslib_Debug::log("stack_trace","failed to find image",$id,$relative,$path,$this->location);
