@@ -372,8 +372,6 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	{
 		if($this->connection) return true;
 
-		$this->debug(__METHOD__.": DATABASE IS NOT CONNECTED");
-
 		return false;
 	}
 
