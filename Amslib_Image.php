@@ -375,7 +375,7 @@ class Amslib_Image
 
 		if($cache != "cache") return false;
 
-		$filename = Amslib_Website::abs();
+		$filename = Amslib_Website::absolute();
 		$filename = rtrim($filename,"/");
 
 		$search_file = true;
@@ -732,7 +732,7 @@ class Amslib_Image
 	 */
 	public function writeCacheFromFile($filename)
 	{
-		$filename	= Amslib_Website::abs($filename);
+		$filename	= Amslib_Website::absolute($filename);
 		$cache		= $this->getCacheFilename();
 
 		return copy($filename,$cache) && chmod($cache,0755);

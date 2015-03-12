@@ -71,9 +71,9 @@ class Amslib_Translator_XML extends Amslib_Translator_Keystore
 			//	NOTE: This is ugly and I believe it's a failure of Amslib_File::find() to not do this automatically
 			if(file_exists($source)){
 				$filename = $source;
-			}else if(file_exists($f=Amslib_File::find(Amslib_Website::rel($source),true))){
+			}else if(file_exists($f=Amslib_File::find(Amslib_Website::relative($source),true))){
 				$filename = $f;
-			}else if(file_exists($f=Amslib_File::find(Amslib_Website::abs($source),true))){
+			}else if(file_exists($f=Amslib_File::find(Amslib_Website::absolute($source),true))){
 				$filename = $f;
 			}
 

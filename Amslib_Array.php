@@ -618,11 +618,11 @@ class Amslib_Array
 	 */
 	static public function glob($location,$relative=false)
 	{
-		$items = glob(Amslib_Website::abs($location));
+		$items = glob(Amslib_Website::absolute($location));
 
 		if($relative){
 			foreach($items as &$i){
-				$i = Amslib_Website::rel($i);
+				$i = Amslib_Website::relative($i);
 			}
 		}
 

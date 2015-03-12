@@ -104,7 +104,7 @@ class Amslib_XML
 	{
 		//	NOTE:	Added a call to Amslib_Website::abs to fix finding the file, because in some cases,
 		//			the file cannot be found. But I am not sure of the side-effects (if any) of doing this
-		$this->filename = Amslib_File::find(Amslib_Website::abs($filename),true);
+		$this->filename = Amslib_File::find(Amslib_Website::absolute($filename),true);
 
 		$document = new DOMDocument('1.0', 'UTF-8');
 		if(is_file($this->filename) && $document->load($this->filename)){
