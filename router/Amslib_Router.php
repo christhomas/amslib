@@ -169,7 +169,7 @@ class Amslib_Router
 
 			//	If the service requested had no handlers (weird!) then just don't do anything
 			if(self::isEmptyRoute($service)){
-				Amslib_Debug::log(__METHOD__,"cannot extend service because it was not found",$extend,$service);
+				Amslib_Debug::log(__METHOD__,"stack_trace","service cannot be extended: NOT FOUND",$extend,$service);
 				return $route;
 			}
 
@@ -985,7 +985,11 @@ class Amslib_Router
 			//	You are not supposed to update the url cache, imported routes are not accessible through url
 			//	The reason for this is because it doesnt make sense a url from a remote system will be processed by the local system
 			//	All url requests for imported services should goto the remote server directly
-			foreach(Amslib_Array::valid($data["cache"]) as $route){
+			foreach(Amslib_Array::valid($data["cache"]) as $route)
+			{
+				//	We cannot use the service inheritance when importing a remote router
+				unset($route["extend"]);
+
 				self::setRoute($route["name"],$route["group"],$domain,$route,false);
 			}
 
