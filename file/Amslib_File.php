@@ -475,8 +475,9 @@ class Amslib_File
 		$data = file_get_contents($filename);
 		$error = ob_get_clean();
 
-		//	TODO: make this logging optional
-		Amslib_Debug::log(__METHOD__,$filename);
+		if(strlen($error) || !strlen($data)){
+			Amslib_Debug::log(__METHOD__,"file = '$filename', error output = ",$error,"strlen(data) = ",strlen($data));
+		}
 
 		return $data;
 	}
