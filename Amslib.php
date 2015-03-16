@@ -49,8 +49,14 @@ class Amslib
 	/**
 	 * 	method:	importFile
 	 *
-	 * 	todo:
-	 * 		write documentation
+	 * 	params:
+	 * 		$__r - Whether the file is required/included
+	 * 		$__f - The file to process
+	 * 		$__p - The parameter array to expand
+	 * 		$__b - To grab the output into a buffer or include directly
+	 *
+	 * 	returns:
+	 * 		boolean false if the function has failed, the return value of require/include, or output buffer if requested
 	 *
 	 * 	NOTE:
 	 * 		-	This method has weird parameter names to make it harder
