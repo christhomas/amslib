@@ -156,6 +156,26 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 	{
 		return this.json.success ? true : false;
 	},
+
+	/**
+	 * 	method:	hasSuccess
+	 *
+	 * 	todo: write documentation
+	 */
+	getSuccessURL: function()
+	{
+		return this.json.url_success || false;
+	},
+	
+	/**
+	 * 	method:	hasSuccess
+	 *
+	 * 	todo: write documentation
+	 */
+	getFailureURL: function()
+	{
+		return this.json.url_failure || false;
+	},
 	
 	/**
 	 * 	method:	hasPlugin
