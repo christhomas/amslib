@@ -166,7 +166,7 @@ class Amslib_Website
 	}
 
 	/**
-	 * 	method:	abs
+	 * 	method:	absolute
 	 *
 	 *	Return an absolute url for the file to the root directory
 	 *	FIXME: if you pass an absolute filename into this method, it won't return the correct filename back
