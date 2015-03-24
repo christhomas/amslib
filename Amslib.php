@@ -278,6 +278,7 @@ class Amslib
 			if(in_array($c,array(
 					"Amslib_COOKIE",
 					"Amslib_FILES",
+					"Amslib_SERVER",
 					"Amslib_GET",
 					"Amslib_POST",
 					"Amslib_REQUEST",
