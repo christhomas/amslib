@@ -807,7 +807,7 @@ class Amslib_Plugin
 			$v = Amslib_Plugin::expandPath($c["value"]);
 
 			if($c["tag"] == "include"){
-				Amslib::addIncludePath(Amslib_Website::absolute($v));
+				Amslib::addIncludePath(Amslib_File::absolute($v));
 			}else{
 				Amslib_Website::setPath($c["tag"],$v);
 
