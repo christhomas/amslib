@@ -69,8 +69,8 @@ class Amslib_Router_Source_XML
 
 			case "type":{
 				$data = $data[0] == "terminator"
-				? (isset($data[1]["state"]) ? "terminator_{$data[1]["state"]}" : "terminator_common")
-				: "service";
+					? (isset($data[1]["state"]) ? "terminator_{$data[1]["state"]}" : "terminator_common")
+					: "service";
 			}break;
 		}
 
@@ -246,6 +246,14 @@ class Amslib_Router_Source_XML
 
 		if(array_key_exists("child",$array)){
 			foreach($array["child"] as $c){
+				if($c["tag"] == "url" && isset($c["attr"]["callback"])){
+					$callback = $c["attr"]["callback"];
+					
+					if(is_callable($callback)){
+						$c["value"] = call_user_func($callback);
+					}
+				}
+				
 				$import[$c["tag"]] = $c["value"];
 			}
 		}
