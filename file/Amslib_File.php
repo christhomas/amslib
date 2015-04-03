@@ -161,7 +161,7 @@ class Amslib_File
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function absolute($path)
+	static public function absolute($path="")
 	{
 		if(strpos($path,"://") !== false) return $path;
 
@@ -171,10 +171,6 @@ class Amslib_File
 
 		$final = self::reduceSlashes("$root/$rel");
 
-		if(!is_dir($final) && !file_exists($final)){
-			//ssprint(__METHOD__.Amslib_Debug::vdump($path,$root,$rel,$final));
-		}
-
 		return $final;
 	}
 
@@ -183,7 +179,7 @@ class Amslib_File
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function relative($path)
+	static public function relative($path="")
 	{
 		if(strpos($path,"http://") === 0) return $path;
 
