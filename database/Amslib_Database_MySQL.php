@@ -249,7 +249,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			//	skip values if non-numeric or string
 			if(!is_numeric($value) && !is_string($value)) continue;
 			//	if string, quote it
-			if(is_string) $value="'$value'";
+			if(is_string($value)) $value="'$value'";
 			
 			$fields[] = "$key=$value";
 		}
