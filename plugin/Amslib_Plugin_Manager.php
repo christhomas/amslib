@@ -260,9 +260,11 @@ class Amslib_Plugin_Manager
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function listPlugin()
+	static public function listPlugin($testObject=false)
 	{
-		return array_keys(self::$plugins);
+		return $testObject
+			? array_map("get_class",self::$plugins)
+			: array_keys(self::$plugins);
 	}
 
 	/**
@@ -270,9 +272,11 @@ class Amslib_Plugin_Manager
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function listAPI()
+	static public function listAPI($testObject=false)
 	{
-		return array_keys(self::$api);
+		return $testObject
+			? array_map("get_class",self::$api)
+			: array_keys(self::$api);
 	}
 
 	/**
