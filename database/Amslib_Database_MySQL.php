@@ -500,6 +500,33 @@ QUERY;
 			? $this->getLastAffectedCount(true,$allow_zero)
 			: false;
 	}
+	
+	/**
+	 * 	method: updateFields
+	 *
+	 * 	A method to update a table with an array of fields which is built and imploded beforehand
+	 *
+	 * 	params:
+	 * 		$table - The database table to insert into
+	 * 		$fields - An array of fields to insert
+	 * 		$allow_zero - Whether or not zero updates is to be ignored or treated like a failure
+	 *
+	 *  returns:
+	 *  	-	Boolean false if the fields returned was not valid
+	 *  	-	Boolean false if the insert failed
+	 *  	-	An integer primary key of the row that was inserted into the table
+	 */
+	public function updateFields($table,$fields,$allow_zero=true)
+	{
+		$fields = $this->buildFields($fields);
+	
+		if(!$fields) return false;
+	
+		$table = $this->escape($table);
+	
+		return $this->update("$table set $fields",$allow_zero);
+	}
+	
 
 	/**
 	 * 	method:	delete
