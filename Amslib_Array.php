@@ -791,7 +791,7 @@ class Amslib_Array
 		$wrap	=	$char=="\"" ? addslashes($char) : $char;
 		$sep	=	addslashes($sep);
 
-		$string = "$char".implode("{$char}{$sep}{$char}",$array)."$char";
+		$string = $char.implode($char.$sep.$char,$array).$char;
 
 		return $returnArray ? explode($sep,$string) : $string;
 	}
@@ -803,7 +803,7 @@ class Amslib_Array
 	 */
 	static public function implode($array,$join=",",$quote="")
 	{
-		return $quote.implode("{$quote}{$join}{$quote}",$array).$quote;
+		return $quote.implode($quote.$join.$quote,$array).$quote;
 	}
 
 	/**
