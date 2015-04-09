@@ -225,6 +225,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 * 
 	 * 	params:
 	 * 		$array - The array of key/value pairs
+	 * 		$separator - The separator to use between each pair
 	 * 
 	 * 	returns:
 	 * 		an implode()'d string of key=values, separate by comma
@@ -236,7 +237,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 	 * 		-	non-numeric values are skipped
 	 * 		-	non-string values are skipped
 	 */
-	public function buildFields($array)
+	public function buildFields($array,$separator=",")
 	{
 		if(!is_array($array)) $array = Amslib_Array::valid($array);
 		
@@ -253,7 +254,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			$fields[] = "$key=$value";
 		}
 		
-		return count($fields) ? implode(",",$fields) : false;
+		return count($fields) ? implode($separator,$fields) : false;
 	}
 
 	/**
@@ -526,7 +527,6 @@ QUERY;
 	
 		return $this->update("$table set $fields",$allow_zero);
 	}
-	
 
 	/**
 	 * 	method:	delete
