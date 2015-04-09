@@ -253,7 +253,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			$fields[] = "$key=$value";
 		}
 		
-		return implode(",",$params);
+		return count($fields) ? implode(",",$fields) : false;
 	}
 
 	/**
@@ -462,6 +462,31 @@ QUERY;
 		return $this->query("insert into $query",true)
 			? $this->getLastInsertId()
 			: false;
+	}
+	
+	/**
+	 * 	method: insertFields
+	 * 
+	 * 	A method to insert into a table an array of fields which is built and imploded beforehand
+	 * 	
+	 * 	params:
+	 * 		$table - The database table to insert into
+	 * 		$fields - An array of fields to insert
+	 * 
+	 *  returns:
+	 *  	-	Boolean false if the fields returned was not valid
+	 *  	-	Boolean false if the insert failed
+	 *  	-	An integer primary key of the row that was inserted into the table
+	 */
+	public function insertFields($table,$fields)
+	{
+		$fields = $this->buildFields($fields);
+		
+		if(!$fields) return false;
+		
+		$table = $this->escape($table);
+		
+		return $this->insert("$table set $fields");
 	}
 
 	/**
