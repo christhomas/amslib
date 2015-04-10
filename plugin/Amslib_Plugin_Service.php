@@ -197,12 +197,18 @@ class Amslib_Plugin_Service
 
 		//	Call the success or failure terminators
 		foreach(Amslib_Array::valid($this->terminatorList["$type"]) as $t){
-			$this->runHandler($t["object"],$t["method"],$source);
+			$response = $this->runHandler($t["object"],$t["method"],$source);
+			
+			//	Store the result of the service and make ready to start a new service
+			$this->storeData($response);
 		}
 
 		//	Call the common terminators
 		foreach(Amslib_Array::valid($this->terminatorList["common"]) as $t){
-			$this->runHandler($t["object"],$t["method"],$source);
+			$response = $this->runHandler($t["object"],$t["method"],$source);
+			
+			//	Store the result of the service and make ready to start a new service
+			$this->storeData($response);
 		}
 	}
 
