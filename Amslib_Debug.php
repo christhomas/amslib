@@ -158,40 +158,21 @@ class Amslib_Debug
 		}
 
 		$stack = self::getStackTrace();
+		
+		//	eliminate this function from the stack
+		$location = array_shift(array_slice($stack,2,1));
+		
+		$line = isset($location["line"]) ? "@{$location["line"]}" : "";
+		
+		$location = Amslib_Array::hasKeys($location,array("class","type","function"))
+			? $location["class"].$location["type"].$location["function"]
+			: $location;
+		
+		$location = is_array($location) && Amslib_Array::hasKeys($location,"file","function")
+			? basename($location["file"])."({$location["function"]})"
+			: $location;
 
-		if(!is_numeric($function)) $function = count($stack) > 1 ? 1 : 0;
-
-		$line		= array("line"=>-1);
-		$function	= false;
-
-		if($function == 0 && isset($stack[$function]) && Amslib_Array::hasKeys($stack[$function],array("line","file")))
-		{
-			$line		= $stack[$function]["line"];
-			$f			= explode("/",$stack[$function]["file"]);
-			$function	= array(
-					"class"=>"",
-					"type"=>"",
-					"function"=>end($f)
-			);
-		}else{
-			if(isset($stack[$function-1])){
-				$line = $stack[$function-1]["line"];
-			}
-
-			if(isset($stack[$function])){
-				$function = $stack[$function];
-			}
-		}
-
-		if(!$function || !isset($function["class"]) || !isset($function["type"]) || !isset($function["function"])){
-			$function	=	"(ERROR, function invalid: ".self::dump($function).")";
-			$data		=	array(self::dump($stack));
-		}else{
-			$function	=	"{$function["class"]}{$function["type"]}{$function["function"]}($line)";
-			//$data[] = self::dump($stack);
-		}
-
-		error_log($log = "[DEBUG] $function, ".implode(", ",$data));
+		error_log($log = $location.$line.": ".implode(", ",$data));
 
 		return array("function"=>$function,"data"=>$data,"log"=>$log);
 	}
@@ -263,6 +244,11 @@ class Amslib_Debug
 			$i = $a["type"] == "string" ? "\n" : "<br/>";
 		}else{
 			$t = $e->getTrace();
+			
+			//	remove the arguments because they are largely useless
+			foreach($t as $k=>$ignore){
+				unset($t[$k]["args"]);
+			}
 		}
 
 		if(isset($a["limit"])){
@@ -322,23 +308,12 @@ class Amslib_Debug
 	 */
 	static public function enable($state=true)
 	{
-		$state = intval($state);
-
-		switch($state){
-			case 0:{
-				ini_set("display_errors",false);
-				error_reporting($state);
-			}break;
-
-			case 1:{
-				ini_set("display_errors",true);
-				error_reporting(-1);
-			}break;
-
-			case 2:{
-				ini_set("display_errors",false);
-				error_reporting(-1);
-			}break;
+		if($state){
+			ini_set("display_errors",$state);
+			error_reporting(-1);
+		}else{
+			ini_set("display_errors",$state);
+			error_reporting(intval($state));
 		}
 	}
 
