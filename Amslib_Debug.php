@@ -233,7 +233,7 @@ class Amslib_Debug
 		$a = func_get_args();
 		$a = Amslib_Array::toKeyValue($a);
 
-		$e = new Exception();
+		$e = isset($a["exception"]) ? $a["exception"] : new Exception();
 
 		if(isset($a["type"]) && in_array($a["type"],array("text","string","html"))){
 			//	A common mistake is putting "text" instead of "string" so i'll cover this up here
