@@ -308,12 +308,25 @@ class Amslib_Debug
 	 */
 	static public function enable($state=true)
 	{
-		if($state){
-			ini_set("display_errors",$state);
-			error_reporting(-1);
-		}else{
-			ini_set("display_errors",$state);
-			error_reporting(intval($state));
+		switch($state){
+			case 2:{
+				//	Don't display errors, Report all errors
+				ini_set("display_errors",false);
+				error_reporting(-1);
+			}break;
+			
+			case true:
+			case 1:{
+				//	Display errors, Report all errors
+				ini_set("display_errors",true);
+				error_reporting(-1);
+			}break;
+			
+			default:{
+				//	Don't display errors, neither report them
+				ini_set("display_errors",false);
+				error_reporting(0);
+			}break;
 		}
 	}
 
