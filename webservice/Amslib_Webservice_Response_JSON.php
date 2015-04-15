@@ -44,7 +44,7 @@ class Amslib_Webservice_Response_JSON extends Amslib_Webservice_Response_Raw
 		$output = ob_get_clean();
 
 		if(strlen($output) || strlen($exception)){
-			Amslib_Debug::log(__METHOD__,"json_decode probably has failed with the following output",$output,$exception);
+			Amslib_Debug::log("json_decode probably has failed with the following output",$output,$exception);
 		}
 	}
 }

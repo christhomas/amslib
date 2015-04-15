@@ -63,7 +63,7 @@ class Amslib_File
 		}else if(isset($_SERVER["DOCUMENT_ROOT"])){
 			$docroot = $_SERVER["DOCUMENT_ROOT"];
 		}else{
-			Amslib_Debug::log(__METHOD__,"Not sure how to obtain the docroot on this platform",$docroot,$_SERVER);
+			Amslib_Debug::log("Not sure how to obtain the docroot on this platform",$docroot,$_SERVER);
 			// NOTE: ADD DEBUGGING CODE HERE AND UPDATE WHEN YOU FIND A SCENARIO WHICH WORKS
 			//die(__METHOD__.Amslib_Debug::vdump(array("docroot"=>$docroot,"server"=>$_SERVER)));
 			return false;
@@ -202,7 +202,7 @@ class Amslib_File
 	 * returns:
 	 * 	boolean true or false, depending on the whether creation was successful
 	 */
-	static public function mkdir($directory,$mode=0777,$recursive=false,&$error_text=NULL)
+	static public function mkdir($directory,$mode=0775,$recursive=false,&$error_text=NULL)
 	{
 		$status = true;
 
@@ -472,7 +472,7 @@ class Amslib_File
 		$error = ob_get_clean();
 
 		if(strlen($error) || !strlen($data)){
-			Amslib_Debug::log(__METHOD__,"file = '$filename', error output = ",$error,"strlen(data) = ",strlen($data));
+			Amslib_Debug::log("file = '$filename', error output = ",$error,"strlen(data) = ",strlen($data));
 		}
 
 		return $data;

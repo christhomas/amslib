@@ -60,7 +60,7 @@ class Amslib_Log extends Amslib_Mixin
 			return true;
 		}
 
-		Amslib_Debug::log(__METHOD__,"file failed to create, or modify it's permissions",error_get_last(),"touch=".intval($t),"chmod=".intval($c));
+		Amslib_Debug::log("file failed to create, or modify it's permissions",error_get_last(),"touch=".intval($t),"chmod=".intval($c));
 
 		return false;
 	}

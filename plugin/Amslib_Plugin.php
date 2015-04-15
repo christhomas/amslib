@@ -161,7 +161,7 @@ class Amslib_Plugin
 
 		//	If the API object is not valid, don't continue to process
 		if(!$this->api){
-			Amslib_Debug::log(__METHOD__,self::ERROR_API_INVALID,$this->api,$this->getName());
+			Amslib_Debug::log(self::ERROR_API_INVALID,$this->api,$this->getName());
 			return false;
 		}
 
@@ -339,7 +339,7 @@ class Amslib_Plugin
 				}else{
 					//	your object was not a compatible singleton, we need to find the getInstance method
 					$message = str_replace("__ERROR__","find the getInstance method in the API object '{$object["value"]}'",$error);
-					Amslib_Debug::log(__METHOD__,$message);
+					Amslib_Debug::log($message);
 					die($message);
 				}
 			}else{
@@ -447,7 +447,7 @@ class Amslib_Plugin
 
 			foreach(Amslib_Array::valid($translators) as $name=>$object){
 				if(!$object){
-					Amslib_Debug::log(__METHOD__,"we found a translator which was not valid",$name,$object);
+					Amslib_Debug::log("we found a translator which was not valid",$name,$object);
 					continue;
 				}
 
@@ -695,7 +695,7 @@ class Amslib_Plugin
 
 		//	If there is no valid "id" element, skip this item
 		if(!isset($a["id"])){
-			Amslib_Debug::log(__METHOD__,ERROR_IMAGE_ID_INVALID,$array);
+			Amslib_Debug::log(ERROR_IMAGE_ID_INVALID,$array);
 			return;
 		}
 
@@ -724,7 +724,7 @@ class Amslib_Plugin
 
 			//	If there is no valid "id" element, skip this item
 			if(!isset($a["id"])){
-				Amslib_Debug::log(__METHOD__,self::ERROR_FONT_ID_INVALID,$font);
+				Amslib_Debug::log(self::ERROR_FONT_ID_INVALID,$font);
 				continue;
 			}
 
@@ -931,7 +931,7 @@ class Amslib_Plugin
 			$callback[$data["type"]]
 		);
 
-		//Amslib_Debug::log(__METHOD__,$method,$data);
+		//Amslib_Debug::log($method,$data);
 
 		call_user_func($method,$data["selector"],$data["callback"]);
 	}
@@ -967,7 +967,7 @@ class Amslib_Plugin
 			//	Now the configuration data is loaded, initialise the plugin with any custom requirements
 			$this->initialisePlugin();
 		}else{
-			Amslib_Debug::log(__METHOD__,self::ERROR_PLUGIN_SOURCE_INVALID,$this->source);
+			Amslib_Debug::log(self::ERROR_PLUGIN_SOURCE_INVALID,$this->source);
 		}
 
 		return $this->isConfigured;

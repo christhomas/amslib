@@ -359,7 +359,7 @@ class Amslib_Plugin_Manager
 				$sname = ($ts=is_object($src)) ? $src->getName() : "searched: {$value["src"]}";
 				$dname = ($td=is_object($dst)) ? $dst->getName() : "searched: {$value["dst"]}";
 
-				Amslib_Debug::log(__METHOD__,self::PLUGIN_INVALID,intval($ts),intval($ts),$sname,$dname);
+				Amslib_Debug::log(self::PLUGIN_INVALID,intval($ts),intval($ts),$sname,$dname);
 				continue;
 			}
 
@@ -376,7 +376,7 @@ class Amslib_Plugin_Manager
 							$value["key"],
 							$value["val"]
 					));
-					Amslib_Debug::log(__METHOD__,$message);
+					Amslib_Debug::log($message);
 					die($message);
 				}break;
 
@@ -506,55 +506,55 @@ class Amslib_Plugin_Manager
 
 	static public function render($plugin,$view="default",$parameters=array())
 	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD","stack_trace");
+		Amslib_Debug::log("DEPRECATED METHOD","stack_trace");
 		return Amslib_Plugin::render($plugin,$view,$parameters);
 	}
 
 	static public function renderView($plugin,$view="default",$parameters=array())
 	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		Amslib_Debug::log("DEPRECATED METHOD");
 		return Amslib_Plugin::renderView($plugin,$view,$parameters);
 	}
 
 	static public function getObject($plugin,$id,$singleton=false)
 	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		Amslib_Debug::log("DEPRECATED METHOD");
 		return Amslib_Plugin::getObject($plugin,$id,$singleton);
 	}
 
 	static public function setStylesheet($plugin,$id,$file,$conditional=NULL)
 	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		Amslib_Debug::log("DEPRECATED METHOD");
 		return Amslib_Plugin::setStylesheet($plugin,$id,$file,$conditional);
 	}
 
 	static public function addStylesheet($plugin,$stylesheet)
 	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		Amslib_Debug::log("DEPRECATED METHOD");
 		return Amslib_Plugin::addStylesheet($plugin,$stylesheet);
 	}
 
 	static public function setJavascript($plugin,$id,$file,$conditional=NULL)
 	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		Amslib_Debug::log("DEPRECATED METHOD");
 		return Amslib_Plugin::setJavascript($plugin,$id,$file,$conditional);
 	}
 
 	static public function addJavascript($plugin,$javascript)
 	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		Amslib_Debug::log("DEPRECATED METHOD");
 		return Amslib_Plugin::addJavascript($plugin,$javascript);
 	}
 
 	static public function preload($name,$plugin)
 	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD");
+		Amslib_Debug::log("DEPRECATED METHOD");
 		return self::insert($name,$plugin);
 	}
 
 	static public function listPlugins()
 	{
-		Amslib_Debug::log(__METHOD__,"DEPRECATED METHOD","stack_trace");
+		Amslib_Debug::log("DEPRECATED METHOD","stack_trace");
 		return self::listPlugin();
 	}
 }

@@ -174,7 +174,7 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 
 		if($this->handler === false){
 			//	TODO: move into the logging system instead of here
-			Amslib_Debug::log(__METHOD__,"INVALID HANDLER",Amslib_Debug::pdump(true,$this->handler));
+			Amslib_Debug::log("INVALID HANDLER",Amslib_Debug::pdump(true,$this->handler));
 			return NULL;
 		}
 
@@ -186,14 +186,14 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 			if(is_array($value)){
 				$this->setKey($keys,$value);
 			}else{
-				Amslib_Debug::log(__METHOD__,"value was invalid array",$value);
+				Amslib_Debug::log("value was invalid array",$value);
 			}
 		}else if(is_numeric($name) || is_string($name)){
 			$keys[] = $name;
 
 			$this->setKey($keys,$value);
 		}else{
-			Amslib_Debug::log(__METHOD__,"name was invalid",$name);
+			Amslib_Debug::log("name was invalid",$name);
 		}
 	}
 
@@ -210,7 +210,7 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 
 		if($this->handler === false){
 			//	TODO: move into the logging system instead of here
-			Amslib_Debug::log(__METHOD__,"INVALID HANDLER",Amslib_Debug::pdump(true,$this->handler));
+			Amslib_Debug::log("INVALID HANDLER",Amslib_Debug::pdump(true,$this->handler));
 			return NULL;
 		}
 

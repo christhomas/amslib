@@ -432,7 +432,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 				if(isset($e["password"])){
 					$e["password"]["value"] = "*CENSORED*";
 				}
-				Amslib_Debug::log(__METHOD__,"database details were invalid",$e);
+				Amslib_Debug::log("database details were invalid",$e);
 			}
 		}
 

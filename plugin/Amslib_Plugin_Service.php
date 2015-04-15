@@ -455,7 +455,7 @@ class Amslib_Plugin_Service
 			}
 
 			if(!$plugin || !$object || $method == "missingServiceMethod"){
-				Amslib_Debug::log(__METHOD__,"handler maybe invalid, handler = ",$h);
+				Amslib_Debug::log("handler maybe invalid, handler = ",$h);
 			}
 
 			$params = array($plugin,$object,$method,$h["input"],$h["record"],$h["global"],$h["failure"]);
@@ -718,14 +718,14 @@ class Amslib_Plugin_Service
 			if(is_array($value)){
 				$this->data[$plugin][self::SD] = $value;
 			}else{
-				Amslib_Debug::log(__METHOD__,"value was invalid array",$value);
+				Amslib_Debug::log("value was invalid array",$value);
 
 				return NULL;
 			}
 		}else if(is_numeric($name) || is_string($name)){
 			$this->data[$plugin][self::SD][$name] = $value;
 		}else{
-			Amslib_Debug::log(__METHOD__,"name was invalid",$name);
+			Amslib_Debug::log("name was invalid",$name);
 
 			return NULL;
 		}

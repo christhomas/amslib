@@ -92,7 +92,7 @@ class Amslib_Website
 		}
 
 		if($s && Amslib_File::deleteFile($s)){
-			Amslib_Debug::log(__METHOD__,"success, file was deleted from the disk",$s);
+			Amslib_Debug::log("success, file was deleted from the disk",$s);
 			return true;
 		}
 
@@ -100,7 +100,7 @@ class Amslib_Website
 			Amslib_Debug::log("stack_trace",self::ERROR_FILE_NOT_FOUND." (s,src_filename) = ",$s,$src_filename);
 		}
 
-		Amslib_Debug::log(__METHOD__,"failed to delete file");
+		Amslib_Debug::log("failed to delete file");
 
 		return false;
 	}

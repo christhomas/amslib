@@ -295,7 +295,7 @@ class Amslib_Array
 				}else if(is_string($item)){
 					$k = $item;
 				}else{
-					Amslib_Debug::log(__METHOD__,"list was invalid, key not string or number",$index,$item,$k,$array);
+					Amslib_Debug::log("list was invalid, key not string or number",$index,$item,$k,$array);
 					return $array;
 				}
 			}else{

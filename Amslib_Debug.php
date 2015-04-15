@@ -484,7 +484,7 @@ class Amslib_Debug
 	static public function backtrace()
 	{
 		//	Find out who is using this method so I can upgrade it's code and delete this
-		Amslib_Debug::log(__METHOD__,"stack_trace");
+		Amslib_Debug::log("stack_trace");
 
 		$args	=	func_get_args();
 		$bt		=	debug_backtrace();
@@ -500,7 +500,7 @@ class Amslib_Debug
 
 	static public function showErrors($state=true)
 	{
-		Amslib_Debug::log(__METHOD__,"deprecated, use 'enable(\$state)' instead","stack_trace");
+		Amslib_Debug::log("deprecated, use 'enable(\$state)' instead","stack_trace");
 		self::enable($state);
 	}
 }

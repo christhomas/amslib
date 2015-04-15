@@ -169,7 +169,7 @@ class Amslib_Router
 
 			//	If the service requested had no handlers (weird!) then just don't do anything
 			if(self::isEmptyRoute($service)){
-				Amslib_Debug::log(__METHOD__,"stack_trace","service cannot be extended: NOT FOUND",$extend,$service);
+				Amslib_Debug::log("stack_trace","service cannot be extended: NOT FOUND",$extend,$service);
 				return $route;
 			}
 
@@ -238,7 +238,7 @@ class Amslib_Router
 		$route["handler"] = $list;
 
 		if(isset($route["debug"])){
-			Amslib_Debug::log(__METHOD__,"debugging finalised service = ",$route);
+			Amslib_Debug::log("debugging finalised service = ",$route);
 		}
 
 		return $route;

@@ -591,7 +591,7 @@ class Amslib_MVC extends Amslib_Mixin
 
 			Amslib_Resource::addStylesheet($id,$s["file"],$s["conditional"],$s["media"],$s["position"]);
 		}else{
-			Amslib_Debug::log(__METHOD__,"stylesheet not found",$id);
+			Amslib_Debug::log("stylesheet not found",$id);
 		}
 	}
 
@@ -656,7 +656,7 @@ class Amslib_MVC extends Amslib_Mixin
 
 			Amslib_Resource::addJavascript($id,$j["file"],$j["conditional"],$j["position"]);
 		}else{
-			Amslib_Debug::log(__METHOD__,"javascript not found",$id);
+			Amslib_Debug::log("javascript not found",$id);
 		}
 	}
 

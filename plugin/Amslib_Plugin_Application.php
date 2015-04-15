@@ -283,7 +283,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			return true;
 		}
 
-		Amslib_Debug::log(__METHOD__,"initialiseSelectors not available",$callback);
+		Amslib_Debug::log("initialiseSelectors not available",$callback);
 
 		return false;
 	}
