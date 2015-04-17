@@ -44,6 +44,7 @@ class Amslib_Router_Source_XML
 	{
 		if(count($data) != 2) return $data;
 
+		//	NOTE: Why do I do this? because I've forgotten and now I'm wondering
 		if(in_array($type,array("input","output","record"))){
 			$data = array_key_exists($data[1],$data[0]) ? $data[0][$data[1]] : false;
 		}

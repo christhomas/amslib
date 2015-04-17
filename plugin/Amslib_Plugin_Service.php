@@ -196,7 +196,7 @@ class Amslib_Plugin_Service
 		$type = $state ? "success" : "failure";
 
 		//	Call the success or failure terminators
-		foreach(Amslib_Array::valid($this->terminatorList["$type"]) as $t){
+		foreach(Amslib_Array::valid($this->terminatorList[$type]) as $t){
 			$response = $this->runHandler($t["object"],$t["method"],$source);
 			
 			//	Store the result of the service and make ready to start a new service
@@ -505,8 +505,10 @@ class Amslib_Plugin_Service
 	public function setTerminator($type,$plugin,$object,$method,$source="post",$record=true,$global=false,$failure=true)
 	{
 		//	NOTE: perhaps we should check this information before blindly accepting it
-
-		if(!$type || !is_string($type) || !strlen($type)) return false;
+		
+		if(!in_array($type,array("common","success","failure"))){
+			return false;
+		}
 
 		$this->terminatorList[$type][] = array(
 			"plugin"	=>	$plugin,
