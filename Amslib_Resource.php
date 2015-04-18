@@ -39,11 +39,11 @@ class Amslib_Resource
 
 	static protected function validatePosition($position=NULL)
 	{
-		return is_string($position) && strlen($position) 
-			? $position 
+		return is_string($position) && strlen($position)
+			? $position
 			: self::$default_position;
 	}
-	
+
 	/**
 	 * 	method:	addStylesheet
 	 *
@@ -81,7 +81,11 @@ class Amslib_Resource
 			return implode("\n",self::$stylesheet[$position]);
 		}
 
-		Amslib_Debug::log("the requested position to obtain the stylesheets from was not valid",$position,array_keys(self::$stylesheet));
+		Amslib_Debug::log(
+			"the requested position to obtain the stylesheets from was not valid",
+			$position,
+			array_keys(self::$stylesheet)
+		);
 
 		return "";
 	}
@@ -140,7 +144,11 @@ class Amslib_Resource
 			return implode("\n",self::$javascript[$position]);
 		}
 
-		Amslib_Debug::log("the requested position to obtain the javascripts from was not valid");
+		Amslib_Debug::log(
+			"the requested position to obtain the javascripts from was not valid",
+			$position,
+			array_keys(self::$javascript)
+		);
 
 		return "";
 	}
