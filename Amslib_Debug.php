@@ -158,16 +158,17 @@ class Amslib_Debug
 		}
 
 		$stack = self::getStackTrace();
-		
+
 		//	eliminate this function from the stack
-		$location = array_shift(array_slice($stack,2,1));
-		
+		$location = array_slice($stack,2,1);
+		$location = array_shift($location);
+
 		$line = isset($location["line"]) ? "@{$location["line"]}" : "";
-		
+
 		$location = Amslib_Array::hasKeys($location,array("class","type","function"))
 			? $location["class"].$location["type"].$location["function"]
 			: $location;
-		
+
 		$location = is_array($location) && Amslib_Array::hasKeys($location,"file","function")
 			? basename($location["file"])."({$location["function"]})"
 			: $location;
@@ -244,7 +245,7 @@ class Amslib_Debug
 			$i = $a["type"] == "string" ? "\n" : "<br/>";
 		}else{
 			$t = $e->getTrace();
-			
+
 			//	remove the arguments because they are largely useless
 			foreach($t as $k=>$ignore){
 				unset($t[$k]["args"]);
@@ -314,14 +315,14 @@ class Amslib_Debug
 				ini_set("display_errors",false);
 				error_reporting(-1);
 			}break;
-			
+
 			case true:
 			case 1:{
 				//	Display errors, Report all errors
 				ini_set("display_errors",true);
 				error_reporting(-1);
 			}break;
-			
+
 			default:{
 				//	Don't display errors, neither report them
 				ini_set("display_errors",false);
