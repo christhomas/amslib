@@ -308,6 +308,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			"__MISSING_QUERY",
 			mysql_error($this->connection),
 			mysql_errno($this->connection),
+			//	TODO: eventually I'll figure out what to put here as a default parameter
 			-1
 		);
 
