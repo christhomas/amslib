@@ -305,10 +305,10 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	{
 		//	Overload some default values just inc ase something failed
 		$args = func_get_args() + array(
-				"__MISSING_QUERY",
-				"database not connected",
-				"database not connected",
-				-1
+			"__MISSING_QUERY",
+			mysql_error($this->connection),
+			mysql_errno($this->connection),
+			-1
 		);
 
 		$this->errors[] = $error = array(
@@ -319,7 +319,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 				"db_last_insert"	=>	$this->lastInsertId,
 				"db_insert_id"		=>	$args[3],
 				//	note: I don't think I need the entire trace, maybe just the first couple of methods
-				"db_location"		=>	Amslib_Debug::getStackTrace("type","text")
+				"db_location"		=>	array_slice(Amslib_Debug::getStackTrace(),2,1)
 		);
 
 		if(count($this->errors) > $this->errorCount){
