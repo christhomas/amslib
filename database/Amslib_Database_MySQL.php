@@ -216,20 +216,20 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 		return "order by ".implode(",",$sort);
 	}
-	
+
 	/**
 	 * 	method: buildFields
-	 * 
-	 * 	A method to take an array of key/values and construct a comma separated list of 
+	 *
+	 * 	A method to take an array of key/values and construct a comma separated list of
 	 * 	paramaters ready to send to insert/update sql queries
-	 * 
+	 *
 	 * 	params:
 	 * 		$array - The array of key/value pairs
 	 * 		$separator - The separator to use between each pair
-	 * 
+	 *
 	 * 	returns:
 	 * 		an implode()'d string of key=values, separate by comma
-	 * 
+	 *
 	 * 	notes:
 	 * 		-	non-numeric keys are skipped
 	 * 		-	non-string keys are skipped
@@ -240,9 +240,9 @@ class Amslib_Database_MySQL extends Amslib_Database
 	public function buildFields($array,$separator=",")
 	{
 		if(!is_array($array)) $array = Amslib_Array::valid($array);
-		
+
 		$fields = array();
-		
+
 		foreach($array as $key=>$value){
 			//	skip keys if numeric, non-string or empty string
 			if(is_numeric($key) || !is_string($key) || !strlen($key)) continue;
@@ -250,10 +250,10 @@ class Amslib_Database_MySQL extends Amslib_Database
 			if(!is_numeric($value) && !is_string($value)) continue;
 			//	if string, quote it
 			if(is_string($value)) $value="'$value'";
-			
+
 			$fields[] = "$key=$value";
 		}
-		
+
 		return count($fields) ? implode($separator,$fields) : false;
 	}
 
@@ -325,7 +325,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			{
 				if(!mysql_select_db($details["database"],$c)){
 					$this->disconnect();
-					$this->debug("DATABASE","could not open requested database",$details);
+					$this->debug("DATABASE","Connection to database worked however Credentials don't appear to give access to database '{$details["database"]}'",$details);
 				}else{
 					$this->connection = $c;
 
@@ -334,16 +334,16 @@ class Amslib_Database_MySQL extends Amslib_Database
 					return true;
 				}
 			}else{
-				$this->debug("DATABASE","failed to connect",$details);
+				$this->debug("DATABASE","Connection to database failed",$details);
 			}
 			$output = ob_get_clean();
 
 			//	Cause obviously, I don't want to log the password
 			if(strlen($output)){
-				$this->debug("DATABASE","connection attempt was not clean, output = ",$output,$details);
+				$this->debug("DATABASE","Connection to database failed and produced output = ",$output,$details);
 			}
 		}else{
-			$this->debug("DATABASE","connection details were not valid",$details);
+			$this->debug("DATABASE","Connection to database failed with the provided credentials",$details);
 		}
 
 		return false;
@@ -464,16 +464,16 @@ QUERY;
 			? $this->getLastInsertId()
 			: false;
 	}
-	
+
 	/**
 	 * 	method: insertFields
-	 * 
+	 *
 	 * 	A method to insert into a table an array of fields which is built and imploded beforehand
-	 * 	
+	 *
 	 * 	params:
 	 * 		$table - The database table to insert into
 	 * 		$fields - An array of fields to insert
-	 * 
+	 *
 	 *  returns:
 	 *  	-	Boolean false if the fields returned was not valid
 	 *  	-	Boolean false if the insert failed
@@ -482,11 +482,11 @@ QUERY;
 	public function insertFields($table,$fields)
 	{
 		$fields = $this->buildFields($fields);
-		
+
 		if(!$fields) return false;
-		
+
 		$table = $this->escape($table);
-		
+
 		return $this->insert("$table set $fields");
 	}
 
@@ -501,7 +501,7 @@ QUERY;
 			? $this->getLastAffectedCount(true,$allow_zero)
 			: false;
 	}
-	
+
 	/**
 	 * 	method: updateFields
 	 *
@@ -520,11 +520,11 @@ QUERY;
 	public function updateFields($table,$fields,$allow_zero=true)
 	{
 		$fields = $this->buildFields($fields);
-	
+
 		if(!$fields) return false;
-	
+
 		$table = $this->escape($table);
-	
+
 		return $this->update("$table set $fields",$allow_zero);
 	}
 
