@@ -157,10 +157,19 @@ class Amslib_Debug
 			}
 		}
 
+		$text = self::getErrorLocation().": ".implode(", ",$data);
+
+		error_log($text);
+
+		return array("function"=>$function,"data"=>$data,"log"=>$text);
+	}
+
+	static public function getErrorLocation()
+	{
 		$stack = self::getStackTrace();
 
 		//	eliminate this function from the stack
-		$location = array_slice($stack,2,1);
+		$location = array_slice($stack,3,1);
 		$location = array_shift($location);
 
 		$line = isset($location["line"]) ? "@{$location["line"]}" : "";
@@ -173,9 +182,19 @@ class Amslib_Debug
 			? basename($location["file"])."({$location["function"]})"
 			: $location;
 
-		error_log($log = $location.$line.": ".implode(", ",$data));
+		$location = is_array($location) && Amslib_Array::hasKeys($location,"function")
+			? "{$location["function"]}()"
+			: $location;
 
-		return array("function"=>$function,"data"=>$data,"log"=>$log);
+		if(is_array($location)){
+			error_log("Debugging error, location of error not available: ".Amslib_Debug::vdump($location));
+		}
+
+		$location = is_array($location)
+			? "__ERROR_unknown_locationX"
+			: $location;
+
+		return $location.$line;
 	}
 
 	/**
