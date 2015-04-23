@@ -191,7 +191,7 @@ class Amslib_Debug
 		}
 
 		$location = is_array($location)
-			? "__ERROR_unknown_locationX"
+			? "__ERROR_unknown_location"
 			: $location;
 
 		return $location.$line;
