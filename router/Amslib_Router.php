@@ -238,7 +238,13 @@ class Amslib_Router
 		$route["handler"] = $list;
 
 		if(isset($route["debug"])){
-			Amslib_Debug::log("debugging finalised service = ",$route);
+			$debug = "debugging finalised service = ".Amslib_Debug::vdump(array("route"=>$route,"service"=>$service));
+			
+			if($route["debug"] == "die"){
+				die(__METHOD__.", ".$debug);
+			}else{
+				Amslib_Debug::log($debug);
+			}
 		}
 
 		return $route;
