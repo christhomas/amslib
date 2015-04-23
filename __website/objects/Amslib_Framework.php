@@ -70,14 +70,14 @@ class Amslib_Framework extends Amslib_MVC
 
 		$params["site_title"] = $this->getSiteTitle();
 
+		$params["url_home"] = $this->getURL("home");
+
+		$params["meta_description"]	=	$this->getValue("meta_description");
+		$params["meta_author"]		=	$this->getValue("meta_author");
+
 		if(strpos($params["route"],"error") !== false){
 			$params["data"] = $this->getErrorData();
 		}else{
-			$params["url_home"] = $this->getURL("home");
-
-			$params["meta_description"]	=	$this->getValue("meta_description");
-			$params["meta_author"]		=	$this->getValue("meta_author");
-
 			$params["logo"] = $this->getFile("/resources/logo.png");
 
 			$params["url_about"]			=	$this->getURL("about-framework");

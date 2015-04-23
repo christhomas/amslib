@@ -17,7 +17,14 @@ class Amslib_Plugin_Config_XML
 		if(!in_array($type,array("scan","load"))) return false;
 
 		if(count($callback) == 2 && is_string($callback[0])){
-			$callback[0] = Amslib_Plugin_Manager::getPlugin($callback[0])->getAPI();
+			$cb = Amslib_Plugin_Manager::getPlugin($callback[0]);
+
+			if(!$cb){
+				Amslib_Debug::log("callback[0] was invalid, please check XML for errors.  Are you sure this is a scan selector?");
+				return false;
+			}
+
+			$callback[0] = $cb ? $cb->getAPI() : false;
 		}
 
 		//	With XML, we want to anchor each selector to the package tag, sometimes you can nest
