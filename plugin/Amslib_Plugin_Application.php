@@ -1,4 +1,4 @@
-<?php
+\<?php
 /*******************************************************************************
  * Copyright (c) {15/03/2008} {Christopher Thomas}
  * This library is free software; you can redistribute it and/or
@@ -201,7 +201,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		Amslib_Website::setPath("amslib",		Amslib::locate());
 		Amslib_Website::setPath("website",		$base);
 		Amslib_Website::setPath("website_ext",	Amslib_Router_URL::externalURL($base));
-		Amslib_Website::setPath("host",			$_SERVER["HTTP_HOST"]);
+		Amslib_Website::setPath("host",			Amslib_Router_URL::externalURL());
 		Amslib_Website::setPath("admin",		"__ADMIN__");
 		Amslib_Website::setPath("plugin",		"__PLUGIN__");
 		Amslib_Website::setPath("docroot",		Amslib_File::documentRoot());
