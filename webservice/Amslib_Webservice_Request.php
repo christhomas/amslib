@@ -143,7 +143,7 @@ class Amslib_Webservice_Request
 		Amslib_Debug::log(
 			"EXCEPTION: ",		$exception,
 			"WEBSERVICE URL: ",	$this->url,
-			"PARAMS: ",			$params,
+			"PARAMS: ",			$this->params,
 			"DATA: ",			$reply
 		);
 
