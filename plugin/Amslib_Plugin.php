@@ -1296,6 +1296,13 @@ class Amslib_Plugin
 		return $api ? $api->renderView($view,$parameters) : false;
 	}
 
+	static public function listObject($plugin)
+	{
+		$api = Amslib_Plugin_Manager::getAPI($plugin);
+
+		return $api ? $api->listObject() : false;
+	}
+
 	/**
 	 * 	method:	getObject
 	 *

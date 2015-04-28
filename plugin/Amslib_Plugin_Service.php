@@ -198,7 +198,7 @@ class Amslib_Plugin_Service
 		//	Call the success or failure terminators
 		foreach(Amslib_Array::valid($this->terminatorList[$type]) as $t){
 			$response = $this->runHandler($t["object"],$t["method"],$source);
-			
+
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($response);
 		}
@@ -206,7 +206,7 @@ class Amslib_Plugin_Service
 		//	Call the common terminators
 		foreach(Amslib_Array::valid($this->terminatorList["common"]) as $t){
 			$response = $this->runHandler($t["object"],$t["method"],$source);
-			
+
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($response);
 		}
@@ -446,33 +446,33 @@ class Amslib_Plugin_Service
 			if(Amslib_Array::hasKeys($h,array("plugin","object","method")) && $h["plugin"] == "framework"){
 				//	do nothing
 			}else{
-				//	This significantly helps with debugging, because you can quickly see 
+				//	This significantly helps with debugging, because you can quickly see
 				//	the plugin which if it was missing, defaults to group, but this information
 				//	doesn't get output into the debugging information.
 				if(!isset($h["plugin"])) $h["plugin"] = $group;
-				
+
 				$debug = array();
-				
+
 				if($h["plugin"]){
-					$debug["api"] = $h["plugin"]; 
-					
+					$debug["api"] = $h["plugin"];
+
 					$h["api"] = Amslib_Plugin_Manager::getAPI($h["plugin"]);
 				}else{
 					$list = Amslib_Array::valid(Amslib_Plugin_Manager::listPlugin());
 					$list = implode(",",$list);
 					Amslib_Debug::log("plugin requested was not valid, list = $list");
 				}
-				
+
 				if($h["api"]){
 					$debug["object"] = isset($h["object"]) ? $h["object"] : $debug["api"];
-					
-					$h["object"] = isset($h["object"]) ? $h["api"]->getObject($h["object"],true) : $api;
+
+					$h["object"] = isset($h["object"]) ? $h["api"]->getObject($h["object"],true) : $h["api"];
 				}else{
 					$list = Amslib_Array::valid(Amslib_Plugin_Manager::listAPI());
 					$list = implode(",",$list);
 					Amslib_Debug::log("api object '{$debug["api"]}' was not valid, api list = $list");
 				}
-				
+
 				if($h["object"]){
 					$h["method"] = isset($h["method"]) ? $h["method"] : false;
 				}else{
@@ -481,7 +481,7 @@ class Amslib_Plugin_Service
 					Amslib_Debug::log("object '{$debug["object"]}' on api '{$debug["api"]}' not valid, object list = $list");
 				}
 			}
-			
+
 			$params = array($h["plugin"],$h["object"],$h["method"],$h["input"],$h["record"],$h["global"],$h["failure"]);
 
 			if($h["type"] == "service"){
@@ -495,7 +495,7 @@ class Amslib_Plugin_Service
 			call_user_func_array(array($this,$method),$params);
 		}
 	}
-	
+
 
 	/**
 	 * 	method:	setHandler
@@ -530,7 +530,7 @@ class Amslib_Plugin_Service
 	public function setTerminator($type,$plugin,$object,$method,$source="post",$record=true,$global=false,$failure=true)
 	{
 		//	NOTE: perhaps we should check this information before blindly accepting it
-		
+
 		if(!in_array($type,array("common","success","failure"))){
 			return false;
 		}
@@ -556,19 +556,19 @@ class Amslib_Plugin_Service
 		//	NOTE:	this might seem a little harsh, but it's a critical error, your object doesn't have
 		//			the method you said it would, probably this means something in your code is broken
 		//			and you need to know about it and fix it.
-		
+
 		if(!is_object($object)){
 			Amslib_Debug::log("\$object parameter was not an object, ".Amslib_Debug::dump($object));
 			$object = "__INVALID_OBJECT__";
 			die("FAILURE[c:$object][m:$method]-> object did not exist, so cannot execute service handler");
 		}
-		
+
 		if(!method_exists($object,$method)){
 			Amslib_Debug::log("'$method' was not found on object, ".Amslib_Debug::dump($method));
 			$object = get_class($object);
 			die("FAILURE[c:$object][m:$method]-> method did not exist, so cannot execute service handler");
 		}
-		
+
 		return call_user_func_array(array($object,$method),array($this,&$source));
 	}
 

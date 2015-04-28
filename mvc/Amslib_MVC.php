@@ -428,7 +428,7 @@ class Amslib_MVC extends Amslib_Mixin
 	 */
 	public function listObject()
 	{
-		return array_keys($this->object);
+		return array_merge(array("api"=>$this->getName(),array_keys($this->object)));
 	}
 
 	/**
