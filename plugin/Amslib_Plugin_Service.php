@@ -528,21 +528,23 @@ class Amslib_Plugin_Service
 	 */
 	public function runHandler($object,$method,&$source)
 	{
-		if(method_exists($object,$method)){
-			return call_user_func_array(array($object,$method),array($this,&$source));
-		}
-
-		if(!is_object($object)){
-			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib_Debug::dump($object));
-			$object = "__INVALID_OBJECT__";
-		}else{
-			$object = get_class($object);
-		}
-
 		//	NOTE:	this might seem a little harsh, but it's a critical error, your object doesn't have
 		//			the method you said it would, probably this means something in your code is broken
 		//			and you need to know about it and fix it.
-		die("FAILURE[c:$object][m:$method]-> method did not exist, so could not be called");
+		
+		if(!is_object($object)){
+			Amslib_Debug::log("\$object parameter was not an object, ".Amslib_Debug::dump($object));
+			$object = "__INVALID_OBJECT__";
+			die("FAILURE[c:$object][m:$method]-> object did not exist, so cannot execute service handler");
+		}
+		
+		if(!method_exists($object,$method)){
+			Amslib_Debug::log("'$method' was not found on object, ".Amslib_Debug::dump($method));
+			$object = get_class($object);
+			die("FAILURE[c:$object][m:$method]-> method did not exist, so cannot execute service handler");
+		}
+		
+		return call_user_func_array(array($object,$method),array($this,&$source));
 	}
 
 	/**
