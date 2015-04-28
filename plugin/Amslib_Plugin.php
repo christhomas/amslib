@@ -509,6 +509,8 @@ class Amslib_Plugin
 		$file = $this->getComponent("object",$array["value"]);
 		if(file_exists($file)){
 			$a["file"] = $file;
+		}else{
+			$a["error"] = "file doesn't exist '$file'";
 		}
 
 		$this->data["api"] = $a;
