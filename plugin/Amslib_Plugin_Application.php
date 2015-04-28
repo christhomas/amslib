@@ -1,4 +1,4 @@
-\<?php
+<?php
 /*******************************************************************************
  * Copyright (c) {15/03/2008} {Christopher Thomas}
  * This library is free software; you can redistribute it and/or
