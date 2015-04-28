@@ -444,21 +444,45 @@ class Amslib_Plugin_Service
 			//	NOTE: this means framework has become a system name and cannot be used as a name of any plugin?
 			//	NOTE: perhaps amslib can become a plugin, therefore the plugin will be "amslib" and not "framework" ?
 			if(Amslib_Array::hasKeys($h,array("plugin","object","method")) && $h["plugin"] == "framework"){
-				$plugin	=	$h["plugin"];
-				$object	=	$h["object"];
-				$method	=	$h["method"];
+				//	do nothing
 			}else{
-				$plugin	=	isset($h["plugin"]) ? $h["plugin"] : $group;
-				$api	=	Amslib_Plugin_Manager::getAPI($plugin);
-				$object	=	isset($h["object"]) ? $api->getObject($h["object"],true) : $api;
-				$method	=	isset($h["method"]) ? $h["method"] : "missingServiceMethod";
+				//	This significantly helps with debugging, because you can quickly see 
+				//	the plugin which if it was missing, defaults to group, but this information
+				//	doesn't get output into the debugging information.
+				if(!isset($h["plugin"])) $h["plugin"] = $group;
+				
+				$debug = array();
+				
+				if($h["plugin"]){
+					$debug["api"] = $h["plugin"]; 
+					
+					$h["api"] = Amslib_Plugin_Manager::getAPI($h["plugin"]);
+				}else{
+					$list = Amslib_Array::valid(Amslib_Plugin_Manager::listPlugin());
+					$list = implode(",",$list);
+					Amslib_Debug::log("plugin requested was not valid, list = $list");
+				}
+				
+				if($h["api"]){
+					$debug["object"] = isset($h["object"]) ? $h["object"] : $debug["api"];
+					
+					$h["object"] = isset($h["object"]) ? $h["api"]->getObject($h["object"],true) : $api;
+				}else{
+					$list = Amslib_Array::valid(Amslib_Plugin_Manager::listAPI());
+					$list = implode(",",$list);
+					Amslib_Debug::log("api object '{$debug["api"]}' was not valid, api list = $list");
+				}
+				
+				if($h["object"]){
+					$h["method"] = isset($h["method"]) ? $h["method"] : false;
+				}else{
+					$list = Amslib_Array::valid(Amslib_Plugin::listObject($h["plugin"]));
+					$list = implode(",",$list);
+					Amslib_Debug::log("object '{$debug["object"]}' on api '{$debug["api"]}' not valid, object list = $list");
+				}
 			}
-
-			if(!$plugin || !$object || $method == "missingServiceMethod"){
-				Amslib_Debug::log("handler maybe invalid, handler = ",$h);
-			}
-
-			$params = array($plugin,$object,$method,$h["input"],$h["record"],$h["global"],$h["failure"]);
+			
+			$params = array($h["plugin"],$h["object"],$h["method"],$h["input"],$h["record"],$h["global"],$h["failure"]);
 
 			if($h["type"] == "service"){
 				$method = "setHandler";
@@ -471,6 +495,7 @@ class Amslib_Plugin_Service
 			call_user_func_array(array($this,$method),$params);
 		}
 	}
+	
 
 	/**
 	 * 	method:	setHandler
@@ -528,21 +553,23 @@ class Amslib_Plugin_Service
 	 */
 	public function runHandler($object,$method,&$source)
 	{
-		if(method_exists($object,$method)){
-			return call_user_func_array(array($object,$method),array($this,&$source));
-		}
-
-		if(!is_object($object)){
-			error_log(__METHOD__.": \$object parameter is not an object, ".Amslib_Debug::dump($object));
-			$object = "__INVALID_OBJECT__";
-		}else{
-			$object = get_class($object);
-		}
-
 		//	NOTE:	this might seem a little harsh, but it's a critical error, your object doesn't have
 		//			the method you said it would, probably this means something in your code is broken
 		//			and you need to know about it and fix it.
-		die("FAILURE[c:$object][m:$method]-> method did not exist, so could not be called");
+		
+		if(!is_object($object)){
+			Amslib_Debug::log("\$object parameter was not an object, ".Amslib_Debug::dump($object));
+			$object = "__INVALID_OBJECT__";
+			die("FAILURE[c:$object][m:$method]-> object did not exist, so cannot execute service handler");
+		}
+		
+		if(!method_exists($object,$method)){
+			Amslib_Debug::log("'$method' was not found on object, ".Amslib_Debug::dump($method));
+			$object = get_class($object);
+			die("FAILURE[c:$object][m:$method]-> method did not exist, so cannot execute service handler");
+		}
+		
+		return call_user_func_array(array($object,$method),array($this,&$source));
 	}
 
 	/**
