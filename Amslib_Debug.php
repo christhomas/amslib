@@ -7,7 +7,7 @@
  */
 class Amslib_Debug
 {
-	static public $dumpLimit = 1;
+	static public $dumpLimit = 0;
 	/**
 	 * 	method:	dump
 	 *
@@ -20,20 +20,22 @@ class Amslib_Debug
 	 * 	NOTES:
 	 * 		-	INCLUDES A VERY CRUDE DEBUGGING TOOL
 	 * 			If var_dump attempts to dump something that is huge, it'll run out of memory,
-	 * 			causing your PHP script to fail and when this happens, you don't really get
+	 * 			causing your PHP script to fail and when this happens you don't really get
 	 * 			any information that is useful, WHICH variable was too large.
-	 * 			This simple counter will let you die after a certain number of calls to this method
-	 * 			YES, I TOLD YOU IT WAS CRUDE.....Alter the dumpLimit static member variable in order to adjust
-	 * 			_when_ to die, meaning you can run the code and when it dies here, you know the code up to
-	 * 			that point is ok then you increase or decrease the limit until your code runs out of memory
-	 * 			and you know the call which was responsible for running out of memory.
-	 * 			I felt a bit dirty just writing this code.....
+	 * 		-	This simple counter will let you die after a certain number of calls to this method
+	 * 			Set the dumpLimit to > 0 value to adjust when to die, e.g: Amslib_Debug::dumpLimit = 5
+	 * 		-	This dumpLimit means, it'll execute for example 5 dumps before dying and showing you
+	 * 			which dump was executing by outputting a stack trace allowing you to fiddle with the value
+	 * 			and see which variable is causing the problem
+	 * 		-	I felt a bit dirty just writing this code.....
 	 */
 	static public function dump($variable)
 	{
-		//	NOTE: uncomment these lines to run the dirty nasty dump debugger :(
-		//static $run = 0;
-		//if(++$run == self::$dumpLimit) die(self::getStackTrace("type","text"));
+		//	dirty hacky dump limiter to try to find out where dumping a variable runs out of memory
+		if(self::$dumpLimit > 1){
+			static $run = 0;
+			if(++$run == self::$dumpLimit) die(self::getStackTrace("type","text"));
+		}
 
 		//	Obtain the variables to dump
 		$args = func_get_args();
@@ -157,19 +159,19 @@ class Amslib_Debug
 			}
 		}
 
-		$text = self::getErrorLocation().": ".implode(", ",$data);
+		$text = self::getCodeLocation(3).": ".implode(", ",$data);
 
 		error_log($text);
 
 		return array("function"=>$function,"data"=>$data,"log"=>$text);
 	}
 
-	static public function getErrorLocation()
+	static public function getCodeLocation($stack_offset=2)
 	{
 		$stack = self::getStackTrace();
 
 		//	eliminate this function from the stack
-		$location = array_slice($stack,3,1);
+		$location = array_slice($stack,$stack_offset,1);
 		$location = array_shift($location);
 
 		$line = isset($location["line"]) ? "@{$location["line"]}" : "";
