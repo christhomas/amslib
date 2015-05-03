@@ -283,6 +283,7 @@ class Amslib_Website
 				}break;
 			}
 
+			Amslib_Benchmark::log();
 			header("Location: $location");
 		}else{
 			$message = __METHOD__."-> The \$location parameter was an invalid string: '$location'";
@@ -315,6 +316,8 @@ class Amslib_Website
 		//	if there is a callback specified, wrap up the json into a jsonp format
 		$jsonp = Amslib_GET::get("callback");
 		if($jsonp) $json = "$jsonp($json)";
+
+		Amslib_Benchmark::log();
 
 		if($block === true)		die($json);
 		if($block === false)	print($json);

@@ -45,26 +45,51 @@ class Amslib_Benchmark
 
 	static public function get($title=NULL,$totals=true)
 	{
-		if($title === NULL){
-			return array(
-				"list"		=> self::$entries,
-				"totals"	=> self::totals()
-			);
+		$data = array();
+
+		if($totals){
+			$data["totals"] = self::totals();
 		}
 
-		foreach(self::$entries as $e){
-			if($e["title"] == $title) return $e;
+		if($title){
+			foreach(self::$entries as $e){
+				if($e["title"] == $title){
+					$data["entry"] = $e;
+					break;
+				}
+			}
+		}else{
+			$data["list"] = self::$entries;
 		}
+
+		if($totals) return $data;
+
+		if(isset($data["entry"])) return $data["entry"];
+		if(isset($data["list"])) return $data["list"];
 
 		return false;
 	}
 
 	static public function totals()
 	{
+		if(!self::$start) return NULL;
+
 		return array(
 			"start"		=>	self::$start,
 			"finish"	=>	self::$finish,
 			"total"		=>	self::$total
 		);
+	}
+
+	static public function log()
+	{
+		foreach(self::get(NULL,false) as $item)
+		{
+			Amslib_Debug::log("title[{$item["title"]}], time[{$item["time"]}], diff[{$item["diff"]}]");
+		}
+
+		if($totals = self::totals()){
+			Amslib_Debug::log("start[{$totals["start"]}], finish[{$totals["finish"]}], total[{$totals["total"]}]");
+		}
 	}
 }

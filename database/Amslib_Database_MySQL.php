@@ -317,7 +317,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 		$this->disconnect();
 
-		$valid = Amslib_Array::hasKeys($details,"server","username","database","encoding") && strlen($password);
+		$valid = Amslib_Array::hasKeys($details,array("server","username","database","encoding")) && strlen($password);
 
 		if($valid){
 			ob_start();
