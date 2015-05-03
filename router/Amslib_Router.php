@@ -52,6 +52,8 @@ class Amslib_Router
 		"javascript"	=>	array()
 	);
 
+	static protected $is_initialised = false;
+
 	/**
 	 * variable: $base
 	 *
@@ -239,7 +241,7 @@ class Amslib_Router
 
 		if(isset($route["debug"])){
 			$debug = "debugging finalised service = ".Amslib_Debug::vdump(array("route"=>$route,"service"=>$service));
-			
+
 			if($route["debug"] == "die"){
 				die(__METHOD__.", ".$debug);
 			}else{
@@ -257,6 +259,8 @@ class Amslib_Router
 	 */
 	static public function initialise()
 	{
+		if(self::$is_initialised) return;
+
 		$search = array_merge($_SERVER,$_GET);
 		self::$pathList["__WEBSITE_ROOT__"] = $search["__WEBSITE_ROOT__"];
 
@@ -275,6 +279,8 @@ class Amslib_Router
 		//	This allows amslib to add routes the system can use to import/export router configurations
 		//	This isn't part of your application, this is part of the system and used to self-configure
 		self::load(Amslib::locate()."/router/router.xml","xml","framework");
+
+		self::$is_initialised = true;
 	}
 
 	/**
@@ -361,6 +367,8 @@ class Amslib_Router
 	 */
 	static public function getBase()
 	{
+		self::initialise();
+
 		return self::$base;
 	}
 
