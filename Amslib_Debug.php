@@ -169,18 +169,22 @@ class Amslib_Debug
 	static public function getCodeLocation($stack_offset=2)
 	{
 		$stack = self::getStackTrace();
-
 		//	eliminate this function from the stack
-		$location = array_slice($stack,$stack_offset,1);
-		$location = array_shift($location);
+		$location = array_slice($stack,$stack_offset);
 
-		$line = isset($location["line"]) ? "@{$location["line"]}" : "";
+		$line = array_shift($location);
 
-		$location = Amslib_Array::hasKeys($location,array("class","type","function"))
+		$location = count($location) == 0
+			? ltrim(Amslib_Website::web($line["file"]),"/")
+			: array_shift($location);
+
+		$line = isset($line["line"]) ? "@{$line["line"]}" : "";
+
+		$location = is_array($location) && Amslib_Array::hasKeys($location,array("class","type","function"))
 			? $location["class"].$location["type"].$location["function"]
 			: $location;
 
-		$location = is_array($location) && Amslib_Array::hasKeys($location,"file","function")
+		$location = is_array($location) && Amslib_Array::hasKeys($location,array("file","function"))
 			? basename($location["file"])."({$location["function"]})"
 			: $location;
 
