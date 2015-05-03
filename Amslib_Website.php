@@ -66,9 +66,9 @@ class Amslib_Website
 	static public function moveFile($src_filename,$directory,&$dst_filename,&$fullpath=NULL)
 	{
 		$s = $src_filename;
-		$d = self::abs($directory);
+		$d = self::absolute($directory);
 
-		if(!file_exists($s) && $a=self::abs($s)){
+		if(!file_exists($s) && $a=self::absolute($s)){
 			$s = file_exists($a) ? $a : false;
 		}
 
@@ -87,7 +87,7 @@ class Amslib_Website
 	{
 		$s = $src_filename;
 
-		if(!file_exists($s) && $a=self::abs($s)){
+		if(!file_exists($s) && $a=self::absolute($s)){
 			$s = file_exists($a) ? $a : false;
 		}
 
@@ -107,7 +107,7 @@ class Amslib_Website
 
 	static public function listFiles($dir,$recurse=false,$exit=true)
 	{
-		return Amslib_File::listFiles(self::abs($dir),$recurse,$exit);
+		return Amslib_File::listFiles(self::absolute($dir),$recurse,$exit);
 	}
 
 	/**
@@ -207,7 +207,7 @@ class Amslib_Website
 	 */
 	static public function web($url="")
 	{
-		$url = self::rel($url);
+		$url = self::relative($url);
 
 		$extension = Amslib_File::getFileExtension(basename($url));
 
