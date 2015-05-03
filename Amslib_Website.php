@@ -173,6 +173,8 @@ class Amslib_Website
 	 */
 	static public function absolute($url="",$resolve=false)
 	{
+		self::set();
+
 		if(!is_string($url)){
 			Amslib_Debug::log("stack_trace",$url);
 
@@ -207,12 +209,14 @@ class Amslib_Website
 	 */
 	static public function web($url="")
 	{
+		self::set();
+
 		$url = self::relative($url);
 
 		$extension = Amslib_File::getFileExtension(basename($url));
 
+		//	NOTE: This prevents /some/path/index.php being converted to /some/path/index.php/
 		$url = "/$url".($extension ? "" : "/");
-
 		$url = str_replace(self::$location,"",$url);
 
 		return self::reduceSlashes("/$url");
