@@ -85,7 +85,7 @@ class Amslib_Benchmark
 	{
 		foreach(self::get(NULL,false) as $item)
 		{
-			Amslib_Debug::log("title[{$item["title"]}], time[{$item["time"]}], diff[{$item["diff"]}]");
+			Amslib_Debug::log("code_location,{$item["title"]}","time[{$item["time"]}], diff[{$item["diff"]}]");
 		}
 
 		if($totals = self::totals()){

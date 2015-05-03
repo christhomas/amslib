@@ -120,18 +120,18 @@ class Amslib_Debug
 		$args		=	func_get_args();
 		$data		=	array();
 		$maxlength	=	8912;
-		$function	=	false;
+		$location	=	NULL;
 
 		foreach($args as $k=>$a){
 			if(is_string($a) && strpos($a,"stack_trace") === 0){
 				$parts = explode(",",$a);
 				array_shift($parts); // discard the "stack_trace" part
 
-				$args = count($parts)
+				$parts = count($parts)
 					? array("type","text","limit",$parts)
 					: array("type","text");
 
-				$stack = call_user_func_array("Amslib_Debug::getStackTrace",$args);
+				$stack = call_user_func_array("Amslib_Debug::getStackTrace",$parts);
 				$stack = explode("\n",$stack);
 
 				foreach($stack as $k=>$row){
@@ -141,10 +141,8 @@ class Amslib_Debug
 				$data[] = "memory_usage_human = ".self::getMemoryUsage(true,true);
 			}else if(is_string($a) && strpos($a,"memory_usage") === 0){
 				$data[] = "memory_usage = ".self::getMemoryUsage(true);
-			}else if(is_string($a) && strpos($a,"func_offset") === 0){
-				$command = explode(",",array_shift($args));
-
-				if(count($command) == 1) $function = $command[0];
+			}else if(is_string($a) && strpos($a,"code_location") === 0){
+				list($ignore,$location) = explode(",",$a);
 			}else{
 				if(is_object($a))	$a = array(get_class($a),self::dump($a));
 				if(is_array($a)) 	$a = self::dump($a);
@@ -159,11 +157,15 @@ class Amslib_Debug
 			}
 		}
 
-		$text = self::getCodeLocation(3).": ".implode(", ",$data);
+		if($location === NULL){
+			$location = self::getCodeLocation(3);
+		}
+
+		$text = $location.": ".implode(", ",$data);
 
 		error_log($text);
 
-		return array("function"=>$function,"data"=>$data,"log"=>$text);
+		return array("data"=>$data,"log"=>$text);
 	}
 
 	static public function getCodeLocation($stack_offset=2)
