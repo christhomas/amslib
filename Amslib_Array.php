@@ -192,6 +192,15 @@ class Amslib_Array
 	 */
 	static public function hasKeys($array,$keys,$ignoreFailure=false)
 	{
+		if(is_string($keys) && is_string($ignoreFailure)){
+			Amslib_Debug::log(
+				"keys and ignoreFailure parameters are both detected as strings, probably you ".
+				"forgot this method accepts an array of strings and are just passing the keys ".
+				"one by one to the parameters of this function which will result in the first ".
+				"being tested and ignoreFailure will be enabled, I don't think this is what you intended"
+			);
+		}
+
 		return self::testKeys($array,$keys,$ignoreFailure,true);
 	}
 
