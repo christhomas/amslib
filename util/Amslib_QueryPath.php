@@ -30,7 +30,8 @@ class Amslib_QueryPath
 				Amslib_Debug::log("QueryPath did not produce clean output when processing document, this is not normal",$warnings);
 			}
 		}catch(Exception $e){
-			Amslib_Debug::log("QueryPath trigger an exception processing document",$document,$e->getMessage());
+			Amslib_Debug::log("Exception Document: ",$document);
+			Amslib_Debug::log("Exception Message: ".$e->getMessage());
 		}
 
 		//	Something went wrong, create a dummy object (this hasn't been tested properly)
