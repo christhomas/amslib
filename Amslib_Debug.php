@@ -161,7 +161,7 @@ class Amslib_Debug
 		}
 
 		if($location === NULL){
-			$location = self::getCodeLocation(3);
+			$location = self::getCodeLocation(2);
 		}
 
 		$text = $location.": ".implode(", ",$data);
