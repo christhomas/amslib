@@ -481,6 +481,8 @@ QUERY;
 	 */
 	public function insertFields($table,$fields)
 	{
+		$this->setErrorStackDepth(6);
+		
 		$fields = $this->buildFields($fields);
 
 		if(!$fields) return false;
@@ -519,6 +521,8 @@ QUERY;
 	 */
 	public function updateFields($table,$fields,$allow_zero=true)
 	{
+		$this->setErrorStackDepth(6);
+		
 		$fields = $this->buildFields($fields);
 
 		if(!$fields) return false;
