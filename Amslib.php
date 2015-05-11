@@ -147,6 +147,33 @@ class Amslib
 	}
 
 	/**
+	 * 	method: safeCall
+	 *
+	 * 	A method to call a function with parameters, in a way which won't output anything to the browser
+	 * 	but will drop any error or feedback output to the error log, this is useful when you absolutely have no
+	 * 	guarantee that no output will reach the browser causeing annoying issues
+	 *
+	 * 	params:
+	 * 		$function - The function to execute by passing it to call_user_func_arra
+	 * 		$params - The parameters to pass to the function
+	 *
+	 * 	returns:
+	 * 		Whatever the function you've executed returns
+	 */
+	static public function safeCall($function,$params=array())
+	{
+		ob_start();
+		$return = call_user_func_array($function,$params);
+		$output = ob_get_clean();
+
+		if(strlen($output)){
+			Amslib_Debug::log($output);
+		}
+
+		return $return;
+	}
+
+	/**
 	 * 	method:	getRandomCode
 	 *
 	 * 	todo: write documentation

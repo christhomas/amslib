@@ -17,29 +17,17 @@ class Amslib_QueryPath
 	{
 		self::$qp = false;
 
-		try{
-			//	NOTE: we do this output buffer trick to contain any output it might make, but strlen the output afterwards
-			//			if there was a problem, surely it'll be non-zero if it outputs anything, but we prevent this
-			//			from breaking the output of the system, so we contain the problem, although we don't skip it
-			//			or even control it, because I haven't found a way to safely do that without breaking other stuff
-			ob_start();
-			self::$qp = QueryPath::with($document, $selector, $options);
-			$warnings = ob_get_clean();
+		//	NOTE: we do this output buffer trick to contain any output it might make, but strlen the output afterwards
+		//			if there was a problem, surely it'll be non-zero if it outputs anything, but we prevent this
+		//			from breaking the output of the system, so we contain the problem, although we don't skip it
+		//			or even control it, because I haven't found a way to safely do that without breaking other stuff
+		ob_start();
+		self::$qp = QueryPath::with($document, $selector, $options);
+		$warnings = ob_get_clean();
 
-			if(strlen($warnings)){
-				Amslib_Debug::log("QueryPath did not produce clean output when processing document, this is not normal",$warnings);
-			}
-		}catch(Exception $e){
-			Amslib_Debug::log("Exception Document: ",$document);
-			Amslib_Debug::log("Exception Message: ".$e->getMessage());
-		}
-
-		//	Something went wrong, create a dummy object (this hasn't been tested properly)
-		if(!self::$qp){
-			Amslib_Debug::log("QueryPath was invalid, creating a dummy object to prevent code break");
-			self::$qp = qp(
-			"<?xml version='1.0' encoding='UTF-8'?>
-			 <querypath><invalid/></querypath>");
+		//	Something went wrong, but didn't trigger an exception
+		if(strlen($warnings)){
+			Amslib_Debug::log("QueryPath did not produce clean output when processing document, this is not normal",$warnings);
 		}
 
 		return self::$qp;
