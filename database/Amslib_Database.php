@@ -113,6 +113,15 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		//	Probably you're not setting this, so this will always return an invalid result
 		return $this->lastResult;
 	}
+	
+	protected function setErrorStackDepth($depth=NULL)
+	{
+		static $defaultDepth = 5;
+	
+		$depth = intval($depth);
+	
+		$this->errorStackDepth = $depth ? $depth : $defaultDepth;
+	}
 
 	/**
 	 * 	method:	__construct
@@ -123,6 +132,9 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	{
 		$this->table	=	array();
 		$this->errors	=	array();
+		
+		//	Set the default error stack depth for code location reporting
+		$this->setErrorStackDepth();
 
 		//	This test is to detect whether you are accidentally going
 		//	to try to auto-connect a database object which has no database
@@ -319,8 +331,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 				"db_error_num"		=>	$args[2],
 				"db_last_insert"	=>	$this->lastInsertId,
 				"db_insert_id"		=>	$args[3],
-				//	note: I don't think I need the entire trace, maybe just the first couple of methods
-				"db_location"		=>	array_slice(Amslib_Debug::getStackTrace(),2,1)
+				"db_location"		=>	Amslib_Debug::getCodeLocation($this->errorStackDepth)
 		);
 
 		if(count($this->errors) > $this->errorCount){
@@ -328,6 +339,8 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		}
 
 		$this->debug("ERROR",$error);
+		
+		$this->setErrorStackDepth();
 	}
 
 	/**

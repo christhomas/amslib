@@ -249,7 +249,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 			//	skip values if non-numeric or string
 			if(!is_numeric($value) && !is_string($value)) continue;
 			//	if string, quote it
-			if(is_string($value)) $value="'$value'";
+			if(is_string($value)) $value="'".$this->escape($value)."'";
 
 			$fields[] = "$key=$value";
 		}
@@ -481,6 +481,8 @@ QUERY;
 	 */
 	public function insertFields($table,$fields)
 	{
+		$this->setErrorStackDepth(6);
+		
 		$fields = $this->buildFields($fields);
 
 		if(!$fields) return false;
@@ -519,6 +521,8 @@ QUERY;
 	 */
 	public function updateFields($table,$fields,$allow_zero=true)
 	{
+		$this->setErrorStackDepth(6);
+		
 		$fields = $this->buildFields($fields);
 
 		if(!$fields) return false;
