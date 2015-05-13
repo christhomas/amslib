@@ -171,9 +171,10 @@ class Amslib_Debug
 		return array("data"=>$data,"log"=>$text);
 	}
 
-	static public function getCodeLocation($stack_offset=2)
+	static public function getCodeLocation($stack_offset=2,$exception=NULL)
 	{
-		$stack = self::getStackTrace();
+		$stack = $exception ? self::getStackTrace("exception",$exception) : self::getStackTrace();
+
 		//	eliminate this function from the stack
 		$location = array_slice($stack,$stack_offset);
 
