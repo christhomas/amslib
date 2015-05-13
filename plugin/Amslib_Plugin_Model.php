@@ -104,6 +104,10 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	 */
 	public function initialiseObject($api)
 	{
+		if(!$api){
+			Amslib_Debug::log("api variable passed was not valid");
+		}
+
 		$this->api = $api;
 		$this->copyConnection($this->api->getModel());
 
