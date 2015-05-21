@@ -138,6 +138,6 @@ HAS_TABLE;
 
 		$result = $this->select($query,1);
 
-		return isset($result["COUNT(*)"]) && $result["COUNT(*)"]
+		return isset($result["COUNT(*)"]) && $result["COUNT(*)"];
 	}
 }
