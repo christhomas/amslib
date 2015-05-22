@@ -61,6 +61,21 @@ class Amslib_Plugin_Service
 	protected $failureCB;
 	protected $format;
 	protected $data;
+	
+	/**
+	 * 	boolean: $optimise
+	 * 
+	 * 	Whether the webservice result will attempt to optimise it's result so remove not-useful-elements
+	 * 
+	 * 	This will, if enabled do the following
+	 * 		-	If there is only one handler, it'll remove the handler and the result will equal the data contained within it
+	 * 		-	If there is only one block of data, in that single handler, the result will equal the data inside the first block
+	 * 	
+	 * 	This allows the return structure to be much simpler than requiring people to see things they might not be required
+	 * 	to know about, allowing a simpler structure, unless more complex results are generated, then the full result set
+	 * 	will be returned
+	 */
+	protected $optimise;
 
 	//	NOTE:	technically "session" is the wrong word, since we could be building a JSON
 	//			structure to send back, it's an old word associated with the old system
@@ -123,6 +138,34 @@ class Amslib_Plugin_Service
 
 		$this->data = array();
 	}
+	
+	/**
+	 * 	method: getResultData
+	 * 
+	 * 	Process the session data into the final result before passing back to a method
+	 * 	which will output it somehow
+	 * 
+	 * 	returns:
+	 * 		An array structure processed into the final result
+	 * 
+	 * 	notes:
+	 * 		-	It's not safe to remove any more levels here, such as service.data or service.errors, etc
+	 * 			because it's the minimum necessary to work
+	 */
+	protected function getResultData()
+	{
+		//	Optionally remove the handlers, if there is only one of them
+		if($this->getOptimiseState() && count($this->session[self::HD]) == 1){
+			$this->session = $this->session[self::HD][0];
+
+			//	Now you've got rid of the handlers, you can optionally optimise the next level as well
+			if(count($this->session) == 1){
+				$this->session = current($this->session);
+			}
+		}
+		
+		return $this->session;
+	}
 
 	/**
 	 * 	method:	successSESSION
@@ -131,7 +174,7 @@ class Amslib_Plugin_Service
 	 */
 	protected function successSESSION()
 	{
-		$_SESSION[self::SR] = $this->session;
+		$_SESSION[self::SR] = $this->getResultData();
 
 		Amslib_Website::redirect($this->getSuccessURL(),true);
 	}
@@ -143,7 +186,7 @@ class Amslib_Plugin_Service
 	 */
 	protected function failureSESSION()
 	{
-		$_SESSION[self::SR] = $this->session;
+		$_SESSION[self::SR] = $this->getResultData();
 
 		Amslib_Website::redirect($this->getFailureURL(),true);
 	}
@@ -156,7 +199,7 @@ class Amslib_Plugin_Service
 	protected function successJSON()
 	{
 		//	NOTE: I don't like the method name "outputJSON", I think it's ugly and not elegant
-		Amslib_Website::outputJSON($this->session,true);
+		Amslib_Website::outputJSON($this->getResultData(),true);
 	}
 
 	/**
@@ -166,7 +209,7 @@ class Amslib_Plugin_Service
 	 */
 	protected function failureJSON()
 	{
-		Amslib_Website::outputJSON($this->session,true);
+		Amslib_Website::outputJSON($this->getResultData(),true);
 	}
 
 	/**
@@ -380,6 +423,26 @@ class Amslib_Plugin_Service
 	{
 		$this->setSuccessURL($url);
 		$this->setFailureURL($url);
+	}
+	
+	/**
+	 * 	method: setOptimiseState
+	 *
+	 * 	todo: write documentation
+	 */
+	public function setOptimiseState($state)
+	{
+		$this->optimise = $state == "true";
+	}
+	
+	/**
+	 * 	method: getOptimiseState
+	 * 
+	 * 	todo: write documentation
+	 */
+	public function getOptimiseState()
+	{
+		return $this->optimise;
 	}
 
 	/**
@@ -611,9 +674,11 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function execute()
+	public function execute($optimise=false)
 	{
 		$state = false;
+		
+		$this->setOptimiseState($optimise);
 
 		foreach($this->handlerList as $h){
 			//	TODO: investigate why h["plugin"] was returning false??

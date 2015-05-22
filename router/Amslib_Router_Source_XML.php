@@ -42,13 +42,16 @@ class Amslib_Router_Source_XML
 
 	protected function sanitise($type,$data)
 	{
-		if(count($data) != 2) return $data;
-
-		//	NOTE: Why do I do this? because I've forgotten and now I'm wondering
-		if(in_array($type,array("input","output","record"))){
-			$data = array_key_exists($data[1],$data[0]) ? $data[0][$data[1]] : false;
+		//	NOTE:	This happened for any other type than "type" because the sanitise check is different
+		//			and it's much simpler for the other types of sanitation
+		if($type != "type"){
+			$data = array_key_exists($type,$data) ? $data[$type] : false;
 		}
-
+		
+		//	Data was invalid, so we cannot sanitise it, return null
+		//	NOTE: we should throw an exception probably in the future
+		if(!$data) return NULL;
+		
 		switch($type){
 			case "input":{
 				if(!in_array($data,array("get","post"))){
@@ -65,6 +68,12 @@ class Amslib_Router_Source_XML
 			case "record":{
 				if(!in_array($data,array("true","false","global"))){
 					$data = "true";
+				}
+			}break;
+			
+			case "optimise":{
+				if(!in_array($data,array("true","false"))){
+					$data = "false";
 				}
 			}break;
 
@@ -182,7 +191,7 @@ class Amslib_Router_Source_XML
 		//	Ignore if there are no children
 		if(empty($array["child"])) return;
 
-		$d 				=	array("input"=>"post","output"=>"session","record"=>"true");
+		$d 				=	array("input"=>"post","output"=>"session","record"=>"true","optimise"=>"false");
 		$a 				=	array_merge($d,array_map("strtolower",$array["attr"]));
 		$a["type"]		=	$array["tag"];
 		$a["src"]		=	array();
@@ -192,9 +201,10 @@ class Amslib_Router_Source_XML
 		$handler_types = array("service","terminator_common","terminator_success","terminator_failure");
 
 		//	Grab the default route input and output values, in order to potentially use them when setting up the handlers
-		$a["input"]		=	self::sanitise("input",array($a,"input"));
-		$a["output"]	=	self::sanitise("output",array($a,"output"));
-		$a["record"]	=	self::sanitise("record",array($a,"record"));
+		$a["input"]		=	self::sanitise("input",$a);
+		$a["output"]	=	self::sanitise("output",$a);
+		$a["record"]	=	self::sanitise("record",$a);
+		$a["optimise"]	=	self::sanitise("optimise",$a);
 
 		foreach($array["child"] as $child){
 			switch($child["tag"]){

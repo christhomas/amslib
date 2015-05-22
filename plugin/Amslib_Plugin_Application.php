@@ -447,7 +447,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	{
 		$route = Amslib_Router::getRoute();
 
-		//	NOTE:	Perhaps dying horribly like you just drove off a cliff in your
+		//	NOTE:	Perhaps die()'ing horribly like you just drove off a cliff in your
 		//				lamborghini with a martini in one hand, a hooker blowing you whilst
 		//				smoking an enormous cigar made of 100 dollar bills is NOT the best
 		//				way to handle failure?
@@ -483,7 +483,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 		$service = Amslib_Plugin_Service::getInstance();
 		$service->installHandlers($route["group"],$route["output"],$route["handler"]);
-		$service->execute();
+		$service->execute($route["optimise"]);
 	}
 
 	/**
