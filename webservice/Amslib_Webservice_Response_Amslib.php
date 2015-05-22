@@ -229,10 +229,19 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 	 */
 	public function setValidationData($plugin,$data)
 	{
-		/*$this->data[self::pluginToName($plugin)][self::VD] = $data;
-		 */
+		$this->data[self::pluginToName($plugin)][self::VD] = $data;
 	}
 
+	/**
+	 * 	method:	getValidationData
+	 *
+	 * 	todo: write documentation
+	 */
+	public function getValidationData($plugin=NULL,$default=array())
+	{
+		return Amslib_Array::valid($this->getHandlerData($plugin,$default,self::VD));
+	}
+	
 	/**
 	 * 	method:	setValidationErrors
 	 *
@@ -244,19 +253,6 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 			$errors["no_errors"] = true;
 			$errors["debug_help"] = "No Errors set and array was empty, perhaps validation failed because source was empty?";
 		}
-		/*
-		$this->data[self::pluginToName($plugin)][self::VE] = $errors;
-		*/
-	}
-
-	/**
-	 * 	method:	getValidationData
-	 *
-	 * 	todo: write documentation
-	 */
-	public function getValidationData($plugin=NULL,$default=array())
-	{
-		return Amslib_Array::valid($this->getHandlerData($plugin,$default,self::VD));
 	}
 
 	/**
@@ -274,11 +270,6 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getServiceErrors($plugin=NULL,$default=false)
-	{
-		return $this->getHandlerData($plugin,$default,self::SE);
-	}
-
 	public function setServiceData($plugin,$name,$value)
 	{
 		return $this->setHandlerData($plugin,$name,$value);
@@ -292,8 +283,18 @@ class Amslib_Webservice_Response_Amslib extends Amslib_Webservice_Response_JSON
 	public function getServiceData($plugin=NULL,$default=false,$key=false)
 	{
 		$data = $this->getHandlerData($plugin,$default,self::SD);
-
+	
 		return $key && $data && isset($data[$key]) ? $data[$key] : $data;
+	}
+	
+	/**
+	 * 	method: getServiceErrors
+	 * 
+	 * 	todo: write documentation
+	 */
+	public function getServiceErrors($plugin=NULL,$default=false)
+	{
+		return $this->getHandlerData($plugin,$default,self::SE);
 	}
 
 	public function deleteServiceData($plugin,$name=NULL)
