@@ -599,7 +599,7 @@ class Amslib_Plugin_Service
 		//	the method you said it would, probably this means something in your code is broken
 		//	and you need to know about it and fix it.
 
-		if(class_exists($object) && is_callable("$object::$method")){
+		if(is_string($object) && class_exists($object) && is_callable("$object::$method")){
 			$callback = "$object::$method";
 		}else if(!is_object($object)){
 			Amslib_Debug::log("\$object parameter was not an object, ".Amslib_Debug::dump($object));
