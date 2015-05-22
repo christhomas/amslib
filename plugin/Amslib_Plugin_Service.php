@@ -181,7 +181,9 @@ class Amslib_Plugin_Service
 		//	NOTE: what happens if you are running from https:// ?
 		$http = strpos($url,"http://") !== false ? "http://" : "";
 		//	strip away the http:// part first, because it won't survive the reduceSlashes otherwise
-		return $http.Amslib_File::reduceSlashes(str_replace("http://","",$url));
+		$url = $http.Amslib_File::reduceSlashes(str_replace("http://","",$url));
+		
+		return $url == "/" ? "" : $url;
 	}
 
 	/**
@@ -341,7 +343,9 @@ class Amslib_Plugin_Service
 	 */
 	public function setSuccessURL($url)
 	{
-		$this->session[self::US] = $this->sanitiseURL($url);
+		$url = $this->sanitiseURL($url);
+		
+		if(strlen($url)) $this->session[self::US] = $url;
 	}
 
 	/**
@@ -361,7 +365,9 @@ class Amslib_Plugin_Service
 	 */
 	public function setFailureURL($url)
 	{
-		$this->session[self::UF] = $this->sanitiseURL($url);
+		$url = $this->sanitiseURL($url);
+		
+		if(strlen($url)) $this->session[self::UF] = $url; 
 	}
 
 	/**
