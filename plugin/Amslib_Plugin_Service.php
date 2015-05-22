@@ -53,7 +53,6 @@ class Amslib_Plugin_Service
 	const SE = "service.errors";
 	const DB = "database.errors";
 	const HD = "handlers";
-	const FB = "feedback";
 	const SC = "success";
 	const US = "url_success";
 	const UF = "url_failure";
@@ -257,8 +256,6 @@ class Amslib_Plugin_Service
 		//			so you're just creating session keys and not using them
 		Amslib_SESSION::get(self::SR,false,true);
 
-		$this->showFeedback();
-
 		//	Obtain the old return_ajax parameter, either as json or false
 		$return_ajax = Amslib_POST::get("return_ajax",false) ? "json" : false;
 		//	Obtain the new output_format parameter, or default to the return_ajax value if not found
@@ -308,18 +305,12 @@ class Amslib_Plugin_Service
 			case "json":{
 				$this->successCB = "successJSON";
 				$this->failureCB = "failureJSON";
-
-				//	When doing ajax calls, you should never show feedback on the next available page
-				$this->hideFeedback();
 			}break;
 
 			case "xml":{
 				//	NOTE: I just add the code here because it's easy to do, but this isn't supported yet
 				$this->successCB = "successXML";
 				$this->failureCB = "failureXML";
-
-				//	When doing ajax calls, you should never show feedback on the next available page
-				$this->hideFeedback();
 			}break;
 
 			default:{
@@ -419,26 +410,6 @@ class Amslib_Plugin_Service
 		return is_string($key) && strlen($key) && isset(self::$var[$key])
 			? self::$var[$key]
 			: NULL;
-	}
-
-	/**
-	 * 	method:	showFeedback
-	 *
-	 * 	todo: write documentation
-	 */
-	public function showFeedback()
-	{
-		$this->session[self::FB] = true;
-	}
-
-	/**
-	 * 	method:	hideFeedback
-	 *
-	 * 	todo: write documentation
-	 */
-	public function hideFeedback()
-	{
-		$this->session[self::FB] = false;
 	}
 
 	public function installHandlers($group,$output,$handlerList)
@@ -948,16 +919,6 @@ class Amslib_Plugin_Service
 	/*****************************************************************************
 	 * 	STATIC API TO RETRIEVE SESSION DATA
 	*****************************************************************************/
-	/**
-	 * 	method:	displayFeedback
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function displayFeedback()
-	{
-		return self::$serviceData[self::FB];
-	}
-
 	/**
 	 * 	method:	hasData
 	 *

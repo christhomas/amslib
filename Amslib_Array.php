@@ -390,6 +390,9 @@ class Amslib_Array
 	 * method:removeKeys
 	 *
 	 * This method is a wrapper around unset to make it easier and less verbose in your code to remove multiple elements
+	 * 
+	 * note:
+	 * 	-	I'm not entirely sure this code does 100% of what I think it should
 	 */
 	static public function removeKeys($array,$keys)
 	{
