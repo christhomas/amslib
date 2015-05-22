@@ -169,9 +169,7 @@ class Amslib_File
 		$path 	=	self::win2unix($path);
 		$rel	=	Amslib_String::lchop($path,$root);
 
-		$final = self::reduceSlashes("$root/$rel");
-
-		return $final;
+		return Amslib_String::reduceSlashes("$root/$rel");
 	}
 
 	/**
@@ -187,7 +185,7 @@ class Amslib_File
 		$path 	=	self::win2unix($path);
 		$rel	=	Amslib_String::lchop($path,$root);
 
-		return self::reduceSlashes("/$rel");
+		return Amslib_String::reduceSlashes("/$rel");
 	}
 
 	/**
@@ -317,7 +315,7 @@ class Amslib_File
 		$list = array();
 
 		if(is_dir($dir)){
-			$list = glob(self::reduceSlashes("$dir/*"));
+			$list = glob(Amslib_String::reduceSlashes("$dir/*"));
 
 			if($recurse){
 				foreach($list as $l){
