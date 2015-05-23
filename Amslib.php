@@ -45,8 +45,6 @@ class Amslib
 		"standard"	=> false,
 		"exception"	=> false
 	);
-	
-	static protected $__shutdown_url = false;
 
 	/**
 	 * 	method:	importFile
@@ -411,94 +409,6 @@ class Amslib
 		spl_autoload_register("amslib_autoload_exception");
 
 		return true;
-	}
-
-	/**
-	 * 	method:	shutdown
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function shutdown($url,$callback=NULL,$warnings=false)
-	{
-		self::$__shutdown_url = $url;
-		
-		register_shutdown_function(array("Amslib","__shutdown_handler"),$callback,$warnings);
-		
-		set_exception_handler(array("Amslib","__shutdown_exception"));
-	}
-	
-	/**
-	 * 	method:	__shutdown_handler
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function __shutdown_handler($callback,$warnings)
-	{
-		$url = self::$__shutdown_url;
-		
-		if(!$url){
-			exit(__METHOD__.", url was invalid, cannot execute");
-		}
-		
-		//	E_PARSE: you cannot catch parse errors without a prepend file.
-		//	NOTE: I think this has to do with being a different apache request stage
-	
-		//	All the errors I believe to be fatal/non-recoverable/you're fucked/your code is shit
-		$fatal = array(E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,E_COMPILE_WARNING,E_STRICT,E_USER_ERROR);
-	
-		if($warnings){
-			$fatal+=array(E_WARNING,E_NOTICE,E_CORE_WARNING,E_USER_WARNING,E_RECOVERABLE_ERROR);
-		}
-	
-		$e = @error_get_last();
-	
-		if($e && @is_array($e) && @in_array($e["type"],$fatal))
-		{
-			$error = base64_encode(json_encode(array(
-					"code"	=>	isset($e['type']) ? $e['type'] : 0,
-					"msg"	=>	isset($e['message']) ? $e['message'] : '',
-					"file"	=>	isset($e['file']) ? $e['file'] : '',
-					"line"	=>	isset($e['line']) ? $e['line'] : '',
-					"uri"	=>	$_SERVER["REQUEST_URI"],
-					"root"	=>	isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/"
-			)));
-	
-			header("Location: $url?data=$error");
-		}
-	}
-	
-	/**
-	 * 	method: __shutdown_exception
-	 * 
-	 * 	todo: write documentation
-	 */
-	static public function __shutdown_exception($e)
-	{
-		$url = self::$__shutdown_url;
-		
-		if(!$url){
-			exit(__METHOD__.", url was invalid, cannot execute");
-		}
-		
-		$stack = Amslib_Debug::getStackTrace("exception",$e);
-		$location = array_slice($stack,2);
-		
-		$line = array_shift($location);
-		
-		$location = count($location) == 0
-			? ltrim(Amslib_Website::web($line["file"]),"/")
-			: array_shift($location);
-		
-		$error = base64_encode(json_encode(array(
-			"code"	=> "Exception: ".get_class($e),
-			"msg"	=> $e->getMessage(),
-			"file"	=> $line["file"],
-			"line"	=> $line["line"],
-			"uri"	=> $_SERVER["REQUEST_URI"],
-			"root"	=> isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/"
-		)));
-		
-		header("Location: $url?data=$error");
 	}
 }
 

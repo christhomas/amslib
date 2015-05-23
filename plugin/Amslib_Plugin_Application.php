@@ -258,7 +258,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 
 	public function setShutdown($url)
 	{
-		Amslib::shutdown($url);
+		Amslib_Shutdown::setup($url);
 	}
 
 	/**
@@ -445,6 +445,9 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	 */
 	public function runService()
 	{
+		//	NOTE: This might be presumptuous to say every webservice will output it's data in JSON format
+		Amslib_Shutdown::setMode("json");
+
 		$route = Amslib_Router::getRoute();
 
 		//	NOTE:	Perhaps die()'ing horribly like you just drove off a cliff in your
