@@ -164,6 +164,7 @@ class Amslib_Plugin_Service
 
 			unset($this->session[self::HD]);
 			$this->session = array_merge($this->session,$data);
+			$this->session["optimised"] = true;
 		}
 
 		return $this->session;
