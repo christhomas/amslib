@@ -136,7 +136,7 @@ class Amslib_Shutdown
 			}break;
 
 			case "json":{
-				self::renderJSON($url,$data);
+				self::renderJSON($data);
 			}break;
 		}
 	}
@@ -148,10 +148,10 @@ class Amslib_Shutdown
 
 	static public function renderText($url,$data)
 	{
-		self::renderJSON($url,$data);
+		self::renderJSON($data);
 	}
 
-	static public function renderJSON($url,$data)
+	static public function renderJSON($data)
 	{
 		header("Cache-Control: no-cache");
 		header("Content-Type: application/json");
