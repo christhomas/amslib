@@ -61,16 +61,16 @@ class Amslib_Plugin_Service
 	protected $failureCB;
 	protected $format;
 	protected $data;
-	
+
 	/**
 	 * 	boolean: $optimise
-	 * 
+	 *
 	 * 	Whether the webservice result will attempt to optimise it's result so remove not-useful-elements
-	 * 
+	 *
 	 * 	This will, if enabled do the following
 	 * 		-	If there is only one handler, it'll remove the handler and the result will equal the data contained within it
 	 * 		-	If there is only one block of data, in that single handler, the result will equal the data inside the first block
-	 * 	
+	 *
 	 * 	This allows the return structure to be much simpler than requiring people to see things they might not be required
 	 * 	to know about, allowing a simpler structure, unless more complex results are generated, then the full result set
 	 * 	will be returned
@@ -138,16 +138,16 @@ class Amslib_Plugin_Service
 
 		$this->data = array();
 	}
-	
+
 	/**
 	 * 	method: getResultData
-	 * 
+	 *
 	 * 	Process the session data into the final result before passing back to a method
 	 * 	which will output it somehow
-	 * 
+	 *
 	 * 	returns:
 	 * 		An array structure processed into the final result
-	 * 
+	 *
 	 * 	notes:
 	 * 		-	It's not safe to remove any more levels here, such as service.data or service.errors, etc
 	 * 			because it's the minimum necessary to work
@@ -156,14 +156,16 @@ class Amslib_Plugin_Service
 	{
 		//	Optionally remove the handlers, if there is only one of them
 		if($this->getOptimiseState() && count($this->session[self::HD]) == 1){
-			$this->session = $this->session[self::HD][0];
+			$data = $this->session[self::HD][0];
 
-			//	Now you've got rid of the handlers, you can optionally optimise the next level as well
-			if(count($this->session) == 1){
-				$this->session = current($this->session);
+			if(count($data) == 1){
+				$data = current($data);
 			}
+
+			unset($this->session[self::HD]);
+			$this->session = array_merge($this->session,$data);
 		}
-		
+
 		return $this->session;
 	}
 
@@ -224,7 +226,7 @@ class Amslib_Plugin_Service
 		$http = strpos($url,"http://") !== false ? "http://" : "";
 		//	strip away the http:// part first, because it won't survive the reduceSlashes otherwise
 		$url = $http.Amslib_File::reduceSlashes(str_replace("http://","",$url));
-		
+
 		return $url == "/" ? "" : $url;
 	}
 
@@ -378,7 +380,7 @@ class Amslib_Plugin_Service
 	public function setSuccessURL($url)
 	{
 		$url = $this->sanitiseURL($url);
-		
+
 		if(strlen($url)) $this->session[self::US] = $url;
 	}
 
@@ -400,8 +402,8 @@ class Amslib_Plugin_Service
 	public function setFailureURL($url)
 	{
 		$url = $this->sanitiseURL($url);
-		
-		if(strlen($url)) $this->session[self::UF] = $url; 
+
+		if(strlen($url)) $this->session[self::UF] = $url;
 	}
 
 	/**
@@ -424,7 +426,7 @@ class Amslib_Plugin_Service
 		$this->setSuccessURL($url);
 		$this->setFailureURL($url);
 	}
-	
+
 	/**
 	 * 	method: setOptimiseState
 	 *
@@ -434,10 +436,10 @@ class Amslib_Plugin_Service
 	{
 		$this->optimise = $state == "true";
 	}
-	
+
 	/**
 	 * 	method: getOptimiseState
-	 * 
+	 *
 	 * 	todo: write documentation
 	 */
 	public function getOptimiseState()
@@ -677,7 +679,7 @@ class Amslib_Plugin_Service
 	public function execute($optimise=false)
 	{
 		$state = false;
-		
+
 		$this->setOptimiseState($optimise);
 
 		foreach($this->handlerList as $h){
