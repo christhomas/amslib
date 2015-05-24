@@ -115,19 +115,13 @@ class Amslib_Shutdown
 		}
 
 		$stack = Amslib_Debug::getStackTrace("exception",$e);
-		$location = array_slice($stack,2);
-
-		$line = array_shift($location);
-
-		$location = count($location) == 0
-			? ltrim(Amslib_Website::web($line["file"]),"/")
-			: array_shift($location);
 
 		$data = array(
 				"code"	=> "Exception: ".get_class($e),
 				"msg"	=> $e->getMessage(),
-				"file"	=> $line["file"],
-				"line"	=> $line["line"],
+				"file"	=> $stack[0]["file"],
+				"line"	=> $stack[0]["line"],
+				"stack"	=> $stack,
 				"uri"	=> $_SERVER["REQUEST_URI"],
 				"root"	=> isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/"
 		);
