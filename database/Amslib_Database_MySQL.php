@@ -384,6 +384,28 @@ class Amslib_Database_MySQL extends Amslib_Database
 
 		return $returnBoolean ? !!$result : $result;
 	}
+	
+	/**
+	 * 	method:	multi
+	 *
+	 * 	Same method as Amslib_Database_MySQL::query() except it allows you to run mutiple statements at once
+	 */
+	public function multi($query)
+	{
+		$result = false;
+	
+		if($this->isConnected()){
+			$this->setLastQuery($query);
+			$result = mysql_multi_query($query,$this->connection);
+			$this->debug("QUERY",$query);
+	
+			if(!$result){
+				$this->setError($query);
+			}
+		}
+	
+		return $result;
+	}
 
 	/**
 	 * 	method:	select
