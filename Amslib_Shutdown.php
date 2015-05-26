@@ -117,7 +117,8 @@ class Amslib_Shutdown
 		$stack = Amslib_Debug::getStackTrace("exception",$e);
 
 		$data = array(
-				"code"	=> "Exception: ".get_class($e),
+				"error"	=> "Uncaught Exception",
+				"code"	=> get_class($e),
 				"msg"	=> $e->getMessage(),
 				"file"	=> $stack[0]["file"],
 				"line"	=> $stack[0]["line"],
