@@ -416,6 +416,7 @@ class Amslib_Database_MySQL extends Amslib_Database
 	{
 		$handle = $this->query("select $query");
 
+		//	record error information?
 		if(!$handle) return false;
 
 		$handle = $this->setHandle($handle);

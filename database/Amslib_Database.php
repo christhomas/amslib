@@ -122,6 +122,28 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	
 		$this->errorStackDepth = $depth ? $depth : $defaultDepth;
 	}
+	
+	/**
+	 * 	array: $cache
+	 *
+	 * 	An array of PDOStatements which have been cached by previous queries
+	 */
+	protected $cache;
+	
+	/**
+	 * 	method: getStatement
+	 *
+	 * 	Retrieve the PDOStatement based on the query, from the query cache or created
+	 * 	anew and inserted into the cache for next time
+	 */
+	protected function getStatement($query)
+	{
+		if(!isset($this->cache[$query])){
+			$this->cache[$query] = $this->connection->prepare($query);
+		}
+	
+		return $this->cache[$query];
+	}
 
 	/**
 	 * 	method:	__construct
@@ -151,15 +173,6 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	/**
 	 *  method:	getInstance
 	 *
-	 *  note: When launching the translator object with the option database,
-	 *  when launching the load function an instance of this object is needed.
-	 *  I do not know if you are aware of the problem and you have a way to
-	 *  cope with it.  I assume you are not aware of the problem since you
-	 *  have to do several installation to see it(in my case) so I am adding
-	 *  this function.  If you don't want getInstance in here I will create
-	 *  a wrapper "capsule" object for my projects.
-	 *
-	 *  Chris: alfonso, I don't have any idea what you mean, sorry
 	 */
 	static public function getInstance()
 	{
@@ -384,9 +397,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function isConnected()
 	{
-		if($this->connection) return true;
-
-		return false;
+		return !!$this->connection;
 	}
 
 	/**
@@ -436,7 +447,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			$v->add("password","text",true);
 			$v->add("database","text",true);
 			$v->add("server","text",true);
-			$v->add("encoding","text",true,array("default"=>"utf8"));
+			$v->add("encoding","text",true,array("default"=>"utf8","limit-input"=>array("utf8","latin1")));
 
 			$s = $v->execute();
 			$d = $v->getValid();
@@ -490,25 +501,6 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		}
 
 		return $shared;
-	}
-
-	/**
-	 * 	method:	setFetchMethod
-	 *
-	 * 	todo: write documentation
-	 */
-	public function setFetchMethod($method)
-	{
-		/* The original MySQL Code, please convert to PDO
-		if(function_exists($method)){
-			$this->fetchMethod = $method;
-		}else{
-			$message = "Your fetch method is not valid, ALL database queries will fail, this is not acceptable";
-			$this->debug(__METHOD__,$message);
-			die($message);
-		}
-		*/
-		return false;
 	}
 
 	/**
@@ -699,23 +691,15 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		$valid = Amslib_Array::hasKeys($details,"server","username","database","encoding") && strlen($password);
 
 		if($valid){
-			ob_start();
-				try {
-					$dsn = "mysql:host=$server:dbname=$database";
+			try {
+				$dsn = "mysql:host=$server:dbname=$database;charset={$details["encoding"]}";
 
-					$this->connection = new PDO($dsn,$details["username"],$password);
+				$this->connection = new PDO($dsn,$details["username"],$password);
 
-					$this->setEncoding($details["encoding"]);
-
-					return $this->isConnected();
-				} catch (PDOException $e){
-					$this->debug("DATABASE","failed to connect",$details,$e->getMessage());
-				}
-			$output = ob_get_clean();
-
-			//	Cause obviously, I don't want to log the password
-			if(strlen($output)){
-				$this->debug("DATABASE","connection attempt was not clean, output = ",$output,$details);
+				return $this->isConnected();
+			} catch (PDOException $e){
+				$this->debug("DATABASE","failed to connect",$details,$e->getMessage());
+				throw $e;
 			}
 		}else{
 			$this->debug("DATABASE","connection details were not valid",$details);
@@ -743,11 +727,17 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 * 	notes:
 	 * 		-	I added the returnBoolean parameter to keep the code compatible with the mysql version
 	 */
-	public function query($query,$returnBoolean=false)
+	public function query($query,$params=array(),$returnBoolean=false)
 	{
 		$this->setLastQuery($query);
-
-		$results = $this->connection->query($query);
+		
+		$statement = $this->getStatement($query);
+		
+		foreach(Amslib_Array::valid($params) as $p){
+			call_user_func_array(array($statement,"bindValue"),$p);
+		}
+		
+		$results = $statement->execute();
 		$this->debug("QUERY",$query);
 		return $results->fetchAll();
 	}
@@ -757,29 +747,24 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 *
 	 * 	todo: write documentation
 	 */
-	public function select($query,$numResults=0,$optimise=false){ // <-- put this { on a new line please
-		$query ="select $query";
-		$this->setLastQuery($query);
-
+	public function select($query,$params=array(),$numResults=0,$optimise=false)
+	{
+		$statement = $this->getStatement("select $query");
+		
+		foreach(Amslib_Array::valid($params) as $p){
+			call_user_func_array(array($statement,"bindValue"),$p);
+		}
+		
+		//	record error information?
+		if(!$statement->execute()) return false;
+		
+		$statement = $this->setHandler($statement);
+		
+		//	If you don't request a number of results, use the maximum number we could possible accept
+		//	NOTE: you'll run out of memory a long time before you reach this count
 		if($numResults == 0) $numResults = PHP_INT_MAX;
-		$results = $this->connection->query($query);
-		$this->debug("QUERY",$query);
-		//	chris:	oh cool!! fetchAll ? ignoring numResults completely :D
-
-		//	chris:	double points for coolness!!!! when it returns 70,000 results, leading
-		//			your PHP script to fail as it runs out of memory :D
-		return $results->fetchAll();
-
-		//	chris:	alfonso, this is why in the mysql layer, you have getResults, meaning you
-		//			can obtain 100 results in the main query and then subsequent calls to getResults
-		//			can "page" through the other 1,000,000 rows instead of obtaining all 1m rows into memory
-		//			you can then write an outside loop grabbing X rows then processing them and obtaining
-		//			another X rows.  Combined with the pushHandle, popHandle, meaning you can do a query which
-		//			returns 1,000,000 rows, return in 250 row chunks, pushHandle, do other SQL operations, such as
-		//			processing the rows back into the database, doing other select calls etc, then at the end of the loop
-		//			popHandle and getResults(250) to obtain another 250 rows from the original sql query, it's quite
-		//			useful, but probably not compatible with transactions (begin, commit, rollback) due to memory
-		//			conditions (you might run out of it)
+		
+		return $this->getResults($numResults,$statment,$optimise);
 	}
 
 	/**
@@ -1010,15 +995,14 @@ QUERY;
 	 */
 	public function getResults($count,$handle=NULL,$optimise=false)
 	{
-		/* The original MySQL Code, please convert to PDO
 		$this->lastResult = array();
-
+		
 		//	Make sure the result handle is valid
 		if(!$this->isHandle($handle)) $handle = $this->getHandle();
 		if(!$this->isHandle($handle)) return false;
-
+		
 		for($a=0;$a<$count;$a++){
-			$row = call_user_func($this->fetchMethod,$handle);
+			$row = $handle->fetch();
 			//	We have no results left to obtain
 			if(!$row) break;
 			//	Otherwise record the result
@@ -1037,8 +1021,6 @@ QUERY;
 		}
 
 		return $this->lastResult;
-		*/
-		return false;
 	}
 
 	/**
@@ -1048,11 +1030,9 @@ QUERY;
 	 */
 	public function begin()
 	{
-		//	chris:	alfonso, you are assuming the connection is an object, what if
-		//			connection failed and somebody attempted to use the object
-		//			regardless, ignoring the failure? then this would cause your
-		//			code to error and die, right?
-		return $this->connection->beginTransaction();
+		return $this->isConnected() 
+			? $this->connection->beginTransaction() 
+			: false;
 	}
 
 	/**
@@ -1062,11 +1042,9 @@ QUERY;
 	 */
 	public function commit()
 	{
-		//	chris:	alfonso, you are assuming the connection is an object, what if
-		//			connection failed and somebody attempted to use the object
-		//			regardless, ignoring the failure? then this would cause your
-		//			code to error and die, right?
-		return $this->connection->commit();
+		return $this->isConnected()
+			? $this->connection->commit()
+			: false;
 	}
 
 	/**
@@ -1076,11 +1054,9 @@ QUERY;
 	 */
 	public function rollback()
 	{
-		//	chris:	alfonso, you are assuming the connection is an object, what if
-		//			connection failed and somebody attempted to use the object
-		//			regardless, ignoring the failure? then this would cause your
-		//			code to error and die, right?
-		return $this->connection->rollBack();
+		return $this->isConnected()
+			? $this->connection->rollBack()
+			: false;
 	}
 
 	/**
