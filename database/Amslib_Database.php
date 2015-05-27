@@ -609,10 +609,14 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		if($valid){
 			try {
 				$dsn = "mysql:host={$details["server"]}:dbname={$details["database"]};charset={$details["encoding"]}";
+				//Amslib_Debug::log("dsn = ",$dsn,$details["username"],$password);
 				
-				$this->connection = new PDO($dsn,$details["username"],$password);
-				$this->connection->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-				$this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE,PDO::FETCH_ASSOC);
+				$options = array(
+					PDO::ATTR_ERRMODE				=> PDO::ERRMODE_EXCEPTION,
+					PDO::ATTR_DEFAULT_FETCH_MODE	=> PDO::FETCH_ASSOC
+				);
+				
+				$this->connection = new PDO($dsn,$details["username"],$password,$options);
 				
 				$this->setEncoding($details["encoding"]);
 

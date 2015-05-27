@@ -256,9 +256,10 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		Amslib_Debug::enable($state);
 	}
 
-	public function setShutdown($url)
+	public function setShutdown($url,$mode="html")
 	{
 		Amslib_Shutdown::setup($url);
+		Amslib_Shutdown::setMode($mode);
 	}
 
 	/**
