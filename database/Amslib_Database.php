@@ -133,6 +133,10 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		if(!isset($this->statementCache[$key])){
 			$this->statementCache[$key] = $this->connection->prepare($query);
 		}
+		
+		if(!$this->statementCache[$key] instanceof PDOStatement){
+			throw new PDOException("prepare() did not return a PDOStatement");
+		}
 	
 		return $this->statementCache[$key];
 	}
@@ -872,16 +876,15 @@ QUERY;
 	 */
 	public function insert($query)
 	{
-		/* The original MySQL Code, please convert to PDO
-		$this->lastInsertId = false;
-
-		if($this->query("insert into $query")){
+		$statement = $this->getStatement("insert into $query");
+		
+		if(!$statement->execute()){
 			return false;
 		}
-
-		return $this->lastInsertId = mysql_insert_id($this->connection);
-		*/
-		return false;
+		
+		$this->setHandle($statement);
+		
+		return $this->lastInsertId = $this->getInsertId();
 	}
 
 	/**
@@ -893,20 +896,15 @@ QUERY;
 	{
 		$statement = $this->getStatement("update $query");
 		
-		if(!$statement){
+		if(!$statement->execute()){
 			return false;
 		}
 		
-		/* The original MySQL Code, please convert to PDO
-		if(!$this->query("update $query",true)){
-			return false;
-		}
-
-		$affected = mysql_affected_rows($this->connection);
-
-		return $allow_zero ? $affected >= 0 : $affected > 0;
-		*/
-		return false;
+		$statement = $this->setHandle($statement);
+		
+		$count = $this->getCount();
+		
+		return $allow_zero ? $count >= 0 : $count > 0;
 	}
 
 	/**
@@ -916,12 +914,15 @@ QUERY;
 	 */
 	public function delete($query)
 	{
-		/* The original MySQL Code, please convert to PDO
-		return $this->query("delete from $query")
-			? mysql_affected_rows($this->connection) >= 0
-			: false;
-		*/
-		return false;
+		$statement = $this->getStatement("delete from $query");
+		
+		if(!$statement->execute()){
+			return false;
+		}
+		
+		$statement = $this->setHandle($statement);
+		
+		return $this->getCount() >= 0;
 	}
 
 	/**
@@ -931,11 +932,9 @@ QUERY;
 	 */
 	public function getInsertId()
 	{
-		/* convert to PDO
-		return $this->lastInsertId = mysql_insert_id($this->connection);
-		*/
+		$this->isConnected();
 		
-		return 0;
+		return $this->connection->lastInsertId();
 	}
 	
 	/**
