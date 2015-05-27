@@ -608,8 +608,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 		if($valid){
 			try {
-				$dsn = "mysql:host={$details["server"]}:dbname={$details["database"]};charset={$details["encoding"]}";
-				//Amslib_Debug::log("dsn = ",$dsn,$details["username"],$password);
+				$dsn = "mysql:dbname={$details["database"]};host={$details["server"]};charset={$details["encoding"]}";
 				
 				$options = array(
 					PDO::ATTR_ERRMODE				=> PDO::ERRMODE_EXCEPTION,
