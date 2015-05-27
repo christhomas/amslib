@@ -994,7 +994,7 @@ QUERY;
 	 * 			Example: array(array("id_row"=>1,"field_1"=>"hello")) will become array("id_row"=>1,"field_1"=>"hello")
 	 * 			So you can see it's removed the outer array
 	 */
-	public function getResults($count,$handle=NULL,$optimise=false)
+	public function getResults($numResults,$handle=NULL,$optimise=false)
 	{
 		$this->selectResult = array();
 		
