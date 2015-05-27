@@ -122,7 +122,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 * 	Retrieve the PDOStatement based on the query, from the query cache or created
 	 * 	anew and inserted into the cache for next time
 	 */
-	protected function getStatement($query)
+	protected function getStatement($query,$params=array())
 	{
 		$this->isConnected();
 		
@@ -136,6 +136,10 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		
 		if(!$this->statementCache[$key] instanceof PDOStatement){
 			throw new PDOException("prepare() did not return a PDOStatement");
+		}
+		
+		foreach(Amslib_Array::valid($params) as $p){
+			call_user_func_array(array($this->statementCache[$key],"bindValue"),$p);
 		}
 	
 		return $this->statementCache[$key];
@@ -722,12 +726,8 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function query($query,$params=array(),$returnBoolean=false)
 	{
-		$statement = $this->getStatement($query);
-		
-		foreach(Amslib_Array::valid($params) as $p){
-			call_user_func_array(array($statement,"bindValue"),$p);
-		}
-		$this->setDebugState(true);
+		$statement = $this->getStatement($query,$params);
+
 		$result = $statement->execute();
 		
 		$this->debug("QUERY",$query);
@@ -742,11 +742,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function select($query,$params=array(),$numResults=0,$optimise=false)
 	{
-		$statement = $this->getStatement("select $query");
-		
-		foreach(Amslib_Array::valid($params) as $p){
-			call_user_func_array(array($statement,"bindValue"),$p);
-		}
+		$statement = $this->getStatement("select $query",$params);
 		
 		//	record error information?
 		if(!$statement->execute()) return false;
@@ -774,7 +770,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function selectColumn($query,$column=false,$numResults=0,$optimise=false)
 	{
-		$result = $this->select($query,$numResults,$optimise);
+		$result = $this->select($query,array(),$numResults,$optimise);
 
 		if(is_string($column)) $result = Amslib_Array::pluck($result,$column);
 
@@ -864,9 +860,9 @@ QUERY;
 	 *
 	 * 	todo: write documentation
 	 */
-	public function selectRow($query)
+	public function selectRow($query,$params=array())
 	{
-		return $this->select($query,1,true);
+		return $this->select($query,$params,1,true);
 	}
 
 	/**
@@ -874,9 +870,9 @@ QUERY;
 	 *
 	 * 	todo: write documentation
 	 */
-	public function insert($query)
+	public function insert($query,$params=array())
 	{
-		$statement = $this->getStatement("insert into $query");
+		$statement = $this->getStatement("insert into $query",$params);
 		
 		if(!$statement->execute()){
 			return false;
@@ -892,9 +888,9 @@ QUERY;
 	 *
 	 * 	todo: write documentation
 	 */
-	public function update($query,$allow_zero=true)
+	public function update($query,$params=array(),$allow_zero=true)
 	{
-		$statement = $this->getStatement("update $query");
+		$statement = $this->getStatement("update $query",$params);
 		
 		if(!$statement->execute()){
 			return false;
@@ -912,9 +908,9 @@ QUERY;
 	 *
 	 * 	todo: write documentation
 	 */
-	public function delete($query)
+	public function delete($query,$params=array())
 	{
-		$statement = $this->getStatement("delete from $query");
+		$statement = $this->getStatement("delete from $query",$params);
 		
 		if(!$statement->execute()){
 			return false;
