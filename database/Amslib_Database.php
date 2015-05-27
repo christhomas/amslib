@@ -1002,7 +1002,7 @@ QUERY;
 		if(!$this->isHandle($handle)) $handle = $this->getHandle();
 		if(!$this->isHandle($handle)) return false;
 		
-		for($a=0;$a<count;$a++){
+		for($a=0;$a<$count;$a++){
 			$row = $handle->fetch();
 			//	We have no results left to obtain
 			if(!$row) break;
@@ -1011,7 +1011,7 @@ QUERY;
 		}
 
 		//	see note on optimisation
-		if($optimise && count == 1){
+		if($optimise && $count == 1){
 			$this->selectResult = current($this->selectResult);
 		}
 
