@@ -604,7 +604,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 		$this->disconnect();
 
-		$valid = Amslib_Array::hasKeys($details,"server","username","database","encoding") && strlen($password);
+		$valid = Amslib_Array::hasKeys($details,array("server","username","database","encoding")) && strlen($password);
 
 		if($valid){
 			try {
