@@ -95,7 +95,7 @@ class Amslib_Shutdown
 				}break;
 
 				case "json":{
-					self::renderJSON($url,$data);
+					self::renderJSON($data);
 				}break;
 			}
 		}

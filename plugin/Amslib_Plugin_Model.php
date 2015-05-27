@@ -45,15 +45,19 @@
  * 		-	(23/10/2014): I still think this object is stupid and
  * 			the debugging code is probably not very nice, I should
  * 			do something nicer, build into the base layer
+ * 		-	(27/05/2015): Slowly but surely, being deleted and all the
+ * 			functionality is being removed
  *
  */
-class Amslib_Plugin_Model extends Amslib_Database_MySQL
+class Amslib_Plugin_Model extends Amslib_Database
 {
+	/**
+	 * 	object: $api
+	 * 
+	 * 	The API Object for the plugin which owns this model object
+	 */
 	protected $api;
-
-	protected $enableDebug;
-	protected $enableDebugLog;
-
+	
 	/**
 	 * 	method:	__construct
 	 *
@@ -62,27 +66,6 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	public function __construct($connect=false)
 	{
 		parent::__construct($connect);
-
-		//	TODO: default to an empty object??
-		$this->api = false;
-	}
-
-	public function isConnected()
-	{
-		$s1 = parent::isConnected();
-		$s2 = $this->isInitialised();
-
-		if(!$s1 && !$s2){
-			Amslib_Debug::log(
-				__METHOD__,
-				"NOTE: Database was not connected, model was not initialised properly, ".
-				"have you called the parent::initialiseObject(\$api) method?"
-			);
-
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
@@ -104,121 +87,11 @@ class Amslib_Plugin_Model extends Amslib_Database_MySQL
 	 */
 	public function initialiseObject($api)
 	{
-		if(!$api){
-			Amslib_Debug::log("api variable passed was not valid");
+		if(!$api instanceof Amslib_MVC){
+			throw new Exception("api variable passed was not valid");
 		}
 
 		$this->api = $api;
 		$this->copyConnection($this->api->getModel());
-
-		$dd		= $this->api ? $this->api->getValue("debug_database",false) : false;
-		$ddl	= $this->api ? $this->api->getValue("debug_database_log",false) : false;
-
-		$this->setDebugStatus(
-			Amslib_GET::get("debug_database",$dd),
-			Amslib_GET::get("debug_database_log",$ddl)
-		);
-	}
-
-	/**
-	 * 	method:	selectValue
-	 *
-	 * 	todo: write documentation
-	 */
-	public function selectValue($field,$query,$numResults=0,$optimise=false)
-	{
-		if($this->enableDebug){
-			$log = Amslib_Debug::log("func_offset,3",$query,$numResults,$optimise);
-
-			if($this->enableDebugLog){
-				$this->api->logDebug("DEBUG_DATABASE: {$log["function"]}",$log["data"]);
-			}
-		}
-
-		return parent::selectValue($field,$query,$numResults,$optimise);
-	}
-
-	/**
-	 * 	method:	select
-	 *
-	 * 	todo: write documentation
-	 */
-	public function select($query,$numResults=0,$optimise=false)
-	{
-		if($this->enableDebug){
-			$log = Amslib_Debug::log("func_offset,3",stripslashes($query),$numResults,$optimise);
-
-			if($this->enableDebugLog){
-				$this->api->logDebug("DEBUG_DATABASE: {$log["function"]}",$log["data"]);
-			}
-		}
-
-		return parent::select($query,$numResults,$optimise);
-	}
-
-	/**
-	 * 	method:	select2
-	 *
-	 * 	todo: write documentation
-	 */
-	public function select2($query,$numResults=0,$optimise=false)
-	{
-		if($this->enableDebug){
-			$log = Amslib_Debug::log("func_offset,3",stripslashes($query),$numResults,$optimise);
-
-			if($this->enableDebugLog){
-				$this->api->logDebug("DEBUG_DATABASE: {$log["function"]}",$log["data"]);
-			}
-		}
-
-		return parent::select2($query,$numResults,$optimise);
-	}
-
-	/**
-	 * 	method:	insert
-	 *
-	 * 	todo: write documentation
-	 */
-	public function insert($query)
-	{
-		if($this->enableDebug){
-			$log = Amslib_Debug::log("func_offset,3",stripslashes($query));
-		}
-
-		return parent::insert($query);
-	}
-
-	/**
-	 * 	method:	update
-	 *
-	 * 	todo: write documentation
-	 */
-	public function update($query,$allow_zero=true)
-	{
-		if($this->enableDebug){
-			$log = Amslib_Debug::log("func_offset,3",stripslashes($query),$allow_zero);
-		}
-
-		return parent::update($query,$allow_zero);
-	}
-
-	/**
-	 * 	method:	delete
-	 *
-	 * 	todo: write documentation
-	 */
-	public function delete($query)
-	{
-		if($this->enableDebug){
-			$log = Amslib_Debug::log("func_offset,3",stripslashes($query));
-		}
-
-		return parent::delete($query);
-	}
-
-	public function setDebugStatus($debug=false,$log=false)
-	{
-		$this->enableDebug		=	!!$debug;
-		$this->enableDebugLog	=	!!$log;
 	}
 }

@@ -145,6 +145,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	public function __construct($connect=true)
 	{
 		$this->alias	=	array();
+		$this->table	=	&$this->alias;
 		$this->error	=	false;
 		
 		//	Set the default error stack depth for code location reporting
@@ -717,17 +718,17 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function query($query,$params=array(),$returnBoolean=false)
 	{
-		$this->setLastQuery($query);
-		
 		$statement = $this->getStatement($query);
 		
 		foreach(Amslib_Array::valid($params) as $p){
 			call_user_func_array(array($statement,"bindValue"),$p);
 		}
+		$this->setDebugState(true);
+		$result = $statement->execute();
 		
-		$results = $statement->execute();
 		$this->debug("QUERY",$query);
-		return $results->fetchAll();
+		
+		return $statement->fetchAll();
 	}
 
 	/**
@@ -746,13 +747,13 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		//	record error information?
 		if(!$statement->execute()) return false;
 		
-		$statement = $this->setHandler($statement);
+		$statement = $this->setHandle($statement);
 		
 		//	If you don't request a number of results, use the maximum number we could possible accept
 		//	NOTE: you'll run out of memory a long time before you reach this count
 		if($numResults == 0) $numResults = PHP_INT_MAX;
 		
-		return $this->getResults($numResults,$statment,$optimise);
+		return $this->getResults($numResults,$statement,$optimise);
 	}
 
 	/**
