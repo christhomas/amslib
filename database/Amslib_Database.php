@@ -994,7 +994,7 @@ QUERY;
 	 * 			Example: array(array("id_row"=>1,"field_1"=>"hello")) will become array("id_row"=>1,"field_1"=>"hello")
 	 * 			So you can see it's removed the outer array
 	 */
-	public function getResults($numResults,$handle=NULL,$optimise=false)
+	public function getResults($count,$handle=NULL,$optimise=false)
 	{
 		$this->selectResult = array();
 		
@@ -1002,7 +1002,7 @@ QUERY;
 		if(!$this->isHandle($handle)) $handle = $this->getHandle();
 		if(!$this->isHandle($handle)) return false;
 		
-		for($a=0;$a<$count;$a++){
+		for($a=0;$a<count;$a++){
 			$row = $handle->fetch();
 			//	We have no results left to obtain
 			if(!$row) break;
@@ -1011,7 +1011,7 @@ QUERY;
 		}
 
 		//	see note on optimisation
-		if($optimise && $numResults == 1){
+		if($optimise && count == 1){
 			$this->selectResult = current($this->selectResult);
 		}
 
