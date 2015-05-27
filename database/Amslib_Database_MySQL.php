@@ -181,83 +181,6 @@ class Amslib_Database_MySQL extends Amslib_Database
 	}
 
 	/**
-	 * 	method:	buildLimit
-	 *
-	 * 	todo: write documentation
-	 */
-	public function buildLimit($length=NULL,$offset=NULL)
-	{
-		$length = intval($length);
-		$offset = intval($offset);
-
-		$limit = "LIMIT $offset".($length ? ",$length" : "");
-
-		return !$length && !$offset ? "" : $limit;
-	}
-
-	/**
-	 * 	method: buildSort
-	 *
-	 * 	A method to build the sorting part of an SQL query from parameters and hide all the complexity inside here
-	 * @param unknown_type $va_args
-	 */
-	public function buildSort($va_args)
-	{
-		$args = func_get_args();
-		$sort = array();
-
-		foreach($args as $pair){
-			if(!count($pair) == 2) continue;
-			if(!strlen($pair[0]) || !is_string($pair[0]) || is_numeric($pair[0])) continue;
-			if(!in_array($pair[1],array("asc","desc"))) continue;
-
-			$sort[] = "{$pair[0]} {$pair[1]}";
-		}
-
-		return "order by ".implode(",",$sort);
-	}
-
-	/**
-	 * 	method: buildFields
-	 *
-	 * 	A method to take an array of key/values and construct a comma separated list of
-	 * 	paramaters ready to send to insert/update sql queries
-	 *
-	 * 	params:
-	 * 		$array - The array of key/value pairs
-	 * 		$separator - The separator to use between each pair
-	 *
-	 * 	returns:
-	 * 		an implode()'d string of key=values, separate by comma
-	 *
-	 * 	notes:
-	 * 		-	non-numeric keys are skipped
-	 * 		-	non-string keys are skipped
-	 * 		-	empty keys are skipped
-	 * 		-	non-numeric values are skipped
-	 * 		-	non-string values are skipped
-	 */
-	public function buildFields($array,$separator=",")
-	{
-		if(!is_array($array)) $array = Amslib_Array::valid($array);
-
-		$fields = array();
-
-		foreach($array as $key=>$value){
-			//	skip keys if numeric, non-string or empty string
-			if(is_numeric($key) || !is_string($key) || !strlen($key)) continue;
-			//	skip values if non-numeric or string
-			if(!is_numeric($value) && !is_string($value)) continue;
-			//	if string, quote it
-			if(is_string($value)) $value="'".$this->escape($value)."'";
-
-			$fields[] = "$key=$value";
-		}
-
-		return count($fields) ? implode($separator,$fields) : false;
-	}
-
-	/**
 	 * method:	getRealResultCount
 	 *
 	 * Obtain a real row count from the previous query, if you use limit and want to know how many
@@ -383,28 +306,6 @@ class Amslib_Database_MySQL extends Amslib_Database
 		}
 
 		return $returnBoolean ? !!$result : $result;
-	}
-	
-	/**
-	 * 	method:	multi
-	 *
-	 * 	Same method as Amslib_Database_MySQL::query() except it allows you to run mutiple statements at once
-	 */
-	public function multi($query)
-	{
-		$result = false;
-	
-		if($this->isConnected()){
-			$this->setLastQuery($query);
-			$result = mysql_multi_query($query,$this->connection);
-			$this->debug("QUERY",$query);
-	
-			if(!$result){
-				$this->setError($query);
-			}
-		}
-	
-		return $result;
 	}
 
 	/**

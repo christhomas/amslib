@@ -39,24 +39,16 @@
  */
 class Amslib_Database extends Amslib_Database_DEPRECATED
 {
-	protected $lastQuery		=	array();
-	protected $lastResult		=	array();
-	protected $lastInsertId		=	0;
-
-	protected $debugState		=	false;
-	protected $errors			=	array();
-	protected $errorState		=	true;
-	protected $errorCount		=	100;
-
-	protected $db_type;
+	protected $debugState	=	false;
+	protected $error		=	array();
 
 	/**
-	 * 	variable:	$table
+	 * 	variable:	$alias
 	 * 	type:		array
 	 *
 	 * 	An array of table names, each key returns the actual name in the database
 	 */
-	protected $table = array();
+	protected $alias = array();
 
 	/**
 	 * 	boolean: connection
@@ -74,6 +66,19 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 	protected $selectHandle			=	false;
 	protected $selectStack			=	array();
+	protected $selectResult			=	array();
+	
+	protected $lastQuery			=	false;
+	protected $lastInsertId			=	0;
+	
+	protected $validEncoding		=	array("utf8","latin1");
+	
+	/**
+	 * 	array: $statementCache
+	 *
+	 * 	An array of PDOStatements which have been cached by previous queries
+	 */
+	protected $statementCache;
 
 	/**
 	 * 	method: debug
@@ -93,25 +98,13 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	}
 
 	/**
-	 * 	method:	setLastQuery
-	 *
-	 * 	todo: write documentation
-	 */
-	protected function setLastQuery($query)
-	{
-		$this->lastQuery[] = $query;
-		if(count($this->lastQuery) > 100) array_shift($this->lastQuery);
-	}
-
-	/**
 	 * 	method:	getLastResult
 	 *
 	 * 	todo: write documentation
 	 */
 	protected function getLastResult()
 	{
-		//	Probably you're not setting this, so this will always return an invalid result
-		return $this->lastResult;
+		return $this->selectResult;
 	}
 	
 	protected function setErrorStackDepth($depth=NULL)
@@ -124,13 +117,6 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	}
 	
 	/**
-	 * 	array: $cache
-	 *
-	 * 	An array of PDOStatements which have been cached by previous queries
-	 */
-	protected $cache;
-	
-	/**
 	 * 	method: getStatement
 	 *
 	 * 	Retrieve the PDOStatement based on the query, from the query cache or created
@@ -138,11 +124,17 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	protected function getStatement($query)
 	{
-		if(!isset($this->cache[$query])){
-			$this->cache[$query] = $this->connection->prepare($query);
+		$this->isConnected();
+		
+		$this->setLastQuery($query);
+		
+		$key = sha1($query);
+		
+		if(!isset($this->statementCache[$key])){
+			$this->statementCache[$key] = $this->connection->prepare($query);
 		}
 	
-		return $this->cache[$query];
+		return $this->statementCache[$key];
 	}
 
 	/**
@@ -152,8 +144,8 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function __construct($connect=true)
 	{
-		$this->table	=	array();
-		$this->errors	=	array();
+		$this->alias	=	array();
+		$this->error	=	false;
 		
 		//	Set the default error stack depth for code location reporting
 		$this->setErrorStackDepth();
@@ -185,10 +177,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 	public function isHandle($handle)
 	{
-		/* The original MySQL Code, please convert to PDO
-		return $handle && is_resource($handle) && stristr($handle, "mysql");
-		*/
-		return false;
+		return $handle instanceof PDOStatement;
 	}
 
 	public function setHandle($handle)
@@ -261,11 +250,8 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 			return false;
 		}
-
-		/* The original MySQL Code, please convert to PDO
-		return mysql_free_result($handle);
-		*/
-		return false;
+		
+		return $handle->closeCursor();
 	}
 
 	/**
@@ -286,25 +272,10 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		$c = count($args);
 
 		if($c == 1){
-			$this->table = $args[0];
+			$this->alias = $args[0];
 		}else if($c > 1){
-			$this->table[$args[0]] = $args[1];
+			$this->alias[$args[0]] = $args[1];
 		}
-	}
-
-	/**
-	 * 	method:	setErrorState
-	 *
-	 * 	todo: write documentation
-	 * 	NOTE: does anything use this now??
-	 */
-	public function setErrorState($state)
-	{
-		$e = $this->errorState;
-
-		$this->errorState = !!$state;
-
-		return $e;
 	}
 
 	/**
@@ -328,16 +299,16 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function setError($data)
 	{
-		//	Overload some default values just inc ase something failed
+		//	Overload some default values just in case something failed
 		$args = func_get_args() + array(
-			"__MISSING_QUERY",
-			mysql_error($this->connection),
-			mysql_errno($this->connection),
+			"__MISSING_QUERY__",
+			$this->connection->errorInfo(),
+			$this->connection->errorCode(),
 			//	TODO: eventually I'll figure out what to put here as a default parameter
 			-1
 		);
 
-		$this->errors[] = $error = array(
+		$this->error = array(
 				"db_failure"		=>	true,
 				"db_query"			=>	preg_replace('/\s+/',' ',$args[0]),
 				"db_error"			=>	$args[1],
@@ -347,11 +318,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 				"db_location"		=>	Amslib_Debug::getCodeLocation($this->errorStackDepth)
 		);
 
-		if(count($this->errors) > $this->errorCount){
-			array_shift($this->errors);
-		}
-
-		$this->debug("ERROR",$error);
+		$this->debug("ERROR",$this->error);
 		
 		$this->setErrorStackDepth();
 	}
@@ -359,21 +326,31 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	/**
 	 * 	method:	getError
 	 *
-	 * 	Obtain the errors set on the database object due to queries run against it
+	 * 	Obtain the error set on the database object due to queries run against it
 	 *
 	 * 	parameters:
 	 * 		$clear	-	Whether or not to clear the errors after obtaining them
 	 *
 	 * 	returns
-	 * 		An array, empty or otherwise, of all the errors that have occured in the system
+	 * 		An array of error data, or boolean false if there are no errors set
 	 */
 	public function getError($clear=true)
 	{
-		$errors = $this->errors;
+		$error = $this->error;
 
-		if($clear) $this->errors = array();
+		if($clear) $this->error = false;
 
-		return $errors;
+		return $error;
+	}
+	
+	/**
+	 * 	method:	setLastQuery
+	 *
+	 * 	todo: write documentation
+	 */
+	protected function setLastQuery($query)
+	{
+		$this->lastQuery = $query;
 	}
 
 	/**
@@ -383,7 +360,6 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function getLastQuery()
 	{
-		//	chris: alfonso, probably you're not setting this, so calling this method will not return a valid query string
 		return $this->lastQuery;
 	}
 
@@ -393,11 +369,17 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 * 	Return the status of the database connection
 	 *
 	 * 	returns:
-	 * 		-	Boolean true or false depending on whether the database logged in correctly or not
+	 * 		-	Boolean true or throws an exception about the database not being connected
 	 */
-	public function isConnected()
+	public function isConnected($return=false)
 	{
-		return !!$this->connection;
+		if(!$this->connection instanceof PDO){
+			if(!$return) throw new PDOException(__CLASS__." Exception: Database not connected"); 
+
+			return false;
+		}
+		
+		return true;
 	}
 
 	/**
@@ -430,11 +412,13 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function copyConnection($object)
 	{
-		if($object && is_object($object) && method_exists($object,"getConnection")){
+		if($object instanceof PDO){
+			$this->setConnection($object);
+		}else if($object instanceof self){
 			$this->setConnection($object->getConnection());
 		}
 
-		return $this->connection ? true : false;
+		return $this->isConnected();
 	}
 
 	public function setConnectionDetails($details=NULL)
@@ -447,7 +431,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			$v->add("password","text",true);
 			$v->add("database","text",true);
 			$v->add("server","text",true);
-			$v->add("encoding","text",true,array("default"=>"utf8","limit-input"=>array("utf8","latin1")));
+			$v->add("encoding","text",true,array("default"=>"utf8","limit-input"=>$this->validEncoding));
 
 			$s = $v->execute();
 			$d = $v->getValid();
@@ -492,17 +476,6 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		die(__METHOD__.", FATAL ERROR: there were no connection details".Amslib_Debug::vdump($this->connectionDetails));
 	}
 
-	public static function sharedConnection($object=NULL)
-	{
-		static $shared = NULL;
-
-		if($object && is_object($object) && method_exists($object,"getConnection")){
-			$shared = $object;
-		}
-
-		return $shared;
-	}
-
 	/**
 	 * 	method:	setEncoding
 	 *
@@ -512,19 +485,17 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	{
 		if($this->isConnected() == false) return false;
 
-		$allowedEncodings = array("utf8","latin1");
-
-		if(!in_array($encoding,$allowedEncodings)){
+		if(!in_array($encoding,$this->validEncoding)){
 			$message =
 				"(".basename(__FILE__)." / FATAL ERROR): Your encoding ($encoding) is wrong, ".
 				"this can cause database corruption.".
 				"I'm sorry dave, but I can't allow you to do that<br/>".
-				"allowed encodings = <pre>".implode(",",$allowedEncodings)."</pre>";
+				"allowed encodings = <pre>".implode(",",$this->validEncoding)."</pre>";
 
 			$this->debug("ERROR",$message);
 			die($message);
 		}
-
+		
 		$this->connection->exec("set names $encoding");
 		$this->connection->exec("set character set $encoding");
 
@@ -538,66 +509,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function escape($value)
 	{
-		/* The original MySQL Code, please convert to PDO
-		if($value === NULL)		return $value;
-		//check if a string contains an integer representation and convert it into an integer
-		if((string)(int)$value == $value) return (int)$value;
-		//	Simple numeric checks to quickly escape them without using the mysql functionality
-		if(is_int($value))		return intval($value);
-		if(is_bool($value))		return intval($value);
-		if(is_float($value))	return floatval($value);
-
-		//	from this point on, the value must be a string
-		if(!is_string($value)){
-			$this->debug("stack_trace,2,*","value is not a string",$value);
-		}
-
-		if(!$this->isConnected()){
-			print(__METHOD__.", unsafe string escape: database not connected<br/>\n");
-			print("it is not safe to continue, corruption might occur<br/>\n");
-			$this->debug("stack_trace,2","not connected to database");
-			die("DYING");
-		}
-
-		ob_start();
-		$value = mysql_real_escape_string($value);
-		$error = ob_get_clean();
-
-		if(strlen($error)){
-			//	I'm not sure what I should do here, so I'll just log whatever
-			//	it outputs and improve the error control when I find out what I am dealing with
-			$this->debug(__METHOD__,$error);
-		}
-
 		return $value;
-		*/
-		return false;
-	}
-
-	/**
-	 * 	method:	unescape
-	 *
-	 * 	todo: write documentation
-	 *
-	 * 	note: this is generic functionality, it's not mysql specific
-	 */
-	public function unescape($results,$keys="")
-	{
-		if(!$results || !is_array($results)) return $results;
-
-		if(Amslib_Array::isMulti($results)){
-			if($keys == "") $keys = array_keys(current($results));
-
-			foreach($results as &$r){
-				$r = Amslib_Array::stripSlashesSingle($r,$keys);
-			}
-		}else{
-			if($keys == "") $keys = array_keys($results);
-
-			$results = Amslib_Array::stripSlashesSingle($results,$keys);
-		}
-
-		return $results;
 	}
 
 	/**
@@ -607,15 +519,12 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function buildLimit($length=NULL,$offset=NULL)
 	{
-		/* The original MySQL Code, please convert to PDO
 		$length = intval($length);
 		$offset = intval($offset);
 
 		$limit = "LIMIT $offset".($length ? ",$length" : "");
 
 		return !$length && !$offset ? "" : $limit;
-		*/
-		return false;
 	}
 
 	/**
@@ -626,51 +535,58 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function buildSort($va_args)
 	{
-		/* The original MySQL Code, please convert to PDO
 		$args = func_get_args();
 		$sort = array();
-
+	
 		foreach($args as $pair){
 			if(!count($pair) == 2) continue;
 			if(!strlen($pair[0]) || !is_string($pair[0]) || is_numeric($pair[0])) continue;
 			if(!in_array($pair[1],array("asc","desc"))) continue;
-
+	
 			$sort[] = "{$pair[0]} {$pair[1]}";
 		}
-
+	
 		return "order by ".implode(",",$sort);
-		*/
-		return false;
 	}
-
+	
 	/**
-	 * method:	getRealResultCount
+	 * 	method: buildFields
 	 *
-	 * Obtain a real row count from the previous query, if you use limit and want to know how many
-	 * a query WOULD return without the limit, you can use this method, but in the query, you need
-	 * to put SQL_CALC_FOUND_ROWS at the beginning of the query
+	 * 	A method to take an array of key/values and construct a comma separated list of
+	 * 	paramaters ready to send to insert/update sql queries
 	 *
-	 * returns:
-	 * 	The number of results the previous query would have returned without the limit statement,
-	 * 	if using SQL_CALC_FOUND_ROWS in the query
+	 * 	params:
+	 * 		$array - The array of key/value pairs
+	 * 		$separator - The separator to use between each pair
 	 *
-	 * notes:
-	 * 	-	this method uses the select result stack to store the previous query, which is assumed
-	 * 		to be the query that generated the results, but you need the real result count before you
-	 * 		process all the results, normally, calling this method would destroy the previous query
-	 * 		and all your results with it.
+	 * 	returns:
+	 * 		an implode()'d string of key=values, separate by comma
+	 *
+	 * 	notes:
+	 * 		-	non-numeric keys are skipped
+	 * 		-	non-string keys are skipped
+	 * 		-	empty keys are skipped
+	 * 		-	non-numeric values are skipped
+	 * 		-	non-string values are skipped
 	 */
-	public function getRealResultCount()
+	public function buildFields($array,$separator=",")
 	{
-		$this->pushHandle();
-		/* The original MySQL Code, please convert to PDO
-		$count = $this->selectValue("c","FOUND_ROWS() as c",1,true);
-		*/
-		$count = false; // obviously I'm doing this to make this code fail before you rewrite it, delete this after you've finished converting it
-
-		$this->popHandle();
-
-		return $count;
+		if(!is_array($array)) $array = Amslib_Array::valid($array);
+	
+		$fields = array();
+	
+		foreach($array as $key=>$value){
+			//	skip keys if numeric, non-string or empty string
+			if(is_numeric($key) || !is_string($key) || !strlen($key)) continue;
+			//	skip values if non-numeric or string
+			if(!is_numeric($value) && !is_string($value)) continue;
+			//	if string, quote it
+			if(is_string($value)) $value="'".$this->escape($value)."'";
+	
+			$fields[] = "$key=$value";
+		}
+	
+		return count($fields) ? implode($separator,$fields) : false;
 	}
 
 	/**
@@ -692,11 +608,15 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 		if($valid){
 			try {
-				$dsn = "mysql:host=$server:dbname=$database;charset={$details["encoding"]}";
-
+				$dsn = "mysql:host={$details["server"]}:dbname={$details["database"]};charset={$details["encoding"]}";
+				
 				$this->connection = new PDO($dsn,$details["username"],$password);
+				$this->connection->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+				$this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE,PDO::FETCH_ASSOC);
+				
+				$this->setEncoding($details["encoding"]);
 
-				return $this->isConnected();
+				return $this->isConnected(true);
 			} catch (PDOException $e){
 				$this->debug("DATABASE","failed to connect",$details,$e->getMessage());
 				throw $e;
@@ -718,6 +638,71 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	public function disconnect()
 	{
 		$this->connection = NULL;
+	}
+	
+	/**
+	 * 	method:	begin
+	 *
+	 * 	todo: write documentation
+	 */
+	public function begin()
+	{
+		$this->isConnected();
+	
+		return $this->connection->beginTransaction();
+	}
+	
+	/**
+	 * 	method:	commit
+	 *
+	 * 	todo: write documentation
+	 */
+	public function commit()
+	{
+		$this->isConnected();
+	
+		return $this->connection->commit();
+	}
+	
+	/**
+	 * 	method:	rollback
+	 *
+	 * 	todo: write documentation
+	 */
+	public function rollback()
+	{
+		$this->isConnected();
+	
+		return $this->connection->rollBack();
+	}
+	
+	/**
+	 * 	method:	multi
+	 *
+	 * 	Same method as Amslib_Database_MySQL::query() except it allows you to run mutiple statements at once
+	 */
+	public function multi($query)
+	{
+		/*
+		NOTE: I'm not sure how to implement this in PDO
+		
+		$result = false;
+		
+		$statement = $this->getStatement($query);
+	
+		if($this->isConnected()){
+			$this->setLastQuery($query);
+			$result = mysql_multi_query($query,$this->connection);
+			$this->debug("QUERY",$query);
+	
+			if(!$result){
+				$this->setError($query);
+			}
+		}
+	
+		return $result;
+		*/
+		return false;
 	}
 
 	/**
@@ -797,16 +782,11 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 */
 	public function selectField($table,$value,$field,$count=1,$optimise=true)
 	{
-		/* The original MySQL Code, please convert to PDO
-		$table = $this->escape($table);
-		$field = $this->escape($field);
-
-		if(is_string($value))	$value = is_string($value);
-		if(is_numeric($value))	$value = intval($value);
-
-		return $this->selectValue($field,"$field from $table where $field='$value'");
-		*/
-		return false;
+		return $this->selectValue($field,":field from :table where :field=:value",array(
+			array(":field",$field,PDO_TYPE_STR),
+			array(":table",$table,PDO_TYPE_STR),
+			array(":value",$value)
+		));	
 	}
 
 	/**
@@ -852,10 +832,10 @@ QUERY;
 	 * 		the field you want in the first parameter, so in the query you can just put a "$field $query" and it'll
 	 * 		select only what you want, without duplication.  He's clever sometimes.
 	 */
-	public function selectValue($field,$query,$numResults=0,$optimise=false)
+	public function selectValue($field,$query,$params=array(),$numResults=0,$optimise=false)
 	{
 		$field	=	trim($field);
-		$values	=	$this->select($query,$numResults,$optimise);
+		$values	=	$this->select($query,$params,$numResults,$optimise);
 
 		if($numResults == 1 && $optimise){
 			return isset($values[$field]) ? $values[$field] : NULL;
@@ -907,6 +887,12 @@ QUERY;
 	 */
 	public function update($query,$allow_zero=true)
 	{
+		$statement = $this->getStatement("update $query");
+		
+		if(!$statement){
+			return false;
+		}
+		
 		/* The original MySQL Code, please convert to PDO
 		if(!$this->query("update $query",true)){
 			return false;
@@ -939,47 +925,58 @@ QUERY;
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getLastInsertId()
+	public function getInsertId()
 	{
-		switch($this->db_type) {
-			case 'SQLITE': // <-- no { it's a bad form, you should always put one
-				//	chris:	alfonso? is a method to obtain the last inserted row,
-				//			the correct place to call a method that connects to a
-				//			databases? surely at this point, it should already be connected?
-				return $this->connect()->lastInsertRowId();
-				//	chris:	<---- here is a bug, there is no break, therefore this code will
-				//			execute the SQLITE code and immediately after the MYSQL code, the
-				//			correct form for a switch case statement to avoid stupid bugs like
-				//			this is as follows
-			case "DEMO_ALFONSO_SWITCH_CASE":{
-				//	chris: please do all future switch/case statements in this format
-			}break; // <-- this was missing from your above code
-			case 'MYSQL': // <-- no { to open the statement
-				//	chris:	I didnt research the PDO object, but is this the correct way to
-				//			ask the PDO object for it's last inserted row primary key ?
-				return mysql_insert_id($this->db);
-				//	<-- no break statement, also, no } to close this a few lines up
-		}
-
-		//	The original default code
-		return $this->lastInsertId;
+		/* convert to PDO
+		return $this->lastInsertId = mysql_insert_id($this->connection);
+		*/
+		
+		return 0;
 	}
-
+	
 	/**
-	 * 	method:	getLastAffectedCount
+	 * 	method:	getCount
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getLastAffectedCount($boolean=true,$allow_zero=true)
+	public function getCount($boolean=true,$allow_zero=true)
 	{
-		return 0;
+		$handle = $this->getHandle();
+		
+		$count = $handle->rowCount();
+		
+		return $boolean ? ($allow_zero ? $count >= 0 : $count > 0) : $count;
+	}
+	
+	/**
+	 * method:	getRealResultCount
+	 *
+	 * Obtain a real row count from the previous query, if you use limit and want to know how many
+	 * a query WOULD return without the limit, you can use this method, but in the query, you need
+	 * to put SQL_CALC_FOUND_ROWS at the beginning of the query
+	 *
+	 * returns:
+	 * 	The number of results the previous query would have returned without the limit statement,
+	 * 	if using SQL_CALC_FOUND_ROWS in the query
+	 *
+	 * notes:
+	 * 	-	this method uses the select result stack to store the previous query, which is assumed
+	 * 		to be the query that generated the results, but you need the real result count before you
+	 * 		process all the results, normally, calling this method would destroy the previous query
+	 * 		and all your results with it.
+	 */
+	public function getRealCount()
+	{
+		$this->pushHandle();
+	
+		$count = $this->connection->query("SELECT FOUND_ROWS()")->fetchColumn();
+	
+		$this->popHandle();
+	
+		return $count;
 	}
 
-	/**	/**
-	 * 	method:	getLastAffectedCount
-	 *
-	 * 	todo: write documentation
-	 *
+	/**
 	 * 	method:	getResults
 	 *
 	 * 	todo: write documentation
@@ -995,7 +992,7 @@ QUERY;
 	 */
 	public function getResults($count,$handle=NULL,$optimise=false)
 	{
-		$this->lastResult = array();
+		$this->selectResult = array();
 		
 		//	Make sure the result handle is valid
 		if(!$this->isHandle($handle)) $handle = $this->getHandle();
@@ -1006,85 +1003,21 @@ QUERY;
 			//	We have no results left to obtain
 			if(!$row) break;
 			//	Otherwise record the result
-			$this->lastResult[] = $row;
+			$this->selectResult[] = $row;
 		}
 
 		//	see note on optimisation
 		if($optimise && $numResults == 1){
-			$this->lastResult = current($this->lastResult);
+			$this->selectResult = current($this->selectResult);
 		}
 
 		//	No results? return false! I'm not sure whether returning false is a good idea, since it has some "meaning"
 		//	Perhaps return NULL = no results and return false = failure (failure has meaning, it means something went wrong)
-		if(empty($this->lastResult)){
-			$this->lastResult = false;
+		if(empty($this->selectResult)){
+			$this->selectResult = false;
 		}
 
-		return $this->lastResult;
-	}
-
-	/**
-	 * 	method:	begin
-	 *
-	 * 	todo: write documentation
-	 */
-	public function begin()
-	{
-		return $this->isConnected() 
-			? $this->connection->beginTransaction() 
-			: false;
-	}
-
-	/**
-	 * 	method:	commit
-	 *
-	 * 	todo: write documentation
-	 */
-	public function commit()
-	{
-		return $this->isConnected()
-			? $this->connection->commit()
-			: false;
-	}
-
-	/**
-	 * 	method:	rollback
-	 *
-	 * 	todo: write documentation
-	 */
-	public function rollback()
-	{
-		return $this->isConnected()
-			? $this->connection->rollBack()
-			: false;
-	}
-
-	/**
-	 * 	method: countRows
-	 *
-	 * 	A quick method to count the number of rows by selecting a single field, this
-	 * 	is quite a limited method, but in the future I can add more features to it
-	 *
-	 * 	parameters:
-	 * 		$field	-	The field to select
-	 * 		$table	-	The table to query
-	 *
-	 * 	returns:
-	 * 		Returns errors [-1 (field),-2 (table)] when they are invalid,
-	 * 		a positive integer when successful or boolean false for a general failure
-	 */
-	public function countRows($field,$table)
-	{
-		/* The original MySQL Code, please convert to PDO
-		$field = $this->escape($field);
-		$table = $this->escape($table);
-
-		if(!$field || !strlen($field) || is_numeric($field)) return -1;
-		if(!$table || !strlen($table) || is_numeric($table)) return -2;
-
-		return $this->selectValue("c","count($field) as c from $table",1,true);
-		*/
-		return false;
+		return $this->selectResult;
 	}
 
 	/**
