@@ -33,8 +33,8 @@ class Amslib_Debug
 	{
 		//	dirty hacky dump limiter to try to find out where dumping a variable runs out of memory
 		if(self::$dumpLimit >= 1){
-			static $run = 0;
-			if(++$run == self::$dumpLimit) die(self::getStackTrace("type","text"));
+			static $run = 1;
+			if($run++ == self::$dumpLimit) die(self::getStackTrace("type","text"));
 		}
 
 		//	Obtain the variables to dump

@@ -85,16 +85,33 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	 *
 	 * 	todo: write documentation
 	 */
-	protected function debug($va_args)
+	protected function debug($type,$data,$params=array())
 	{
-		$va_args = func_get_args();
-
-		if(empty($va_args)) return;
-
-		//	Logging debug or query information is only allowed when debug is enabled
-		if(in_array($va_args[0],array("DEBUG","QUERY")) && !$this->debugState) return;
-
-		return call_user_func_array("Amslib_Debug::log",$va_args);
+		//	Type "ERROR" always record into the database, but DEBUG/QUERY, require debugState=true
+		if(!$this->debugState && in_array($type,array("DEBUG","QUERY"))){
+			return null;
+		}
+		
+		static $param_map = array(
+			0 => "PARAM_NULL",
+			1 => "PARAM_INT",
+			2 => "PARAM_STR",
+			3 => "PARAM_LOB",
+			4 => "PARAM_STMT",
+			5 => "PARAM_BOOL"
+		);
+		
+		$params = Amslib_Array::valid($params);
+		$params = Amslib_Array::reindexByKey($params,"0");
+		
+		foreach($params as &$p){
+			$p = Amslib_Array::pluck($p,array("1","2"));
+			$p[2] = $param_map[$p[2]];
+		}
+		
+		return empty($params)
+			? Amslib_Debug::log($type,$data)
+			: Amslib_Debug::log($type,$data,$params);
 	}
 
 	/**
@@ -129,6 +146,8 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		$this->setLastQuery($query);
 		
 		$key = sha1($query);
+
+		$this->debug("QUERY",$query,$params);
 		
 		if(!isset($this->statementCache[$key])){
 			$this->statementCache[$key] = $this->connection->prepare($query);
@@ -729,8 +748,6 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		$statement = $this->getStatement($query,$params);
 
 		$result = $statement->execute();
-		
-		$this->debug("QUERY",$query);
 		
 		return $statement->fetchAll();
 	}
