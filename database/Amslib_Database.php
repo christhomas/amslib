@@ -609,7 +609,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			//	skip values if non-numeric or string
 			if(!is_numeric($value) && !is_string($value)) continue;
 			//	if string, quote it
-			if(is_string($value)) $value="'".$this->escape($value)."'";
+			if(is_string($value)) $value=$this->connection->quote($value);
 	
 			$fields[] = "$key=$value";
 		}
@@ -747,9 +747,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	{
 		$statement = $this->getStatement($query,$params);
 
-		$result = $statement->execute();
-		
-		return $statement->fetchAll();
+		return $statement->execute();
 	}
 
 	/**
@@ -898,6 +896,33 @@ QUERY;
 		$this->setHandle($statement);
 		
 		return $this->lastInsertId = $this->getInsertId();
+	}
+	
+	/**
+	 * 	method: insertFields
+	 *
+	 * 	A method to insert into a table an array of fields which is built and imploded beforehand
+	 *
+	 * 	params:
+	 * 		$table - The database table to insert into
+	 * 		$fields - An array of fields to insert
+	 *
+	 *  returns:
+	 *  	-	Boolean false if the fields returned was not valid
+	 *  	-	Boolean false if the insert failed
+	 *  	-	An integer primary key of the row that was inserted into the table
+	 */
+	public function insertFields($table,$fields)
+	{
+		$this->setErrorStackDepth(6);
+	
+		$fields = $this->buildFields($fields);
+	
+		if(!$fields) return false;
+	
+		$table = $this->escape($table);
+	
+		return $this->insert("$table set $fields");
 	}
 
 	/**
