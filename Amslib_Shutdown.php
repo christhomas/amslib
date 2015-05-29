@@ -124,7 +124,8 @@ class Amslib_Shutdown
 				"line"	=> $stack[0]["line"],
 				"stack"	=> $stack,
 				"uri"	=> $_SERVER["REQUEST_URI"],
-				"root"	=> isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/"
+				"root"	=> isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/",
+				"data"	=> is_callable(array($e,"getData")) ? $e->getData() : false
 		);
 
 		switch(self::$mode){
