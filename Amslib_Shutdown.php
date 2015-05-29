@@ -120,12 +120,12 @@ class Amslib_Shutdown
 				"error"	=> "Uncaught Exception",
 				"code"	=> get_class($e),
 				"msg"	=> $e->getMessage(),
+				"data"	=> is_callable(array($e,"getData")) ? $e->getData() : false,
 				"file"	=> $stack[0]["file"],
 				"line"	=> $stack[0]["line"],
 				"stack"	=> $stack,
 				"uri"	=> $_SERVER["REQUEST_URI"],
-				"root"	=> isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/",
-				"data"	=> is_callable(array($e,"getData")) ? $e->getData() : false
+				"root"	=> isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/"
 		);
 
 		switch(self::$mode){
