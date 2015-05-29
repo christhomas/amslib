@@ -5,6 +5,17 @@ class Amslib_Benchmark
 	static protected $finish = NULL;
 	static protected $total = NULL;
 	static protected $entries = array();
+	static protected $mode = "record";
+	static protected $allowedModes = array("record","log");
+	
+	static public function mode($mode)
+	{
+		if(!in_array($mode,self::$allowedModes)){
+			return false;
+		}
+		
+		return self::$mode = $mode;
+	}
 
 	static public function set($title=NULL,$data=NULL)
 	{
@@ -23,13 +34,15 @@ class Amslib_Benchmark
 
 		//	Set the total to the subtraction of the last and first benchmark points
 		self::$total = self::$finish - self::$start;
+		
+		//	calculate the diff only when there was a previous benchmark point set
+		$diff = $last === NULL ? 0 : ($time-$last["time"]);
 
 		//	Set the basic data
 		$e = array(
-				"title"	=>	$title,
-				"time"	=>	$time,
-				//	calculate the diff only when there was a previous benchmark point set
-				"diff"	=>	$last === NULL ? 0 : ($time-$last["time"])
+			"title"	=>	$title,
+			"time"	=>	$time,
+			"diff"	=>	$diff
 		);
 
 		//	Save the data, store the last entry, add it to the list and return it to the calling method
@@ -37,8 +50,17 @@ class Amslib_Benchmark
 
 		//	Retain a copy of the previous execution so you can do the differential easier
 		$last = $e;
-
-		self::$entries[] = $e;
+		
+		switch(self::$mode){
+			case "record":{
+				self::$entries[] = $e; 
+			}break;
+			
+			case "log":{
+				//	FIXME: refactor against log() 
+				Amslib_Debug::log("title[$title], time[$time], diff[$diff]");
+			}break;
+		}
 
 		return $e;
 	}
