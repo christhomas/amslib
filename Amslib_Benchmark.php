@@ -22,7 +22,7 @@ class Amslib_Benchmark
 		static $last = NULL;
 
 		//	If no title is set, use the code location which executed the set() method
-		if($title === NULL) $title = Amslib_Debug::getCodeLocation();
+		if($title === NULL) $title = Amslib_Debug::getCodeLocation(3);
 
 		$time = microtime(true);
 
