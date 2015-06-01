@@ -39,7 +39,7 @@
  */
 class Amslib_Database extends Amslib_Database_DEPRECATED
 {
-	protected $debugState	=	false;
+	protected $debugState	=	true;
 	protected $error		=	array();
 
 	/**
@@ -67,12 +67,12 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	protected $selectHandle			=	false;
 	protected $selectStack			=	array();
 	protected $selectResult			=	array();
-	
+
 	protected $lastQuery			=	false;
 	protected $lastInsertId			=	0;
-	
+
 	protected $validEncoding		=	array("utf8","latin1");
-	
+
 	/**
 	 * 	array: $statementCache
 	 *
@@ -91,7 +91,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		if(!$this->debugState && in_array($type,array("DEBUG","QUERY"))){
 			return null;
 		}
-		
+
 		static $param_map = array(
 			0 => "PARAM_NULL",
 			1 => "PARAM_INT",
@@ -100,15 +100,15 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			4 => "PARAM_STMT",
 			5 => "PARAM_BOOL"
 		);
-		
+
 		$params = Amslib_Array::valid($params);
 		$params = Amslib_Array::reindexByKey($params,"0");
-		
+
 		foreach($params as &$p){
 			$p = Amslib_Array::pluck($p,array("1","2"));
 			$p[2] = $param_map[$p[2]];
 		}
-		
+
 		return empty($params)
 			? Amslib_Debug::log($type,$data)
 			: Amslib_Debug::log($type,$data,$params);
@@ -123,16 +123,16 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	{
 		return $this->selectResult;
 	}
-	
+
 	protected function setErrorStackDepth($depth=NULL)
 	{
 		static $defaultDepth = 5;
-	
+
 		$depth = intval($depth);
-	
+
 		$this->errorStackDepth = $depth ? $depth : $defaultDepth;
 	}
-	
+
 	/**
 	 * 	method: getStatement
 	 *
@@ -142,25 +142,29 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	protected function getStatement($query,$params=array())
 	{
 		$this->isConnected();
-		
+
 		$this->setLastQuery($query);
-		
-		$key = sha1($query);
 
 		$this->debug("QUERY",$query,$params);
-		
-		if(!isset($this->statementCache[$key])){
-			$this->statementCache[$key] = $this->connection->prepare($query);
+
+		$key = sha1($query);
+
+		if(!isset($this->statementCache[$key]) || empty($params)){
+			$statement = $this->connection->prepare($query);
 		}
-		
-		if(!$this->statementCache[$key] instanceof PDOStatement){
+
+		if(!$statement instanceof PDOStatement){
 			throw new PDOException("prepare() did not return a PDOStatement");
 		}
-		
+
+		if(empty($params)) return $statement;
+
+		$this->statementCache[$key] = $statement;
+
 		foreach(Amslib_Array::valid($params) as $p){
 			call_user_func_array(array($this->statementCache[$key],"bindValue"),$p);
 		}
-	
+
 		return $this->statementCache[$key];
 	}
 
@@ -174,7 +178,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		$this->alias	=	array();
 		$this->table	=	&$this->alias;
 		$this->error	=	false;
-		
+
 		//	Set the default error stack depth for code location reporting
 		$this->setErrorStackDepth();
 
@@ -278,7 +282,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 			return false;
 		}
-		
+
 		return $handle->closeCursor();
 	}
 
@@ -347,7 +351,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		);
 
 		$this->debug("ERROR",$this->error);
-		
+
 		$this->setErrorStackDepth();
 	}
 
@@ -370,7 +374,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 		return $error;
 	}
-	
+
 	/**
 	 * 	method:	setLastQuery
 	 *
@@ -402,11 +406,11 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	public function isConnected($return=false)
 	{
 		if(!$this->connection instanceof PDO){
-			if(!$return) throw new PDOException(__CLASS__." Exception: Database not connected"); 
+			if(!$return) throw new PDOException(__CLASS__." Exception: Database not connected");
 
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -523,7 +527,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			$this->debug("ERROR",$message);
 			die($message);
 		}
-		
+
 		$this->connection->exec("set names $encoding");
 		$this->connection->exec("set character set $encoding");
 
@@ -565,18 +569,18 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	{
 		$args = func_get_args();
 		$sort = array();
-	
+
 		foreach($args as $pair){
 			if(!count($pair) == 2) continue;
 			if(!strlen($pair[0]) || !is_string($pair[0]) || is_numeric($pair[0])) continue;
 			if(!in_array($pair[1],array("asc","desc"))) continue;
-	
+
 			$sort[] = "{$pair[0]} {$pair[1]}";
 		}
-	
+
 		return "order by ".implode(",",$sort);
 	}
-	
+
 	/**
 	 * 	method: buildFields
 	 *
@@ -600,9 +604,9 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	public function buildFields($array,$separator=",")
 	{
 		if(!is_array($array)) $array = Amslib_Array::valid($array);
-	
+
 		$fields = array();
-	
+
 		foreach($array as $key=>$value){
 			//	skip keys if numeric, non-string or empty string
 			if(is_numeric($key) || !is_string($key) || !strlen($key)) continue;
@@ -610,10 +614,10 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			if(!is_numeric($value) && !is_string($value)) continue;
 			//	if string, quote it
 			if(is_string($value)) $value=$this->connection->quote($value);
-	
+
 			$fields[] = "$key=$value";
 		}
-	
+
 		return count($fields) ? implode($separator,$fields) : false;
 	}
 
@@ -637,14 +641,14 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		if($valid){
 			try {
 				$dsn = "mysql:dbname={$details["database"]};host={$details["server"]};charset={$details["encoding"]}";
-				
+
 				$options = array(
 					PDO::ATTR_ERRMODE				=> PDO::ERRMODE_EXCEPTION,
 					PDO::ATTR_DEFAULT_FETCH_MODE	=> PDO::FETCH_ASSOC
 				);
-				
+
 				$this->connection = new PDO($dsn,$details["username"],$password,$options);
-				
+
 				$this->setEncoding($details["encoding"]);
 
 				return $this->isConnected(true);
@@ -670,7 +674,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	{
 		$this->connection = NULL;
 	}
-	
+
 	/**
 	 * 	method:	begin
 	 *
@@ -679,10 +683,10 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	public function begin()
 	{
 		$this->isConnected();
-	
+
 		return $this->connection->beginTransaction();
 	}
-	
+
 	/**
 	 * 	method:	commit
 	 *
@@ -691,10 +695,10 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	public function commit()
 	{
 		$this->isConnected();
-	
+
 		return $this->connection->commit();
 	}
-	
+
 	/**
 	 * 	method:	rollback
 	 *
@@ -703,10 +707,10 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	public function rollback()
 	{
 		$this->isConnected();
-	
+
 		return $this->connection->rollBack();
 	}
-	
+
 	/**
 	 * 	method:	multi
 	 *
@@ -716,21 +720,21 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	{
 		/*
 		NOTE: I'm not sure how to implement this in PDO
-		
+
 		$result = false;
-		
+
 		$statement = $this->getStatement($query);
-	
+
 		if($this->isConnected()){
 			$this->setLastQuery($query);
 			$result = mysql_multi_query($query,$this->connection);
 			$this->debug("QUERY",$query);
-	
+
 			if(!$result){
 				$this->setError($query);
 			}
 		}
-	
+
 		return $result;
 		*/
 		return false;
@@ -758,16 +762,16 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 	public function select($query,$params=array(),$numResults=0,$optimise=false)
 	{
 		$statement = $this->getStatement("select $query",$params);
-		
+
 		//	record error information?
 		if(!$statement->execute()) return false;
-		
+
 		$statement = $this->setHandle($statement);
-		
+
 		//	If you don't request a number of results, use the maximum number we could possible accept
 		//	NOTE: you'll run out of memory a long time before you reach this count
 		if($numResults == 0) $numResults = PHP_INT_MAX;
-		
+
 		return $this->getResults($numResults,$statement,$optimise);
 	}
 
@@ -805,7 +809,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			array(":field",$field,PDO_TYPE_STR),
 			array(":table",$table,PDO_TYPE_STR),
 			array(":value",$value)
-		));	
+		));
 	}
 
 	/**
@@ -888,16 +892,16 @@ QUERY;
 	public function insert($query,$params=array())
 	{
 		$statement = $this->getStatement("insert into $query",$params);
-		
+
 		if(!$statement->execute()){
 			return false;
 		}
-		
+
 		$this->setHandle($statement);
-		
+
 		return $this->lastInsertId = $this->getInsertId();
 	}
-	
+
 	/**
 	 * 	method: insertFields
 	 *
@@ -915,13 +919,13 @@ QUERY;
 	public function insertFields($table,$fields)
 	{
 		$this->setErrorStackDepth(6);
-	
+
 		$fields = $this->buildFields($fields);
-	
+
 		if(!$fields) return false;
-	
+
 		$table = $this->escape($table);
-	
+
 		return $this->insert("$table set $fields");
 	}
 
@@ -933,15 +937,15 @@ QUERY;
 	public function update($query,$params=array(),$allow_zero=true)
 	{
 		$statement = $this->getStatement("update $query",$params);
-		
+
 		if(!$statement->execute()){
 			return false;
 		}
-		
+
 		$statement = $this->setHandle($statement);
-		
+
 		$count = $this->getCount();
-		
+
 		return $allow_zero ? $count >= 0 : $count > 0;
 	}
 
@@ -953,13 +957,13 @@ QUERY;
 	public function delete($query,$params=array())
 	{
 		$statement = $this->getStatement("delete from $query",$params);
-		
+
 		if(!$statement->execute()){
 			return false;
 		}
-		
+
 		$statement = $this->setHandle($statement);
-		
+
 		return $this->getCount() >= 0;
 	}
 
@@ -971,10 +975,10 @@ QUERY;
 	public function getInsertId()
 	{
 		$this->isConnected();
-		
+
 		return $this->connection->lastInsertId();
 	}
-	
+
 	/**
 	 * 	method:	getCount
 	 *
@@ -983,12 +987,12 @@ QUERY;
 	public function getCount($boolean=true,$allow_zero=true)
 	{
 		$handle = $this->getHandle();
-		
+
 		$count = $handle->rowCount();
-		
+
 		return $boolean ? ($allow_zero ? $count >= 0 : $count > 0) : $count;
 	}
-	
+
 	/**
 	 * method:	getRealResultCount
 	 *
@@ -1009,11 +1013,11 @@ QUERY;
 	public function getRealCount()
 	{
 		$this->pushHandle();
-	
+
 		$count = $this->connection->query("SELECT FOUND_ROWS()")->fetchColumn();
-	
+
 		$this->popHandle();
-	
+
 		return $count;
 	}
 
@@ -1034,11 +1038,11 @@ QUERY;
 	public function getResults($count,$handle=NULL,$optimise=false)
 	{
 		$this->selectResult = array();
-		
+
 		//	Make sure the result handle is valid
 		if(!$this->isHandle($handle)) $handle = $this->getHandle();
 		if(!$this->isHandle($handle)) return false;
-		
+
 		for($a=0;$a<$count;$a++){
 			$row = $handle->fetch();
 			//	We have no results left to obtain
