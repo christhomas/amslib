@@ -86,11 +86,20 @@ class Amslib_Array
 	 */
 	static public function valid($array=NULL,$key=NULL)
 	{
-		if($key !== NULL && is_string($key)) $array = isset($array[$key]) ? $array[$key] : array();
+		if($key !== NULL && is_string($key)){
+			$array = array_key_exists($key,$array) ? $array[$key] : array();
+		}
+		
 		//	Invalid values return an empty array
-		if(empty($array) || !$array || !is_array($array) || is_null($array)) return array();
+		if(empty($array) || !$array || !is_array($array) || is_null($array)){
+			return array();
+		}
+		
 		//	cast objects to arrays
-		if(is_object($array)) $array = (array)$a;
+		if(is_object($array)){
+			$array = (array)$a;
+		}
+		
 		//	return the original value
 		return $array;
 	}
