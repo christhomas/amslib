@@ -39,7 +39,7 @@
  */
 class Amslib_Database extends Amslib_Database_DEPRECATED
 {
-	protected $debugState	=	true;
+	protected $debugState	=	false;
 	protected $error		=	array();
 
 	/**
