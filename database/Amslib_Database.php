@@ -644,7 +644,8 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 				$options = array(
 					PDO::ATTR_ERRMODE				=> PDO::ERRMODE_EXCEPTION,
-					PDO::ATTR_DEFAULT_FETCH_MODE	=> PDO::FETCH_ASSOC
+					PDO::ATTR_DEFAULT_FETCH_MODE	=> PDO::FETCH_ASSOC,
+					PDO::ATTR_STATEMENT_CLASS		=> array('Amslib_Database_Statement', array($this)) 
 				);
 
 				$this->connection = new PDO($dsn,$details["username"],$password,$options);
