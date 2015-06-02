@@ -148,11 +148,11 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		$this->debug("QUERY",$query,$params);
 
 		$key = sha1($query);
-
-		if(!isset($this->statementCache[$key]) || empty($params)){
-			$statement = $this->connection->prepare($query);
-		}
-
+		
+		$statement = isset($this->statementCache[$key]) 
+			? $this->statementCache[$key] 
+			: $this->connection->prepare($query);
+		
 		if(!$statement instanceof PDOStatement){
 			throw new PDOException("prepare() did not return a PDOStatement");
 		}
