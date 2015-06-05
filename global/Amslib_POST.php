@@ -50,4 +50,9 @@ class Amslib_POST extends Amslib_GLOBAL
 	{
 		return self::deleteIndex($_POST,$key);
 	}
+	
+	static public function dump()
+	{
+		return parent::dump($_POST);
+	}
 }

@@ -50,4 +50,9 @@ class Amslib_GET extends Amslib_GLOBAL
 	{
 		return self::deleteIndex($_GET,$key);
 	}
+	
+	static public function dump()
+	{
+		return parent::dump($_GET);
+	}
 }

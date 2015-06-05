@@ -69,4 +69,9 @@ class Amslib_SESSION extends Amslib_GLOBAL
 		self::start();
 		self::destroy();
 	}
+	
+	static public function dump()
+	{
+		return parent::dump($_SESSION);
+	}
 }

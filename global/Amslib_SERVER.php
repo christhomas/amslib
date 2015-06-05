@@ -50,4 +50,9 @@ class Amslib_SERVER extends Amslib_GLOBAL
 	{
 		return self::deleteIndex($_SERVER,$key);
 	}
+	
+	static public function dump()
+	{
+		return parent::dump($_SERVER);
+	}
 }

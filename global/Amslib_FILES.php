@@ -38,4 +38,9 @@ class Amslib_FILES extends Amslib_GLOBAL
 	{
 		return self::deleteIndex($_FILES,$key);
 	}
+	
+	static public function dump()
+	{
+		return parent::dump($_FILES);
+	}
 }

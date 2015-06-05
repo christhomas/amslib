@@ -38,4 +38,9 @@ class Amslib_REQUEST extends Amslib_GLOBAL
 	{
 		return self::deleteIndex($_REQUEST,$key);
 	}
+	
+	static public function dump()
+	{
+		return parent::dump($_REQUEST);
+	}
 }

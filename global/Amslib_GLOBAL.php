@@ -72,4 +72,9 @@ class Amslib_Global
 
 		return self::getIndex($source,$key);
 	}
+	
+	static public function dump()
+	{
+		return Amslib_Debug::vdump(func_get_arg(0));
+	}
 }
