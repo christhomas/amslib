@@ -1,5 +1,6 @@
 <?php
-class Amslib_Database_Statement extends PDOStatement {
+class Amslib_Database_Statement extends PDOStatement
+{
     public $dbh;
     
     protected function __construct($dbh)
