@@ -51,7 +51,7 @@ class Amslib_Webservice_Request
 
 	public function setParams($params)
 	{
-		$this->params = $params;
+		$this->params = Amslib_Array::valid($params);
 	}
 
 	public function setSharedSessionState($state)
