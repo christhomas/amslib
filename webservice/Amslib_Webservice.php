@@ -39,7 +39,7 @@ class Amslib_Webservice
 	{
 		$this->urlSource = $urlSource ? $urlSource : "Amslib_Router_URL";
 	}
-
+	
 	public function call($name,$params=array(),$paged=false)
 	{
 		if($paged && is_array($params)){
@@ -47,9 +47,14 @@ class Amslib_Webservice
 			if(!isset($params["pager_length"]))	$params["pager_length"] = NULL;
 		}
 
-		$url = call_user_func(array($this->urlSource,"getServiceURL"),$name);
+		//	FIXME:	so the only way this system works is when in conjunction with a router?
+		//	NOTE:	I think the router should be optional somehow, dependency injection can solve this?
+		$url = $this->urlSource 
+			? call_user_func(array($this->urlSource,"getServiceURL"),$name)
+			: $name;
 
 		$request = new Amslib_Webservice_Request($url,$params,true);
+		//	FIXME: why did I put this here? I think it's code which should not have been committed
 		$request->setBasicAuthorisation("clients","clients");
 
 		return $request->execute();
