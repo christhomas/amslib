@@ -331,6 +331,33 @@ class Amslib_Plugin_Service
 	{
 		return $this->session;
 	}
+	
+	public function setInputFormat($handler)
+	{
+		//	by default, all sources are "post" if not specified
+		if(!isset($handler["source"])) $handler["source"] = "post";
+		
+		//	Set the source to what was requested, or default in any other case to the $_POST array
+		switch($handler["source"]){
+			case "get":{
+				$this->source = &$_GET;
+			}break;
+		
+			case "post":{
+				$this->source = &$_POST;
+			}break;
+		
+			case "previous":{
+				if(!count($this->data)){
+					$this->source = array();
+				}else{
+					$this->source = Amslib_Webservice::createResponse("amslib");
+					$this->source->addHandler($this->data);
+					$this->source->setStatus(true);
+				}
+			}break;
+		}
+	}
 
 	public function setOutputFormat($format)
 	{
@@ -688,26 +715,7 @@ class Amslib_Plugin_Service
 			//	TODO: investigate why h["plugin"] was returning false??
 			$this->activeHandler = $h;
 
-			//	by default, all sources are "post" if not specified
-			if(!isset($h["source"])) $h["source"] = "post";
-
-			//	Set the source to what was requested, or default in any other case to the $_POST array
-			switch($h["source"]){
-				case "get":{
-					$this->source = &$_GET;
-				}break;
-				
-				case "post":{
-					$this->source = &$_POST;
-				}break;
-				
-				case "previous":{
-					$this->source = count($this->data)
-						? $this->data
-						: array();
-				}break;
-			}
-
+			$this->setInputFormat($h);
 			$this->setOutputFormat($h["format"]);
 
 			//	Run the handler, either in managed or unmanaged mode
