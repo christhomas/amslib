@@ -725,7 +725,7 @@ class Amslib_Plugin_Service
 
 			//	Need to somehow merge against Amslib_Webservice_* classes
 			//	because now some of this code is overlapping a lot
-			if(isset($this->source["/amslib/webservice/session/request/"])){
+			if(is_array($this->source) && isset($this->source["/amslib/webservice/session/request/"])){
 				$this->session["/amslib/webservice/session/remote/"] = session_id();
 			}
 
