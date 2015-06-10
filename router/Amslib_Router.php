@@ -187,9 +187,14 @@ class Amslib_Router
 				//	When extending services, we need to use this routes service parameters
 				//	to override the ones in the service handlers themselves so you can customise them
 
-				//	Copy the input/record/global/failure parameter if they exist
-				if(isset($route["input"]))		$h["input"]		= $route["input"];
-				if(isset($route["record"]))		$h["record"]	= $route["record"];
+				//	Copy the input && record from the global definitions if they are not existing on the individual handlers
+				if(isset($route["input"]) && !isset($h["input"])){
+					$h["input"]		= $route["input"];
+				}
+				
+				if(isset($route["record"]) && !isset($h["record"])){
+					$h["record"]	= $route["record"];
+				}
 			}
 			//	unlink/break the reference which causes the next foreach loop to fail
 			unset($h);
@@ -207,11 +212,11 @@ class Amslib_Router
 			$c = count($list);
 			$i = isset($h["insert"]) && is_numeric($i=intval($h["insert"])) && $i >= 0 && $i < $c ? $i : -1;
 			$r = isset($h["replace"]) && is_numeric($r=intval($h["replace"])) && $r >= 0 && $r < $c ? $r : -1;
-
+			
 			//	Default input source if not found to default route source
 			if(!isset($h["input"]))		$h["input"]		=	$route["input"];
 			if(!isset($h["record"]))	$h["record"]	=	$route["record"];
-
+			
 			if($i !== -1){
 				if($i == 0){
 					//	insert at the beginning
@@ -232,7 +237,10 @@ class Amslib_Router
 		//	Set each of the global and record parameters according to the final configuration
 		foreach($list as &$h){
 			$h["global"] = in_array($h["record"],array("global",false));
-			$h["record"] = in_array($h["record"],array("true","record")) || $h["global"] == false;
+			
+			$h["record"] = $h["record"] != "false"
+				? (in_array($h["record"],array("true","record")) || $h["global"] == false)
+				: false;
 		}
 		unset($h);
 
@@ -1102,14 +1110,28 @@ class Amslib_Router
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function dump()
+	static public function dump($vdump=false,$print=false,$die=false)
 	{
-		return array(
+		$data = array(
 			"path"		=>	self::$path,
 			"current"	=>	self::$route,
 			"cache"		=>	self::$cache,
 			"url"		=>	self::$url,
 			"name"		=>	self::$name
 		);
+		
+		if($vdump || $print){
+			$data = Amslib_Debug::vdump($data);
+		}
+		
+		if($print)	print($data);
+		
+		if($die !== false){
+			if(!is_string($die)) $die = "";
+			
+			die($die.$data);
+		}
+		
+		return $data;
 	}
 }

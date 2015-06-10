@@ -122,7 +122,7 @@ class Amslib_Plugin_Service
 	protected function storeData($status,$force=false)
 	{
 		$this->setServiceStatus($status);
-
+		
 		if($this->activeHandler["record"] || $force){
 			if(!empty($this->data)){
 				$this->session[self::HD][]	= $this->data;
@@ -135,8 +135,6 @@ class Amslib_Plugin_Service
 		if($this->activeHandler["global"]){
 			$this->setVar(NULL,$this->data);
 		}
-
-		$this->data = array();
 	}
 
 	/**
@@ -597,6 +595,9 @@ class Amslib_Plugin_Service
 	public function runHandler($object,$method,&$source)
 	{
 		$callback = false;
+		
+		//	Reset the data array to empty so it's empty and ready for the next execution
+		$this->data = array();
 
 		//	NOTE:   this might seem a little harsh, but it's a critical error, your object doesn't have
 		//	the method you said it would, probably this means something in your code is broken
@@ -687,11 +688,24 @@ class Amslib_Plugin_Service
 			//	TODO: investigate why h["plugin"] was returning false??
 			$this->activeHandler = $h;
 
+			//	by default, all sources are "post" if not specified
+			if(!isset($h["source"])) $h["source"] = "post";
+
 			//	Set the source to what was requested, or default in any other case to the $_POST array
-			if(isset($h["source"]) && $h["source"] == "get"){
-				$this->source = &$_GET;
-			}else{
-				$this->source = &$_POST;
+			switch($h["source"]){
+				case "get":{
+					$this->source = &$_GET;
+				}break;
+				
+				case "post":{
+					$this->source = &$_POST;
+				}break;
+				
+				case "previous":{
+					$this->source = count($this->data)
+						? $this->data
+						: array();
+				}break;
 			}
 
 			$this->setOutputFormat($h["format"]);
