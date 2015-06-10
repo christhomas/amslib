@@ -447,6 +447,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 	public function runService()
 	{
 		//	NOTE: This might be presumptuous to say every webservice will output it's data in JSON format
+		//	NOTE: obviously the webservice has an output format, we can detect session/json and set this appropriately
 		Amslib_Shutdown::setMode("json");
 
 		$route = Amslib_Router::getRoute();
@@ -482,7 +483,7 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 			Amslib_Debug::log($m=__METHOD__.": route/handler is invalid, there was no output specified",$route);
 			die($m);
 		}
-
+		
 		$this->api->setupService($route["group"],$route["name"]);
 
 		$service = Amslib_Plugin_Service::getInstance();

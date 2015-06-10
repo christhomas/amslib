@@ -54,7 +54,7 @@ class Amslib_Router_Source_XML
 		
 		switch($type){
 			case "input":{
-				if(!in_array($data,array("get","post"))){
+				if(!in_array($data,array("get","post","previous"))){
 					$data = "post";
 				}
 			}break;
