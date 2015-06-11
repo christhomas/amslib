@@ -316,6 +316,7 @@ class Amslib
 				$c = "global/$c";
 			}
 
+			if(strpos($c,"Amslib_Exception")	=== 0)	$c	=	"exception/$c";
 			if(strpos($c,"Amslib_Translator")	=== 0)	$c	=	"translator/$c";
 			if(strpos($c,"Amslib_Router")		=== 0) 	$c	=	"router/$c";
 			if(strpos($c,"Amslib_Database")		=== 0)	$c	=	"database/$c";

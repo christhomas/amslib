@@ -47,26 +47,15 @@ class Amslib_Mixin
 	{
 		if(in_array($name,array_keys($this->mixin))){
 			return call_user_func_array(array($this->mixin[$name],$name),$args);
-		}else{
-			//	build an array map of objects to methods so you can output a
-			//	data structure to the error log with what was searched and failed
-			//	to find a match, for debugging
-			$map = array();
-			foreach($this->mixin as $method=>$object){
-				$o = get_class($object);
-
-				if(!isset($map[$o])) $map[$o] = array();
-
-				$map[$o][] = $method;
-			}
-			//	Log the failure to find a method to call to the error log
-			Amslib_Debug::log("MIXIN FAILURE","stack_trace",get_class($this),$name);
-			foreach($map as $o=>$l){
-				Amslib_Debug::log("MIXIN FAILURE DATA",$o,$name,implode(",",$l));
-			}
 		}
+		
+		$e = new Amslib_Exception("Mixin Failure: method was not found in object");
+		$e->setData("this",get_class($this));
+		$e->setData("method",$name);
+		$e->setData("arg_types",array_map("gettype",$args));
+		$e->setData("mixin_data",$this->mixin);
 
-		return false;
+		throw $e;
 	}
 
 	/**
@@ -107,10 +96,13 @@ class Amslib_Mixin
 			}
 		}else{
 			$name = $object;
-			if(is_string($object)) $name = is_string($object);
+			if(is_string($object)) $name = $object;
 			if(is_object($object)) $name = get_class($object);
-
-			Amslib_Debug::log("MIXIN FAILURE","stack_trace",$name);
+			
+			$e = new Amslib_Exception("Mixin Failure: Object was not valid");
+			$e->setData("object",$object);
+			
+			throw $e;
 		}
 
 		return $object;
