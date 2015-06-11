@@ -53,7 +53,7 @@ class Amslib_Mixin
 		$e->setData("this",get_class($this));
 		$e->setData("method",$name);
 		$e->setData("arg_types",array_map("gettype",$args));
-		$e->setData("mixin_data",$this->mixin);
+		$e->setData("mixin_data",array_map("get_class",$this->mixin));
 
 		throw $e;
 	}
