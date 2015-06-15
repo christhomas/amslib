@@ -754,22 +754,22 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 		return $statement->execute();
 	}
-	
+
 	/**
 	 * 	method: createTempTable
-	 * 
+	 *
 	 * 	Create a temporary table from a select query
-	 * 
+	 *
 	 * 	params:
 	 * 		$table	- The table name to use
 	 * 		$query	- The SQL select the create the table from
 	 * 		$params	- The SQL parameters to apply to the query
-	 * 
+	 *
 	 * 	returns:
 	 * 		-	Boolean false if drop table was not allowed
 	 * 		-	Boolean false if create table was not allowed
 	 * 		-	Boolean true if everything executed ok
-	 * 
+	 *
 	 * 	notes:
 	 * 		-	We should throw exceptions perhaps to allow better error detection cause false can mean many things
 	 */
@@ -978,9 +978,7 @@ QUERY;
 
 		$statement = $this->setHandle($statement);
 
-		$count = $this->getCount();
-
-		return $allow_zero ? $count >= 0 : $count > 0;
+		return $this->getCount(true,$allow_zero);
 	}
 
 	/**
