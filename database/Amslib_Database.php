@@ -754,7 +754,40 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 
 		return $statement->execute();
 	}
-
+	
+	/**
+	 * 	method: createTempTable
+	 * 
+	 * 	Create a temporary table from a select query
+	 * 
+	 * 	params:
+	 * 		$table	- The table name to use
+	 * 		$query	- The SQL select the create the table from
+	 * 		$params	- The SQL parameters to apply to the query
+	 * 
+	 * 	returns:
+	 * 		-	Boolean false if drop table was not allowed
+	 * 		-	Boolean false if create table was not allowed
+	 * 		-	Boolean true if everything executed ok
+	 * 
+	 * 	notes:
+	 * 		-	We should throw exceptions perhaps to allow better error detection cause false can mean many things
+	 */
+	public function createTempTable($table,$query,$params=array())
+	{
+		if(!$this->query("drop temporary table if exists $table")){
+			//	Could not drop temporary table (throw exception?)
+			return false;
+		}
+	
+		if(!$this->query("create temporary table $table as $query",$params)){
+			//	Could not create temporary table (throw exception?)
+			return false;
+		}
+	
+		return true;
+	}
+	
 	/**
 	 * 	method:	select
 	 *
