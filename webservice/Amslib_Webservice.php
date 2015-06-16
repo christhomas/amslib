@@ -1,11 +1,16 @@
 <?php
 class Amslib_Webservice
 {
-	protected $urlSource;
+	protected $router_url_source;
+	protected $url;
+	protected $params;
 
-	public function __construct($urlSource=NULL)
+	public function __construct($location)
 	{
-		$this->setURLSource($urlSource);
+		$this->setRouterURLSource("Amslib_Router_URL");
+		
+		$this->setLocation($location);
+		$this->setParams(array());
 	}
 
 	static public function &getInstance()
@@ -17,50 +22,44 @@ class Amslib_Webservice
 		return $instance;
 	}
 
-	static public function createResponse($type,$data=NULL)
+	public function setRouterURLSource($source=NULL)
 	{
-		$map = array("amslib"=>"Amslib","json"=>"JSON","raw"=>"Raw");
-
-		if(!in_array(strtolower($type),array("amslib","json","raw"))){
-			$type = "Raw";
+		//	There might be other conditions here which determine whether this can run or not
+		
+		if($source && is_callable($source,"getServiceURL")){
+			$this->router_url_source = $source;
 		}
-
-		$type = "Amslib_Webservice_Response_{$map[$type]}";
-
-		return new $type($data);
-	}
-
-	public function initialiseObject($urlSource)
-	{
-		$this->setURLSource($urlSource);
-	}
-
-	public function setURLSource($urlSource=NULL)
-	{
-		$this->urlSource = $urlSource ? $urlSource : "Amslib_Router_URL";
 	}
 	
-	public function call($name,$params=array(),$paged=false)
+	public function setLocation($location)
 	{
-		if($paged && is_array($params)){
-			if(!isset($params["pager_page"]))	$params["pager_page"] = 0;
-			if(!isset($params["pager_length"]))	$params["pager_length"] = NULL;
-		}
-
-		//	FIXME:	so the only way this system works is when in conjunction with a router?
-		//	NOTE:	I think the router should be optional somehow, dependency injection can solve this?
-		$url = $this->urlSource 
-			? call_user_func(array($this->urlSource,"getServiceURL"),$name)
-			: $name;
-
-		$request = new Amslib_Webservice_Request($url,$params,true);
-		//	FIXME: why did I put this here? I think it's code which should not have been committed
-		$request->setBasicAuthorisation("clients","clients");
-
-		return $request->execute();
+		$this->url = false;
+		
+		if(!$this->url) $this->setRoute($location);
+		if(!$this->url) $this->setURL($url);
 	}
-
-	public function getData($response,$plugin=NULL,$key=NULL,$default=false,$paged=false)
+	
+	public function setURL($url)
+	{
+		$this->url = $url;
+	}
+	
+	public function setRoute($route)
+	{
+		$this->url = call_user_func(array($this->router_url_source,"getServiceName"),$route);
+	}
+	
+	public function setParams($params)
+	{
+		$this->params = $params;
+	}
+	
+	public function setParam($key,$value)
+	{
+		$this->params[$key] = $value;
+	}
+	
+	/*public function getData($response,$plugin=NULL,$key=NULL,$default=false,$paged=false)
 	{
 		if(!$response) return $default;
 
@@ -105,5 +104,38 @@ class Amslib_Webservice
 		return $data && $key && isset($data[$key])
 			? $data[$key]
 			: ($key ? $default : $data);
-	}
+	}*/
+	
+	/*public function call($name,$params=array(),$paged=false)
+	 {
+	 if($paged && is_array($params)){
+	 if(!isset($params["pager_page"]))	$params["pager_page"] = 0;
+	 if(!isset($params["pager_length"]))	$params["pager_length"] = NULL;
+	 }
+	
+	 //	FIXME:	so the only way this system works is when in conjunction with a router?
+	 //	NOTE:	I think the router should be optional somehow, dependency injection can solve this?
+	 $url = $this->urlSource
+	 ? call_user_func(array($this->urlSource,"getServiceURL"),$name)
+	 : $name;
+	
+	 $request = new Amslib_Webservice_Request($url,$params,true);
+	 //	FIXME: why did I put this here? I think it's code which should not have been committed
+	 $request->setBasicAuthorisation("clients","clients");
+	
+	 return $request->execute();
+	 }*/
+	
+	/*static public function createResponse($type,$data=NULL)
+	 {
+	 $map = array("amslib"=>"Amslib","json"=>"JSON","raw"=>"Raw");
+	
+	 if(!in_array(strtolower($type),array("amslib","json","raw"))){
+	 $type = "Raw";
+	 }
+	
+	 $type = "Amslib_Webservice_Response_{$map[$type]}";
+	
+	 return new $type($data);
+	 }*/
 }

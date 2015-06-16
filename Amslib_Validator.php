@@ -1129,7 +1129,7 @@ class Amslib_Validator
 			return "FILE_UNKNOWN_ERROR[{$value["error"]}]";
 		}
 
-		return "FILE_NOT_FOUND[{$value["error"]}]";
+		return "FILE_NOT_FOUND";
 	}
 
 	/**

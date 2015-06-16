@@ -236,13 +236,13 @@ class Amslib_Plugin_Service
 	 */
 	protected function finalise($state)
 	{
-		$source = array();
-
 		$type = $state ? "success" : "failure";
 
 		//	Call the success or failure terminators
 		foreach(Amslib_Array::valid($this->terminatorList[$type]) as $t){
-			$response = $this->runHandler($t["object"],$t["method"],$source);
+			$this->setInputFormat($t);
+			
+			$response = $this->runHandler($t["object"],$t["method"],$this->source);
 
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($response);
@@ -250,7 +250,9 @@ class Amslib_Plugin_Service
 
 		//	Call the common terminators
 		foreach(Amslib_Array::valid($this->terminatorList["common"]) as $t){
-			$response = $this->runHandler($t["object"],$t["method"],$source);
+			$this->setInputFormat($t);
+			
+			$response = $this->runHandler($t["object"],$t["method"],$this->source);
 
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($response);
@@ -305,6 +307,8 @@ class Amslib_Plugin_Service
 		//	Obtain the new output_format parameter, or default to the return_ajax value if not found
 		$format = Amslib_POST::get("output_format",$return_ajax);
 		//	Sanitise the format to be one of three possible options, or default to false
+		//	NOTE: we might want to use redirect, but we cannot store anything useful in the session
+		//	NOTE: however this is valid reasoning: to do the job, redirect, but don't bother writing session data cause it cannot be used
 		if(!in_array($format,array(false,"json","session"))) $format = false;
 		//	Now it should be safe to set the output format, false will of course reset
 		$this->setOutputFormat($format);
@@ -351,7 +355,7 @@ class Amslib_Plugin_Service
 				if(!count($this->data)){
 					$this->source = array();
 				}else{
-					$this->source = Amslib_Webservice::createResponse("amslib");
+					$this->source = new Amslib_Webservice_Response_Amslib();
 					$this->source->addHandler($this->data);
 					$this->source->setStatus(true);
 				}
@@ -405,9 +409,15 @@ class Amslib_Plugin_Service
 	 */
 	public function setSuccessURL($url)
 	{
-		$url = $this->sanitiseURL($url);
+		if(is_string($url)){
+			$url = $this->sanitiseURL($url);
 
-		if(strlen($url)) $this->session[self::US] = $url;
+			if(strlen($url)) $this->session[self::US] = $url;
+		}else if(is_array($url)){
+			foreach($url as $key=>$value){
+				$this->session[self::US] = str_replace($key,$value,$this->session[self::US]);
+			}
+		}
 	}
 
 	/**
@@ -427,9 +437,15 @@ class Amslib_Plugin_Service
 	 */
 	public function setFailureURL($url)
 	{
-		$url = $this->sanitiseURL($url);
-
-		if(strlen($url)) $this->session[self::UF] = $url;
+		if(is_string($url)){
+			$url = $this->sanitiseURL($url);
+		
+			if(strlen($url)) $this->session[self::UF] = $url;
+		}else if(is_array($url)){
+			foreach($url as $key=>$value){
+				$this->session[self::UF] = str_replace($key,$value,$this->session[self::UF]);
+			}
+		}
 	}
 
 	/**
