@@ -236,13 +236,13 @@ class Amslib_Plugin_Service
 	 */
 	protected function finalise($state)
 	{
-		$source = array();
-
 		$type = $state ? "success" : "failure";
 
 		//	Call the success or failure terminators
 		foreach(Amslib_Array::valid($this->terminatorList[$type]) as $t){
-			$response = $this->runHandler($t["object"],$t["method"],$source);
+			$this->setInputFormat($t);
+			
+			$response = $this->runHandler($t["object"],$t["method"],$this->source);
 
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($response);
@@ -250,7 +250,9 @@ class Amslib_Plugin_Service
 
 		//	Call the common terminators
 		foreach(Amslib_Array::valid($this->terminatorList["common"]) as $t){
-			$response = $this->runHandler($t["object"],$t["method"],$source);
+			$this->setInputFormat($t);
+			
+			$response = $this->runHandler($t["object"],$t["method"],$this->source);
 
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($response);
@@ -353,7 +355,7 @@ class Amslib_Plugin_Service
 				if(!count($this->data)){
 					$this->source = array();
 				}else{
-					$this->source = Amslib_Webservice::createResponse("amslib");
+					$this->source = new Amslib_Webservice_Response_Amslib();
 					$this->source->addHandler($this->data);
 					$this->source->setStatus(true);
 				}
