@@ -305,6 +305,8 @@ class Amslib_Plugin_Service
 		//	Obtain the new output_format parameter, or default to the return_ajax value if not found
 		$format = Amslib_POST::get("output_format",$return_ajax);
 		//	Sanitise the format to be one of three possible options, or default to false
+		//	NOTE: we might want to use redirect, but we cannot store anything useful in the session
+		//	NOTE: however this is valid reasoning: to do the job, redirect, but don't bother writing session data cause it cannot be used
 		if(!in_array($format,array(false,"json","session"))) $format = false;
 		//	Now it should be safe to set the output format, false will of course reset
 		$this->setOutputFormat($format);
