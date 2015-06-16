@@ -407,9 +407,15 @@ class Amslib_Plugin_Service
 	 */
 	public function setSuccessURL($url)
 	{
-		$url = $this->sanitiseURL($url);
+		if(is_string($url)){
+			$url = $this->sanitiseURL($url);
 
-		if(strlen($url)) $this->session[self::US] = $url;
+			if(strlen($url)) $this->session[self::US] = $url;
+		}else if(is_array($url)){
+			foreach($url as $key=>$value){
+				$this->session[self::US] = str_replace($key,$value,$this->session[self::US]);
+			}
+		}
 	}
 
 	/**
@@ -429,9 +435,15 @@ class Amslib_Plugin_Service
 	 */
 	public function setFailureURL($url)
 	{
-		$url = $this->sanitiseURL($url);
-
-		if(strlen($url)) $this->session[self::UF] = $url;
+		if(is_string($url)){
+			$url = $this->sanitiseURL($url);
+		
+			if(strlen($url)) $this->session[self::UF] = $url;
+		}else if(is_array($url)){
+			foreach($url as $key=>$value){
+				$this->session[self::UF] = str_replace($key,$value,$this->session[self::UF]);
+			}
+		}
 	}
 
 	/**
