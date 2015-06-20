@@ -2,7 +2,7 @@
     "name": "amstudios/amslib",
     "description": "Antimatter Studios Library",
     "license": "GPLv3",
-    "type": "project",
+    "type": "library",
     "authors": [
     	{
     		"name": "Christopher Thomas",
@@ -10,5 +10,16 @@
     		"homepage": "http://antimatter-studios.com"
     	}
     ],
-    "minimum-stability": "stable"
+    "minimum-stability": "dev",
+    
+    "repositories": [{
+		"type": "vcs",
+		"url": "https://github.com/technosophos/querypath.git"
+	}],
+	
+
+	"require":{
+		"php": ">=5.3.0",
+		"querypath/QueryPath": "dev-master"
+	}	
 }
