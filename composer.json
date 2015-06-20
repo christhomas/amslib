@@ -15,6 +15,15 @@
     "repositories": [{
 		"type": "vcs",
 		"url": "https://github.com/technosophos/querypath.git"
+	},{
+		"type": "vcs",
+		"url": "https://github.com/Seldaek/monolog.git"
+	},{
+		"type": "vcs",
+		"url": "http://repo.or.cz/htmlpurifier.git"
+	},{
+		"type": "vcs",
+		"url": "https://github.com/dompdf/dompdf.git"
 	}],
 	
 
