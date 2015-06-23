@@ -127,8 +127,7 @@ class Amslib_File_Transfer
 		$remote_url	=	"$post_url?encrypted=".base64_encode($encrypted);
 		
 		$reply = file_get_contents($remote_url);
-		Amslib_Debug::log("json failed to decode",$reply);
-		die("DEAD");
+
 		$json = json_decode($reply,true);
 		
 		if(!$json){
