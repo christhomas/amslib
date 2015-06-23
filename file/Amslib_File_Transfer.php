@@ -125,8 +125,16 @@ class Amslib_File_Transfer
 	
 		$encrypted	= 	AesCtr::encrypt(json_encode($data),self::getPassword());
 		$remote_url	=	"$post_url?encrypted=".base64_encode($encrypted);
+		
+		$reply = file_get_contents($remote_url);
 	
-		return json_decode(file_get_contents($remote_url),true);
+		$json = json_decode($reply,true);
+		
+		if(!$json){
+			Amslib_Debug::log("json failed to decode",$reply);
+		}
+		
+		return $json;
 	}
 
 	/**
