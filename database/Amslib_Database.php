@@ -37,7 +37,7 @@
  * 		write documentation
  *
  */
-class Amslib_Database extends Amslib_Database_DEPRECATED
+class Amslib_Database
 {
 	protected $debugState	=	false;
 	protected $error		=	array();
