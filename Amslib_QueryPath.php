@@ -1,14 +1,4 @@
 <?php
-//	we have to do this here because QueryPath has no constructor we can call, so it can't be autoloaded
-//	this class basically "fixes" that by wrapping it all up in a way that can be autoloaded
-//	it's such a hack :P
-
-//	NOTE: actually it does have a constructor, but it's also got a namespaced class library, which is
-//			something I'm unsure about, I'm not sure how to integrate this with the Amslib class loader
-//	NOTE: or perhaps I don't....But I would like that Amslib_QueryPath inherits from QueryPath and provides
-//			a seamless interface for QueryPath instead of wrapping it up like this, I think it would be better
-require_once(dirname(__FILE__)."/QueryPath/qp.php");
-
 class Amslib_QueryPath
 {
 	static protected $qp;

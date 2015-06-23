@@ -148,11 +148,11 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 		$this->debug("QUERY",$query,$params);
 
 		$key = sha1($query);
-		
-		$statement = isset($this->statementCache[$key]) 
-			? $this->statementCache[$key] 
+
+		$statement = isset($this->statementCache[$key])
+			? $this->statementCache[$key]
 			: $this->connection->prepare($query);
-		
+
 		if(!$statement instanceof PDOStatement){
 			throw new PDOException("prepare() did not return a PDOStatement");
 		}
@@ -645,7 +645,7 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 				$options = array(
 					PDO::ATTR_ERRMODE				=> PDO::ERRMODE_EXCEPTION,
 					PDO::ATTR_DEFAULT_FETCH_MODE	=> PDO::FETCH_ASSOC,
-					PDO::ATTR_STATEMENT_CLASS		=> array('Amslib_Database_Statement', array($this)) 
+					PDO::ATTR_STATEMENT_CLASS		=> array('Amslib_Database_Statement', array($this))
 				);
 
 				$this->connection = new PDO($dsn,$details["username"],$password,$options);
@@ -779,15 +779,15 @@ class Amslib_Database extends Amslib_Database_DEPRECATED
 			//	Could not drop temporary table (throw exception?)
 			return false;
 		}
-	
-		if(!$this->query("create temporary table $table as $query",$params)){
+
+		if(!$this->query("create temporary table $table as select $query",$params)){
 			//	Could not create temporary table (throw exception?)
 			return false;
 		}
-	
+
 		return true;
 	}
-	
+
 	/**
 	 * 	method:	select
 	 *

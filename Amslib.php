@@ -325,18 +325,14 @@ class Amslib
 			if(strpos($c,"Amslib_MVC")			=== 0)	$c	=	"mvc/$c";
 			if(strpos($c,"Amslib_Mixin")		=== 0)	$c	=	"mvc/$c";
 			if(strpos($c,"Amslib_File")			=== 0)	$c	=	"file/$c";
-			if(strpos($c,"Amslib_QueryPath")	=== 0)	$c	=	"util/$c";
 			if(strpos($c,"Amslib_Webservice")	===	0)	$c	=	"webservice/$c";
 			if(strpos($c,"PiwikTracker")		=== 0)	$c	=	"util/$c";
 			if(strpos($c,"phpQuery")			=== 0)	$c	=	"util/$c/$c";
 			if(strpos($c,"QRcode")				=== 0)	$c	=	"util/phpqrcode/phpqrcode";
 			if(strpos($c,"AesCtr")				=== 0)	$c	=	"util/$c";
-			if(strpos($c,"Logger")				=== 0)	$c	=	"util/apache-log4php/src/main/php/$c";
 
 			if($c == "Facebook")						$c	=	"util/facebook-php-sdk/src/facebook";
 			if($c == "FirePHP") 						$c	=	"util/FirePHPCore/$c.class";
-			if($c == "HTMLPurifier")					$c	=	"util/HTMLPurifier.standalone";
-			if($c == "mPDF")							$c	=	"util/mpdf-5.4/mpdf";
 
 			$f = str_replace("//","/","$c.php");
 
