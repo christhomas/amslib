@@ -4,13 +4,16 @@ class Amslib_Webservice
 	protected $router_url_source;
 	protected $url;
 	protected $params;
+	protected $username;
+	protected $password;
+	protected $reply;
 
-	public function __construct($location)
+	public function __construct($location,$params=array())
 	{
 		$this->setRouterURLSource("Amslib_Router_URL");
 		
 		$this->setLocation($location);
-		$this->setParams(array());
+		$this->setParams($params);
 	}
 
 	static public function &getInstance()
@@ -36,7 +39,7 @@ class Amslib_Webservice
 		$this->url = false;
 		
 		if(!$this->url) $this->setRoute($location);
-		if(!$this->url) $this->setURL($url);
+		if(!$this->url) $this->setURL($location);
 	}
 	
 	public function setURL($url)
@@ -46,12 +49,18 @@ class Amslib_Webservice
 	
 	public function setRoute($route)
 	{
-		$this->url = call_user_func(array($this->router_url_source,"getServiceName"),$route);
+		$callback = array($this->router_url_source,"getServiceName");
+		
+		if(is_callable($callback)){
+			$this->url = call_user_func($callback,$route);
+		}
 	}
 	
 	public function setParams($params)
 	{
-		$this->params = $params;
+		if(is_array($params) && !empty($params)){
+			$this->params = $params;
+		}
 	}
 	
 	public function setParam($key,$value)
@@ -59,83 +68,75 @@ class Amslib_Webservice
 		$this->params[$key] = $value;
 	}
 	
-	/*public function getData($response,$plugin=NULL,$key=NULL,$default=false,$paged=false)
+	public function setAuth($username=NULL,$password=NULL)
 	{
-		if(!$response) return $default;
-
-		$amslib = $response->getData("amslib");
-
-		if(!$amslib) return $default;
-
-		$data = $amslib->getServiceData($plugin);
-
-		if($paged){
-			if($data && Amslib_Array::hasKeys($data,array("list","item_count","page_count"))){
-				$data["list"] = Amslib_Array::valid($data["list"]);
-			}else{
-				$data = array(
-						"list"			=>	array(),
-						"item_count"	=>	0,
-						"page_count"	=>	0
-				);
-			}
+		if(is_string($username) && strlen($username) && is_string($password) && strlen($password)){
+			$this->username = $username;
+			$this->password = $password;
 		}else{
-			$data = $data && $key && isset($data[$key])
-				? $data[$key]
-				: ($key ? $default : $data);
+			$this->username = NULL;
+			$this->password = NULL;
 		}
-
-		return $data;
 	}
 
-	public function getError($response,$plugin=NULL,$key=NULL,$default=false)
+	public function execute()
 	{
-		if(!$response) return $default;
+		try{
+			if(strlen($this->url) == 0) throw new Exception("webservice url was invalid");
+		
+			$curl = curl_init();
+			
+			$params = http_build_query(Amslib_Array::valid($this->params));
+			
+			if($this->username && $this->password){
+				curl_setopt($curl,CURLOPT_USERPWD,"$this->username:$this->password");
+			}
+			
+			curl_setopt($curl,CURLOPT_URL,				$this->url);
+			curl_setopt($curl,CURLOPT_POST,				true);
+			curl_setopt($curl,CURLOPT_HTTP_VERSION,		1.0);
+			curl_setopt($curl,CURLOPT_RETURNTRANSFER,	true);
+			curl_setopt($curl,CURLOPT_HEADER,			false);
+			curl_setopt($curl,CURLOPT_POSTFIELDS,		$params);
+			
+			$this->reply = curl_exec($curl);
+			
+			if(!$this->reply || !strlen($this->reply)){
+				Amslib_Debug::log("CURL ERROR",curl_error($curl),Amslib_Debug::dump($this->reply));
+				curl_close($curl);
+			
+				return false;
+			}
+			
+			curl_close($curl);
+			
+			return true;
+		}catch(Exception $e){
+			$exception = $e->getMessage();
+		}
 
-		$amslib = $response->getData("amslib");
-
-		if(!$amslib) return $default;
-
-		$data = array(
-				"service"		=> $amslib->getServiceErrors($plugin),
-				"validation"	=>	$amslib->getValidationErrors($plugin)
+		Amslib_Debug::log(
+			"EXCEPTION: ",		$exception,
+			"WEBSERVICE URL: ",	$this->url,
+			"PARAMS: ",			$this->params,
+			"DATA: ",			$reply
 		);
 
-		return $data && $key && isset($data[$key])
-			? $data[$key]
-			: ($key ? $default : $data);
-	}*/
+		return false;
+	}
 	
-	/*public function call($name,$params=array(),$paged=false)
-	 {
-	 if($paged && is_array($params)){
-	 if(!isset($params["pager_page"]))	$params["pager_page"] = 0;
-	 if(!isset($params["pager_length"]))	$params["pager_length"] = NULL;
-	 }
-	
-	 //	FIXME:	so the only way this system works is when in conjunction with a router?
-	 //	NOTE:	I think the router should be optional somehow, dependency injection can solve this?
-	 $url = $this->urlSource
-	 ? call_user_func(array($this->urlSource,"getServiceURL"),$name)
-	 : $name;
-	
-	 $request = new Amslib_Webservice_Request($url,$params,true);
-	 //	FIXME: why did I put this here? I think it's code which should not have been committed
-	 $request->setBasicAuthorisation("clients","clients");
-	
-	 return $request->execute();
-	 }*/
-	
-	/*static public function createResponse($type,$data=NULL)
-	 {
-	 $map = array("amslib"=>"Amslib","json"=>"JSON","raw"=>"Raw");
-	
-	 if(!in_array(strtolower($type),array("amslib","json","raw"))){
-	 $type = "Raw";
-	 }
-	
-	 $type = "Amslib_Webservice_Response_{$map[$type]}";
-	
-	 return new $type($data);
-	 }*/
+	public function getResponse($type)
+	{
+		$type = strtolower($type);
+		
+		$map = array(
+			"amslib"	=>	"Amslib_Webservice_Response_Amslib",
+			"json"		=>	"Amslib_Webservice_Response_JSON",
+			"raw"		=>	"Amslib_Webservice_Response_Raw"
+		);
+		
+		$type = in_array($type,array("amslib","json","raw")) ? $map[$type] : $map["raw"];
+		
+		return new $type($this->reply);
+	}
 }
