@@ -15,9 +15,9 @@ class Amslib_Exception extends Exception
 
 	public function setData($key,$value)
 	{
-		if(!is_string($key) || !strlen($key)) return NULL;
-
-		return $this->data[$key] = $value;
+		return is_string($key) && strlen($key)
+			? $this->data[$key] = $value
+			: NULL;
 	}
 
 	public function getData($key=NULL)
@@ -29,5 +29,12 @@ class Amslib_Exception extends Exception
 		}
 
 		return $this->data[$key];
+	}
+	
+	public function setMessage($message)
+	{
+		if(is_string($message) && strlen($message)){
+			$this->message = $message;
+		}
 	}
 }
