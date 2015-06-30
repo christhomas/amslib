@@ -192,7 +192,7 @@ class Amslib
 
 		$input = $input !== NULL ? Amslib_Debug::pdump(true,$args) : "";
 
-		return sha1(implode("__",array($salt,$input,microtime(true),mt_rand(0,21387132987),$salt)));
+		return sha1(implode("__",array($salt,$input,microtime(true),mt_rand(0,2138713),$salt)));
 	}
 
 	/**
