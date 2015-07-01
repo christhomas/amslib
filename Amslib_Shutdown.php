@@ -43,10 +43,17 @@ class Amslib_Shutdown
 	static public function setup($url,$trap_warnings=false)
 	{
 		self::$shutdown_url = $url;
+		
+		set_error_handler(array("Amslib_Shutdown","__exception_error_handler"));
 
 		register_shutdown_function(array("Amslib_Shutdown","__shutdown_handler"),$trap_warnings);
 
 		set_exception_handler(array("Amslib_Shutdown","__shutdown_exception"));
+	}
+	
+	static public function __exception_error_handler($errno, $errstr, $errfile, $errline)
+	{
+		throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
 	}
 
 	/**
