@@ -144,7 +144,9 @@ class Amslib_Debug
 			}else if(is_string($a) && strpos($a,"code_location,") === 0){
 				list($ignore,$location) = explode(",",$a);
 			}else if(is_string($a) && strpos($a,"mysql_query,") === 0){
-				list($ignore,$query) = explode(",",$a);
+				$parts = explode(",",$a);
+				$query = implode(",",array_slice($parts,1));
+				
 				$data[] = trim(preg_replace("/\s+/"," ",$query));
 			}else{
 				if(is_object($a))	$a = array(get_class($a),self::dump($a));
