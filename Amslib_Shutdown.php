@@ -115,6 +115,10 @@ class Amslib_Shutdown
 		}
 
 		$stack = Amslib_Debug::getStackTrace("exception",$e);
+		
+		if(empty($stack)) $stack = array(array("file"=>"__STACK_ERROR__","line"=>"__STACK_ERROR__"));
+		if(!array_key_exists("file",$stack[0])) $stack[0]["file"] = "__MISSING_FILE__";
+		if(!array_key_exists("line",$stack[0])) $stack[0]["line"] = "__MISSING_LINE__";
 
 		$data = array(
 				"error"	=> "Uncaught Exception",
