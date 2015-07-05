@@ -193,18 +193,13 @@ class Amslib_Plugin_Config_XML
 	{
 		$filename = $this->getValue("filename");
 
-		try{
-			$this->queryPath = Amslib_QueryPath::qp($filename);
+		$this->queryPath = Amslib_QueryPath::qp($filename);
 
-			$this->executeScan($plugin);
-			$this->executeLoad($plugin);
+		$this->executeScan($plugin);
+		$this->executeLoad($plugin);
 
-			return true;
-		}catch(Exception $e){
-			Amslib_Debug::log("QueryPath Exception",$e->getMessage());
-		}
+		return true;
 
-		return false;
 	}
 
 	public function executeScan($plugin)
