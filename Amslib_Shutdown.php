@@ -53,7 +53,11 @@ class Amslib_Shutdown
 
 	static public function __exception_error_handler($errno, $errstr, $errfile, $errline)
 	{
-		throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+		if(strpos($errstr,"open_basedir restriction in effect") !== false){
+			throw new Amslib_Exception_Openbasedir($errstr,$errno);
+		}else{
+			throw new Amslib_Exception($errstr,$values);
+		}
 	}
 
 	/**

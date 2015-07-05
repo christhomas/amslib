@@ -202,17 +202,22 @@ class Amslib_File
 	 */
 	static public function mkdir($directory,$mode=0775,$recursive=false,&$error_text=NULL)
 	{
-		$status = true;
-
-		ob_start();
-		$exists = is_dir($directory);
-		if(!$exists && !mkdir($directory,$mode,$recursive)){
-			Amslib_Debug::log("Failed to create directory requested",$directory);
-			$status = false;
+		if(!strlen($directory)){
+			Amslib_Debug::log("directory string was invalid",$directory);
+			return false;
 		}
-		$error_text = ob_get_clean();
 
-		return $status;
+		if(is_dir($directory)){
+			Amslib_Debug::log("directory already exists",$directory);
+			return true;
+		}
+
+		if(!mkdir($directory,$mode,$recursive)){
+			Amslib_Debug::log("failed to create directory",$directory);
+			return false;
+		}
+
+		return true;
 	}
 
 	//	NOTE:	what does this method do now? it's old and deprecated?
@@ -269,7 +274,7 @@ class Amslib_File
 	 */
 	static public function find($filename,$includeFilename=false)
 	{
-		if(@file_exists($filename)){
+		if(self::fileExists($filename)){
 			return ($includeFilename) ? $filename : Amslib_String::rchop($filename,"/");
 		}
 
@@ -277,9 +282,20 @@ class Amslib_File
 
 		foreach($includePath as $path){
 			$test = (strpos($filename,"/") !== 0) ? "$path/$filename" : "{$path}{$filename}";
-			if(@file_exists($test)){
+			if(self::fileExists($test)){
 				return realpath($includeFilename ? $test : $path);
 			}
+		}
+
+		return false;
+	}
+
+	static public function fileExists($path)
+	{
+		try{
+			return file_exists($path);
+		}catch(Amslib_Exception_Openbasedir $e){
+			//	ignore this error
 		}
 
 		return false;
