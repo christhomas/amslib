@@ -8,7 +8,5 @@ class Amslib_Exception_Openbasedir extends Amslib_Exception
 		parent::__construct($message,array(
 			"code" => $code
 		));
-
-		Amslib_Debug::log(__CLASS__,$message);
 	}
 }

@@ -120,7 +120,8 @@ class Amslib_Debug
 		$args		=	func_get_args();
 		$data		=	array();
 		$maxlength	=	8912;
-		$location	=	NULL;
+		$location	=	self::getCodeLocation(2);
+		$prefix		=	$location.": ";
 
 		foreach($args as $k=>$a){
 			if(is_string($a) && strpos($a,"stack_trace") === 0){
@@ -135,18 +136,16 @@ class Amslib_Debug
 				$stack = explode("\n",$stack);
 
 				foreach($stack as $k=>$row){
-					error_log("[TRACE:$k] $row");
+					$data[] = "[TRACE:$k] $row";
 				}
 			}else if(is_string($a) && strpos($a,"memory_usage_human") === 0){
 				$data[] = "memory_usage_human = ".self::getMemoryUsage(true,true);
 			}else if(is_string($a) && strpos($a,"memory_usage") === 0){
 				$data[] = "memory_usage = ".self::getMemoryUsage(true);
-			}else if(is_string($a) && strpos($a,"code_location,") === 0){
-				list($ignore,$location) = explode(",",$a);
 			}else if(is_string($a) && strpos($a,"mysql_query,") === 0){
 				$parts = explode(",",$a);
 				$query = implode(",",array_slice($parts,1));
-				
+
 				$data[] = trim(preg_replace("/\s+/"," ",$query));
 			}else{
 				if(is_object($a))	$a = array(get_class($a),self::dump($a));
@@ -162,15 +161,9 @@ class Amslib_Debug
 			}
 		}
 
-		if($location === NULL){
-			$location = self::getCodeLocation(2);
+		foreach($data as $item){
+			error_log($item);
 		}
-
-		$text = $location.": ".implode(", ",$data);
-
-		error_log($text);
-
-		return array("data"=>$data,"log"=>$text);
 	}
 
 	static public function getCodeLocation($stack_offset=2,$exception=NULL)

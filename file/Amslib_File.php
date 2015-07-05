@@ -278,7 +278,9 @@ class Amslib_File
 			return ($includeFilename) ? $filename : Amslib_String::rchop($filename,"/");
 		}
 
-		$includePath = explode(PATH_SEPARATOR,ini_get("include_path"));
+		$includePath = array_reverse(explode(PATH_SEPARATOR,ini_get("include_path")));
+
+		Amslib_Debug::log("includePath = ",$includePath);
 
 		foreach($includePath as $path){
 			$test = (strpos($filename,"/") !== 0) ? "$path/$filename" : "{$path}{$filename}";
@@ -295,7 +297,8 @@ class Amslib_File
 		try{
 			return file_exists($path);
 		}catch(Amslib_Exception_Openbasedir $e){
-			//	ignore this error
+			//	ignore this error, but output error log data to help trace down the reason
+			Amslib_Debug::log(get_class($e),$e->getMessage(),$path,"stack_trace");
 		}
 
 		return false;
