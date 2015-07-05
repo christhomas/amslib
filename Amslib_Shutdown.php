@@ -43,14 +43,14 @@ class Amslib_Shutdown
 	static public function setup($url,$trap_warnings=false)
 	{
 		self::$shutdown_url = $url;
-		
+
 		set_error_handler(array("Amslib_Shutdown","__exception_error_handler"));
 
 		register_shutdown_function(array("Amslib_Shutdown","__shutdown_handler"),$trap_warnings);
 
 		set_exception_handler(array("Amslib_Shutdown","__shutdown_exception"));
 	}
-	
+
 	static public function __exception_error_handler($errno, $errstr, $errfile, $errline)
 	{
 		throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
@@ -122,10 +122,10 @@ class Amslib_Shutdown
 		}
 
 		$stack = Amslib_Debug::getStackTrace("exception",$e);
-		
+
 		if(empty($stack)) $stack = array(array("file"=>"__STACK_ERROR__","line"=>"__STACK_ERROR__"));
-		if(!array_key_exists("file",$stack[0])) $stack[0]["file"] = "__MISSING_FILE__";
-		if(!array_key_exists("line",$stack[0])) $stack[0]["line"] = "__MISSING_LINE__";
+		if(!array_key_exists("file",$stack[0])) $stack[0]["file"] = "__FILE_NOT_AVAILABLE__";
+		if(!array_key_exists("line",$stack[0])) $stack[0]["line"] = "__LINE_NOT_AVAILABLE__";
 
 		$data = array(
 				"error"	=> "Uncaught Exception",
