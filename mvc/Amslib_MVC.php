@@ -408,6 +408,13 @@ class Amslib_MVC extends Amslib_Mixin
 			}else{
 				$o = new $id;
 			}
+			
+			//	Sometimes, you forget to define "getInstance" in your class and it builds a parent 
+			//	class instead, this is something that can cause a headache to debug, so I'll warn 
+			//	you about it here
+			if(!$o instanceof $id){
+				Amslib_Debug::log("requested to build class '$id' but instead class ".get_class($o)." was constructed");
+			}
 
 			//	if this object was valid and has initialiseObject, call it, then return whatever was created
 			if($o && method_exists($o,"initialiseObject") && !$o->isInitialised()){
