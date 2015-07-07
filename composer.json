@@ -24,11 +24,14 @@
 	},{
 		"type": "vcs",
 		"url": "https://github.com/dompdf/dompdf.git"
+	},{
+		"type": "vcs",
+		"url": "https://github.com/dominicsayers/isemail.git"
 	}],
 	
-
 	"require":{
 		"php": ">=5.3.0",
-		"querypath/QueryPath": "dev-master"
+		"querypath/QueryPath": "dev-master",
+		"dominicsayers/isemail": "dev-master"
 	}	
 }

@@ -807,11 +807,8 @@ class Amslib_Validator
 		if(strlen($value) == 0 && $required == true) $error = "EMAIL_EMPTY";
 
 		if(isset($options["invalid"]) && in_array($value,$options["invalid"])) $error = "EMAIL_INVALID_INPUT";
-
-		//	LOL REGEXP
-		$pattern = "^[a-z0-9,!#\$%&'\*\+/=\?\^_`\{\|}~-]+(\.[a-z0-9,!#\$%&'\*\+/=\?\^_`\{\|}~-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*\.([a-z]{2,})$";
-		//	eregi is deprecated, need to swap it for preg_match, when I find out how to convert the regexp :P
-		if(!@eregi($pattern,$value)) $error = "EMAIL_INVALID";
+		
+		if(!is_email($email)) $error = "EMAIL_INVALID";
 
 		if($required == true && $error !== false) return $error;
 
