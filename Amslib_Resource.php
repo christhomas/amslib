@@ -33,8 +33,8 @@
  */
 class Amslib_Resource
 {
-	static protected $stylesheet = array();
-	static protected $javascript = array();
+	static protected $stylesheet = array("__common"=>array());
+	static protected $javascript = array("__common"=>array());
 	static protected $default_position = "__common";
 
 	static protected function validatePosition($position=NULL)
