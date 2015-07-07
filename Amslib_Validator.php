@@ -808,7 +808,7 @@ class Amslib_Validator
 
 		if(isset($options["invalid"]) && in_array($value,$options["invalid"])) $error = "EMAIL_INVALID_INPUT";
 		
-		if(!is_email($email)) $error = "EMAIL_INVALID";
+		if(!is_email($value)) $error = "EMAIL_INVALID";
 
 		if($required == true && $error !== false) return $error;
 
