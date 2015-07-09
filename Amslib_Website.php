@@ -175,13 +175,14 @@ class Amslib_Website
 	static public function absolute($url="",$resolve=false)
 	{
 		self::set();
-
+		
 		if(!is_string($url)){
 			Amslib_Debug::log("stack_trace",$url);
-
+		
 			return false;
 		}
-
+		
+		/*
 		//	When we have a string with this protocol token, it's already an absolute url
 		if(strpos($url,"://") !== false){
 			return $url;
@@ -190,6 +191,8 @@ class Amslib_Website
 		$url = Amslib_File::absolute(self::$location.$url);
 
 		return $resolve ? Amslib_File::resolvePath($url) : $url;
+		*/
+		return Amslib_File::absolute(self::$location.$url);
 	}
 
 	/**
