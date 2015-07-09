@@ -124,8 +124,9 @@ class Amslib_File_Transfer
 		);
 	
 		$encrypted	= 	AesCtr::encrypt(json_encode($data),self::getPassword());
-		$remote_url	=	"$post_url?encrypted=".base64_encode($encrypted);
-		
+		$encoded	=	base64_encode($encrypted);
+		$remote_url	=	"$post_url?encrypted=$encoded";
+
 		$reply = file_get_contents($remote_url);
 
 		$json = json_decode($reply,true);
@@ -155,6 +156,7 @@ class Amslib_File_Transfer
 			$json = json_decode($decrypted,true);
 		}catch(Exception $e){
 			//	do nothing
+			Amslib_Debug::log("Exception whilst json_decoding content");
 		}
 		
 		if(!isset($json) || !$json || !isset($json["check"])) self::reply(false,"invalid data");
@@ -165,7 +167,7 @@ class Amslib_File_Transfer
 		
 		//	TODO:	the sender might have posted an actual file, so we need to maybe check this and 
 		//			provide the file data from the $_FILES array
-		
+
 		return $json;
 	}
 }

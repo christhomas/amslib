@@ -157,6 +157,7 @@ class Amslib_Website
 		if(strpos($url,"://") !== false){
 			list($protocol,$domain,$url) = self::parseURL($url);
 
+			//	Because we have a url with a protocol, it must mean the url parsed is already relative
 			return $url;
 		}
 
