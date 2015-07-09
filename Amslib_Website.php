@@ -174,7 +174,7 @@ class Amslib_Website
 	 */
 	static public function absolute($url="",$resolve=false)
 	{
-		self::set();
+		//self::set();
 		
 		if(!is_string($url)){
 			Amslib_Debug::log("stack_trace",$url);
