@@ -33,5 +33,9 @@
 		"php": ">=5.3.0",
 		"querypath/QueryPath": "dev-master",
 		"dominicsayers/isemail": "dev-master"
-	}	
+	},
+	
+	"autoload": {
+    	"psr-0": {"Amslib": "/"}
+    }	
 }
