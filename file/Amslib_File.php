@@ -280,8 +280,6 @@ class Amslib_File
 
 		$includePath = array_reverse(explode(PATH_SEPARATOR,ini_get("include_path")));
 
-		Amslib_Debug::log("includePath = ",$includePath);
-
 		foreach($includePath as $path){
 			$test = (strpos($filename,"/") !== 0) ? "$path/$filename" : "{$path}{$filename}";
 			if(self::fileExists($test)){
