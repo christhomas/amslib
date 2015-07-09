@@ -854,7 +854,7 @@ class Amslib_Plugin
 			$location	=	$this->getLocation();
 			$plugin		=	Amslib_Plugin_Manager::config($array["value"],$location);
 		}catch(Exception $e){
-			Amslib_Debug::log("Exception occured whilst configuring plugin, message = ".$e->getMessage());
+			Amslib_Debug::log("Exception occured whilst configuring plugin, message = ",$e->getMessage());
 		}
 
 		if($plugin){

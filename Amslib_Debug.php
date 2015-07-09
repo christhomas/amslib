@@ -162,7 +162,8 @@ class Amslib_Debug
 		$stack = self::getStackTrace();
 		
 		//	eliminate this function from the stack
-		$location = array_shift(array_slice($stack,2,1));
+		$stack		= array_slice($stack,2,1);
+		$location	= array_shift($stack);
 		
 		$line = isset($location["line"]) ? "@{$location["line"]}" : "";
 		
