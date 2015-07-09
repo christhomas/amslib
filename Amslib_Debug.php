@@ -120,33 +120,31 @@ class Amslib_Debug
 		$args		=	func_get_args();
 		$data		=	array();
 		$maxlength	=	8912;
-		$location	=	self::getCodeLocation(2);
-		$prefix		=	$location.": ";
+		$function	=	false;
 
 		foreach($args as $k=>$a){
 			if(is_string($a) && strpos($a,"stack_trace") === 0){
 				$parts = explode(",",$a);
 				array_shift($parts); // discard the "stack_trace" part
 
-				$parts = count($parts)
+				$args = count($parts)
 					? array("type","text","limit",$parts)
 					: array("type","text");
 
-				$stack = call_user_func_array("Amslib_Debug::getStackTrace",$parts);
+				$stack = call_user_func_array("Amslib_Debug::getStackTrace",$args);
 				$stack = explode("\n",$stack);
 
 				foreach($stack as $k=>$row){
-					$data[] = "[TRACE:$k] $row";
+					error_log("[TRACE:$k] $row");
 				}
 			}else if(is_string($a) && strpos($a,"memory_usage_human") === 0){
 				$data[] = "memory_usage_human = ".self::getMemoryUsage(true,true);
 			}else if(is_string($a) && strpos($a,"memory_usage") === 0){
 				$data[] = "memory_usage = ".self::getMemoryUsage(true);
-			}else if(is_string($a) && strpos($a,"mysql_query,") === 0){
-				$parts = explode(",",$a);
-				$query = implode(",",array_slice($parts,1));
+			}else if(is_string($a) && strpos($a,"func_offset") === 0){
+				$command = explode(",",array_shift($args));
 
-				$data[] = trim(preg_replace("/\s+/"," ",$query));
+				if(count($command) == 1) $function = $command[0];
 			}else{
 				if(is_object($a))	$a = array(get_class($a),self::dump($a));
 				if(is_array($a)) 	$a = self::dump($a);
@@ -161,9 +159,24 @@ class Amslib_Debug
 			}
 		}
 
-		foreach($data as $item){
-			error_log($item);
-		}
+		$stack = self::getStackTrace();
+		
+		//	eliminate this function from the stack
+		$location = array_shift(array_slice($stack,2,1));
+		
+		$line = isset($location["line"]) ? "@{$location["line"]}" : "";
+		
+		$location = Amslib_Array::hasKeys($location,array("class","type","function"))
+			? $location["class"].$location["type"].$location["function"]
+			: $location;
+		
+		$location = is_array($location) && Amslib_Array::hasKeys($location,"file","function")
+			? basename($location["file"])."({$location["function"]})"
+			: $location;
+
+		error_log($log = $location.$line.": ".implode(", ",$data));
+
+		return array("function"=>$function,"data"=>$data,"log"=>$log);
 	}
 
 	static public function getCodeLocation($stack_offset=2,$exception=NULL)
