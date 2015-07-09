@@ -7,7 +7,7 @@ class Amslib_Exception extends Exception
 	{
 		parent::__construct($message);
 
-		$this->data = $data;
+		$this->data = is_array($data) ? $data : array($data);
 
 		//	NOTE: I have to test whether this records the correct location in all circumstances
 		$this->setData("location",Amslib_Debug::getCodeLocation(3));
