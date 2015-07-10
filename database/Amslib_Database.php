@@ -1088,12 +1088,6 @@ QUERY;
 			$this->selectResult = current($this->selectResult);
 		}
 
-		//	No results? return false! I'm not sure whether returning false is a good idea, since it has some "meaning"
-		//	Perhaps return NULL = no results and return false = failure (failure has meaning, it means something went wrong)
-		if(empty($this->selectResult)){
-			$this->selectResult = false;
-		}
-
 		return $this->selectResult;
 	}
 
