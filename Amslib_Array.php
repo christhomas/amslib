@@ -89,17 +89,17 @@ class Amslib_Array
 		if($key !== NULL && is_string($key)){
 			$array = array_key_exists($key,$array) ? $array[$key] : array();
 		}
-		
+
 		//	Invalid values return an empty array
 		if(empty($array) || !$array || !is_array($array) || is_null($array)){
 			return array();
 		}
-		
+
 		//	cast objects to arrays
 		if(is_object($array)){
 			$array = (array)$a;
 		}
-		
+
 		//	return the original value
 		return $array;
 	}
@@ -401,7 +401,7 @@ class Amslib_Array
 	 * method:removeKeys
 	 *
 	 * This method is a wrapper around unset to make it easier and less verbose in your code to remove multiple elements
-	 * 
+	 *
 	 * note:
 	 * 	-	I'm not entirely sure this code does 100% of what I think it should
 	 */
@@ -801,22 +801,16 @@ class Amslib_Array
 	 *
 	 * 	todo: write documentation
 	 *
-	 *	NOTE:	Of course, we use a normal separator "," to split the string
-	 *			But if any of the elements in each array element contains a "," character
-	 *			this will break, so in these circumstances, you need to choose a separator
-	 *			which ISNT present in ANY array element, e.g: #array_sep# or something unique
-	 *
 	 *	NOTE:	I am adding slashes to the " character, but this might not be the only character which
 	 *			causes a problem here, we need to investigate any potential others, but I think for now this is ok
 	 */
-	static public function wrap($array,$char,$returnArray=true,$sep=",")
+	static public function wrap($array,$char)
 	{
-		$wrap	=	$char=="\"" ? addslashes($char) : $char;
-		$sep	=	addslashes($sep);
+		$wrap = $char=="\"" ? addslashes($char) : $char;
 
-		$string = $char.implode($char.$sep.$char,$array).$char;
-
-		return $returnArray ? explode($sep,$string) : $string;
+		return array_map(function($str){
+			return $wrap.trim($str,$char).$wrap;
+		},$array);
 	}
 
 	/**
@@ -829,40 +823,40 @@ class Amslib_Array
 		return $quote.implode($quote.$join.$quote,$array).$quote;
 	}
 
-	/**
-	 * 	method:	implodeQuoteSingle
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function implodeQuoteSingle($array,$join=",")
-	{
-		return self::implode($array,$join,"'");
-	}
-
-	/**
-	 * 	method:	implodeQuoteDouble
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function implodeQuoteDouble($array,$join=",")
-	{
-		return self::implode($array,$join,"\"");
-	}
-
 	static private function ______DEPRECATED_METHODS_BELOW(){}
 
 	static public function missingKeys($array,$key,$value=NULL)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD, USE self::fillMissing DIRECTLY");
+
 		return self::fillMissing($array,$key,$value);
 	}
 
 	static public function pluck2($array,$keys)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD, USE self::pluck DIRECTLY");
+
 		return self::pluck($array,$keys);
 	}
 
 	static public function pluckMulti2($array,$keys)
 	{
+		Amslib_Debug::log("DEPRECATED METHOD, USE self::pluck DIRECTLY");
+
 		return self::pluck($array,$keys);
+	}
+
+	static public function implodeQuoteSingle($array,$join=",")
+	{
+		Amslib_Debug::log("DEPRECATED METHOD, USE self::implode DIRECTLY");
+
+		return self::implode($array,$join,"'");
+	}
+
+	static public function implodeQuoteDouble($array,$join=",")
+	{
+		Amslib_Debug::log("DEPRECATED METHOD, USE self::implode DIRECTLY");
+
+		return self::implode($array,$join,"\"");
 	}
 }
