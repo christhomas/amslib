@@ -248,22 +248,24 @@ class Amslib_File
 		 * WARNING: You better make double triple quadruple sure you wanna do this, cause it'll nuke a LOT OF FILES
 		 */
 	}
-	
+
 	//	FUTURE IDEA TO MAKE SLUGIFYING FILENAMES EASIER
-	static public function slugify($filename)
+	/*static public function slugify($filename)
 	{
 		if(substr($filename,-1) == "/") return $filename;
-		
+
 		list($protocol,$filename) = explode("://",$filename) + array(NULL,$filename);
-		
+
 		$parts = explode("/",$filename);
-		
+
 		$filename = array_pop($parts);
-		
+
 		$filename = Amslib_String::slugify($filename,"-",".");
-		
-		return implode("/",array_push(parts,$filename));
-	}
+
+		$parts = array_push($parts,$filename);
+
+		return implode("/",$parts);
+	}*/
 
 	/**
 	 * 	method:	getFileExtension
