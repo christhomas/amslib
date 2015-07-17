@@ -808,7 +808,7 @@ class Amslib_Array
 	{
 		$wrap = $char=="\"" ? addslashes($char) : $char;
 
-		return array_map(function($str){
+		return array_map(function($str) use ($char,$wrap){
 			return $wrap.trim($str,$char).$wrap;
 		},$array);
 	}
