@@ -676,7 +676,7 @@ class Amslib_Validator
 			$error = "BOOLEAN_INVALID";
 		}
 
-		$bool = !!in_array($value,$true);
+		$bool = !!in_array($value,$true,true);
 
 		if(isset($options["limit-input"]) && !in_array($bool,$options["limit-input"])){
 			$error = "BOOLEAN_CANNOT_MATCH_AGAINST_LIMIT_INPUT";
