@@ -689,7 +689,7 @@ class Amslib_Validator
 			return $required ? $error : true;
 		}
 
-		$this->setValid($name,$value);
+		$this->setValid($name,$bool);
 
 		return true;
 	}
