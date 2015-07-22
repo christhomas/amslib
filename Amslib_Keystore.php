@@ -77,9 +77,17 @@ class Amslib_Keystore
 	 */
 	static public function add($name,$value)
 	{
-		if(!isset(self::$store[$name])) self::$store[$name] = array();
-		if(!is_array(self::$store[$name])) return false;
-		if(!is_string($name)) return false;
+		if(!isset(self::$store[$name])){
+			self::$store[$name] = array();
+		}
+		
+		if(!is_array(self::$store[$name])){
+			return false;
+		}
+		
+		if(!is_string($name)){
+			return false;
+		}
 
 		self::$store[$name][] = $value;
 
