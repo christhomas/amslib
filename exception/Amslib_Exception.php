@@ -18,7 +18,7 @@ class Amslib_Exception extends Exception
 		
 		//	if this callback is usable, call it for the custom functionality
 		if(is_callable(self::$callback)){
-			call_user_func(self::$callback,$message,$data);
+			call_user_func(self::$callback,$message,$this->data);
 		}
 	}
 	
