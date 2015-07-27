@@ -18,19 +18,13 @@ class Amslib_Exception extends Exception
 		
 		//	if this callback is usable, call it for the custom functionality
 		if(is_callable(self::$callback)){
-			Amslib_Debug::log("executing callback",self::$callback);
 			call_user_func(self::$callback,$message,$data);
 		}
 	}
 	
 	static public function setCallback($callback)
 	{
-		if(is_callable($callback)){
-			self::$callback = $callback;
-			Amslib_Debug::log("callback was set, apparently");
-		}else{
-			Amslib_Debug::log("callback was not set because it was not callable");
-		}
+		self::$callback = $callback;
 	}
 
 	public function setData($key,$value)
