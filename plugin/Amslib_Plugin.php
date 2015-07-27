@@ -833,16 +833,21 @@ class Amslib_Plugin
 		}
 
 		$a = $array["attr"];
+		
+		$alias = isset($a["alias"]) ? $a["alias"] : NULL;
+		if($alias) Amslib_Plugin_Manager::setPluginAlias($array["value"],$alias);
 
 		$replace = isset($a["replace"]) ? $a["replace"] : NULL;
-		if($replace) Amslib_Plugin_Manager::replacePluginLoad($replace,$array["value"]);
+		if($replace) Amslib_Plugin_Manager::setPluginReplace($replace,$array["value"]);
 
-		$prevent = isset($a["prevent"]) ? $a["prevent"] : NULL;
-		if($prevent) Amslib_Plugin_Manager::preventPluginLoad($prevent,$array["value"]);
+		//	NOTE: we should deprecate "prevent" in favour of "block" in the future
+		$prevent	= isset($a["prevent"]) ? $a["prevent"] : NULL;
+		$block		= isset($a["block"]) ? $a["block"] : NULL;
+		if($prevent || $block) Amslib_Plugin_Manager::setPluginBlock($array["value"]);
 
 		//	Only process plugins which have no replace or prevent instructions,
 		//	these are instructions about loading, not instructions to ACTUALLY load
-		if($prevent || $replace) return;
+		if($prevent || $block || $replace) return;
 
 		//	If the plugin is already created, don't attempt to configure or load it again
 		$plugin = Amslib_Plugin_Manager::getPlugin($array["value"]);
