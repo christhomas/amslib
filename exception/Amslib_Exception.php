@@ -14,7 +14,7 @@ class Amslib_Exception extends Exception
 		}
 
 		//	NOTE: I have to test whether this records the correct location in all circumstances
-		$this->setData("location",Amslib_Debug::getCodeLocation(3));
+		$this->setData("location",basename($this->getFile())."@".$this->getLine());
 		
 		//	if this callback is usable, call it for the custom functionality
 		if(is_callable(self::$callback)){
