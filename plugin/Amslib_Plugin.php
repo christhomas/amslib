@@ -191,7 +191,7 @@ class Amslib_Plugin
 
 					case "object":{
 						if(!isset($v["file"])){
-							Amslib_Debug::log("WARNING: object being configured and has no file array index",$value);
+							Amslib_Debug::log("WARNING: object being configured and has no file array index",$key,$k,$v);
 
 							continue;
 						}
