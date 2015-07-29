@@ -22,7 +22,7 @@ class Amslib_Exception extends Exception
 				//	the function to call
 				self::$callback,
 				//	the message, data, stack parameters to pass
-				$message,
+				$this->message,
 				$this->data,
 				Amslib_Debug::getStackTrace("type","text")
 			);
