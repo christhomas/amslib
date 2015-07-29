@@ -5,7 +5,7 @@ class Amslib_Exception extends Exception
 	
 	static protected $callback = false;
 
-	public function __construct($message,$data=array())
+	public function __construct($message,$data=array(),$log_entry=true)
 	{
 		parent::__construct($message);
 
@@ -17,7 +17,7 @@ class Amslib_Exception extends Exception
 		$this->setData("location",basename($this->getFile())."@".$this->getLine());
 		
 		//	if this callback is usable, call it for the custom functionality
-		if(is_callable(self::$callback)){
+		if(is_callable(self::$callback) && $log_entry){
 			call_user_func(
 				//	the function to call
 				self::$callback,
