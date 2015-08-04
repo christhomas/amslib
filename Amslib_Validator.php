@@ -121,7 +121,7 @@ class Amslib_Validator
 
 		if(!$required) return true;
 
-		$this->setError($name,"LOGICAL_OR_FAILED");
+		$this->setError($name,$value,"LOGICAL_OR_FAILED");
 
 		return false;
 	}
@@ -141,7 +141,7 @@ class Amslib_Validator
 			if(!$exists || !$empty){
 				if(!$required) return true;
 
-				$this->setError($name,"LOGICAL_AND_FAILED");
+				$this->setError($name,$value,"LOGICAL_AND_FAILED");
 
 				return true;
 			}
