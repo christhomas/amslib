@@ -18,14 +18,7 @@ class Amslib_Exception extends Exception
 		
 		//	if this callback is usable, call it for the custom functionality
 		if(is_callable(self::$callback) && $log_entry){
-			call_user_func(
-				//	the function to call
-				self::$callback,
-				//	the message, data, stack parameters to pass
-				$this->message,
-				$this->data,
-				Amslib_Debug::getStackTrace("type","text")
-			);
+			call_user_func(self::$callback,$this,Amslib_Debug::getStackTrace("type","text"));
 		}
 	}
 	
