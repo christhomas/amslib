@@ -7,11 +7,6 @@ class Amslib_QueryPath
 	{
 		self::$qp = false;
 		
-		//	Only set this if it's not already set in the options
-		if(!array_key_exists("replace_entities",$options)){
-			$options["replace_entities"] = true;
-		}
-
 		//	NOTE: we do this output buffer trick to contain any output it might make, but strlen the output afterwards
 		//			if there was a problem, surely it'll be non-zero if it outputs anything, but we prevent this
 		//			from breaking the output of the system, so we contain the problem, although we don't skip it
