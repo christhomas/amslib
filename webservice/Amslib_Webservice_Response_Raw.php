@@ -40,7 +40,7 @@ class Amslib_Webservice_Response_Raw
 
 	public function resetResponse()
 	{
-		$this->response = array();
+		$this->response = null;
 	}
 
 	public function getResponse()
@@ -49,123 +49,12 @@ class Amslib_Webservice_Response_Raw
 	}
 
 	/**
-	 * 	method:	hasData
+	 * 	method:	hasResponse
 	 *
 	 * 	todo: write documentation
 	 */
 	public function hasResponse()
 	{
-		return $this->response && is_array($this->response);
-	}
-
-	public function setKey($key,$value=NULL)
-	{
-		if(!$this->hasResponse()){
-			return false;
-		}
-
-		$a = &$this->response;
-
-		if(is_string($key)){
-			$key = array($key);
-		}
-
-		while($count = count($key)){
-			$index = array_shift($key);
-
-			if($count > 1){
-				if(!isset($a[$index])){
-					$a[$index] = array();
-				}
-
-				$a = &$a[$index];
-			}else{
-				$a[$index] = $value;
-			}
-		}
-
-		unset($a);
-
-		return $value;
-	}
-
-	public function getKey($key=NULL,$default=NULL)
-	{
-		if(!$this->hasResponse()){
-			return $default;
-		}
-
-		$a = $this->response;
-
-		if(is_string($key)){
-			$key = array($key);
-		}
-
-		foreach($key as $index){
-			if(!isset($a[$index])){
-				return $default;
-			}
-
-			$a = $a[$index];
-		}
-
-		return $a;
-	}
-
-	public function deleteKey($key)
-	{
-		if(!$this->hasResponse()){
-			return NULL;
-		}
-
-		$a = &$this->response;
-
-		if(is_string($key)){
-			$key = array($key);
-		}
-
-		while($count = count($key)){
-			$index = array_shift($key);
-
-			if($count > 1){
-				if(!isset($a[$index])){
-					return NULL;
-				}
-
-				$a = &$a[$index];
-			}else{
-				$value = $a[$index];
-				unset($a[$index],$a);
-
-				return $value;
-			}
-		}
-
-		return NULL;
-	}
-
-	public function hasKey($vargs)
-	{
-		if(!$this->hasResponse()) return false;
-
-		$args = func_get_args();
-
-		$count = count($args);
-
-		if(!$count) return false;
-
-		$response = $this->response;
-
-		do{
-			$a = array_shift($args);
-
-			if((is_string($a) || is_numeric($a)) && array_key_exists($a,$response)){
-				$response = $response[$a];
-			}else{
-				return false;
-			}
-		}while(count($args));
-
-		return true;
+		return $this->response;
 	}
 }
