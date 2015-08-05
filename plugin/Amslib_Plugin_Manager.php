@@ -41,7 +41,8 @@ class Amslib_Plugin_Manager
 	static protected $api		=	array();
 	static protected $location	=	array();
 	static protected $replace	=	array();
-	static protected $prevent	=	array();
+	static protected $alias		=	array();
+	static protected $block		=	array();
 	static protected $import	=	array();
 	static protected $export	=	array();
 
@@ -71,35 +72,46 @@ class Amslib_Plugin_Manager
 	}
 
 	/**
-	 * 	method:	preventPluginLoad
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function preventPluginLoad($prevent,$plugin)
-	{
-		if(!is_string($prevent) && strlen($prevent) == 0) return false;
-		if(!is_string($plugin) && strlen($plugin) == 0) return false;
-
-		self::$prevent[$plugin] = $prevent;
-	}
-
-	/**
-	 * 	method:	replacePluginLoad
+	 * 	method:	setPluginReplace
 	 *
 	 * 	todo: write documentation
 	 *
 	 * 	note:
-	 * 	-	This function will map plugin1 => plugin2, so any attempt to load plugin1 will
-	 * 		result in loading plugin2
-	 * 	-	This means you need to be able to load plugin2 AT THE POINT IN TIME that plugin1
+	 * 	-	This function will map plugin_ref => replace_by, so any attempt to load plugin_ref will
+	 * 		result in loading replace_by
+	 * 	-	This means you need to be able to load replace_by AT THE POINT IN TIME that plugin_ref
 	 * 		is loaded, if you require something more, you're going to find trouble.
 	 */
-	static public function replacePluginLoad($plugin1,$plugin2)
+	static public function setPluginReplace($plugin_ref,$replace_by)
 	{
-		if(!is_string($plugin1) && strlen($plugin1) == 0) return false;
-		if(!is_string($plugin2) && strlen($plugin2) == 0) return false;
+		if(!is_string($plugin_ref) && strlen($plugin_ref) == 0) return false;
+		if(!is_string($replace_by) && strlen($replace_by) == 0) return false;
 
-		self::$replace[$plugin1] = $plugin2;
+		self::$replace[$plugin_ref] = $replace_by;
+	}
+	
+	/**
+	 * 	method:	setupPluginAlias
+	 *
+	 *	Setup a plugin to be an alias of another, allowing you to query plugins by another, possibly more common name
+	 */
+	static public function setPluginAlias($plugin_ref,$alias_with)
+	{
+		if(!is_string($plugin_ref) && strlen($plugin_ref) == 0) return false;
+	
+		self::$alias[$alias_with] = $plugin_ref;
+	}
+	
+	/**
+	 * 	method:	setPluginBlock
+	 *
+	 * 	Block a plugin from being loaded into the system
+	 */
+	static public function setPluginBlock($plugin)
+	{
+		if(!is_string($plugin) && strlen($plugin) == 0) return false;
+	
+		self::$block[$plugin] = true;
 	}
 
 	/**
@@ -116,7 +128,7 @@ class Amslib_Plugin_Manager
 		}
 
 		//	If this plugin is configured to not load, return false
-		if(isset(self::$prevent[$name])) return false;
+		if(isset(self::$block[$name])) return false;
 
 		//	If this plugin is configured to be replaced with another, use the replacement
 		if(isset(self::$replace[$name])) $name = self::$replace[$name];
@@ -148,7 +160,7 @@ class Amslib_Plugin_Manager
 	static public function load($name,$location=NULL)
 	{
 		//	If this plugin is configured to not load, return false
-		if(isset(self::$prevent[$name])) return false;
+		if(isset(self::$block[$name])) return false;
 
 		//	If this plugin is configured to be replaced with another, use the replacement
 		if(isset(self::$replace[$name])) $name = self::$replace[$name];
@@ -224,7 +236,8 @@ class Amslib_Plugin_Manager
 	static public function getAPI($name)
 	{
 		//	If this plugin is configured to be replaced with another, use the replacement
-		if(isset(self::$replace[$name])) $name = self::$replace[$name];
+		if(isset(self::$replace[$name]))	$name = self::$replace[$name];
+		if(isset(self::$alias[$name]))		$name = self::$alias[$name];
 
 		return is_string($name) && isset(self::$api[$name]) ? self::$api[$name] : false;
 	}

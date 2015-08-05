@@ -261,6 +261,12 @@ class Amslib_Plugin_Application extends Amslib_Plugin
 		Amslib_Shutdown::setup($url,$trap_warnings);
 		Amslib_Shutdown::setMode($mode);
 	}
+	
+	//	Set this callback to execute each time a new exception/error happens
+	public function setExceptionCallback($callback)
+	{
+		Amslib_Exception::setCallback($callback);
+	}
 
 	/**
 	 * 	method:	setConfigSource

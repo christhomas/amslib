@@ -2,8 +2,10 @@
 class Amslib_Exception extends Exception
 {
 	protected $data;
+	
+	static protected $callback = false;
 
-	public function __construct($message,$data=array())
+	public function __construct($message,$data=array(),$log_entry=true)
 	{
 		parent::__construct($message);
 
@@ -12,7 +14,17 @@ class Amslib_Exception extends Exception
 		}
 
 		//	NOTE: I have to test whether this records the correct location in all circumstances
-		$this->setData("location",Amslib_Debug::getCodeLocation(3));
+		$this->setData("location",basename($this->getFile())."@".$this->getLine());
+		
+		//	if this callback is usable, call it for the custom functionality
+		if(is_callable(self::$callback) && $log_entry){
+			call_user_func(self::$callback,$this,Amslib_Debug::getStackTrace("type","text"));
+		}
+	}
+	
+	static public function setCallback($callback)
+	{
+		self::$callback = $callback;
 	}
 
 	public function setData($key,$value)
