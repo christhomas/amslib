@@ -8,6 +8,12 @@ class Amslib_Exception extends Exception
 	public function __construct($message,$data=array(),$log_entry=true)
 	{
 		parent::__construct($message);
+		
+		//	This is so if an exception is generated using a true/false/1/0 type value
+		//	it'll still process into a predictable format
+		if(is_scalar($data)){
+			$data = array("data" => $data);
+		}
 
 		foreach(Amslib_Array::valid($data) as $key=>$value){
 			$this->setData($key,$value);
