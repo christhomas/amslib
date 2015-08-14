@@ -91,22 +91,24 @@ class Amslib_Database
 		if(!$this->debugState && in_array($type,array("DEBUG","QUERY"))){
 			return null;
 		}
-
-		static $param_map = array(
-			0 => "PARAM_NULL",
-			1 => "PARAM_INT",
-			2 => "PARAM_STR",
-			3 => "PARAM_LOB",
-			4 => "PARAM_STMT",
-			5 => "PARAM_BOOL"
-		);
-
-		$params = Amslib_Array::valid($params);
-		$params = Amslib_Array::reindexByKey($params,"0");
-
-		foreach($params as &$p){
-			$p = Amslib_Array::pluck($p,array("1","2"));
-			$p[2] = $param_map[$p[2]];
+		
+		if(!empty($params)){
+			static $param_map = array(
+				0 => "PARAM_NULL",
+				1 => "PARAM_INT",
+				2 => "PARAM_STR",
+				3 => "PARAM_LOB",
+				4 => "PARAM_STMT",
+				5 => "PARAM_BOOL"
+			);
+	
+			$params = Amslib_Array::valid($params);
+			$params = Amslib_Array::reindexByKey($params,"0");
+	
+			foreach($params as &$p){
+				$p = Amslib_Array::pluck($p,array("1","2"));
+				$p[2] = $param_map[$p[2]];
+			}
 		}
 
 		return empty($params)
@@ -654,7 +656,11 @@ class Amslib_Database
 
 				return $this->isConnected(true);
 			} catch (PDOException $e){
-				$this->debug("DATABASE","failed to connect",$details,$e->getMessage());
+				$this->debug("DATABASE",array(
+					"exception"	=> $e->getMessage(),
+					"data"		=> $details
+				));
+				
 				throw $e;
 			}
 		}else{

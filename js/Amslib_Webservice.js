@@ -108,6 +108,13 @@ var Amslib_Webservice = my.Amslib_Webservice = my.Class(
 		return this;
 	},
 	
+	always: function(handler)
+	{
+		this.promise.always(handler);
+		
+		return this;
+	},
+	
 	executeSuccess: function(json)
 	{
 		if(this.cbSuccess) for(i in this.cbSuccess){
