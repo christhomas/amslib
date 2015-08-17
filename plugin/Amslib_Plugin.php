@@ -833,7 +833,7 @@ class Amslib_Plugin
 		}
 
 		$a = $array["attr"];
-		
+
 		$alias = isset($a["alias"]) ? $a["alias"] : NULL;
 		if($alias) Amslib_Plugin_Manager::setPluginAlias($array["value"],$alias);
 
@@ -1367,6 +1367,43 @@ class Amslib_Plugin
 		$api = Amslib_Plugin_Manager::getAPI($plugin);
 
 		return $api ? $api->addJavascript($javascript) : false;
+	}
+
+	static public function getCallback($callback)
+	{
+		//	Case 1: the string, function, static method is callable without any processing
+		if(is_callable($callback)){
+			return $callback;
+		}
+
+		//	Example: [plugin]v1_event, [object]V1_Event, [method]somethingToCall
+		$parts = explode(",",$callback);
+
+		//	if there are no parts, you cannot decode anything from this callback
+		if(empty($parts)) return false;
+		$plugin = array_shift($parts);
+		$plugin = Amslib_Plugin_Manager::getAPI($plugin);
+
+		//	If the plugin doesn't exist, there is nothing to execute
+		if(!$plugin) return false;
+
+		//	If there are no more parts, then you don't have a method to call, again, cannot proceed
+		if(empty($parts)) return false;
+		$method = array_pop($parts);
+
+		//	Get the object to use in the callback
+		$object = array_shift($parts);
+		$object = empty($object) ? $plugin : $plugin->getObject($object);
+
+		//	Build the callback and test you can call it
+		$callback = array($object,$method);
+
+		if(is_callable($callback)){
+			return $callback;
+		}
+
+		//	failing this, you cannot do anything
+		return false;
 	}
 
 	////////////////////////////////////////////////
