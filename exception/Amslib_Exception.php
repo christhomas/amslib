@@ -50,6 +50,17 @@ class Amslib_Exception extends Exception
 
 		return $this->data[$key];
 	}
+	
+	public function removeData($key)
+	{
+		$key = $this->getData($key);
+		
+		if(array_key_exists($key,$this->data)){
+			unset($this->data[$key]);
+		}
+		
+		return $key;
+	}
 
 	public function setMessage($message)
 	{
