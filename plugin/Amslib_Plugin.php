@@ -1381,8 +1381,8 @@ class Amslib_Plugin
 
 		//	if there are no parts, you cannot decode anything from this callback
 		if(empty($parts)) return false;
-		$plugin = array_shift($parts);
-		$plugin = Amslib_Plugin_Manager::getAPI($plugin);
+		$plugin1 = array_shift($parts);
+		$plugin = Amslib_Plugin_Manager::getAPI($plugin1);
 
 		//	If the plugin doesn't exist, there is nothing to execute
 		if(!$plugin) return false;
