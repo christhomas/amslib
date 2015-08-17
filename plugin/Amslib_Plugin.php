@@ -1371,6 +1371,15 @@ class Amslib_Plugin
 
 	static public function getCallback($callback)
 	{
+		$not_found = function() use ($callback){
+			$args = func_get_args();
+			
+			throw new Amslib_Exception("Amslib_Plugin::getCallback() was not able to return a valid callback",array(
+				"callback"	=> $callback instanceof Closure ? "was closure" : $callback,
+				"arguments"	=> $args
+			));
+		};
+		
 		//	Case 1: the string, function, static method is callable without any processing
 		if(is_callable($callback)){
 			return $callback;
@@ -1380,15 +1389,15 @@ class Amslib_Plugin
 		$parts = explode(",",$callback);
 
 		//	if there are no parts, you cannot decode anything from this callback
-		if(empty($parts)) return false;
+		if(empty($parts)) return $not_found;
 		$plugin1 = array_shift($parts);
 		$plugin = Amslib_Plugin_Manager::getAPI($plugin1);
 
 		//	If the plugin doesn't exist, there is nothing to execute
-		if(!$plugin) return false;
+		if(!$plugin) return $not_found;
 
 		//	If there are no more parts, then you don't have a method to call, again, cannot proceed
-		if(empty($parts)) return false;
+		if(empty($parts)) return $not_found;
 		$method = array_pop($parts);
 
 		//	Get the object to use in the callback
@@ -1403,7 +1412,7 @@ class Amslib_Plugin
 		}
 
 		//	failing this, you cannot do anything
-		return false;
+		return $not_found;
 	}
 
 	////////////////////////////////////////////////
