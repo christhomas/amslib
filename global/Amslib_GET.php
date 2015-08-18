@@ -46,7 +46,7 @@ class Amslib_GET extends Amslib_GLOBAL
 		return self::getIndex($_GET,$key,$default,$erase);
 	}
 
-	static public function delete($key,$path)
+	static public function delete($key)
 	{
 		return self::deleteIndex($_GET,$key);
 	}
