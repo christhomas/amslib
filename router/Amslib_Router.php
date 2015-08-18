@@ -289,6 +289,9 @@ class Amslib_Router
 		self::load(Amslib::locate()."/router/router.xml","xml","framework");
 
 		self::$is_initialised = true;
+		
+		//	remove this from the $_GET superglobal, it's kind of annoying to keep finding it in the application code
+		Amslib_GET::delete("__WEBSITE_ROOT__");
 	}
 
 	/**
