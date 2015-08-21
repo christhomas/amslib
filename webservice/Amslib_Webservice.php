@@ -1,4 +1,9 @@
 <?php
+/**
+ * 	class: Amslib_Webservice
+ *
+ * 	A class built to allow you to call remote Amslib webservices with little effort
+ */
 class Amslib_Webservice
 {
 	protected $router_url_source;
@@ -60,7 +65,7 @@ class Amslib_Webservice
 
 	public function setRoute($route)
 	{
-		$callback = array($this->router_url_source,"getServiceName");
+		$callback = array($this->router_url_source,"getServiceURL");
 
 		if(is_callable($callback)){
 			$this->url = call_user_func($callback,$route);
