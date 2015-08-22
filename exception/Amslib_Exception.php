@@ -40,12 +40,12 @@ class Amslib_Exception extends Exception
 			: NULL;
 	}
 
-	public function getData($key=NULL)
+	public function getData($key=NULL,$default=null)
 	{
 		if(!is_scalar($key) || !strlen($key)){
 			return $this->data;
 		}else if(!isset($this->data[$key])){
-			return NULL;
+			return $default;
 		}
 
 		return $this->data[$key];
