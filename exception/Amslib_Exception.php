@@ -8,7 +8,7 @@ class Amslib_Exception extends Exception
 	public function __construct($message,$data=array(),$log_entry=true)
 	{
 		parent::__construct($message);
-		
+
 		//	This is so if an exception is generated using a true/false/1/0 type value
 		//	it'll still process into a predictable format
 		if(is_scalar($data)){
@@ -50,16 +50,16 @@ class Amslib_Exception extends Exception
 
 		return $this->data[$key];
 	}
-	
+
 	public function removeData($key)
 	{
-		$key = $this->getData($key);
-		
+		$data = $this->getData($key);
+
 		if(array_key_exists($key,$this->data)){
 			unset($this->data[$key]);
 		}
-		
-		return $key;
+
+		return $data;
 	}
 
 	public function setMessage($message)
