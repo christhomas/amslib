@@ -13,13 +13,17 @@ class Amslib_Webservice
 	protected $password;
 	protected $reply;
 
-	protected function externalURL()
+	protected function externalURL($url)
 	{
+		if(empty($url)) return $url;
+		
 		$callback = array($this->router_url_source,"externalURL");
 
 		if(is_callable($callback)){
-			$this->url = call_user_func($callback,$this->url);
+			$url = call_user_func($callback,$url);
 		}
+		
+		return $url;
 	}
 
 	public function __construct($location,$params=array())
@@ -52,15 +56,13 @@ class Amslib_Webservice
 	{
 		$this->url = false;
 
-		if(!$this->url) $this->setRoute($location);
-		if(!$this->url) $this->setURL($location);
+		if(!$this->url) $this->url = $this->setRoute($location);
+		if(!$this->url) $this->url = $this->setURL($location);
 	}
 
 	public function setURL($url)
 	{
-		$this->url = $url;
-
-		$this->externalURL();
+		return $this->externalURL($url);
 	}
 
 	public function setRoute($route)
@@ -68,10 +70,10 @@ class Amslib_Webservice
 		$callback = array($this->router_url_source,"getServiceURL");
 
 		if(is_callable($callback)){
-			$this->url = call_user_func($callback,$route);
+			$url = call_user_func($callback,$route);
 		}
-
-		$this->externalURL();
+		
+		return $this->externalURL($url);
 	}
 
 	public function setParams($params)
