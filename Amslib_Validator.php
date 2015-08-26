@@ -807,7 +807,7 @@ class Amslib_Validator
 		if(strlen($value) == 0 && $required == true) $error = "EMAIL_EMPTY";
 
 		if(isset($options["invalid"]) && in_array($value,$options["invalid"])) $error = "EMAIL_INVALID_INPUT";
-		
+
 		if(!is_email($value)) $error = "EMAIL_INVALID";
 
 		if($required == true && $error !== false) return $error;
@@ -853,6 +853,40 @@ class Amslib_Validator
 		if($required == false) return true;
 
 		return "DOMAIN_INVALID";
+	}
+
+	/**
+	 *	method:	validate_ip_address
+	 *
+	 *	Validate an ip address by using ip2long to convert it and detect false for failure
+	 *
+	 *	parameters:
+	 *		name		-	The name of the field
+	 *		value		-	The value of the field (ip address)
+	 *		required	-	Boolean true or false, whether the field is mandatory or not
+	 *		options		-	Validation restrictions
+	 *
+	 *	returns:
+	 * 		-	If ip address name was an empty string, will return "IP_ADDRESS_EMPTY"
+	 * 		-	If ip address was invalid will return "IP_ADDRESS_INVALID"
+	 * 		-	If successful, will set valid data and return true
+	 */
+	protected function validate_ip_address($name,$value,$required,$options)
+	{
+		$value = trim($value);
+
+		if(strlen($value) == 0 && $required == true) return "IP_ADDRESS_EMPTY";
+
+		$record = ip2long($value) !== false;
+
+		if($record){
+			$this->setValid($name,$value);
+			return true;
+		}
+
+		if($required == false) return true;
+
+		return "IP_ADDRESS_INVALID";
 	}
 
 	/**
