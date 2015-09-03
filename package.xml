@@ -94,6 +94,45 @@
 		<file id="amslib.webservice">__AMSLIB__/js/Amslib_Webservice.js</file>
 		<file id="amslib.form">__AMSLIB__/js/Amslib_Form.js</file>		
 	</javascript>
+
+	<!-- explicitly define each test, it's name and callback-->
+	<phpunit>
+		<test>
+			<name>Add integer to include path</name>
+			<callback>Amslib_Test::test_AddIncludePath_Integer</callback>
+		</test>
+
+		<test>
+			<name>Add non-existing path to include path</name>
+			<callback>Amslib_Test::test_AddIncludePath_NonExistingPath</callback>
+		</test>
+
+		<test>
+			<name>Add existing path to include path</name>
+			<callback>Amslib_Test::test_AddIncludePath_ExistingPath</callback>
+		</test>
+	</phpunit>
+
+	<!-- define a class and each test but only specify the methods to call on the class -->
+	<phpunit>
+		<class>Amslib_Test</class>
+
+		<test>
+			<name>Add empty string to include path</name>
+			<callback>test_AddIncludePath_EmptyString</callback>
+		</test>
+
+		<test>
+			<name>Add object to include path</name>
+			<callback>test_AddIncludePath_Object</callback>
+		</test>
+	</phpunit>
+
+	<!-- define the class and then the prefix for all the tests, reflection will be used to obtain the metadata -->
+	<phpunit>
+		<class>Amslib_Test</class>
+		<prefix>test_</prefix>
+	</phpunit>
 	
 	<router>
 		<path name="home">
