@@ -661,7 +661,7 @@ class Amslib_Plugin
 		$a["rename"]	= $array["value"];
 
 		//	You require at minimum these two attributes, or cannot accept it
-		if(!isset($a["plugin"]) || !isset($a["name"])) continue;
+		if(!isset($a["plugin"]) || !isset($a["name"])) return;
 		//	If the rename attribute doesn't exist or is empty, replace it with the name attribute
 		if(!isset($a["rename"]) || !$a["rename"] || strlen($a["rename"])){
 			$a["rename"] = $a["name"];

@@ -25,27 +25,22 @@ class Amslib_QueryPath
 
 	static public function htmlqp($document=NULL,$selector=NULL,$options=array())
 	{
+		self::$qp = false;
+
 		//	I copied and modified the default options from the htmlqp method to provide a custom version for Amslib
 		//	NOTE: Hmm....I'm not 100% sure this will work in all circumstances....
 		$document = iconv("ISO8859-1","UTF-8",$document);
 
-		//	NOTE: this actually broke somethings, it would convert < into &lt; and that would mean HTML stopped working :(
-		//if(is_string($document)) $document = htmlspecialchars($document,ENT_COMPAT,"UTF-8");
+		//	NOTE: see output buffer trick comment in qp()
+		ob_start();
+		self::$qp = QueryPath::withHTML($document, $selector, $options);
+		$warnings = ob_get_clean();
 
-		try{
-			//	NOTE: see output buffer trick comment in qp()
-			ob_start();
-			$html = QueryPath::withHTML($document, $selector, $options);
-			$warnings = ob_get_clean();
-
-			if(strlen($warnings)){
-				Amslib_Debug::log("FAILED TO OBTAIN CLEAN OUTPUT WHEN PROCESSING HTML: error = ",$warnings);
-			}
-		}catch(Exception $e){
-			//	I dunno what to do here
+		if(strlen($warnings)){
+			Amslib_Debug::log("FAILED TO OBTAIN CLEAN OUTPUT WHEN PROCESSING HTML: error = ",$warnings);
 		}
 
-		return $html;
+		return self::$qp;
 	}
 
 	/**
