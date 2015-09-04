@@ -23,9 +23,22 @@ class Amslib_Plugin_Object extends Amslib_Mixin
 		return $this->api ? true : false;
 	}
 
+	/**
+	 *	method: initialiseObject
+	 *
+	 * 	Initialise the object with the API object from the plugin it's associated with
+	 *
+	 * 	note:
+	 * 		-	I am not particular happy with this idea, I think that it's very basic
+	 * 		-	Perhaps setAPI($api) would be a better name, since actually, that is all it's doing
+	 */
 	public function initialiseObject($api)
 	{
 		$this->api = $api;
+
+		//	NOTE: I am thinking that this would eliminate the method shadowing below
+		//	NOTE: commented out for now, I don't have time to test this
+		//	$this->addMixin($api);
 	}
 
 	//	I am really not very happy about all this "method-shadowing" that I need to do here
