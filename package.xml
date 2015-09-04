@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package>
-	<!-- NOTE: an idea to set configuration parameters for plugins -->
-	<!-- NOTE: looks an awful lot like the value node doesn't it? -->
-	<config>
-		<debug>true</debug>
-		<shutdown>__AMSLIB__/error/500/</shutdown>
-	</config>
-	
 	<object directory="__website/objects/">
 		<api>Amslib_Framework</api>
 	</object>
