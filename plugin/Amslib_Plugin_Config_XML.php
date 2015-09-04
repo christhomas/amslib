@@ -16,17 +16,6 @@ class Amslib_Plugin_Config_XML
 	{
 		if(!in_array($type,array("scan","load"))) return false;
 
-		if(count($callback) == 2 && is_string($callback[0])){
-			$cb = Amslib_Plugin_Manager::getPlugin($callback[0]);
-
-			if(!$cb){
-				Amslib_Debug::log("callback[0] was invalid, please check XML for errors.  Are you sure this is a scan selector?");
-				return false;
-			}
-
-			$callback[0] = $cb ? $cb->getAPI() : false;
-		}
-
 		//	With XML, we want to anchor each selector to the package tag, sometimes you can nest
 		//	nodes and have nodes which look like they should be part of the amslib package xml
 		//	scheme, but are some custom nodes with the same names.  This replacement stops that problem.
@@ -93,6 +82,7 @@ class Amslib_Plugin_Config_XML
 		//	Create the API object first, then load the selector extensions and then all the child plugins to build the tree
 		self::addScanSelector("package object api",			"configAPI");
 		self::addScanSelector("package requires extension",	"configExtension");
+		self::addScanSelector("package extension",			"configExtension");
 		self::addScanSelector("package requires plugin",	"configPlugin");
 
 		//	Now add all the load selectors, now that the tree scanning has completed

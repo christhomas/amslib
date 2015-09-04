@@ -914,19 +914,25 @@ class Amslib_Plugin
 			$data[$c["tag"]] = $c["value"];
 		}
 
-		//	We don't have the correct tags, so this extension was invalid
-		if(!isset($data["selector"]) || !isset($data["callback"])){
-			Amslib_Debug::log("INVALID CALLBACK",$data);
+		//	We require the selector so we know what to search for
+		if(!isset($data["selector"])){
+			Amslib_Debug::log("INVALID SELECTOR",$data);
 			return false;
 		}
 
-		$data["callback"] = explode(",",$data["callback"]);
+        if(Amslib_Array::hasKeys($data,array("plugin","method"))){
+            //  Just in case an object is included as well
+            $data["callback"] = array_key_exists("object",$data)
+                ? array($data['plugin'],$data["object"],$data["method"])
+                : array($data['plugin'],$data["method"]);
 
-		//	We don't have one or two parts to the callback, so this extension is invalid
-		if(!in_array(count($data["callback"]),array(1,2))){
-			Amslib_Debug::log("INVALID CALLBACK",$data);
-			return false;
-		}
+            $data["callback"] = self::getCallback($data["callback"]);
+        }else if(Amslib_Array::hasKeys($data,array("callback"))){
+            $data["callback"] = self::getCallback($data["callback"]);
+        }else{
+            Amslib_Debug::log("INVALID PLUGIN/METHOD/CALLBACK",$data);
+            return false;
+        }
 
 		$callback = array(
 			"scan"	=>	"addScanSelector",
@@ -937,8 +943,6 @@ class Amslib_Plugin
 			get_class($this->source),
 			$callback[$data["type"]]
 		);
-
-		//Amslib_Debug::log($method,$data);
 
 		call_user_func($method,$data["selector"],$data["callback"]);
 	}
@@ -1379,6 +1383,12 @@ class Amslib_Plugin
 				"arguments"	=> $args
 			));
 		};
+
+        //  If the callback was an array, it might be array(plugin,object,method) or array(plugin,method)
+        //  so lets implode it to a usable csv string
+        if(is_array($callback)){
+            $callback = implode(",",$callback);
+        }
 		
 		//	Case 1: the string, function, static method is callable without any processing
 		if(is_callable($callback)){
