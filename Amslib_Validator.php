@@ -98,7 +98,7 @@ class Amslib_Validator
 	/**
 	 * 	method:	validate_logical_or
 	 *
-	 * 	todo: write documentation
+	 * 	This will return the first value which was found from the requested fields, it will stop when one match is found
 	 *
 	 * 	usage: $v->add("has_file","logical_or",true,array("select_file","csv_file"));
 	 */
