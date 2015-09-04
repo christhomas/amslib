@@ -3,4 +3,6 @@
 .buildpath
 .DS_Store
 .idea
-/nbproject/*
+nbproject
+vendor
+composer.lock
