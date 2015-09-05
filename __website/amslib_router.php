@@ -8,7 +8,7 @@ do{
 		require_once($file);
 		break;
 	}else if(!strlen($search)){
-		break;
+		die("Cannot find the composer autoload.php, dying...");
 	}
 }while($search = rtrim(dirname($search),"/"));
 
