@@ -1391,7 +1391,7 @@ class Amslib_Plugin
 			return $callback;
 		}
 
-		//	Example: [plugin]v1_event, [object]V1_Event, [method]somethingToCall
+		//	Example: [plugin]some_plugin, [object]An_Object, [method]somethingToCall
 		if(is_string($callback)){
 			$callback = explode(",",$callback);
 		}
