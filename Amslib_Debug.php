@@ -49,8 +49,8 @@ class Amslib_Debug
 	/**
 	 *	method:	pdump
 	 *
-	 *	(pdump means <pre>dump</pre>)
-	 *	Print the dumping of various variables with optional hidden visibility for the browser
+	 *	Print the dumping of various variables with optional hidden visibility for the browser,
+	 *	It wraps the output in a html pre element optionally applying display none to hide from the browser
 	 *
 	 *	params:
 	 *		$visible	-	Boolean true or false, to print the data out in a browser visible or invisible form (<pre display:none>)
@@ -160,17 +160,17 @@ class Amslib_Debug
 		}
 
 		$stack = self::getStackTrace();
-		
+
 		//	eliminate this function from the stack
 		$stack		= array_slice($stack,2,1);
 		$location	= array_shift($stack);
-		
+
 		$line = isset($location["line"]) ? "@{$location["line"]}" : "";
-		
+
 		$location = Amslib_Array::hasKeys($location,array("class","type","function"))
 			? $location["class"].$location["type"].$location["function"]
 			: $location;
-		
+
 		$location = is_array($location) && Amslib_Array::hasKeys($location,"file","function")
 			? basename($location["file"])."({$location["function"]})"
 			: $location;
