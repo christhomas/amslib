@@ -23,8 +23,6 @@
 /**
  * 	class:	Amslib_Plugin_Service
  *
- *	group:	plugin
- *
  *	file:	Amslib_Plugin_Service.php
  *
  *	description:
@@ -91,26 +89,39 @@ class Amslib_Plugin_Service
 	static protected $var			=	array();
 
 	/**
+	 * 	method:	getIdentifier
+	 *
+	 * 	todo: write documentation
+	 */
+	static protected function getIdentifier($identifier)
+	{
+		if(!$identifier && count($this->data)) $identifier = current(array_keys($this->data));
+		if(is_object($identifier)) $identifier = get_class($identifier);
+		if(!is_string($identifier) && !is_numeric($identifier)) $identifier = "__UNKNOWN_IDENTIFIER__";
+
+		return $identifier;
+	}
+
+	/**
 	 * 	method:	getHandlerData
 	 *
 	 * 	todo: write documentation
 	 */
-	static protected function getHandlerData($plugin,$default,$key)
+	static protected function getHandlerData($identifier,$default,$key)
 	{
-		$plugin = self::pluginToName($plugin);
+		$identifier = self::getIdentifier($identifier);
 
 		if(!self::$handler && count(self::$serviceData[self::HD])){
 			self::processHandler();
 		}
 
 		if(!self::$handler){
-			//	TODO: move into the logging system intead of here
-			error_log("** ".__METHOD__." ** ".Amslib_Debug::pdump(true,self::$handler)." was invalid");
+			Amslib_Debug::log("handler was invalid",self::$handler);
 			return NULL;
 		}
 
-		return isset(self::$handler[$plugin]) && isset(self::$handler[$plugin][$key])
-			? Amslib_Array::valid(self::$handler[$plugin][$key])
+		return isset(self::$handler[$identifier]) && isset(self::$handler[$identifier][$key])
+			? Amslib_Array::valid(self::$handler[$identifier][$key])
 			: $default;
 	}
 
@@ -122,7 +133,7 @@ class Amslib_Plugin_Service
 	protected function storeData($status,$force=false)
 	{
 		$this->setServiceStatus($status);
-		
+
 		if($this->activeHandler["record"] || $force){
 			if(!empty($this->data)){
 				$this->session[self::HD][]	= $this->data;
@@ -241,8 +252,8 @@ class Amslib_Plugin_Service
 		//	Call the success or failure terminators
 		foreach(Amslib_Array::valid($this->terminatorList[$type]) as $t){
 			$this->setInputFormat($t);
-			
-			$response = $this->runHandler($t["object"],$t["method"],$this->source);
+
+			$response = $this->runHandler($t["callback"],$this->source);
 
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($response);
@@ -251,13 +262,90 @@ class Amslib_Plugin_Service
 		//	Call the common terminators
 		foreach(Amslib_Array::valid($this->terminatorList["common"]) as $t){
 			$this->setInputFormat($t);
-			
-			$response = $this->runHandler($t["object"],$t["method"],$this->source);
+
+			$response = $this->runHandler($t["callback"],$this->source);
 
 			//	Store the result of the service and make ready to start a new service
 			$this->storeData($response);
 		}
 	}
+
+	/**
+	 * 	method:	runHandler
+	 *
+	 * 	Will execute the requested callback with the given data source,
+	 */
+	protected function runHandler($callback,&$source)
+	{
+		//	Reset the data array to empty so it's empty and ready for the next execution
+		$this->data = array();
+
+		$method = __METHOD__;
+
+		$invalid = function() use ($method,$callback,$source){
+			$args = func_get_args();
+
+			throw new Amslib_Exception("$method, callback was not valid",array(
+					"callback"	=>	$callback instanceof Closure ? "was closure" : $callback,
+					"source"	=>	$source,
+					"arguments"	=>	$args
+			));
+		};
+
+		$args = array($this,&$source);
+
+		return is_callable($callback)
+		? call_user_func_array($callback,$args)
+		: call_user_func_array($invalid,$args);
+	}
+
+	/**
+	 * 	method:	runManagedHandler
+	 *
+	 * 	todo: write documentation
+	 *
+	 * 	NOTE: the code is ready however the system is not
+	 * 	NOTE: the problem is that service handlers are not programmed to understand the extra attributes
+	 * 	NOTE: the other problem is that service import/export definitions are not programmed as well
+	 * 	NOTE: so the idea will have to stay here until I can dedicate time to implementing those.
+	 *
+	 * 	NOTE: this method is no longer working because I broke the $object variable and I'm not sure what to replace it with
+	 */
+	 protected function runManagedHandler($rules,$callback,&$source)
+	 {
+		 //	This method needs to exist on the object to retrieve the validation rules
+		 $getRules = array($object,"getValidationRules");
+
+		 //	continue only if the method is available to call
+		 if(!method_exists($getRules)) return false;
+
+		 $rules = call_user_func($getRules,$rules);
+
+		 //	continue only if the rules are valid and a non-empty array
+		 if(!$rules || !is_array($rules) || empty($rules)) return false;
+
+		 //	Now lets execute the handler!
+		 $v = new Amslib_Validator($source);
+		 $v->addRules($rules);
+
+		 $s = $v->execute();
+		 $d = $v->getValidData();
+
+		 if($s){
+			 //	Set the source to the valid data
+			 $source = $d;
+
+			 //	Here we call the handler, this is a SUCCESS only handler, although the data might fail, the data was valid
+			 return $this->runHandler($callback,$source);
+		 }else{
+			 $service->setValidationData($object,$d);
+			 $service->setValidationErrors($object,$v->getErrors());
+		 }
+
+		 $service->setDatabaseErrors($object,$object->getDBErrors());
+
+		 return false;
+	 }
 
 	/**
 	 * 	method:	__construct
@@ -335,22 +423,22 @@ class Amslib_Plugin_Service
 	{
 		return $this->session;
 	}
-	
+
 	public function setInputFormat($handler)
 	{
 		//	by default, all sources are "post" if not specified
 		if(!isset($handler["source"])) $handler["source"] = "post";
-		
+
 		//	Set the source to what was requested, or default in any other case to the $_POST array
 		switch($handler["source"]){
 			case "get":{
 				$this->source = &$_GET;
 			}break;
-		
+
 			case "post":{
 				$this->source = &$_POST;
 			}break;
-		
+
 			case "previous":{
 				if(!count($this->data)){
 					$this->source = array();
@@ -439,7 +527,7 @@ class Amslib_Plugin_Service
 	{
 		if(is_string($url)){
 			$url = $this->sanitiseURL($url);
-		
+
 			if(strlen($url)) $this->session[self::UF] = $url;
 		}else if(is_array($url)){
 			foreach($url as $key=>$value){
@@ -523,50 +611,21 @@ class Amslib_Plugin_Service
 	{
 		foreach(Amslib_Array::valid($handlerList) as $h)
 		{
-			//	Special customisation for framework urls, which normally execute on objects regardless of plugin
-			//	So we just use plugin as the key to trigger this
-			//	NOTE: this means framework has become a system name and cannot be used as a name of any plugin?
-			//	NOTE: perhaps amslib can become a plugin, therefore the plugin will be "amslib" and not "framework" ?
-			if(Amslib_Array::hasKeys($h,array("plugin","object","method")) && $h["plugin"] == "framework"){
-				//	do nothing
-			}else{
-				//	This significantly helps with debugging, because you can quickly see
-				//	the plugin which if it was missing, defaults to group, but this information
-				//	doesn't get output into the debugging information.
-				if(!isset($h["plugin"])) $h["plugin"] = $group;
-
-				$debug = array();
-
-				if($h["plugin"]){
-					$debug["api"] = $h["plugin"];
-
-					$h["api"] = Amslib_Plugin_Manager::getAPI($h["plugin"]);
-				}else{
-					$list = Amslib_Array::valid(Amslib_Plugin_Manager::listPlugin());
-					$list = implode(",",$list);
-					Amslib_Debug::log("plugin requested was not valid, list = $list");
-				}
-
-				if($h["api"]){
-					$debug["object"] = isset($h["object"]) ? $h["object"] : $debug["api"];
-
-					$h["object"] = isset($h["object"]) ? $h["api"]->getObject($h["object"],true) : $h["api"];
-				}else{
-					$list = Amslib_Array::valid(Amslib_Plugin_Manager::listAPI());
-					$list = implode(",",$list);
-					Amslib_Debug::log("api object '{$debug["api"]}' was not valid, api list = $list");
-				}
-
-				if($h["object"]){
-					$h["method"] = isset($h["method"]) ? $h["method"] : false;
-				}else{
-					$list = Amslib_Array::valid(Amslib_Plugin::listObject($h["plugin"]));
-					$list = implode(",",$list);
-					Amslib_Debug::log("object '{$debug["object"]}' on api '{$debug["api"]}' not valid, object list = $list");
-				}
+			//	"framework" is claimed as a standard name for amslib and is no longer usable
+			//	by other plugins, I'm not sure if this is still true, but I should evaluate
+			//	whether it causes a problem or not
+			if($h["plugin"] != "framework"){
+				if(!array_key_exists("plugin",$h)) $h["plugin"] = $group;
+				if(!array_key_exists("object",$h)) $h["object"] = false;
 			}
 
-			$params = array($h["plugin"],$h["object"],$h["method"],$h["input"],$h["record"],$h["global"],$h["failure"]);
+			$callback = Amslib_Plugin::getCallback(array_filter(array(
+					$h["plugin"],
+					$h["object"],
+					$h["method"]
+			)));
+
+			$params = array($h["plugin"],$callback,$h["input"],$h["record"],$h["global"],$h["failure"]);
 
 			if($h["type"] == "service"){
 				$method = "setHandler";
@@ -580,7 +639,6 @@ class Amslib_Plugin_Service
 		}
 	}
 
-
 	/**
 	 * 	method:	setHandler
 	 *
@@ -589,7 +647,7 @@ class Amslib_Plugin_Service
 	 * 	note: if it is, then perhaps I should change it to $output instead?
 	 * 	note: but $output is very ambiguous...or maybe it just appears that way.
 	 */
-	public function setHandler($format,$plugin,$object,$method,$source="post",$record=true,$global=false,$failure=true)
+	public function setHandler($format,$plugin,$callback,$source="post",$record=true,$global=false,$failure=true)
 	{
 		//	NOTE: perhaps we should check this information before blindly accepting it
 
@@ -597,8 +655,7 @@ class Amslib_Plugin_Service
 		$this->handlerList[] = array(
 			"format"	=>	$format,
 			"plugin"	=>	$plugin,
-			"object"	=>	$object,
-			"method"	=>	$method,
+			"callback"	=>	$callback,
 			"source"	=>	$source,
 			"record"	=>	$record,
 			"global"	=>	$global,
@@ -611,7 +668,7 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setTerminator($type,$plugin,$object,$method,$source="post",$record=true,$global=false,$failure=true)
+	public function setTerminator($type,$plugin,$callback,$source="post",$record=true,$global=false,$failure=true)
 	{
 		//	NOTE: perhaps we should check this information before blindly accepting it
 
@@ -621,92 +678,12 @@ class Amslib_Plugin_Service
 
 		$this->terminatorList[$type][] = array(
 			"plugin"	=>	$plugin,
-			"object"	=>	$object,
-			"method"	=>	$method,
+			"callback"	=>	$callback,
 			"source"	=>	$source,
 			"record"	=>	$record,
 			"global"	=>	$global,
 			"failure"	=>	$failure
 		);
-	}
-
-	/**
-	 * 	method:	runHandler
-	 *
-	 * 	todo: write documentation
-	 */
-	public function runHandler($object,$method,&$source)
-	{
-		$callback = false;
-		
-		//	Reset the data array to empty so it's empty and ready for the next execution
-		$this->data = array();
-
-		//	NOTE:   this might seem a little harsh, but it's a critical error, your object doesn't have
-		//	the method you said it would, probably this means something in your code is broken
-		//	and you need to know about it and fix it.
-
-		if(is_string($object) && class_exists($object) && is_callable("$object::$method")){
-			$callback = "$object::$method";
-		}else if(!is_object($object)){
-			Amslib_Debug::log("\$object parameter was not an object, ".Amslib_Debug::dump($object));
-			$object = "__INVALID_OBJECT__";
-			die("FAILURE[c:$object][m:$method]-> object did not exist, so cannot execute service handler");
-		}else if(!method_exists($object,$method)){
-			Amslib_Debug::log("'$method' was not found on object, ".Amslib_Debug::dump($method));
-			$object = get_class($object);
-			die("FAILURE[c:$object][m:$method]-> method did not exist, so cannot execute service handler");
-		}else{
-			$callback = array($object,$method);
-		}
-
-		return call_user_func_array($callback,array($this,&$source));
-	}
-
-	/**
-	 * 	method:	runManagedHandler
-	 *
-	 * 	todo: write documentation
-	 *
-	 * 	NOTE: the code is ready however the system is not
-	 * 	NOTE: the problem is that service handlers are not programmed to understand the extra attributes
-	 * 	NOTE: the other problem is that service import/export definitions are not programmed as well
-	 * 	NOTE: so the idea will have to stay here until I can dedicate time to implementing those.
-	 */
-	public function runManagedHandler($rules,$object,$method,&$source)
-	{
-		//	This method needs to exist on the object to retrieve the validation rules
-		$getRules = array($object,"getValidationRules");
-
-		//	continue only if the method is available to call
-		if(!method_exists($getRules)) return false;
-
-		$rules = call_user_func($getRules,$rules);
-
-		//	continue only if the rules are valid and a non-empty array
-		if(!$rules || !is_array($rules) || empty($rules)) return false;
-
-		//	Now lets execute the handler!
-		$v = new Amslib_Validator($source);
-		$v->addRules($rules);
-
-		$s = $v->execute();
-		$d = $v->getValidData();
-
-		if($s){
-			//	Set the source to the valid data
-			$source = $d;
-
-			//	Here we call the handler, this is a SUCCESS only handler, although the data might fail, the data was valid
-			return $this->runHandler($object,$method,$source);
-		}else{
-			$service->setValidationData($object,$d);
-			$service->setValidationErrors($object,$v->getErrors());
-		}
-
-		$service->setDatabaseErrors($object,$object->getDBErrors());
-
-		return false;
 	}
 
 	public function setSourceData($key,$value)
@@ -728,7 +705,6 @@ class Amslib_Plugin_Service
 		$this->setOptimiseState($optimise);
 
 		foreach($this->handlerList as $h){
-			//	TODO: investigate why h["plugin"] was returning false??
 			$this->activeHandler = $h;
 
 			$this->setInputFormat($h);
@@ -736,8 +712,8 @@ class Amslib_Plugin_Service
 
 			//	Run the handler, either in managed or unmanaged mode
 			$response = isset($h["managed"])
-				? $this->runManagedHandler($h["managed"],$h["object"],$h["method"],$this->source)
-				: $this->runHandler($h["object"],$h["method"],$this->source);
+				? $this->runManagedHandler($h["managed"],$h["callback"],$this->source)
+				: $this->runHandler($h["callback"],$this->source);
 
 			//	Need to somehow merge against Amslib_Webservice_* classes
 			//	because now some of this code is overlapping a lot
@@ -772,26 +748,13 @@ class Amslib_Plugin_Service
 	}
 
 	/**
-	 * 	method:	pluginToName
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function pluginToName($plugin)
-	{
-		if(is_object($plugin)) $plugin = get_class($plugin);
-		if(!is_string($plugin) && !is_numeric($plugin)) $plugin = "__ERROR_PLUGIN_UNKNOWN__";
-
-		return $plugin;
-	}
-
-	/**
 	 * 	method:	setValidationData
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setValidationData($plugin,$data)
+	public function setValidationData($identifier,$data)
 	{
-		$this->data[self::pluginToName($plugin)][self::VD] = $data;
+		$this->data[self::getIdentifier($identifier)][self::VD] = $data;
 	}
 
 	/**
@@ -799,14 +762,14 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setValidationErrors($plugin,$errors)
+	public function setValidationErrors($identifier,$errors)
 	{
 		if(empty($errors)){
 			$errors["no_errors"] = true;
 			$errors["debug_help"] = "No Errors set and array was empty, perhaps validation failed because source was empty?";
 		}
 
-		$this->data[self::pluginToName($plugin)][self::VE] = $errors;
+		$this->data[self::getIdentifier($identifier)][self::VE] = $errors;
 	}
 
 	/**
@@ -816,9 +779,9 @@ class Amslib_Plugin_Service
 	 *
 	 *	NOTE: Be careful with this method, you could be pushing secret data
 	 */
-	public function setDatabaseErrors($plugin,$errors)
+	public function setDatabaseErrors($identifier,$errors)
 	{
-		if(!empty($errors)) $this->data[self::pluginToName($plugin)][self::DB] = $errors;
+		if(!empty($errors)) $this->data[self::getIdentifier($identifier)][self::DB] = $errors;
 	}
 
 	/**
@@ -826,20 +789,20 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setData($plugin,$name,$value)
+	public function setData($identifier,$name,$value)
 	{
-		$plugin = self::pluginToName($plugin);
+		$identifier = self::getIdentifier($identifier);
 
 		if($name == NULL){
 			if(is_array($value)){
-				$this->data[$plugin][self::SD] = $value;
+				$this->data[$identifier][self::SD] = $value;
 			}else{
 				Amslib_Debug::log("value was invalid array",$value);
 
 				return NULL;
 			}
 		}else if(is_numeric($name) || is_string($name)){
-			$this->data[$plugin][self::SD][$name] = $value;
+			$this->data[$identifier][self::SD][$name] = $value;
 		}else{
 			Amslib_Debug::log("name was invalid",$name);
 
@@ -854,17 +817,17 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getData($plugin,$name=NULL,$default=NULL)
+	public function getData($identifier,$name=NULL,$default=NULL)
 	{
-		$plugin = self::pluginToName($plugin);
+		$identifier = self::getIdentifier($identifier);
 
-		if(!isset($this->data[$plugin])) return $default;
+		if(!isset($this->data[$identifier])) return $default;
 
-		$plugin = $this->data[$plugin];
+		$identifier = $this->data[$identifier];
 
-		if($name == NULL) return $plugin[self::SD];
+		if($name == NULL) return $identifier[self::SD];
 
-		return isset($plugin[self::SD][$name]) ? $plugin[self::SD][$name] : $default;
+		return isset($identifier[self::SD][$name]) ? $identifier[self::SD][$name] : $default;
 	}
 
 	/**
@@ -872,24 +835,24 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function deleteData($plugin,$name=NULL)
+	public function deleteData($identifier,$name=NULL)
 	{
-		$plugin	=	self::pluginToName($plugin);
+		$identifier	=	self::getIdentifier($identifier);
 		$copy	=	NULL;
 
-		if(isset($this->data[$plugin])){
-			if($name && isset($this->data[$plugin][self::SD][$name])){
-				$copy = $this->data[$plugin][self::SD][$name];
+		if(isset($this->data[$identifier])){
+			if($name && isset($this->data[$identifier][self::SD][$name])){
+				$copy = $this->data[$identifier][self::SD][$name];
 
-				unset($this->data[$plugin][self::SD][$name]);
+				unset($this->data[$identifier][self::SD][$name]);
 			}else if(!$name){
-				$copy = $this->data[$plugin][self::SD];
+				$copy = $this->data[$identifier][self::SD];
 
-				unset($this->data[$plugin][self::SD]);
+				unset($this->data[$identifier][self::SD]);
 			}
 
 			//	clean up empty arrays in the return structure
-			if(empty($this->data[$plugin])) unset($this->data[$plugin]);
+			if(empty($this->data[$identifier])) unset($this->data[$identifier]);
 		}
 
 		return $copy;
@@ -914,14 +877,14 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function setError($plugin,$name,$value)
+	public function setError($identifier,$name,$value)
 	{
-		$plugin = self::pluginToName($plugin);
+		$identifier = self::getIdentifier($identifier);
 
 		if($name == NULL && is_array($value)){
-			$this->data[$plugin][self::SE] = $value;
+			$this->data[$identifier][self::SE] = $value;
 		}else{
-			$this->data[$plugin][self::SE][$name] = $value;
+			$this->data[$identifier][self::SE][$name] = $value;
 		}
 	}
 
@@ -930,29 +893,29 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	public function getError($plugin=NULL,$name=NULL)
+	public function getError($identifier=NULL,$name=NULL)
 	{
-		if($plugin === NULL){
+		if($identifier === NULL){
 			$errors = array();
 
-			foreach(array_keys($this->data) as $plugin){
-				if(!isset($this->data[$plugin]) || !isset($this->data[$plugin][self::SE])){
+			foreach(array_keys($this->data) as $identifier){
+				if(!isset($this->data[$identifier]) || !isset($this->data[$identifier][self::SE])){
 					continue;
 				}
 
-				$errors[$plugin] = $name !== NULL && isset($this->data[$plugin][self::SE][$name])
-					? $this->data[$plugin][self::SE][$name]
-					: $this->data[$plugin][self::SE];
+				$errors[$identifier] = $name !== NULL && isset($this->data[$identifier][self::SE][$name])
+					? $this->data[$identifier][self::SE][$name]
+					: $this->data[$identifier][self::SE];
 			}
 
 			return $errors;
 		}
 
-		if($name === NULL && isset($this->data[$plugin])){
-			return $this->data[$plugin][self::SE];
+		if($name === NULL && isset($this->data[$identifier])){
+			return $this->data[$identifier][self::SE];
 		}
 
-		return $this->data[$plugin][self::SE][$name];
+		return $this->data[$identifier][self::SE][$name];
 	}
 
 	/**
@@ -985,15 +948,15 @@ class Amslib_Plugin_Service
 	 * 	method:	cloneResponse
 	 *
 	 * 	This method will accept an array of data, normally acquired from the Amslib_Plugin_Service
-	 * 	object and import various keys into a new plugin key, ready to use, this is useful when
+	 * 	object and import various parts into an array with corresponding key, ready to use, this is useful when
 	 * 	copying and deleting old data in order to reformat it based on the requirements
 	 */
-	public function cloneResponse($plugin,$data,$store=false)
+	public function cloneResponse($identifier,$data,$store=false)
 	{
-		if(isset($data[self::SD]))	$this->setData($plugin,NULL,$data[self::SD]);
-		if(isset($data[self::SE]))	$this->setError($plugin,NULL,$data[self::SE]);
-		if(isset($data[self::VD]))	$this->setValidationData($plugin,$data[self::VD]);
-		if(isset($data[self::VE]))	$this->setValidationErrors($plugin,$data[self::VE]);
+		if(isset($data[self::SD]))	$this->setData($identifier,NULL,$data[self::SD]);
+		if(isset($data[self::SE]))	$this->setError($identifier,NULL,$data[self::SE]);
+		if(isset($data[self::VD]))	$this->setValidationData($identifier,$data[self::VD]);
+		if(isset($data[self::VE]))	$this->setValidationErrors($identifier,$data[self::VE]);
 
 		//	Store the result of the service and make ready to start a new service
 		if($store) $this->storeData($this->getServiceStatus(),true);
@@ -1091,9 +1054,9 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getValidationData($plugin,$default=array())
+	static public function getValidationData($identifier,$default=array())
 	{
-		return Amslib_Array::valid(self::getHandlerData($plugin,$default,self::VD));
+		return Amslib_Array::valid(self::getHandlerData($identifier,$default,self::VD));
 	}
 
 	/**
@@ -1101,9 +1064,9 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getValidationErrors($plugin,$default=false)
+	static public function getValidationErrors($identifier,$default=false)
 	{
-		return self::getHandlerData($plugin,$default,self::VE);
+		return self::getHandlerData($identifier,$default,self::VE);
 	}
 
 	/**
@@ -1111,9 +1074,9 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getServiceErrors($plugin,$default=false)
+	static public function getServiceErrors($identifier,$default=false)
 	{
-		return self::getHandlerData($plugin,$default,self::SE);
+		return self::getHandlerData($identifier,$default,self::SE);
 	}
 
 	/**
@@ -1121,9 +1084,9 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getServiceData($plugin,$default=false,$key=false)
+	static public function getServiceData($identifier,$default=false,$key=false)
 	{
-		$data = self::getHandlerData($plugin,$default,self::SD);
+		$data = self::getHandlerData($identifier,$default,self::SD);
 
 		return $key && $data && isset($data[$key]) ? $data[$key] : $data;
 	}
@@ -1134,9 +1097,9 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getDatabaseErrors($plugin,$default=false)
+	static public function getDatabaseErrors($identifier,$default=false)
 	{
-		return self::getHandlerData($plugin,$default,self::DB);
+		return self::getHandlerData($identifier,$default,self::DB);
 	}
 
 	/**
@@ -1144,9 +1107,9 @@ class Amslib_Plugin_Service
 	 *
 	 * 	todo: write documentation
 	 */
-	static public function getDatabaseMessage($plugin,$default=false)
+	static public function getDatabaseMessage($identifier,$default=false)
 	{
-		return Amslib_Array::filterKey(self::getDatabaseErrors($plugin,$default),array("db_error","db_location"));
+		return Amslib_Array::filterKey(self::getDatabaseErrors($identifier,$default),array("db_error","db_location"));
 	}
 
 	//////////////////////////////////////////////////////////////////
