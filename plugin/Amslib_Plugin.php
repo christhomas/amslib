@@ -1407,6 +1407,7 @@ class Amslib_Plugin
 			return $callback;
 		}
 
+		//	Case 2: The callback is a comma separate "plugin address"
 		//	Example: [plugin]some_plugin, [object]An_Object, [method]somethingToCall
 		if(is_string($callback)){
 			$callback = explode(",",$callback);
