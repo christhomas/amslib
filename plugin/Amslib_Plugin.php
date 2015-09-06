@@ -926,9 +926,9 @@ class Amslib_Plugin
                 ? array($data['plugin'],$data["object"],$data["method"])
                 : array($data['plugin'],$data["method"]);
 
-            $data["callback"] = self::getCallback($data["callback"]);
+            $data["callback"] = self::getCallback($data["callback"],$this);
         }else if(Amslib_Array::hasKeys($data,array("callback"))){
-            $data["callback"] = self::getCallback($data["callback"]);
+            $data["callback"] = self::getCallback($data["callback"],$this);
         }else{
             Amslib_Debug::log("INVALID PLUGIN/METHOD/CALLBACK",$data);
             return false;
@@ -1373,7 +1373,23 @@ class Amslib_Plugin
 		return $api ? $api->addJavascript($javascript) : false;
 	}
 
-	static public function getCallback($callback)
+	/**
+	 * 	method: getCallback
+	 *
+	 * 	Use the callback data to generate a callback usable in call_user_func* function.  This
+	 * 	function can be provided with a fallback plugin or api object in case the detected plugin
+	 * 	doesn't exist.  This is especially useful when the plugins are being loaded, it's not fully
+	 * 	installed in the system, but it's required to generate a callback
+	 *
+	 * 	params:
+	 * 		$callback - An array of data for the callback, or a string of comma separated parts
+	 * 		$fallback - Either null, a Plugin or API object
+	 *
+	 * 	returns:
+	 * 		-	A callback in any case, if there is a problem with the data, it passed an exception
+	 * 			callback which will fail on execution
+	 */
+	static public function getCallback($callback,$fallback=null)
 	{
 		$method = __METHOD__;
 
@@ -1404,8 +1420,16 @@ class Amslib_Plugin
 		$plugin = array_shift($callback);
 		$plugin = Amslib_Plugin_Manager::getAPI($plugin);
 
-		//	If the plugin doesn't exist, there is nothing to execute
-		if(!$plugin) return $invalid;
+		if(!$plugin && !$fallback){
+			//	If plugin doesn't exist and has no fallback, return invalid
+			return $invalid;
+		}else if(!$plugin && $fallback instanceof Amslib_Plugin){
+			//	If plugin is invalid and you were passed a plugin object
+			$plugin = $fallback->getAPI();
+		}else if(!$plugin && $fallback instanceof Amslib_MVC){
+			//	If plugin is invalid and the method was passed an API object
+			$plugin = $fallback;
+		}
 
 		//	If there are no more parts, then you don't have a method to call, again, cannot proceed
 		if(empty($callback)) return $invalid;
@@ -1418,7 +1442,7 @@ class Amslib_Plugin
 
 		//	Get the object to use in the callback
 		$object = array_shift($callback);
-		$object = empty($object) ? $plugin : $plugin->getObject($object);
+		$object = empty($object) ? $plugin->getAPI() : $plugin->getObject($object);
 
 		//	From the information, generate a new callback
 		$callback = array($object,$method);
