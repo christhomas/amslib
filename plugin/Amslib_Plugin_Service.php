@@ -611,18 +611,22 @@ class Amslib_Plugin_Service
 	{
 		foreach(Amslib_Array::valid($handlerList) as $h)
 		{
+			$c = $h;
+
 			//	"framework" is claimed as a standard name for amslib and is no longer usable
 			//	by other plugins, I'm not sure if this is still true, but I should evaluate
 			//	whether it causes a problem or not
-			if($h["plugin"] != "framework"){
-				if(!array_key_exists("plugin",$h)) $h["plugin"] = $group;
-				if(!array_key_exists("object",$h)) $h["object"] = false;
+			if($h["plugin"] == "framework"){
+				unset($c["plugin"]);
+			}else{
+				if(!array_key_exists("plugin",$c)) $c["plugin"] = $group;
+				if(!array_key_exists("object",$c)) $c["object"] = false;
 			}
 
 			$callback = Amslib_Plugin::getCallback(array_filter(array(
-					$h["plugin"],
-					$h["object"],
-					$h["method"]
+					$c["plugin"],
+					$c["object"],
+					$c["method"]
 			)));
 
 			$params = array($h["plugin"],$callback,$h["input"],$h["record"],$h["global"],$h["failure"]);
