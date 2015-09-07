@@ -617,13 +617,16 @@ class Amslib_Plugin_Service
 			//	by other plugins, I'm not sure if this is still true, but I should evaluate
 			//	whether it causes a problem or not
 			if(array_key_exists("plugin",$h) && $h["plugin"] == "framework"){
-				unset($c["plugin"]);
+                $c["plugin"] = false;
 			}else{
 				if(!array_key_exists("plugin",$c)) $c["plugin"] = $group;
 				if(!array_key_exists("object",$c)) $c["object"] = false;
 			}
 
-			$callback = Amslib_Plugin::getCallback(array_filter(array(
+            //  set the handler plugin from the callback plugin
+            $h["plugin"] = $c["plugin"];
+
+            $callback = Amslib_Plugin::getCallback(array_filter(array(
 					$c["plugin"],
 					$c["object"],
 					$c["method"]
