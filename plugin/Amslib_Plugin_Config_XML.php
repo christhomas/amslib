@@ -157,9 +157,7 @@ class Amslib_Plugin_Config_XML
 	{
 		$callback = is_string($callback) ? array($plugin,$callback) : $callback;
 
-		if(is_array($callback) && count($callback) == 2 && is_string($callback[0])){
-			$callback[0] = Amslib_Plugin_Manager::getAPI($callback[0]);
-		}
+		$callback = Amslib_Plugin::getCallback($callback);
 
 		if(!$this->queryPath || !is_callable($callback)){
 			Amslib_Debug::log("QueryPath or callback not valid",$plugin->getName(),$key,$callback[0],$callback[1]);
