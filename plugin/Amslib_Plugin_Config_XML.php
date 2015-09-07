@@ -160,7 +160,9 @@ class Amslib_Plugin_Config_XML
 		$callback = Amslib_Plugin::getCallback($callback);
 
 		if(!$this->queryPath || !is_callable($callback)){
-			Amslib_Debug::log("QueryPath or callback not valid",$plugin->getName(),$key,$callback[0],$callback[1]);
+			$callback = $callback instanceof Closure ? "{closure}" : $callback;
+
+			Amslib_Debug::log("QueryPath or callback not valid",$plugin->getName(),$key,$callback);
 			return;
 		}
 
