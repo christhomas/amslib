@@ -26,13 +26,13 @@
 		"url": "https://github.com/dompdf/dompdf.git"
 	},{
 		"type": "vcs",
-		"url": "https://github.com/dominicsayers/isemail.git"
+		"url": "https://github.com/christhomas/isemail.git"
 	}],
 	
 	"require":{
 		"php": ">=5.3.0",
 		"querypath/QueryPath": "3.x",
-		"dominicsayers/isemail": "master"
+		"dominicsayers/isemail": "3.x"
 	},
 	
 	"autoload": {
