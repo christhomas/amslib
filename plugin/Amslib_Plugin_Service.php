@@ -273,7 +273,7 @@ class Amslib_Plugin_Service
 	/**
 	 * 	method:	runHandler
 	 *
-	 * 	Will execute the requested callback with the given data source,
+	 * 	Will execute the requested callback with the given data source
 	 */
 	protected function runHandler($callback,&$source)
 	{
@@ -294,9 +294,10 @@ class Amslib_Plugin_Service
 
 		$args = array($this,&$source);
 
-		return is_callable($callback)
-		? call_user_func_array($callback,$args)
-		: call_user_func_array($invalid,$args);
+		//	if callback is not usable, fallback to the invalid handler
+		if(!is_callable($callback)) $callback = $invalid;
+
+		return call_user_func_array($callback,$args);
 	}
 
 	/**
