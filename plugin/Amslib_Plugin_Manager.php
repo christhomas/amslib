@@ -89,7 +89,7 @@ class Amslib_Plugin_Manager
 
 		self::$replace[$plugin_ref] = $replace_by;
 	}
-	
+
 	/**
 	 * 	method:	setupPluginAlias
 	 *
@@ -98,10 +98,10 @@ class Amslib_Plugin_Manager
 	static public function setPluginAlias($plugin_ref,$alias_with)
 	{
 		if(!is_string($plugin_ref) && strlen($plugin_ref) == 0) return false;
-	
+
 		self::$alias[$alias_with] = $plugin_ref;
 	}
-	
+
 	/**
 	 * 	method:	setPluginBlock
 	 *
@@ -110,7 +110,7 @@ class Amslib_Plugin_Manager
 	static public function setPluginBlock($plugin)
 	{
 		if(!is_string($plugin) && strlen($plugin) == 0) return false;
-	
+
 		self::$block[$plugin] = true;
 	}
 
@@ -235,6 +235,8 @@ class Amslib_Plugin_Manager
 	 */
 	static public function getAPI($name)
 	{
+		if($name instanceof Amslib_MVC) return $name;
+
 		//	If this plugin is configured to be replaced with another, use the replacement
 		if(isset(self::$replace[$name]))	$name = self::$replace[$name];
 		if(isset(self::$alias[$name]))		$name = self::$alias[$name];

@@ -920,6 +920,8 @@ class Amslib_Plugin
 			return false;
 		}
 
+		Amslib_Debug::log("extension keys = ",array_keys($data));
+
         if(Amslib_Array::hasKeys($data,array("plugin","method"))){
             //  Just in case an object is included as well
             $data["callback"] = array_key_exists("object",$data)
@@ -1388,12 +1390,25 @@ class Amslib_Plugin
 	 * 	returns:
 	 * 		-	A callback in any case, if there is a problem with the data, it passed an exception
 	 * 			callback which will fail on execution
+	 *
+	 * 	variatons:
+	 * 		-	array(plugin,object,method)
+	 * 		-	array(plugin,method)
+	 * 		-	"plugin,object,method => explode(,) => array(plugin,object,method) <-- array
+	 * 		-	"plugin,method" => explode(,) => array(plugin,method) <-- array
+	 * 		-	array(Object,method) <-- not static / array
+	 * 		-	array(Class,method) <-- static / string
+	 * 		-	"Class::method" <-- string
+	 * 		-	"straightFunction" <-- string
 	 */
 	static public function getCallback($callback,$fallback=null)
 	{
 		$method = __METHOD__;
 
-		$invalid = function() use ($method,$callback){
+		//	set output/invalid to be this default callback which throws an exception
+		//	this is so we can catch bad callbacks and trace them back to where they
+		//	where constructed
+		$output = $invalid = function() use ($method,$callback){
 			$args = func_get_args();
 
 			throw new Amslib_Exception("$method, callback was not valid",array(
@@ -1402,55 +1417,64 @@ class Amslib_Plugin
 			));
 		};
 
-		//	Case 1: the string, function, static method is callable without any processing
-		if(is_callable($callback)){
-			return $callback;
-		}
-
-		//	Case 2: The callback is a comma separate "plugin address"
-		//	Example: [plugin]some_plugin, [object]An_Object, [method]somethingToCall
-		if(is_string($callback)){
+		//	supports: "plugin,object,method => array(plugin,object,method)
+		//	supports: "plugin,method" => array(plugin,method)
+		if(is_string($callback) && strpos($callback,",") !== false){
 			$callback = explode(",",$callback);
 		}
 
-		//	if it's not an array or there are no parts, you cannot decode anything from this callback
-		if(!is_array($callback) || empty($callback)){
-			return $invalid;
+		//	supports: array(Object,method)
+		//	supports: array(plugin,object,method)
+		//	supports: array(plugin,method)
+		if(is_array($callback) && in_array(count($callback),[2,3])){
+			//	The first element has to be an object or a plugin
+			$plugin = array_shift($callback);
+
+			//	The last element in the array is always the method, if there is a third element
+			//	it will sit inside the middle, [plugin, >>>HERE<<<, method] and will be the object
+			//	But the third parameter is not necessary, if it's missing, the plugins API object is used
+			$method = array_pop($callback);
+
+			if(is_string($plugin) && !empty($plugin)){
+				//	supports: array(plugin,object,method)
+				//	supports: array(plugin,method)
+				$plugin = Amslib_Plugin_Manager::getAPI($plugin);
+			}else if(is_object($plugin)){
+				//	supports: array(Object,method)
+				$output = array($plugin,$method);
+			}
+
+			if(!$plugin){
+				//	supports: array(Class,method)
+				if(class_exists($plugin)){
+					//	The plugin was not found, therefore this must be a array(Class,Method) type call
+					$output = array($plugin,$method);
+				}else if($fallback instanceof Amslib_Plugin){
+					//	If plugin is invalid and you were passed a plugin object
+					$plugin = $fallback->getAPI();
+				}else if($fallback instanceof Amslib_MVC){
+					//	If plugin is invalid and the method was passed an API object
+					$plugin = $fallback;
+				}
+			}
+
+			if($plugin){
+				//	Get the object to use in the callback
+				$object = !empty($callback) ? array_shift($callback) : false;
+				$object = !empty($object) && is_string($object) ? $plugin->getObject($object) : $plugin;
+
+				//	From the information, generate a new callback
+				$output = array($object,$method);
+			}
+		}else{
+			//	supports: "Class::method"
+			//	supports: "theFunctionCall"
+			//	note: we don't need to do anything to support this, just fall into the else statement
 		}
-
-		$plugin = array_shift($callback);
-		$plugin = Amslib_Plugin_Manager::getAPI($plugin);
-
-		if(!$plugin && !$fallback){
-			//	If plugin doesn't exist and has no fallback, return invalid
-			return $invalid;
-		}else if(!$plugin && $fallback instanceof Amslib_Plugin){
-			//	If plugin is invalid and you were passed a plugin object
-			$plugin = $fallback->getAPI();
-		}else if(!$plugin && $fallback instanceof Amslib_MVC){
-			//	If plugin is invalid and the method was passed an API object
-			$plugin = $fallback;
-		}
-
-		//	If there are no more parts, then you don't have a method to call, again, cannot proceed
-		if(empty($callback)) return $invalid;
-
-		//	First obtain the method, the last element is always the method.
-		//	We do this because if you have array(method) then popping the last element gives that method
-		//	But if we have array(object,method) the popping the last element still gives the method
-		//	But popping the method first, will leave array(object) which then can be obtained with array_shift
-		$method = array_pop($callback);
-
-		//	Get the object to use in the callback
-		$object = array_shift($callback);
-		$object = empty($object) ? $plugin->getAPI() : $plugin->getObject($object);
-
-		//	From the information, generate a new callback
-		$callback = array($object,$method);
 
 		//	Return the callback, or a not_found default callback which throws an exception when called
-		return is_callable($callback)
-			? $callback
+		return is_callable($output)
+			? $output
 			: $invalid;
 	}
 
