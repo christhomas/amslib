@@ -171,7 +171,7 @@ class Amslib_Debug
 			? $location["class"].$location["type"].$location["function"]
 			: $location;
 
-		$location = is_array($location) && Amslib_Array::hasKeys($location,"file","function")
+        $location = is_array($location) && Amslib_Array::hasKeys($location,array("file","function"))
 			? basename($location["file"])."({$location["function"]})"
 			: $location;
 
