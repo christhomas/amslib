@@ -64,9 +64,9 @@ class Amslib_Database
 	protected $connection			=	false;
 	protected $connectionDetails	=	false;
 
-	protected $selectHandle			=	false;
-	protected $selectStack			=	array();
-	protected $selectResult			=	array();
+    protected $selectHandle			=	false;
+    protected $selectStack			=	array();
+    protected $selectResult			=	array();
 
 	protected $lastQuery			=	false;
 	protected $lastInsertId			=	0;
@@ -201,92 +201,13 @@ class Amslib_Database
 	 *
 	 */
 	static public function getInstance()
-	{
-		static $instance = NULL;
+    {
+        static $instance = NULL;
 
-		if($instance === NULL) $instance = new self();
+        if ($instance === NULL) $instance = new self();
 
-		return $instance;
-	}
-
-	public function isHandle($handle)
-	{
-		return $handle instanceof PDOStatement;
-	}
-
-	public function setHandle($handle)
-	{
-		return $this->isHandle($handle)
-			? ($this->selectHandle = $handle)
-			: false;
-	}
-
-	/**
-	 * 	method:	getHandle
-	 *
-	 * 	todo: write documentation
-	 *
-	 * 	note:
-	 * 		-	Probably you're not setting this, so this will always return an invalid handle
-	 */
-	public function getHandle()
-	{
-		return $this->selectHandle;
-	}
-
-	public function pushHandle($handle=NULL,$returnHandle=true)
-	{
-		if($handle === NULL) $handle = $this->getHandle();
-
-		if(!$this->isHandle($handle)) return false;
-
-		$this->selectStack[] = $handle;
-
-		//	Return the handle, or the index where it was added
-		return $returnHandle ? $handle : count($this->selectStack)-1;
-	}
-
-	public function popHandle($index=NULL)
-	{
-		if($index !== NULL && !is_numeric($index) && !isset($this->selectStack[$index])){
-			return false;
-		}
-
-		if($index === NULL){
-			return array_pop($this->selectStack);
-		}
-
-		$handle = $this->selectStack[$index];
-		unset($this->selectStack[$index]);
-		return $handle;
-	}
-
-	public function restoreHandle($index=NULL)
-	{
-		return $this->setHandle($this->popHandle($index));
-	}
-
-	/**
-	 * 	method:	freeHandle
-	 *
-	 * 	todo: write documentation
-	 *
-	 * 	If we supply a result handle, free that, or obtain the handle created when you last selected something
-	 */
-	public function freeHandle($handle=NULL)
-	{
-		if(!$this->isHandle($handle)){
-			$handle = $this->getHandle();
-		}
-
-		if(!$this->isHandle($handle)){
-			$this->debug("DEBUG",__METHOD__,": trying to free an invalid handle");
-
-			return false;
-		}
-
-		return $handle->closeCursor();
-	}
+        return $instance;
+    }
 
 	/**
 	 *	method:	setAlias
@@ -536,6 +457,75 @@ class Amslib_Database
 		return true;
 	}
 
+    public function isHandle($handle)
+    {
+        return $handle instanceof PDOStatement;
+    }
+
+    public function setHandle($handle)
+    {
+        return $this->isHandle($handle)
+            ? ($this->selectHandle = $handle)
+            : false;
+    }
+
+    public function getHandle()
+    {
+        return $this->selectHandle;
+    }
+
+    public function pushHandle($handle=NULL,$returnHandle=true)
+    {
+        if($handle === NULL) $handle = $this->getHandle();
+
+        if(!$this->isHandle($handle)) return false;
+
+        $this->selectStack[] = $handle;
+
+        //	Return the handle, or the index where it was added
+        return $returnHandle ? $handle : count($this->selectStack)-1;
+    }
+
+    public function popHandle($index=NULL)
+    {
+        if($index !== NULL && !is_numeric($index) && !isset($this->selectStack[$index])){
+            return false;
+        }
+
+        if($index === NULL){
+            return array_pop($this->selectStack);
+        }
+
+        $handle = $this->selectStack[$index];
+        unset($this->selectStack[$index]);
+        return $handle;
+    }
+
+    public function restoreHandle($index=NULL)
+    {
+        return $this->setHandle($this->popHandle($index));
+    }
+
+    /**
+     * 	method:	freeHandle
+     *
+     * 	todo: write documentation
+     *
+     * 	If we supply a result handle, free that, or obtain the handle created when you last selected something
+     */
+    public function freeHandle($handle=NULL)
+    {
+        if(!$this->isHandle($handle)){
+            $handle = $this->getHandle();
+        }
+
+        if(!$this->isHandle($handle)){
+            throw new Exception("Freeing an invalid select handle");
+        }
+
+        return $handle->closeCursor();
+    }
+
 	/**
 	 * 	method:	escape
 	 *
@@ -716,35 +706,6 @@ class Amslib_Database
 		$this->isConnected();
 
 		return $this->connection->rollBack();
-	}
-
-	/**
-	 * 	method:	multi
-	 *
-	 * 	Same method as Amslib_Database_MySQL::query() except it allows you to run mutiple statements at once
-	 */
-	public function multi($query)
-	{
-		/*
-		NOTE: I'm not sure how to implement this in PDO
-
-		$result = false;
-
-		$statement = $this->getStatement($query);
-
-		if($this->isConnected()){
-			$this->setLastQuery($query);
-			$result = mysql_multi_query($query,$this->connection);
-			$this->debug("QUERY",$query);
-
-			if(!$result){
-				$this->setError($query);
-			}
-		}
-
-		return $result;
-		*/
-		return false;
 	}
 
 	/**
@@ -1095,45 +1056,5 @@ QUERY;
 		}
 
 		return $this->selectResult;
-	}
-
-	/**
-	 * 	method:	fixColumnEncoding
-	 *
-	 * 	todo: write documentation
-	 *
-	 * 	note: this method isn't really mysql specific, apart from calling select, escape and update, these could be API specific but they are abstracted anyway
-	 */
-	public function TOOL_fixColumnEncoding($src,$dst,$table,$primaryKey,$column)
-	{
-		$encoding_map = array(
-				"latin1"	=>	"latin1",
-				"utf8"		=>	"utf-8"
-		);
-
-		if(!isset($encoding_map[$src])) return false;
-		if(!isset($encoding_map[$dst])) return false;
-
-		$this->setEncoding($src);
-		$data = $this->select("$primaryKey,$column from $table");
-
-		if(!empty($data)){
-			$this->setEncoding($dst);
-
-			$ic_src = $encoding_map[$src];
-			$ic_dst = $encoding_map[$dst];
-
-			foreach($data as $c){
-				$string = iconv($ic_src,$ic_dst,$c[$column]);
-
-				if($string && is_string($string) && strlen($string)){
-					$string = $this->escape($string);
-
-					$this->update("$table set $column='$string' where $primaryKey='{$c[$primaryKey]}'");
-				}
-			}
-
-			return true;
-		}
 	}
 }

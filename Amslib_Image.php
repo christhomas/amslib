@@ -333,7 +333,7 @@ class Amslib_Image
 
 			//	Just in case someone managed to write a file with .. in it (back directory)
 			ob_start();
-			unlink($f);
+			unlink($i);
 			$error = ob_get_clean();
 
 			if(strlen($error)){
