@@ -30,149 +30,132 @@
  */
 class Amslib_Shutdown
 {
-	static protected $shutdown_url = false;
-	static protected $mode = "html";
+    const FATAL     =   array(E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,E_COMPILE_WARNING,E_STRICT,E_USER_ERROR);
+    const WARNINGS  =   array(E_WARNING,E_NOTICE,E_CORE_WARNING,E_USER_WARNING,E_RECOVERABLE_ERROR,E_DEPRECATED);
 
-	static public function setMode($mode="html")
-	{
-		if(in_array($mode,array("html","text","json"))){
-			self::$mode = $mode;
-		}
-	}
+    static protected $shutdown_url = false;
+    static protected $callback = false;
+    static protected $trap_list = [];
 
-	static public function setup($url,$trap_warnings=false)
-	{
-		self::$shutdown_url = $url;
+    static protected function __exec_shutdown($data)
+    {
+        if(is_callable(self::$callback)){
+            call_user_func(self::$callback,$data);
+        }
 
-		set_error_handler(array("Amslib_Shutdown","__exception_error_handler"));
+        die("Amslib_Shutdown::setMode was not called with one of the following parameters [html,json,text]");
+    }
 
-		register_shutdown_function(array("Amslib_Shutdown","__shutdown_handler"),$trap_warnings);
+    static public function setMode($mode="html")
+    {
+        if(in_array($mode,array("html","text","json")))
+        {
+            self::$callback = ["Amslib_Shutdown","render".ucwords($mode)];
+        }
+    }
 
-		set_exception_handler(array("Amslib_Shutdown","__shutdown_exception"));
-	}
+    static public function setup($url,$trap_warnings=false)
+    {
+        self::$shutdown_url	= $url;
 
-	static public function __exception_error_handler($errno, $errstr, $errfile, $errline)
-	{
-		if(strpos($errstr,"open_basedir restriction in effect") !== false){
-			throw new Amslib_Exception_Openbasedir($errstr,$errno);
-		}else{
-			throw new Amslib_Exception($errstr,$errno);
-		}
-	}
+        //	E_PARSE: you cannot catch parse errors without a prepend file.
+        //	NOTE: I think this has to do with being a different apache request stage
 
-	/**
-	 * 	method:	__shutdown_handler
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function __shutdown_handler($trap_warnings)
-	{
-		$url = self::$shutdown_url;
+        //	All the errors I believe to be fatal/non-recoverable/you're fucked/your code is shit
+        self::$trap_list = $trap_warnings ? array_merge(self::FATAL,self::WARNINGS) : self::FATAL;
 
-		if(!$url){
-			exit(__METHOD__.", url was invalid, cannot execute");
-		}
+        set_error_handler(array("Amslib_Shutdown","__exception_error_handler"));
 
-		//	E_PARSE: you cannot catch parse errors without a prepend file.
-		//	NOTE: I think this has to do with being a different apache request stage
+        register_shutdown_function(array("Amslib_Shutdown","__shutdown_handler"));
 
-		//	All the errors I believe to be fatal/non-recoverable/you're fucked/your code is shit
-		$fatal = array(E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,E_COMPILE_WARNING,E_STRICT,E_USER_ERROR);
+        set_exception_handler(array("Amslib_Shutdown","__shutdown_exception"));
+    }
 
-		if($trap_warnings){
-			$fatal+=array(E_WARNING,E_NOTICE,E_CORE_WARNING,E_USER_WARNING,E_RECOVERABLE_ERROR);
-		}
+    static public function __exception_error_handler($errno, $errstr, $errfile, $errline)
+    {
+        if(in_array($errno,self::$trap_list)) {
+            if (strpos($errstr, "open_basedir restriction in effect") !== false) {
+                throw new Amslib_Exception_Openbasedir($errstr, $errno);
+            } else {
+                throw new Amslib_Exception($errstr, $errno);
+            }
+        }else{
+            Amslib_Debug::log("Error/Warning occurred but did not trigger exception",$errno,$errstr,$errfile,$errline);
+        }
+    }
 
-		$e = @error_get_last();
+    /**
+     * 	method:	__shutdown_handler
+     *
+     * 	todo: write documentation
+     */
+    static public function __shutdown_handler()
+    {
+        $e = @error_get_last();
 
-		if($e && is_array($e) && array_key_exists("type",$e) && in_array($e["type"],$fatal))
-		{
-			$data = array(
-				"code"	=>	isset($e['type']) ? $e['type'] : 0,
-				"msg"	=>	isset($e['message']) ? $e['message'] : '',
-				"file"	=>	isset($e['file']) ? $e['file'] : '',
-				"line"	=>	isset($e['line']) ? $e['line'] : '',
-				"uri"	=>	$_SERVER["REQUEST_URI"],
-				"root"	=>	isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/"
-			);
+        if($e && is_array($e) && array_key_exists("type",$e) && in_array($e["type"],self::$trap_list))
+        {
+            $data = array(
+                "code"	=>	isset($e['type']) ? $e['type'] : 0,
+                "msg"	=>	isset($e['message']) ? $e['message'] : '',
+                "file"	=>	isset($e['file']) ? $e['file'] : '',
+                "line"	=>	isset($e['line']) ? $e['line'] : '',
+                "uri"	=>	$_SERVER["REQUEST_URI"],
+                "root"	=>	isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/"
+            );
 
-			switch(self::$mode){
-				case "html":{
-					self::renderHTML($url,$data);
-				}break;
+            self::__exec_shutdown($data);
+        }
+    }
 
-				case "text":{
-					self::renderText($url,$data);
-				}break;
+    /**
+     * 	method: __shutdown_exception
+     *
+     * 	todo: write documentation
+     */
+    static public function __shutdown_exception($e)
+    {
+        $stack = Amslib_Debug::getStackTrace("exception", $e);
 
-				case "json":{
-					self::renderJSON($data);
-				}break;
-			}
-		}
-	}
+        if (empty($stack)) $stack = array(array("file" => "__STACK_ERROR__", "line" => "__STACK_ERROR__"));
+        if (!array_key_exists("file", $stack[0])) $stack[0]["file"] = "__FILE_NOT_AVAILABLE__";
+        if (!array_key_exists("line", $stack[0])) $stack[0]["line"] = "__LINE_NOT_AVAILABLE__";
 
-	/**
-	 * 	method: __shutdown_exception
-	 *
-	 * 	todo: write documentation
-	 */
-	static public function __shutdown_exception($e)
-	{
-		$url = self::$shutdown_url;
+        $data = array(
+            "error" => "Uncaught Exception",
+            "code" => get_class($e),
+            "msg" => $e->getMessage(),
+            "data" => is_callable(array($e, "getData")) ? $e->getData() : false,
+            "file" => $stack[0]["file"],
+            "line" => $stack[0]["line"],
+            "stack" => $stack,
+            "uri" => $_SERVER["REQUEST_URI"],
+            "root" => isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/"
+        );
 
-		if(!$url){
-			exit(__METHOD__.", url was invalid, cannot execute");
-		}
+        self::__exec_shutdown($data);
+    }
 
-		$stack = Amslib_Debug::getStackTrace("exception",$e);
+    static public function renderHtml($data)
+    {
+        if(self::$shutdown_url){
+            header("Location: ".self::$shutdown_url."?data=".base64_encode(json_encode($data)));
+            die("waiting to redirect");
+        }
 
-		if(empty($stack)) $stack = array(array("file"=>"__STACK_ERROR__","line"=>"__STACK_ERROR__"));
-		if(!array_key_exists("file",$stack[0])) $stack[0]["file"] = "__FILE_NOT_AVAILABLE__";
-		if(!array_key_exists("line",$stack[0])) $stack[0]["line"] = "__LINE_NOT_AVAILABLE__";
+        die(__METHOD__.", url was invalid, cannot execute");
+    }
 
-		$data = array(
-				"error"	=> "Uncaught Exception",
-				"code"	=> get_class($e),
-				"msg"	=> $e->getMessage(),
-				"data"	=> is_callable(array($e,"getData")) ? $e->getData() : false,
-				"file"	=> $stack[0]["file"],
-				"line"	=> $stack[0]["line"],
-				"stack"	=> $stack,
-				"uri"	=> $_SERVER["REQUEST_URI"],
-				"root"	=> isset($_SERVER["__WEBSITE_ROOT__"]) ? $_SERVER["__WEBSITE_ROOT__"] : "/"
-		);
+    static public function renderText($data)
+    {
+        self::renderJSON($data);
+    }
 
-		switch(self::$mode){
-			case "html":{
-				self::renderHTML($url,$data);
-			}break;
+    static public function renderJSON($data)
+    {
+        header("Cache-Control: no-cache");
+        header("Content-Type: application/json");
 
-			case "text":{
-				self::renderText($url,$data);
-			}break;
-
-			case "json":{
-				self::renderJSON($data);
-			}break;
-		}
-	}
-
-	static public function renderHTML($url,$data)
-	{
-		header("Location: $url?data=".base64_encode(json_encode($data)));
-	}
-
-	static public function renderText($url,$data)
-	{
-		self::renderJSON($data);
-	}
-
-	static public function renderJSON($data)
-	{
-		header("Cache-Control: no-cache");
-		header("Content-Type: application/json");
-
-		die(json_encode($data));
-	}
+        die(json_encode($data));
+    }
 }
