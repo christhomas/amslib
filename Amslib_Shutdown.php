@@ -30,8 +30,8 @@
  */
 class Amslib_Shutdown
 {
-    const FATAL     =   array(E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,E_COMPILE_WARNING,E_STRICT,E_USER_ERROR);
-    const WARNINGS  =   array(E_WARNING,E_NOTICE,E_CORE_WARNING,E_USER_WARNING,E_RECOVERABLE_ERROR,E_DEPRECATED);
+    static protected $FATAL     =   array(E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,E_COMPILE_WARNING,E_STRICT,E_USER_ERROR);
+    static protected $WARNINGS  =   array(E_WARNING,E_NOTICE,E_CORE_WARNING,E_USER_WARNING,E_RECOVERABLE_ERROR,E_DEPRECATED);
 
     static protected $shutdown_url = false;
     static protected $callback = false;
@@ -62,7 +62,7 @@ class Amslib_Shutdown
         //	NOTE: I think this has to do with being a different apache request stage
 
         //	All the errors I believe to be fatal/non-recoverable/you're fucked/your code is shit
-        self::$trap_list = $trap_warnings ? array_merge(self::FATAL,self::WARNINGS) : self::FATAL;
+        self::$trap_list = $trap_warnings ? array_merge(self::$FATAL,self::$WARNINGS) : self::$FATAL;
 
         set_error_handler(array("Amslib_Shutdown","__exception_error_handler"));
 
