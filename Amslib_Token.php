@@ -154,8 +154,23 @@ class Amslib_Token
     {
         $count = 0;
 
+        $list = $this->list;
+
         do {
-            $string = preg_replace('/'.$this->input.'/e', "\$this->list['".$this->output."']", $string, -1, $count);
+            $string = preg_replace_callback(
+            //  input regexp
+                "/".$this->input."/isU",
+                //  replacement function to execute for each match $m = matches
+                function($m) use ($list) {
+                    return $list[$m[0]];
+                },
+                //  input string
+                $string,
+                //  replace everything!!!11
+                -1,
+                //  store the count of all the replacements
+                $count
+            );
         }while($count);
 
         return $string;
