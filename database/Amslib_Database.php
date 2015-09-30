@@ -50,6 +50,8 @@ class Amslib_Database
      */
     protected $table = array();
 
+    protected $token;
+
     /**
      * 	boolean: connection
      *
@@ -72,6 +74,8 @@ class Amslib_Database
     protected $lastInsertId			=	0;
 
     protected $validEncoding		=	array("utf8","latin1");
+
+    protected $errorStackDepth;
 
     /**
      * 	array: $statementCache
@@ -143,6 +147,8 @@ class Amslib_Database
      */
     protected function getStatement($query,$params=array())
     {
+        $query = $this->token->get($query);
+
         $this->isConnected();
 
         $this->setLastQuery($query);
@@ -178,6 +184,7 @@ class Amslib_Database
     public function __construct($connect=true)
     {
         $this->table	=	array();
+        $this->token    =   new Amslib_Token("{_X_}","_X_");
         $this->error	=	false;
 
         //	Set the default error stack depth for code location reporting
@@ -218,18 +225,14 @@ class Amslib_Database
      * 		$arg1	-	the name of the table, or the name of the key to use for this table
      * 		$arg2	-	[optional] or the actual name of the table inside the database references by arg1 as the "key"
      */
-    public function setAlias()
+    public function setAlias($alias,$table)
     {
         $args = func_get_args();
         $args = array_map(array($this,"escape"),$args);
 
-        $c = count($args);
+        $this->table[$args[0]] = $args[1];
 
-        if($c == 1){
-            $this->table = $args[0];
-        }else if($c > 1){
-            $this->table[$args[0]] = $args[1];
-        }
+        $this->token->set($args[0],$args[1]);
     }
 
     /**
