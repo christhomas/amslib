@@ -920,7 +920,7 @@ class Amslib_Plugin
 			return false;
 		}
 
-		Amslib_Debug::log("extension keys = ",array_keys($data));
+		//Amslib_Debug::log("extension keys = ",array_keys($data));
 
         if(Amslib_Array::hasKeys($data,array("plugin","method"))){
             //  Just in case an object is included as well
