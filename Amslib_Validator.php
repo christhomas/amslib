@@ -1611,7 +1611,7 @@ class Amslib_Validator
     $r["status"] = $v->execute();
 
     if($r["status"]){
-        $d = $v->getValidData();
+        $d = $v->getValid();
         $r["value"] = $d["test"];
     }else{
         $e = $v->getErrors();
