@@ -654,6 +654,32 @@ class Amslib_Array
     }
 
     /**
+     * @param $array
+     * @param $callback
+     * @return array
+     */
+    public function filterFunction($array,$callback)
+    {
+        if(!is_callable($callback)){
+            throw new InvalidArgumentException("\$callback parameter was not callable function");
+        }
+
+        //  find and search the values which are strings, filtering out those which are not
+        $map    = array_map($callback,$array);
+        $map    = array_filter($map);
+        //  diff the keys against the original array to find the values which failed
+        $diff   = array_diff_key($array,$map);
+        //  build an array of false values in those array positions which failed
+        $diff   = array_keys($diff);
+        $diff   = array_fill_keys($diff,false);
+        //  combine the two arrays missing keys first, to make sure the false block the invalid array
+        //  indexes from copying and filter the result, leaving only the strings
+        $array  = array_filter($diff+$array);
+
+        return $array;
+    }
+
+    /**
      * 	method:	filterType
      *
      * 	todo: write documentation
