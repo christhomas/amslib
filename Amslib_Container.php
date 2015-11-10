@@ -11,7 +11,7 @@
  *  -   I'm trying to write this without referencing another container, to explore whether I fully understand the idea
  *  -   I haven't figured out how I'm going to allow targets to require dependencies yet
  */
-class Amslib_Container
+class Amslib_Container implements ArrayAccess
 {
     protected $list;
 
@@ -62,13 +62,13 @@ class Amslib_Container
         unset($this[$name]);
     }
 
-    public function __set($name,$value)
+    public function offsetSet($name,$value)
     {
         //  set one of the dependencies
         $this->list[$name] = $value;
     }
 
-    public function __get($name)
+    public function offsetGet($name)
     {
         if(!is_string($name) || empty($name)){
             throw new InvalidArgumentException("the \$name parameter was not valid [name = '".Amslib_Debug::vdump($name)."']");
@@ -79,12 +79,12 @@ class Amslib_Container
         return $target instanceof Closure ? $target() : $target;
     }
 
-    public function __unset($name)
+    public function offsetUnset($name)
     {
         unset($this->list[$name]);
     }
 
-    public function __isset($name)
+    public function offsetExists($name)
     {
         if(!array_key_exists($name,$this->list)){
             throw new InvalidArgumentException("the \$name parameter does not exist in container [name = '".Admin_Debug::vdump($name)."']");
