@@ -158,7 +158,7 @@ class Amslib_Token
 
         do {
             $string = preg_replace_callback(
-            //  input regexp
+                //  input regexp
                 "/".$this->input."/isU",
                 //  replacement function to execute for each match $m = matches
                 function($m) use ($list) {
