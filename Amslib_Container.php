@@ -48,6 +48,8 @@ class Amslib_Container
     public function factory($name, $target, array $dependencies = [])
     {
         $closure = function() use ($target, $dependencies) {
+            //  NOTE: I would prefer to acquire each dependency here, instead of inside the callback
+
             return $this->process($target, $dependencies);
         };
 
