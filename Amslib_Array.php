@@ -658,7 +658,7 @@ class Amslib_Array
      * @param $callback
      * @return array
      */
-    public function filterFunction($array,$callback)
+    static public function filterFunction($array,$callback)
     {
         if(!is_callable($callback)){
             throw new InvalidArgumentException("\$callback parameter was not callable function");
