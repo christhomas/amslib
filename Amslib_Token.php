@@ -128,7 +128,7 @@ class Amslib_Token
             return false;
         }
 
-        if(!$allowEmpty && !$replacement || !is_scalar($replacement) || !strlen($replacement)){
+        if(!$allowEmpty && (!$replacement || !is_scalar($replacement) || !strlen($replacement))){
             Amslib_Debug::log("token = ",$token,"replacement = ",$replacement,"stack_trace");
             return false;
         }
