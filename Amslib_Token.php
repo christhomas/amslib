@@ -114,20 +114,21 @@ class Amslib_Token
      * 		$token - The name of the token
      * 		$replacement - The string value to replace the token with
      * 		$overwrite - Whether or not to overwrite existing tokens
+     *      $allowEmpty - Whether to allow an empty replacement string
      *
      * 	notes:
      * 		-	The default is to overwrite the tokens
      * 		-	The replacement value SHOULD be a string, most likely you're replacing tokens in text
      * 		-	If the replacement value is not a string, I don't know what will happen in your specific situation
      */
-    public function set($token,$replacement,$overwrite=true)
+    public function set($token,$replacement,$overwrite=true,$allowEmpty=false)
     {
         if(!$token || !is_string($token) || !strlen($token)){
             Amslib_Debug::log("token = ",$token);
             return false;
         }
 
-        if(!$replacement || !is_scalar($replacement) || !strlen($replacement)){
+        if(!$allowEmpty && (!$replacement || !is_scalar($replacement) || !strlen($replacement))){
             Amslib_Debug::log("token = ",$token,"replacement = ",$replacement,"stack_trace");
             return false;
         }
@@ -158,7 +159,7 @@ class Amslib_Token
 
         do {
             $string = preg_replace_callback(
-            //  input regexp
+                //  input regexp
                 "/".$this->input."/isU",
                 //  replacement function to execute for each match $m = matches
                 function($m) use ($list) {

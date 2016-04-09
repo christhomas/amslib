@@ -671,7 +671,11 @@ class Amslib_Database
      */
     public function disconnect()
     {
+        unset($this->connection);
+
         $this->connection = NULL;
+
+        return true;
     }
 
     /**
