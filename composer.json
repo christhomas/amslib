@@ -29,7 +29,8 @@
 	"require":{
 		"php": ">=5.3.0",
 		"querypath/QueryPath": "3.*",
-		"dominicsayers/isemail": "3.*"
+		"dominicsayers/isemail": "3.*",
+    "phpunit/phpunit": "5.3.*"
 	},
 
 	"autoload": {
